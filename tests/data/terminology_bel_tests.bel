@@ -1,0 +1,51 @@
+##################################################################################
+# Document Properties
+##################################################################################
+SET DOCUMENT Authors = "Bruce Schultz"
+SET DOCUMENT Description = "A collection of BEL statements designed to test every BEL 2.0 rule"
+SET DOCUMENT Name = "terminology_bel_tests.bel"
+
+###################################################################################
+# Definitions Section
+
+# NAMESPACES
+DEFINE NAMESPACE HP AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hp/hp-20171108.belns"
+DEFINE NAMESPACE MESHCS AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=mesh-cellular-structures.belns"
+
+DEFINE NAMESPACE EGID AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/entrez-gene-ids/entrez-gene-ids-20170725.belns"
+DEFINE NAMESPACE CHEBI AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20180106.belns"
+DEFINE NAMESPACE DO AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/disease-ontology/disease-ontology-20170725.belns"
+DEFINE NAMESPACE GOBP AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20170725.belns"
+DEFINE NAMESPACE HGNC AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20170511.belns"
+DEFINE NAMESPACE MESHC AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-chemicals/mesh-chemicals-20170725.belns"
+DEFINE NAMESPACE MESHD AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-diseases/mesh-diseases-20170725.belns"
+DEFINE NAMESPACE MESHPP AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-processes/mesh-processes-20170511.belns"
+DEFINE NAMESPACE MESHE AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-techniques/mesh-techniques-20171030.belns"
+DEFINE NAMESPACE MESHA AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-anatomy/mesh-anatomy-20171030.belns"
+DEFINE NAMESPACE MGI AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mgi-mouse-genes/mgi-mouse-genes-20170725.belns"
+DEFINE NAMESPACE RGD AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/rgd-rat-genes/rgd-rat-genes-20170511.belns"
+DEFINE NAMESPACE SCOMP AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-named-complexes/selventa-named-complexes-20170511.belns"
+DEFINE NAMESPACE SFAM AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-protein-families/selventa-protein-families-20170511.belns"
+
+DEFINE NAMESPACE ADO AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/alzheimer-disease-ontology/alzheimer-disease-ontology-1.0.2.belns"
+DEFINE NAMESPACE BRCO AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/brain-region-ontology/brain-region-ontology-1.0.0.belns"
+DEFINE NAMESPACE NIFT AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/imaging-ontology/imaging-ontology-1.0.0.belns"
+
+DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]+"
+
+DEFINE NAMESPACE FIXME AS LIST {"Flutriciclamide", "GW0742", "GW3965", "GM6001", "GI254023X", "Microglia-like cells", "Loxoribine"}
+
+DEFINE ANNOTATION TimePoint AS LIST {"4 days dpi"}
+
+###################################################################################
+# 1.1. Namespaces
+# Testing whether namespaces can be referenced with minor mistakes in them
+# Return False
+p(HGNC_:TREM2) positiveCorrelation r(HGNC:TREM2)
+###################################################################################
+# Custom
+# Testing use of ANNOTATION not in a list
+# Return False
+SET TimePoint = "3 days dpi"
+p(HGNC:IL2) positiveCorrelation r(HGNC:IL2)
+UNSET TimePoint

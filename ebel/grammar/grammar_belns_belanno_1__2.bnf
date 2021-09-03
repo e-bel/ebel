@@ -1,0 +1,105 @@
+// EBNF for namespace files
+// this version EBNF follows syntax used in python lark-parser
+
+// values will be read and tested with an others program
+
+belns: namespace author citation processing
+
+belanno: annotation author citation processing
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// EBNF for Namespace and AnnotationManager section
+// 'namespace' is abbreviated with "ns" (tree) or "NS" (TOKEN) in the following section
+// 'annotation' is abbreviated with "anno" (tree) or "ANNO" (TOKEN) in the following section
+namespace: "[Namespace]" ( ns_attribute | keyword | ns_query_value_url | created_date_time)+
+annotation: "[AnnotationDefinition]" ( anno_attribute | keyword | created_date_time)+
+// ---------------------------------------------------------------------------------------------------------------------
+
+keyword: "Keyword" "=" KEYWORD
+KEYWORD: /\w+[\.-]?\w+/
+
+anno_attribute: ANNO_ATTRIBUTE_KEY "=" ANNO_ATTRIBUTE_VALUE
+ANNO_ATTRIBUTE_KEY: "TypeString" | "DescriptionString" | "UsageString" | "VersionString" | "CreatedDateTime"
+ANNO_ATTRIBUTE_VALUE: NOT_EOL+
+
+ns_attribute: NS_ATTRIBUTE_KEY "=" NS_ATTRIBUTE_VALUE
+NS_ATTRIBUTE_KEY: "NameString" | "DomainString" | "SpeciesString" | "DescriptionString" | "VersionString"
+NS_ATTRIBUTE_VALUE: NOT_EOL+
+
+// EBNF for ISO8601 is too complcated, will be checke in python
+created_date_time: "CreatedDateTime" "=" ISO8601
+ISO8601: NOT_EOL+
+
+ns_query_value_url: "QueryValueURL" "=" URL
+// =====================================================================================================================
+
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// EBNF for Author section for annotatons and __namespaces
+// 'author' is abbreviated with at (tree) or AT (TOKEN) in the following section
+author: "[Author]" at_attribute+
+// ---------------------------------------------------------------------------------------------------------------------
+
+at_attribute: AT_ATTRIBUTE_KEY "=" AT_ATTRIBUTE_VALUE
+AT_ATTRIBUTE_KEY: "NameString" | "CopyrightString" | "ContactInfoString"
+AT_ATTRIBUTE_VALUE: NOT_EOL+
+
+// =====================================================================================================================
+
+
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// EBNF for Citation section for __namespaces
+// 'citation' is abbreviated with ct (tree) or CT (TOKEN) in the following section
+citation: "[Citation]" ( ct_attribute | ct_published_date | ct_reference_url )+
+// ---------------------------------------------------------------------------------------------------------------------
+
+ct_attribute: CT_ATTRIBUTE_KEY "=" CT_ATTRIBUTE_VALUE
+
+CT_ATTRIBUTE_KEY: "NameString" | "DescriptionString" | "PublishedVersionString" | "PublishedDate" | "ReferenceURL"
+
+CT_ATTRIBUTE_VALUE: NOT_EOL+
+
+// EBNF for ISO8601 is too complcated, will be checke in python
+ct_published_date: "PublishedDate" "=" CT_ISO8601
+CT_ISO8601: NOT_EOL+
+
+ct_reference_url: "ReferenceURL" "=" URL
+
+// =====================================================================================================================
+
+
+
+// >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+// EBNF for Citation section
+// 'processing' is abbreviated with pr (tree) or PR (TOKEN) in the following section
+processing: "[Processing]" ( pr_case_sensitive_flag | pr_delimiter_string | pr_cacheable_flag )+
+// ---------------------------------------------------------------------------------------------------------------------
+
+pr_case_sensitive_flag: "CaseSensitiveFlag" "=" PR_CASE_SENSITIVE_FLAG
+PR_CASE_SENSITIVE_FLAG: "no" | "yes"
+
+pr_delimiter_string: "DelimiterString" "=" PR_DELIMITER
+PR_DELIMITER: NOT_EOL+
+
+pr_cacheable_flag: "CacheableFlag" "=" PR_CACHEABLE_FLAG
+PR_CACHEABLE_FLAG: "yes" | "no"
+
+// =====================================================================================================================
+
+
+COMMENT: "#" /[^\n\r]+/
+
+
+// BASICS
+URL: ("http" ["s"] | "ftp" ) "://" /[^"\n\r]/+
+
+WS: /[ \t\f\r\n]/+
+
+NOT_EOL: /[^\n\r]/
+
+%ignore WS
+
+
+// References:
+// * Building Custom Namespaces: http://openbel-framework.readthedocs.io/en/latest/tutorials/building_custom_namespaces.html

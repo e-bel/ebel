@@ -1,0 +1,20 @@
+# See: https://docs.readthedocs.io/en/latest/yaml-config.html
+version: 2
+
+formats:
+  - epub
+  - pdf
+
+build:
+  image: latest
+
+requirements_file: requirements.txt
+
+python:
+  version: 3.7
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
+  system_packages: true

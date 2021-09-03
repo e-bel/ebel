@@ -1,0 +1,210 @@
+"""Collect of methods used for validating a BEL file."""
+import os
+import csv
+import logging
+from typing import Iterable, Union
+
+import numpy as np
+import pandas as pd
+
+import ebel.database
+from ebel.parser import check_bel_script_line_by_line, check_bel_script, bel_to_json
+
+
+logger = logging.getLogger(__name__)
+
+
+def validate_bel_file(bel_script_path: str, force_new_db: bool = False, line_by_line: bool = False,
+                      reports: Union[Iterable[str], str] = None, bel_version: str = '2_1', tree: bool = False,
+                      sqlalchemy_connection_str: str = None, json_file: bool = True):
+    """Validate BEL script for correct syntax following eBNF grammar.
+
+    Parameters
+    ----------
+    bel_script_path: str
+        Path to BEL file or directory contaiing BEL files.
+    force_new_db: bool
+        Delete current database of namespaces/values and generate a new one. Defaults to False.
+    line_by_line: bool
+        TODO: Write this.
+    reports: Iterable[str] or str
+        List of file paths to write reports to. Multiple formats of the report can be generated at once. Acceptable
+        formats include: CSV, TSV, TXT, XLS, XLSX, JSON, HTML, MD
+    bel_version: {'1', '2', '2_1'}
+        Which BEL grammar version should be used for validating the BEL file. Current available are 1.0, 2.0, and 2.1.
+        Defaults to the most recent version.
+    tree: bool
+        Generates a tree of relationships derived from the BEL file. Defaults to False.
+    sqlalchemy_connection_str: str
+        Path to SQLLite database to be used for storing/looking up used namespaces and values. If None given, it uses
+        the generated e(BE:L) database (default).
+    json_file: bool
+        If True, generates a JSON file that can be used for importing BEL relationships into an e(BE:L) generated
+        OrientDB database. Only creates the JSON file when there are no grammar or syntax errors. Defaults to True.
+
+    Returns
+    -------
+    dict
+        Dictionary of file paths and results for each BEL file processed.
+
+    Examples
+    --------
+    Task: Validate BEL script `my.bel` for BEL syntax 2.0, create error
+    reports in Markdown and JSON format. In case of no errors create a JSON file
+    for the import of BEL network into Cytoscape:
+
+    > ebel validate my.bel -v 2 -r error_report.md,error_report.json
+
+    """
+    validation_results = dict()
+
+    if bel_script_path.startswith('"') and bel_script_path.endswith('"'):
+        bel_script_path = bel_script_path[1:-1]
+
+    if reports and reports.startswith('"') and reports.endswith('"'):
+        reports = reports[1:-1]
+
+    if line_by_line:
+        # TODO: This is perhaps not working
+        result = check_bel_script_line_by_line(bel_script_path,
+                                               error_report_file_path=reports,
+                                               bel_version=bel_version)
+
+        if reports:
+            logger.info("Wrote report to %s\n" % reports)
+        else:
+            logger.info("\n".join([x.to_string() for x in result]) + "\n")
+
+    else:
+        if sqlalchemy_connection_str:
+            ebel.database.set_connection(sqlalchemy_connection_str)
+
+        bel_files = _create_list_bel_files(bel_path=bel_script_path)
+        validation_results['bel_files_checked'] = bel_files
+
+        for bel_file in bel_files:
+            # Create dict to be filled for individual BEL files.
+            validation_results[bel_file] = dict()
+
+            logger.info(f"Processing {bel_file}")
+            result = check_bel_script(
+                bel_script_path=bel_file,
+                force_new_db=force_new_db,
+                bel_version=bel_version,
+            )
+
+            if not result['errors'] and json_file:
+                json_file = _write_success_json(bel_path=bel_file, results=result, bel_version=bel_version)
+                validation_results[bel_file]['json'] = json_file
+
+            if tree:
+
+                if result['errors']:
+                    logger.error("Tree can not be printed because errors still exists\n")
+                else:
+                    logger.debug(result['tree'])
+                    validation_results[bel_file]['tree'] = result['tree']
+
+                if result['warnings'] and reports:
+                    report_paths = _write_report(reports, result, report_type='warnings')
+                    validation_results[bel_file]['reports'] = report_paths
+
+            elif result['errors']:
+
+                if not reports:
+                    logger.info('\n'.join([x.to_string() for x in result['errors']]) + "\n")
+                else:
+                    _write_report(reports, result, report_type='errors')
+
+
+def _write_success_json(bel_path: str, results: dict, bel_version: str):
+    if int(bel_version[0]) > 1:
+        json_tree = bel_to_json(results['tree'])
+        json_path = bel_path + ".json"
+        open(json_path, "w").write(json_tree)
+
+    return json_path
+
+
+def _create_list_bel_files(bel_path: str) -> list:
+    """Export all BEL files in directory as list. If single file is passed, returns a list with that path."""
+    if os.path.isdir(bel_path):
+        bel_files = []
+        for file in os.listdir(bel_path):
+            if file.endswith(".bel"):
+                bel_file_path = os.path.join(bel_path, file)
+                bel_files.append(bel_file_path)
+
+    else:
+        bel_files = [bel_path]
+
+    return bel_files
+
+
+def _write_report(reports: Union[Iterable[str], str], result: dict, report_type: str) -> list:
+    """Write report in different types depending on the file name suffix in reports.
+
+    Parameters
+    ----------
+    reports : Iterable[str] or str
+        List of report formats or comma separated list of report file names.
+    result : dict
+        return value of check_bel_script methode.
+    report_type : str
+        `report_type` could be 'warnings' or 'errors'.
+
+    Returns
+    -------
+    list
+        List of file paths for the reports written.
+
+    """
+    # TODO: report_type options should be constants
+    errors_or_warns_as_list_of_dicts = [x.to_dict() for x in result[report_type]]
+
+    columns = [report_type[:-1] + "_class", "url", "keyword", "entry", "line_number", "column", "hint"]
+    df = pd.DataFrame(data=errors_or_warns_as_list_of_dicts, columns=columns)
+    df.index += 1
+
+    if isinstance(reports, str):
+        reports = reports.split(",")
+
+    for report in reports:
+        if report.endswith('.csv'):
+            df.to_csv(report)
+
+        if report.endswith('.xls'):
+            df.to_excel(report)
+
+        if report.endswith('.xlsx'):
+            df.to_excel(report, engine='xlsxwriter')
+
+        if report.endswith('.tsv'):
+            df.to_csv(report, sep='\t')
+
+        if report.endswith('.json'):
+            df.to_json(report)
+
+        if report.endswith('.txt'):
+            open(report, "w").write(df.to_string())
+
+        if report.endswith('.html'):
+            df.to_html(report)
+
+        if report.endswith('.md'):
+            cols = df.columns
+            df2 = pd.DataFrame([['---', ] * len(cols)], columns=cols)
+
+            if df.hint.dtype == np.str:
+                df.hint = df.hint.str.replace(r'\|', '&#124;')
+
+            if df.entry.dtype == np.str:
+                df.entry = df.entry.str.replace(r'\|', '&#124;')
+
+            df.url = [("[url](" + str(x) + ")" if not pd.isna(x) else '') for x in df.url]
+            url_template = "[%s](" + report.split(".bel.")[0] + ".bel?expanded=true&viewer=simple#L%s)"
+            df.line_number = [url_template % (x, x) for x in df.line_number]
+            df3 = pd.concat([df2, df])
+            df3.to_csv(report, sep="|", index=False, quoting=csv.QUOTE_NONE, escapechar="\\")
+
+    return reports

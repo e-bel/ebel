@@ -1,0 +1,18 @@
+SET DOCUMENT Authors = "Import Tester"
+SET DOCUMENT ContactInfo = "Test Contact"
+SET DOCUMENT Copyright = "Test Copyright"
+SET DOCUMENT Description = "Test Description"
+SET DOCUMENT Licenses = "Test License"
+SET DOCUMENT Name = "test.bel"
+SET DOCUMENT Version = "Test Version"
+
+DEFINE NAMESPACE HGNC AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20170511.belns"
+DEFINE NAMESPACE CHEBI AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20200603.belns"
+
+###########################
+SET Citation = {"PubMed", "Nat Genet. 2017 Sep;49(9):1373-1384. doi: 10.1038/ng.3916. Epub 2017 Jul 17.", "28714976"}
+SET Evidence = "This is a test."
+
+p(HGNC:CD33) -> p(HGNC:IL2, pmod(Ph))
+r(HGNC:CD33) -| g(HGNC:TNF)
+a(CHEBI:"ATP") => act(p(HGNC:UCP1))

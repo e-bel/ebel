@@ -1,0 +1,17 @@
+graft ebel
+graft tests
+
+exclude Jenkinsfile
+include Dockerfile docs/Makefile .dockerignore
+include *.rst *.txt *.yml LICENSE tox.ini .flake8 *.md
+
+recursive-include docs/source *.py *.rst
+recursive-include docs *.ini
+recursive-include docs *.md
+
+recursive-exclude notebooks *
+global-exclude *.py[cod] __pycache__ *.so .DS_Store *.png *.ipynb *.json
+
+exclude .bumpversion.cfg
+
+

@@ -1,0 +1,742 @@
+##################################################################################
+# Document Properties
+##################################################################################
+SET DOCUMENT Authors = "Bruce Schultz"
+SET DOCUMENT Description = "A collection of BEL statements designed to test every BEL 2.0 rule"
+SET DOCUMENT Name = "BEL_library_test.bel"
+
+###################################################################################
+# Definitions Section
+
+# NAMESPACES
+DEFINE NAMESPACE HP AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hp/hp-20171108.belns"
+DEFINE NAMESPACE MESHCS AS URL "https://owncloud.scai.fraunhofer.de/index.php/s/JsfpQvkdx3Y5EMx/download?path=mesh-cellular-structures.belns"
+
+DEFINE NAMESPACE EGID AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/entrez-gene-ids/entrez-gene-ids-20170725.belns"
+DEFINE NAMESPACE CHEBI AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20180106.belns"
+DEFINE NAMESPACE DO AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/disease-ontology/disease-ontology-20170725.belns"
+DEFINE NAMESPACE GOBP AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/go-biological-process/go-biological-process-20170725.belns"
+DEFINE NAMESPACE HGNC AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20170511.belns"
+DEFINE NAMESPACE MESHC AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-chemicals/mesh-chemicals-20170725.belns"
+DEFINE NAMESPACE MESHD AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-diseases/mesh-diseases-20170725.belns"
+DEFINE NAMESPACE MESHPP AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-processes/mesh-processes-20170511.belns"
+DEFINE NAMESPACE MESHE AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-techniques/mesh-techniques-20171030.belns"
+DEFINE NAMESPACE MESHA AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-anatomy/mesh-anatomy-20171030.belns"
+DEFINE NAMESPACE MGI AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mgi-mouse-genes/mgi-mouse-genes-20170725.belns"
+DEFINE NAMESPACE RGD AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/rgd-rat-genes/rgd-rat-genes-20170511.belns"
+DEFINE NAMESPACE SCOMP AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-named-complexes/selventa-named-complexes-20170511.belns"
+DEFINE NAMESPACE SFAM AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/selventa-protein-families/selventa-protein-families-20170511.belns"
+
+DEFINE NAMESPACE ADO AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/alzheimer-disease-ontology/alzheimer-disease-ontology-1.0.2.belns"
+DEFINE NAMESPACE BRCO AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/brain-region-ontology/brain-region-ontology-1.0.0.belns"
+DEFINE NAMESPACE NIFT AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/imaging-ontology/imaging-ontology-1.0.0.belns"
+
+DEFINE NAMESPACE dbSNP AS PATTERN "rs[0-9]+"
+
+DEFINE NAMESPACE FIXME AS LIST {"Flutriciclamide", "GW0742", "GW3965", "GM6001", "GI254023X", "Microglia-like cells", "Loxoribine"}
+
+DEFINE ANNOTATION TimePoint AS LIST {"4 days dpi"}
+
+###################################################################################
+# Statements Section
+###################################################################################
+# 1.1.1. Equivalencing between Namespaces
+# Testing whether different namespaces can be used to indicate the same biological concept and maps to the same node
+# Return True; two nodes and one edge in graph
+p(HGNC:AKT1) positiveCorrelation r(HGNC:AKT1)
+p(EGID:207) positiveCorrelation r(EGID:207)
+###################################################################################
+# 1.3. Statements
+# Testing whether a BEL term can exist on it's own
+# Return True
+complex(p(HGNC:CCND1), p(HGNC:CDK4))
+###################################################################################
+# 2.1.1. abundance(), a()
+# Testing general abundance function with use of string and non-string terms
+# Return True
+a(CHEBI:"oxygen atom")
+a(CHEBI:thapsigargin)
+abundance(CHEBI:"oxygen atom")
+abundance(CHEBI:thapsigargin)
+###################################################################################
+# 2.1.2. complexAbundance(), complex()
+# Testing complex function with use of multiple protein abundance functions and one complex string
+# Return True
+complex(SCOMP:"AP-1 Complex")
+complex(p(HGNC:FOS), p(HGNC:JUN))
+###################################################################################
+# 2.1.Bruce
+# Testing abundance function if raises error when space in name and no quotes are used
+# Return False
+a(CHEBI:oxygen atom)
+###################################################################################
+# 2.1.3. compositeAbundance(), composite()
+# Testing whether composite function returns True regardless of ordering
+# Return True
+composite(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex")) increases bp(GOBP:"T-helper 17 cell differentiation")
+composite(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6)) increases bp(GOBP:"T-helper 17 cell differentiation")
+compositeAbundance(p(HGNC:IL6), complex(GOCC:"interleukin-23 complex")) increases bp(GOBP:"T-helper 17 cell differentiation")
+compositeAbundance(complex(GOCC:"interleukin-23 complex"), p(HGNC:IL6)) increases bp(GOBP:"T-helper 17 cell differentiation")
+###################################################################################
+# 2.1.4. geneAbundance(), g()
+# Testing general geneAbundance function works
+# Return True
+g(HGNC:IL2)
+geneAbundance(HGNC:IL2)
+g(EGID:3558)
+geneAbundance(EGID:3558)
+###################################################################################
+# 2.1.5. microRNAAbundance(), m()
+# Testing general microRNAAbundance function works
+# Return True
+m(HGNC:MIR21)
+microRNAAbundance(HGNC:MIR21)
+###################################################################################
+# 2.1.6. proteinAbundance(), p()
+# Testing general proteinAbundance function works with string and non-string
+# Return True
+p(HGNC:IL2)
+proteinAbundance(HGNC:IL2)
+p(EGID:3558)
+proteinAbundance(EGID:3558)
+p(SFAM:"AKT Family")
+proteinAbundance(SFAM:"AKT Family")
+###################################################################################
+# 2.1.7. rnaAbundance(), r()
+# Testing general rnaAbundance function works
+# Return True
+r(HGNC:IL2)
+rnaAbundance(HGNC:IL2)
+r(EGID:3558)
+rnaAbundance(EGID:3558)
+###################################################################################
+# 2.2.1.0. Protein Modifications
+# Testing whether proteinModification() works
+# Return True
+p(HGNC:IL2, proteinModification(Ph, S, 131))
+p(HGNC:IL2, pmod(Ph, S, 131))
+###################################################################################
+# 2.2.1.1. Protein Modifications
+# Testing whether pmods work with <type>, <code>, and <pos>
+# Return True
+p(HGNC:IL2, pmod(Ph, S, 131))
+p(HGNC:IL2, pmod(Ph, Ser, 131))
+###################################################################################
+# 2.2.1.2.1 Protein Modifications
+# Testing whether pmods work with other abundance functions
+# Return False
+a(HGNC:IL2, pmod(Ph, S, 131))
+###################################################################################
+# 2.2.1.2.2 Protein Modifications
+# Testing whether pmods work with other abundance functions
+# Return False
+r(HGNC:IL2, pmod(Ph, S, 131))
+###################################################################################
+# 2.2.1.3. Protein Modifications
+# Testing every amino acid (single and 3 letter)
+# Return True
+p(HGNC:IL2, pmod(Ph, A, 131))
+p(HGNC:IL2, pmod(Ph, G, 131))
+p(HGNC:IL2, pmod(Ph, I, 131))
+p(HGNC:IL2, pmod(Ph, L, 131))
+p(HGNC:IL2, pmod(Ph, P, 131))
+p(HGNC:IL2, pmod(Ph, V, 131))
+p(HGNC:IL2, pmod(Ph, F, 131))
+p(HGNC:IL2, pmod(Ph, W, 131))
+p(HGNC:IL2, pmod(Ph, Y, 131))
+p(HGNC:IL2, pmod(Ph, D, 131))
+p(HGNC:IL2, pmod(Ph, E, 131))
+p(HGNC:IL2, pmod(Ph, R, 131))
+p(HGNC:IL2, pmod(Ph, H, 131))
+p(HGNC:IL2, pmod(Ph, K, 131))
+p(HGNC:IL2, pmod(Ph, S, 131))
+p(HGNC:IL2, pmod(Ph, T, 131))
+p(HGNC:IL2, pmod(Ph, M, 131))
+p(HGNC:IL2, pmod(Ph, C, 131))
+p(HGNC:IL2, pmod(Ph, N, 131))
+p(HGNC:IL2, pmod(Ph, Q, 131))
+p(HGNC:IL2, pmod(Ph, Ala, 131))
+p(HGNC:IL2, pmod(Ph, Gly, 131))
+p(HGNC:IL2, pmod(Ph, Ile, 131))
+p(HGNC:IL2, pmod(Ph, Leu, 131))
+p(HGNC:IL2, pmod(Ph, Pro, 131))
+p(HGNC:IL2, pmod(Ph, Val, 131))
+p(HGNC:IL2, pmod(Ph, Phe, 131))
+p(HGNC:IL2, pmod(Ph, Trp, 131))
+p(HGNC:IL2, pmod(Ph, Tyr, 131))
+p(HGNC:IL2, pmod(Ph, Asp, 131))
+p(HGNC:IL2, pmod(Ph, Glu, 131))
+p(HGNC:IL2, pmod(Ph, Arg, 131))
+p(HGNC:IL2, pmod(Ph, His, 131))
+p(HGNC:IL2, pmod(Ph, Lys, 131))
+p(HGNC:IL2, pmod(Ph, Ser, 131))
+p(HGNC:IL2, pmod(Ph, Thr, 131))
+p(HGNC:IL2, pmod(Ph, Cys, 131))
+p(HGNC:IL2, pmod(Ph, Met, 131))
+p(HGNC:IL2, pmod(Ph, Asn, 131))
+p(HGNC:IL2, pmod(Ph, Gln, 131))
+###################################################################################
+# 2.2.1.4. Protein Modifications
+# Testing mistakes in 3 leter amino acid names in pmod
+# Return False
+p(HGNC:IL2, pmod(Ph, Glx, 131))
+###################################################################################
+# 2.2.1.5. Protein Modifications
+# Testing if pmod can be written before namespace/value
+# Return False
+p(pmod(Ph, Gln, 131), HGNC:IL2)
+###################################################################################
+# 2.2.1.6. Protein Modifications
+# Testing multiple pmods in p() function
+# Return True
+p(HGNC:MAPK1, pmod(Ph, T, 185), pmod(Ph, Tyr, 187))
+###################################################################################
+# 2.2.1.7. Protein Modifications
+# Testing different acceptable combinations of <ns:v>, <code>, <pos> in pmod
+# Return True
+p(HGNC:IL2, pmod(Ph, Gln, 131))
+p(HGNC:IL2, pmod(Ph))
+p(HGNC:IL2, pmod(Ph, Gln))
+###################################################################################
+# 2.2.1.7. Protein Modifications
+# Testing all modification types in default namespace
+# Return True
+p(HGNC:IL2, pmod(Ac))
+p(HGNC:IL2, pmod(ADPRib))
+p(HGNC:IL2, pmod(ADP-rybosylation))
+p(HGNC:IL2, pmod(Farn))
+p(HGNC:IL2, pmod(Gerger))
+p(HGNC:IL2, pmod(Glyco))
+p(HGNC:IL2, pmod(Hy))
+p(HGNC:IL2, pmod(ISG))
+p(HGNC:IL2, pmod("ISG15-protein conjugation"))
+p(HGNC:IL2, pmod(methylation))
+p(HGNC:IL2, pmod(monomethylation))
+p(HGNC:IL2, pmod(Me2))
+p(HGNC:IL2, pmod(di-methylation))
+p(HGNC:IL2, pmod(trimethylation))
+p(HGNC:IL2, pmod(Myr))
+p(HGNC:IL2, pmod(Nedd))
+p(HGNC:IL2, pmod(NGlyco))
+p(HGNC:IL2, pmod(NO))
+p(HGNC:IL2, pmod(OGlyco))
+p(HGNC:IL2, pmod(Palm))
+p(HGNC:IL2, pmod(Ph))
+p(HGNC:IL2, pmod(Sulf))
+p(HGNC:IL2, pmod(sulphation))
+p(HGNC:IL2, pmod("sulphur addition"))
+p(HGNC:IL2, pmod(sulphonation))
+p(HGNC:IL2, pmod(SUMOylation))
+p(HGNC:IL2, pmod(ubiquitination))
+p(HGNC:IL2, pmod(ubiquitylation))
+p(HGNC:IL2, pmod("Lysine 48-linked polyubiquitination"))
+p(HGNC:IL2, pmod("Lysine 63-linked polyubiquitination"))
+p(HGNC:IL2, pmod(monoubiquitination))
+###################################################################################
+# 2.2.2.0. Variants
+# Testing whether variant() works for both spellings
+# Return True
+p(HGNC:CFTR, variant("="))
+p(HGNC:CFTR, var("="))
+###################################################################################
+# 2.2.2.1. Variants
+# Testing whether reference allele (=) and unspecified variants (?) works
+# Return True
+p(HGNC:CFTR, var("="))
+p(HGNC:CFTR, var("?"))
+###################################################################################
+# 2.2.2.2.1 Variants
+# Testing whether reference allele (=) and unspecified variants (?) works as non-string
+# Return False
+p(HGNC:CFTR, var(=))
+###################################################################################
+# 2.2.2.2.2 Variants
+# Testing whether reference allele (=) and unspecified variants (?) works as non-string
+# Return False
+p(HGNC:CFTR, var(?))
+###################################################################################
+# 2.2.2.3. Variants
+# Testing substitution
+# Return True
+p(HGNC:CFTR, var("p.Gly576Ala"))
+###################################################################################
+# 2.2.2.4. Variants
+# Testing deletion
+# Return True
+p(HGNC:CFTR, var("p.Gly576del"))
+###################################################################################
+# 2.2.2.5. Variants
+# Testing frameshift
+# Return True
+p(HGNC:CFTR, var("p.Thr1220Lysfs"))
+###################################################################################
+# 2.2.2.7. Variants
+# Testing gene variant with a deletion
+# Return True
+g(dbSNP:rs72824905, var("delCTT"))
+g(HGNC:CFTR, var("g.117199646_117199648delCTT"))
+g(HGNC:CFTR, var("c.1521_1523delCTT"))
+###################################################################################
+# 2.2.2.8. Variants
+# Testing gene variant missing "c."
+# Return True
+g(REF:"NM_000492.3", var("1521_1523delCTT"))
+###################################################################################
+# 2.2.2.9. Variants
+# Testing rna variants
+# Return True
+r(HGNC:CFTR, var("c.1521_1523delCTT"))
+r(HGNC:CFTR, var("r.1653_1655delcuu"))
+###################################################################################
+# 2.2.2.10. Variants
+# Testing rna variants missing "r."
+# Return True
+r(HGNC:CFTR, var("1653_1655delcuu"))
+###################################################################################
+# 2.2.2.11. Variants
+# Testing if variant can come before ns:value
+# Return False
+p(var("p.Gly576Ala"), HGNC:CFTR)
+###################################################################################
+# 2.2.3.0. Proteolytic fragments
+# Testing fragment() function naming
+# Return True
+p(HGNC:YFG, fragment("5_20"))
+p(HGNC:YFG, frag("5_20"))
+###################################################################################
+# 2.2.3.1. Proteolytic fragments
+# Testing fragment() function used with other abundance functions other than p()
+# Return False
+a(HGNC:YFG, frag("5_20"))
+###################################################################################
+# 2.2.3.2. Proteolytic fragments
+# Testing whether frag() mod can come before ns:value
+# Return False
+p(frag("5_20"), HGNC:YFG)
+###################################################################################
+# 2.2.3.3. Proteolytic fragments
+# Testing frag possibilities: known start/stop, unknown amino-frag length, unknown carboxy frag length, unknown start/stop, use of descriptor
+# Return True
+p(HGNC:YFG, frag("5_20"))
+p(HGNC:YFG, frag("1_?"))
+p(HGNC:YFG, frag("?_*"))
+p(HGNC:YFG, frag("?"))
+p(HGNC:YFG, frag("?", "55kD"))
+###################################################################################
+# 2.2.3.4. Proteolytic fragments
+# Testing frag use without <range> (<range> is required)
+# Return False
+p(HGNC:YFG, frag("55kD"))
+###################################################################################
+# 2.2.3.5. Proteolytic fragments
+# Testing wrong order of * and ? in frag
+# Return False
+p(HGNC:YFG, frag("*_?"))
+###################################################################################
+# 2.2.3.6. Proteolytic fragments
+# Testing wrong way of indicating unknown start/stop
+# Return False
+p(HGNC:YFG, frag("?_?"))
+###################################################################################
+# 2.2.4.0. Cellular location
+# Testing location() function naming
+# Return True
+p(HGNC:IL2, location(MESHA:Brain))
+p(HGNC:IL2, loc(MESHA:Brain))
+###################################################################################
+# 2.2.4.1. Cellular location
+# Testing location() use with each abundance
+# Return True
+a(CHEBI:lipopolysaccharide, loc(MESHA:Brain))
+r(HGNC:IL2, loc(MESHA:Brain))
+p(HGNC:IL2, loc(MESHA:Brain))
+m(HGNC:MIR34A, loc(MESHA:Brain))
+###################################################################################
+# 2.2.4.2. Cellular location
+# Testing location() use with compositeAbundance
+# Return False
+composite(p(HGNC:IL2), a(CHEBI:lipopolysaccharide), loc(MESHA:Brain))
+###################################################################################
+# 2.3.1. biologicalProcess(), bp()
+# Testing biologicalProcess() naming
+# Return True
+bp(GOBP:"cell cycle arrest")
+bp(GOBP:angiogenesis)
+biologicalProcess(GOBP:angiogenesis)
+biologicalProcess(GOBP:"cell cycle arrest")
+###################################################################################
+# 2.3.2. pathology(), path()
+# Testing pathology() naming
+# Return True
+pathology(MESHD:"Pulmonary Disease, Chronic Obstructive")
+pathology(MESHD:adenocarcinoma)
+path(MESHD:"Pulmonary Disease, Chronic Obstructive")
+path(MESHD:adenocarcinoma)
+###################################################################################
+# 2.3.3.0. activity(), act()
+# Testing activity() naming
+# Return True
+act(p(HGNC:AKT1))
+activity(p(HGNC:AKT1))
+###################################################################################
+# 2.3.3.1. activity(), act()
+# Testing activity() with correct abundance functions (protein, complex, RNA)
+# Return True
+act(p(HGNC:AKT1))
+act(r(HGNC:AKT1))
+act(complex(p(HGNC:AKT1), p(HGNC:IL2)))
+###################################################################################
+# 2.3.3.2. activity(), act()
+# Testing activity() with incorrect abundance functions
+# Return False
+act(a(CHEBI:lipopolysaccharide)) increases p(HGNC:TREM2)
+###################################################################################
+# 2.4.1.0. molecularActivity(), ma()
+# Testing molecularActivity() function naming
+# Return True
+act(p(HGNC:AKT1), ma(kin))
+act(p(HGNC:AKT1), molecularActivity(kin))
+###################################################################################
+# 2.4.1.1. molecularActivity(), ma()
+# Testing molecularActivity() with namespace
+# Return True
+act(p(HGNC:AKT1), ma(kin))
+act(r(HGNC:AKT1), ma(tscript))
+act(p(HGNC:FOXP3), ma(GOBP:"nucleic acid binding transcription factor activity"))
+act(p(HGNC:IL2), ma(GOBP:signaling))
+###################################################################################
+# 2.5.1.0. Translocations
+# Testing translocation() naming
+# Return True
+tloc(p(HGNC:EGFR), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))
+translocation(p(HGNC:IL2), fromLoc(GOCC:"cell surface"), toLoc(GOCC:endosome))
+tloc(p(HGNC:IL4), fromLoc(GOCC:intracellular), toLoc(GOCC:"extracellular space"))
+###################################################################################
+# 2.5.1.1. cellSecretion(), sec()
+# Testing cellSecretion() naming
+# Return True
+cellSecretion(p(HGNC:IL2))
+sec(p(HGNC:IL6))
+###################################################################################
+# 2.5.1.2. cellSurfaceExpression(), surf()
+# Testing cellSurfaceExpression() naming
+# Return True
+surf(p(HGNC:CCL5))
+cellSurfaceExpression(p(HGNC:CCL3))
+###################################################################################
+# 2.5.2. degradation(), deg()
+# Testing degradation() naming
+# Return True
+deg(p(HGNC:IFNG))
+degradation(p(HGNC:IFNG))
+###################################################################################
+# 2.5.3.0. reaction(), rxn()
+# Testing reaction() naming
+# Return True
+rxn(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))
+reaction(reactants(a(CHEBI:superoxide)),products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")))
+###################################################################################
+# 2.5.3.1. reaction(), rxn()
+# Testing reaction() ordering (products should not come first)
+# Return False
+rxn(products(a(CHEBI:"hydrogen peroxide"), a(CHEBI:"oxygen")), reactants(a(CHEBI:superoxide)))
+###################################################################################
+# 2.6.1.0. fusion(), fus()
+# Testing fusion() naming
+# Return True
+r(fus(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))
+r(fusion(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))
+###################################################################################
+# 2.6.1.1. fusion(), fus()
+# Testing fusion() function acceptable abundance terms (gene, RNA, or protein)
+# Return True
+r(fus(HGNC:TMPRSS2, "r.1_79", HGNC:ERG, "r.312_5034"))
+p(fus(HGNC:TMPRSS2, "p.1_79", HGNC:ERG, "p.312_5034"))
+g(fus(HGNC:TMPRSS2, "g.1_79", HGNC:ERG, "g.312_5034"))
+###################################################################################
+# 2.6.1.2. fusion(), fus()
+# Testing fusion() function missing "r."
+# Return False
+r(fus(HGNC:TMPRSS2, "1_79", HGNC:ERG, "r.312_5034"))
+###################################################################################
+# 2.6.1.3. fusion(), fus()
+# Testing fusion() function with unknown breakpoints
+# Return True
+r(fus(HGNC:TMPRSS2, "?", HGNC:ERG, "?"))
+###################################################################################
+# 3.1.1. increases, →
+# Testing increases relationship naming
+# Return True
+p(HGNC:IFNG) increases p(HGNC:TNF)
+p(HGNC:IFNG) -> p(HGNC:TNF)
+###################################################################################
+# 3.1.2. directlyIncreases, ⇒
+# Testing directlyIncreases relationship naming
+# Return True
+p(HGNC:IFNG) directlyIncreases p(HGNC:TNF)
+p(HGNC:IFNG) => p(HGNC:TNF)
+###################################################################################
+# 3.1.3. decreases, -|
+# Testing decreases relationship naming
+# Return True
+p(HGNC:FOXP3) decreases r(HGNC:IFNG)
+p(HGNC:FOXP3) -| r(HGNC:IFNG)
+###################################################################################
+# 3.1.4.0. directlyDecreases, =|
+# Testing directlyDecreases relationship naming
+# Return True
+p(HGNC:FOXP3) directlyDecreases r(HGNC:IFNG)
+p(HGNC:FOXP3) =| r(HGNC:IFNG)
+###################################################################################
+# 3.1.4.1. Relationships
+# Testing that each relationship can be used with different combinations of abundances and processes
+# Return True
+act(p(HGNC:HMGCR), ma(cat)) -> bp(GOBP:"cholesterol biosynthetic process")
+bp(GOBP:"cholesterol biosynthetic process") -> act(p(HGNC:GAPDH))
+act(r(HGNC:HMGCR), ma(cat)) => bp(GOBP:"cholesterol biosynthetic process")
+bp(GOBP:"cholesterol biosynthetic process") => act(p(HGNC:GAPDH))
+act(g(HGNC:HMGCR), ma(cat)) -| bp(GOBP:"cholesterol biosynthetic process")
+bp(GOBP:"cholesterol biosynthetic process") -| act(p(HGNC:GAPDH))
+act(r(HGNC:HMGCR), ma(cat)) =| bp(GOBP:"cholesterol biosynthetic process")
+bp(GOBP:"cholesterol biosynthetic process") =| act(p(HGNC:GAPDH))
+###################################################################################
+# 3.1.4.2. Nested relationships
+# Testing nested statements (i.e. target term is a BEL statement)
+# Return True
+p(HGNC:CLSPN) => (act(p(HGNC:ATR), ma(kin)) => p(HGNC:CHEK1, pmod(Ph)))
+###################################################################################
+# 3.1.4.3. Nested relationships
+# Testing nested statements (i.e. target term is a BEL statement) with missing parathenses around nested statement
+# Return False
+p(HGNC:CLSPN) => act(p(HGNC:ATR), ma(kin)) => p(HGNC:CHEK1, pmod(Ph))
+###################################################################################
+# 3.1.4.4. Self-referential relationships
+# Testing ability to make Self-referential relationships
+# Return True
+p(HGNC:GSK3B, pmod(Ph, S, 9)) =| act(p(HGNC:GSK3B), ma(kin))
+###################################################################################
+# 3.1.5.0. rateLimitingStepOf
+# Testing rateLimitingStepOf relationship naming
+# Return True
+act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf bp(GOBP:"cholesterol biosynthetic process")
+act(p(HGNC:HMGCR), ma(cat)) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
+###################################################################################
+# 3.1.5.1. rateLimitingStepOf
+# Testing rateLimitingStepOf relationship first term must contain act()
+# Return False
+p(HGNC:HMGCR) rateLimitingStepOf bp(GOBP:"cholesterol biosynthetic process")
+###################################################################################
+# 3.1.5.2. rateLimitingStepOf
+# Testing rateLimitingStepOf relationship second term must be a process
+# Return False
+act(p(HGNC:HMGCR), ma(cat)) rateLimitingStepOf act(p(HGNC:FOXP3))
+###################################################################################
+# 3.1.6.0. causesNoChange, cnc
+# Testing causesNoChange naming
+# Return True
+p(HGNC:IFNG) cnc p(HGNC:TNF)
+p(HGNC:IFNG) causesNoChange p(HGNC:TNF)
+###################################################################################
+# 3.1.6.1. causesNoChange, cnc
+# Testing causesNoChange relationship works with abundances and processes
+# Return True
+act(p(HGNC:HMGCR), ma(cat)) causesNoChange bp(GOBP:"cholesterol biosynthetic process")
+###################################################################################
+# 3.1.7. regulates, reg
+# Testing regulates relationship naming
+# Return True
+p(HGNC:IFNG) regulates p(HGNC:TNF)
+p(HGNC:IFNG) reg p(HGNC:TNF)
+###################################################################################
+# 3.2.1.0. negativeCorrelation, neg
+# Testing negativeCorrelation relationship naming
+# Return True
+p(HGNC:IFNG) negativeCorrelation p(HGNC:FOXP3)
+p(HGNC:IFNG) neg p(HGNC:FOXP3)
+###################################################################################
+# 3.2.1.1. negativeCorrelation, neg
+# Testing negativeCorrelation relationship with combination of abundances and processes
+# Return True
+p(HGNC:FOXP3) negativeCorrelation bp(GOBP:"inflammatory response")
+###################################################################################
+# 3.2.1.2. negativeCorrelation, neg
+# Testing negativeCorrelation relationship ordering equivalency, should return same thing
+# Return True
+p(HGNC:FOXP3) negativeCorrelation bp(GOBP:"inflammatory response")
+bp(GOBP:"inflammatory response") negativeCorrelation p(HGNC:FOXP3)
+###################################################################################
+# 3.2.2.0. positiveCorrelation, pos
+# Testing positiveCorrelation relationship naming
+# Return True
+p(HGNC:IFNG) positiveCorrelation p(HGNC:TNF)
+p(HGNC:IFNG) pos p(HGNC:TNF)
+###################################################################################
+# 3.2.2.1. positiveCorrelation, pos
+# Testing positiveCorrelation relationship with combination of abundances and processes
+# Return True
+p(HGNC:IFNG) positiveCorrelation bp(GOBP:"inflammatory response")
+###################################################################################
+# 3.2.2.2. positiveCorrelation, pos
+# Testing positiveCorrelation relationship ordering equivalency, should return same thing
+# Return True
+p(HGNC:IFNG) positiveCorrelation bp(GOBP:"inflammatory response")
+bp(GOBP:"inflammatory response") positiveCorrelation p(HGNC:IFNG)
+###################################################################################
+# 3.2.3.0. association, — 
+# Testing association relationship naming
+# Return True
+p(HGNC:IFNG) association p(HGNC:TNF)
+p(HGNC:IFNG) -- p(HGNC:TNF)
+###################################################################################
+# 3.2.3.1. association, — 
+# Testing association relationship with combination of abundances and processes
+# Return True
+p(HGNC:IFNG) association bp(GOBP:"inflammatory response")
+###################################################################################
+# 3.2.3.2. association, — 
+# Testing association relationship ordering equivalency, should return same thing
+# Return True
+p(HGNC:IFNG) association bp(GOBP:"inflammatory response")
+bp(GOBP:"inflammatory response") association p(HGNC:IFNG)
+###################################################################################
+# 3.3.1.0. orthologous
+# Testing orthologous naming
+# Return True
+g(HGNC:AKT1) orthologous g(MGI:Akt1)
+###################################################################################
+# 3.3.1.1. orthologous
+# Testing orthologous use with g() and r()
+# Return True
+g(HGNC:AKT1) orthologous g(MGI:Akt1)
+r(HGNC:AKT1) orthologous r(MGI:Akt1)
+###################################################################################
+# 3.3.1.2. orthologous
+# Testing orthologous use with unacceptable abundances e.g. a()
+# Return False
+a(CHEBI:lipopolysaccharide) orthologous a(CHEBI:polysaccharide)
+###################################################################################
+# 3.3.2.0. transcribedTo, :>
+# Testing transcribedTo naming
+# Return True
+g(HGNC:AKT1) :> r(HGNC:AKT1)
+g(HGNC:AKT1) transcribedTo r(HGNC:AKT1)
+###################################################################################
+# 3.3.2.1. transcribedTo, :>
+# Testing transcribedTo naming g() -> r() requirement
+# Return False
+g(HGNC:AKT1) transcribedTo p(HGNC:AKT1)
+###################################################################################
+# 3.3.3.0. translatedTo, >>
+# Testing translatedTo naming
+# Return True
+r(HGNC:AKT1) >> p(HGNC:AKT1)
+r(HGNC:AKT1) translatedTo p(HGNC:AKT1)
+###################################################################################
+# 3.3.3.1. translatedTo, >>
+# Testing translatedTo naming g() -> r() requirement
+# Return False
+g(HGNC:AKT1) translatedTo p(HGNC:AKT1)
+###################################################################################
+# 3.4.1.0. hasMember
+# Testing hasMember naming
+# Return True
+complex(GOCC:"calcineurin complex") hasMember p(HGNC:PPP3R1)
+###################################################################################
+# 3.4.1.1. hasMember
+# Testing hasMember rule that term cannot appear in subject and object
+# # Return False
+# complex(GOCC:"calcineurin complex") hasMember complex(GOCC:"calcineurin complex")
+###################################################################################
+# 3.4.2.0. hasMembers
+# Testing hasMembers naming
+# Return True
+complex(GOCC:"calcineurin complex") hasMembers list(p(HGNC:PPP3R1), p(HGNC:PPP3CB))
+###################################################################################
+# 3.4.2.1. hasMembers
+# Testing hasMembers rule that term cannot appear in subject and object
+# # Return False
+# complex(GOCC:"calcineurin complex") hasMembers list(p(HGNC:PPP3R1), p(HGNC:PPP3CB), complex(GOCC:"calcineurin complex"))
+###################################################################################
+# 3.4.3.0. hasComponent
+# Testing hasComponent naming
+# Return True
+complex(SCOMP:"gamma Secretase Complex") hasComponent p(HGNC:PSEN1)
+###################################################################################
+# 3.4.3.1. hasComponent
+# Testing hasComponent rule that first term is a complex
+# Return False
+p(HGNC:IFNG) hasComponent p(HGNC:PSEN1)
+###################################################################################
+# 3.4.3.2. hasComponent
+# Testing hasComponent rule that term cannot appear in subject and object
+# Return False
+p(SCOMP:"gamma Secretase Complex") hasComponent p(SCOMP:"gamma Secretase Complex")
+###################################################################################
+# 3.4.4.0. hasComponents
+# Testing hasComponents naming
+# Return True
+complex(SCOMP:"gamma Secretase Complex") hasComponents list(p(HGNC:PSEN1), p(HGNC:PSENEN))
+###################################################################################
+# 3.4.4.1. hasComponents
+# Testing hasComponents rule that first term is a complex
+# Return False
+p(HGNC:IFNG) hasComponents list(p(HGNC:PSEN1), p(HGNC:PSENEN))
+###################################################################################
+# 3.4.4.2. hasComponents
+# Testing hasComponents rule that term cannot appear in subject and object
+# Return False
+p(SCOMP:"gamma Secretase Complex") hasComponents list(p(HGNC:PSEN1), p(HGNC:PSENEN), p(SCOMP:"gamma Secretase Complex"))
+###################################################################################
+# 3.4.5. isA
+# Testing isA naming
+# Return True
+path(MESHD:Psoriasis) isA path(MESHD:"Skin Diseases")
+###################################################################################
+# 3.4.6.0. subProcessOf
+# Testing subProcessOf naming
+# Return True
+rxn(reactants(a(CHEBI:"(S)-3-hydroxy-3-methylglutaryl-CoA"),a(CHEBI:NADPH), a(CHEBI:hydron)),\
+products(a(CHEBI:mevalonate), a(CHEBI:"CoA-SH"), a(CHEBI:"NADP(+)"))) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
+###################################################################################
+# 3.4.6.1. subProcessOf
+# Testing subProcessOf use with act()
+# Return True
+act(p(HGNC:HMGCR), ma(cat)) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
+###################################################################################
+# 3.4.6.2. subProcessOf
+# Testing subProcessOf rule that first term must be act() or a transformation function
+# Return False
+p(HGNC:HMGCR) subProcessOf bp(GOBP:"cholesterol biosynthetic process")
+###################################################################################
+# 3.4.6.3. subProcessOf
+# Testing subProcessOf rule that second term must be a process
+# Return False
+act(p(HGNC:HMGCR), ma(cat)) subProcessOf p(HGNC:CCL5)
+###################################################################################
+# 3.5.1. analogous
+# Testing analogousTo naming
+# Return True
+act(p(HGNC:ATR), ma(kin)) analogousTo act(p(HGNC:MAPK1), ma(kin))
+a(CHEBI:polysaccharide) analogousTo a(CHEBI:monosaccharide)
+###################################################################################
+# 3.5.2.0. biomarkerFor
+# Testing biomarkerFor naming
+# Return True
+p(HGNC:CHI3L1) biomarkerFor path(MESHD:"Alzheimer Disease")
+a(CHEBI:glucose) biomarkerFor bp(GOBP:"response to glucose")
+###################################################################################
+# 3.5.2.1. biomarkerFor
+# Testing biomarkerFor rule that second term must be a process
+# Return False
+a(CHEBI:glucose) biomarkerFor p(HGNC:GAPDH)
+###################################################################################
+# 3.5.3.0. prognosticBiomarkerFor
+# Testing prognosticBiomarkerFor naming
+# Return True
+p(HGNC:CHI3L1) prognosticBiomarkerFor path(MESHD:"Alzheimer Disease")
+a(CHEBI:glucose) prognosticBiomarkerFor bp(GOBP:"response to glucose")
+###################################################################################
+# 3.5.2.1. prognosticBiomarkerFor
+# Testing prognosticBiomarkerFor rule that second term must be a process
+# Return False
+a(CHEBI:glucose) prognosticBiomarkerFor p(HGNC:GAPDH)

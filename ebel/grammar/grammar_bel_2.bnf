@@ -1,0 +1,656 @@
+// BEL 2.0 EBNF
+// ============
+// This document implements the grammar of Biological Expresssion Langauge (BEL) 2.0 as EBNF
+
+// Reference
+// ---------
+// BEL 2.0 specification (04.01.2020) https://language.bel.bio/language/reference/2.0.0/
+
+// Notes
+// -----
+// The following grammar can be used in Python library lark (https://pypi.python.org/pypi/lark-parser), but
+// differs slightly from ISO standard (https://www.cl.cam.ac.uk/~mgk25/iso-14977.pdf)
+
+// python code for tests as one-liner:
+// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+// >>> import lark, codecs; print(lark.Lark(open('grammar_bel_2.bnf','r').read(),start='script', parser='lalr', lexer="contextual").parse(codecs.open('alz.bel', 'r', encoding="utf-8").read()).pretty())
+
+
+// Order of sections is important
+// ==============================
+// https://language.bel.bio/language/reference/2.0.0/ [04.01.2020]
+// Citation: "BEL Scripts are composed of three (3) functional sections: Properties, Definitions, Statements
+// BEL Scripts are processed from top to bottom, thus the ordering of sections within the document and of records
+// within each section is important."
+
+definitions: ( namespace | annotation  | _eol | _comment )*
+statements_and_sets: ( sets | statement | _eol )*
+
+script: document definitions statements_and_sets
+script_line_by_line: document
+                     | namespace
+                     | annotation
+                     | evidence
+                     | citation
+                     | statement_group
+                     | statement
+                     | set_annotation
+                     | unset
+//                     | ( "#"+ [_COMMENT] )
+//                     | _eol
+
+// Comments behind statements
+statement_comment: "//" WORD_WITHOUT_ESCAPED_NEW_LINE*
+
+WORD_WITHOUT_ESCAPED_NEW_LINE: /([^\\\n\r](?!\\[\n\r]))+/
+
+statement: ( subject
+	     | ( subject relation_basic object )
+	     | ( subject biomarker_relation _molec_process )
+	     | ( pat process_relation _molec_process )
+	     | ( bio_obj orthologous bio_obj )
+	     | ( _basic_subobj analogous_relation _basic_subobj )
+         | ( transc_subject transc_relation transc_object )
+         | ( transl_subject transl_relation transl_object )
+	     | ( subject relation_basic "(" nested_subject nested_relation nested_object ")" )
+	     | ( complex_abundance has_component object )
+	     | ( complex_abundance has_components list )
+	     | ( subject has_members list )) [ statement_comment ] _EOL
+
+transc_relation: transcribed_to
+transl_relation: translated_to
+nested_relation: relation_basic
+biomarker_relation: biomarker_for | prognostic_biomarker_for
+process_relation: sub_process_of | rate_limiting_step_of
+analogous_relation: analogous_to
+
+transc_subject: gene
+transc_object: rna
+transl_subject: rna
+transl_object: protein
+
+bio_obj: protein | rna | gene
+
+subject: _sub_obj
+object: _sub_obj
+
+molecular_process: _molec_process
+_molec_process: path | bp
+
+nested_subject: _sub_obj
+nested_object: _sub_obj
+
+// pat == process (bp or path), activity, or transformation
+pat: _molec_process | act | transformation
+
+_sub_obj: _basic_subobj
+         | _molec_process
+         | tloc
+         | sec
+         | deg
+         | rxn
+         | surf
+
+// #####################################################################################################################
+// List function
+// =============
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_hasmembers
+// "list" is neither in 1.0 nor 2.0 specified
+// only indirectly in ref
+list: _list_function "(" _list_objects ")"
+_list_function: "list"
+_list_objects: _list_object ( "," _list_object )*
+_list_object: _sub_obj
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Cell surface expression
+// =======================
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellsurfaceexpression_surf
+surf: _cell_surface_expression_function "(" _simple_subobj ")"
+_cell_surface_expression_function: "cellSurfaceExpression" | "surf"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Reaction
+// ========
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_reaction_rxn
+rxn: _reaction_function "(" reactants "," products ")"
+reactants: "reactants" "(" _reactants ")"
+products: "products" "(" _products ")"
+_reaction_function: "reaction" | "rxn"
+_reactants: _simple_subobj ( "," _simple_subobj )*
+_products: _simple_subobj ( "," _simple_subobj )*
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Degradation
+// ===========
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_degradation_deg
+deg: _deg "(" _simple_subobj ")"
+_deg: "degradation" | "deg"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Cell_secretion
+// ==============
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellsecretion_sec
+sec: _cell_secretion_function "(" _simple_subobj ")"
+_cell_secretion_function: "cellSecretion" | "sec"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Translocation
+// =============
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_translocation_tloc
+tloc: _translocation_function "(" _basic_subobj ","  from_loc "," to_loc ")"
+from_loc: "fromLoc" "(" nn ")"
+to_loc: "toLoc" "(" nn ")"
+_translocation_function: "translocation" | "tloc"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Biological process
+// ==================
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_biologicalprocess_bp
+// ---------------------------------------------------------------------------------------------------------------------
+bp:  _biological_process_function "(" nn ")"
+_biological_process_function: "biologicalProcess" | "bp"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Pathology
+// =========
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_pathology_path
+path: _abu_pathology "(" nn ")"
+_abu_pathology: "pathology" | "path"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Transformation
+// ==============
+// ref: https://openbel.org/language/version_2.0/bel_specification_version_2.0.html#Xtte
+transformation: tloc | deg | rxn
+// ---------------------------------------------------------------------------------------------------------------------
+
+_basic_subobj:  _simple_subobj | act
+
+// #####################################################################################################################
+// Acitivity and molecular activity
+// ================================
+// http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XmolecularA
+// http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#Xactivity
+// cite: "... activity() can be applied to a protein, complex, or RNA abundance term,
+// and modified with a molecularActivity() argument to indicate a specific type of molecular
+// activity..."
+act: _activity_function "(" _act_abundance [ "," ma ] ")"
+_act_abundance: protein | complex_abundance | complex_list | rna | gene | micro_rna | fusion
+_ma : "molecularActivity" | "ma"
+ma: _ma "(" ( nn | ma_default ) ")"
+_activity_function: "activity"|"act"
+// NOTE - The default BEL namespace (DEFAULT) includes commonly used molecular activity types,
+// mapping directly to the BEL v1.0 activity functions.
+cat: "catalyticActivity" | "cat"
+chap: "chaperoneActivity" | "chap"
+gtp: "gtpBoundActivity" | "gtp"
+kin: "kinaseActivity" | "kin"
+pep: "peptidaseActivity" | "pep"
+phos: "phosphataseActivity" | "phos"
+ribo: "ribosylationActivity" | "ribo"
+tscript: "transcriptionalActivity" | "tscript"
+tport: "transportActivity" | "tport"
+
+ma_default: cat
+              | chap
+              | gtp
+              | kin
+              | pep
+              | phos
+              | ribo
+              | tscript
+              | tport
+// ---------------------------------------------------------------------------------------------------------------------
+
+_simple_subobj: _non_protein_subobj
+               | protein
+               | complex_abundance
+               | complex_list
+               | fusion
+               | composite
+
+
+// #####################################################################################################################
+// Fusion
+// ======
+// function in BEL 2.0
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_fusion_fus
+// https://varnomen.hgvs.org/recommendations/general/
+//    “c.” for a coding DNA reference sequence
+//    “g.” for a linear genomic reference sequence
+//    “m.” for a mitochondrial DNA reference sequence
+//    “n.” for a non-coding DNA reference sequence
+//    “o.” for a circular genomic reference sequence
+//    “p.” for a protein reference sequence
+//    “r.” for an RNA reference sequence (transcript)
+fusion: gene_fusion | rna_fusion | protein_fusion
+
+gene_fusion: _gene_function "(" _fusion_function "(" fus_gene1 "," fus_gene2 ")" ")"
+fus_gene1: nn "," "\"" gene_fusion_range "\""
+fus_gene2: nn "," "\"" gene_fusion_range "\""
+
+rna_fusion: _rna_function "(" _fusion_function "(" fus_rna1 "," fus_rna2 ")" ")"
+fus_rna1: nn "," "\"" rna_fusion_range "\""
+fus_rna2: nn "," "\"" rna_fusion_range "\""
+
+protein_fusion: _protein_function "(" _fusion_function "(" fus_protein1 "," fus_protein2 ")" ")"
+fus_protein1: nn "," "\"" protein_fusion_range "\""
+fus_protein2: nn "," "\"" protein_fusion_range "\""
+
+_fusion_function: "fusion" | "fus"
+GENE_FUSION_PREFIX: "c." | "g." | "m." | "n." | "o."
+
+GENE_FUSION_RANGE: ( GENE_FUSION_PREFIX INT UNDERSCORE INT ) | UNKNOWN
+gene_fusion_range: GENE_FUSION_RANGE
+RNA_FUSION_RANGE: ( "r." INT UNDERSCORE INT ) | UNKNOWN
+rna_fusion_range: RNA_FUSION_RANGE
+PROTEIN_FUSION_RANGE: ( "p." INT UNDERSCORE INT ) | UNKNOWN
+protein_fusion_range: PROTEIN_FUSION_RANGE
+
+UNKNOWN: "?"
+UNDERSCORE: "_"
+// ---------------------------------------------------------------------------------------------------------------------
+
+
+// #####################################################################################################################
+// Complex
+// =======
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA
+
+// TODO: add to complex_abundance location ! http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_location_loc
+// complex_abundance: _complex_function "(" nn [ loc ] ")" should be the solution
+complex_abundance: _complex_function "(" nn [ loc ] ")"
+complex_list: _complex_function "(" list_complex ")"
+_complex_function: "complexAbundance" | "complex"
+list_complex: _list_complex_entry ( "," _list_complex_entry)*
+_list_complex_entry: _basic_subobj
+// ---------------------------------------------------------------------------------------------------------------------
+
+_non_protein_subobj: abundance | gene | micro_rna | rna
+abundance: _abundance_function "(" nn [ changes ] ")"
+gene: _gene_function "(" nn [ changes ] ")"
+micro_rna: _micro_rna_function "(" nn [ changes ] ")"
+rna: _rna_function "(" nn [ changes ] ")"
+changes: ( var | loc )*
+// #####################################################################################################################
+// Cellular location
+// =================
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_cellular_location
+loc: "," _location_function "(" nn ")"
+_location_function: "location" | "loc"
+// ---------------------------------------------------------------------------------------------------------------------
+
+protein: _protein_function "(" nn [ protein_changes ] ")"
+protein_changes: ( pmod | var | frag | loc )*
+
+// #####################################################################################################################
+// Proteolytic fragments
+// =====================
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
+frag: "," _fragment_function "(" "\"" F_RANGE "\"" [ "," "\"" F_DESCRIPTOR "\"" ] ")"
+_fragment_function: "fragment" | "frag"
+F_RANGE: ( INT UNDERSCORE ( INT | US_STAR ) ) | UNKNOWN_CARBOXYL_TERMINAL | QUESTION_MARK | UNKNOWN_AMINO_TERMINAL
+F_DESCRIPTOR: STRING
+US_STAR: "*"
+QUESTION_MARK: "?"
+UNKNOWN_CARBOXYL_TERMINAL: "?_*"
+UNKNOWN_AMINO_TERMINAL: "1_?"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Protein modification
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteinmodification_pmod
+pmod: "," _pmod_function "(" ( _pmod_as_type | _pmod_as_nn ) ")"
+
+_pmod_function: "proteinModification" | "pmod"
+_pmod_as_type: pmod_type ["," amino_acid ["," POSITION]]
+_pmod_as_nn: nn ["," amino_acid ["," POSITION]]
+POSITION: INT
+// ---------------------------------------------------------------------------------------------------------------------
+
+document: ( document_name
+          | document_description
+          | document_version
+          | document_authors
+          | document_contact_info
+          | document_keywords
+          | document_copyright
+          | document_licences
+          | _eol
+          | _comment )*
+_document_key_prefix: "SET" "DOCUMENT"
+_document_key_suffix:  "=" ( ( "\"" STRING_IN_QUOTES "\"" ) | WORD) _EOL
+document_name: _document_key_prefix "Name" _document_key_suffix
+document_description: _document_key_prefix "Description" _document_key_suffix
+document_version: _document_key_prefix "Version" _document_key_suffix
+document_authors: _document_key_prefix "Authors" _document_key_suffix
+document_contact_info: _document_key_prefix "ContactInfo" _document_key_suffix
+document_copyright: _document_key_prefix "Copyright" _document_key_suffix
+document_licences: _document_key_prefix "Licenses" _document_key_suffix
+document_keywords: _document_key_prefix "Keywords" _document_key_suffix
+
+_eol: ("\n" | "\r" | "\r\n")+
+
+_comment: "#"+ [_COMMENT] _EOL
+_COMMENT: NON_EOL_STRING
+
+// reference: http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_define
+// WARNING: pybel follows not this specification for namespace list (17.5.2018)
+
+namespace: "DEFINE" ["DEFAULT"] "NAMESPACE" KEYWORD "AS" _reference _EOL
+annotation: "DEFINE" ["DEFAULT"] "ANNOTATION" KEYWORD "AS" _reference _EOL
+_reference: ( _def_url | _def_pattern | _def_list | _def_file )
+
+_def_url: URL "\"" URL_DEF "\""
+URL: "URL"
+URL_DEF: ( "http" [ "s" ] | "ftp" ) "://" /[^"]/+
+
+_def_pattern: PATTERN "\"" PATTERN_DEF "\""
+PATTERN: "PATTERN"
+PATTERN_DEF: STRING_IN_QUOTES
+
+_def_list: LIST in_list
+LIST: "LIST"
+in_list: "{" ( "\"" ENTRY "\"" ) ( "," "\"" ENTRY "\"" )* "}"
+ENTRY: STRING
+
+_def_file: URL "\"" FILE_PATH_PREFIX FILE_PATH "\""
+FILE_PATH_PREFIX: "file://"
+FILE_PATH: /[^"]/+
+
+
+// reference: http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_set
+sets: _set_entry+
+_set_entry: evidence | citation| statement_group | set_annotation | unset | _comment
+
+// reference: http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_unset
+unset: "UNSET" ( ANNO_KEYWORD | ( "{" ANNO_KEYWORD ( "," ANNO_KEYWORD )* "}"  ) ) _EOL
+ANNO_KEYWORD: KEYWORD
+
+statement_group: "SET" "STATEMENT_GROUP" "=" "\"" GROUP_NAME "\"" _EOL
+GROUP_NAME: STRING
+
+set_annotation: "SET" KEYWORD "=" _anno_entries _EOL
+_anno_entries: "\"" ANNO_SET_ENTRY "\"" | ( "{" "\"" ANNO_SET_ENTRY "\"" ( "," "\"" ANNO_SET_ENTRY "\"" )* "}" )
+ANNO_SET_ENTRY: STRING
+
+// ##################################################################################################################
+// Support (formely known as Evidence)
+// =======
+// Warning: Cite: "BEL Script Evidence Annotation renamed to Support"
+// seems to author that Evidence first named to
+// http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_bel_script_format_changes
+// because of historical reasons rule name is still evidence
+
+evidence: "SET" ( "Support" | "SupportingText" | "Evidence" ) "=" "\"" EVI_TEXT "\"" _EOL
+EVI_TEXT: [_EOL] STRING (_EOL STRING)* [_EOL]
+
+// #####################################################################################################################
+// Citation
+// ========
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_other_examples
+// cit: "Citations are composed of a document type, a document name, a document reference ID, and an optional
+// publication date, authors list and comment field. "
+// ALERT: If citation have only 2 fields, second is reference
+
+citation: "SET" "Citation" "=" "{" "\"" C_TYPE "\"" "," "\"" C_PARAM2 "\"" ( ONLY_2_PARAMETERS | ( "," "\"" C_PARAM3 "\"" [ "," "\"" [C_PUBDATE] "\"" [ "," "\"" [C_AUTHORLIST] "\"" [ "," "\"" [C_COMMENT] "\"" ] ] ] "}" ) ) _EOL
+ONLY_2_PARAMETERS: "}"
+C_TYPE: STRING
+C_PARAM2: STRING
+C_PARAM3: STRING
+C_PUBDATE: STRING
+C_AUTHORLIST: STRING
+C_COMMENT: STRING
+// ---------------------------------------------------------------------------------------------------------------------
+
+
+// #####################################################################################################################
+// Supported One- and Three-letter Amino Acid Codes
+// ================================================
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_supported_one_and_three_letter_amino_acid_codes
+aac_l: "L" | "Leu"
+aac_e: "E" | "Glu"
+aac_k: "K" | "Lys"
+aac_m: "M" | "Met"
+aac_i: "I" | "Ile"
+aac_t: "T" | "Thr"
+aac_d: "D" | "Asp"
+aac_c: "C" | "Cys"
+aac_w: "W" | "Trp"
+aac_v: "V" | "Val"
+aac_p: "P" | "Pro"
+aac_h: "H" | "His"
+aac_q: "Q" | "Gln"
+aac_g: "G" | "Gly"
+aac_s: "S" | "Ser"
+aac_f: "F" | "Phe"
+aac_y: "Y" | "Tyr"
+aac_n: "N" | "Asn"
+aac_r: "R" | "Arg"
+aac_a: "A" | "Ala"
+amino_acid: aac_l | aac_e | aac_k | aac_m | aac_i | aac_t | aac_d | aac_c | aac_w | aac_v | aac_p | aac_h | aac_q | aac_g | aac_s
+            | aac_f | aac_y | aac_n | aac_r | aac_a
+// ---------------------------------------------------------------------------------------------------------------------
+
+// Activity Functions
+// ==================
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_activity_functions
+// citation: "The ten distinct BEL activity functions [...(comment: from BEL 1.0)]
+// are consolidated to a single activity function activity() / act()"
+//
+// Problem only 6 (not 10) BEL 1.0 activity functions (next to molecular activity) can be found in reference:
+// ref: http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_activities_2
+// 1. catalyticActivity
+// 2. peptidaseActivity
+// 3. gtpBoundActivity
+// 4. transportActivity
+// 5. chaperoneActivity
+// 6. transcriptionalActivity
+
+// #####################################################################################################################
+// Variants
+// ========
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_variants_2
+// citation: "The var("") function takes HGVS (http://www.hgvs.org/mutnomen/) variant description expression, e.g.,
+// for a substitution, insertion, or deletion variant."
+// comment: This is in general a problem, because this links to an other grammar
+var: "," _variant_function "(" "\"" HGVS "\"" ")"
+HGVS: STRING | VAR_ALLOWED_SINGLE_CHAR
+_variant_function: "variant" | "var"
+VAR_ALLOWED_SINGLE_CHAR: "=" | "?"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// BEL Functions
+// =============
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_bel_functions
+_abundance_function: "abundance" | "a"
+_gene_function: "geneAbundance"| "g"
+_micro_rna_function: "microRNAAbundance" | "m"
+_protein_function: "proteinAbundance" | "p"
+_rna_function: "rnaAbundance" | "r"
+
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcompositeA
+composite: _composite_function "(" _simple_subobj ("," _basic_subobj)* ")"
+_composite_function: "compositeAbundance" | "composite"
+// ---------------------------------------------------------------------------------------------------------------------
+
+dna_a: "Adenine" | "A"
+dna_c: "Cytosine" | "C"
+dna_g: "Guanine" | "G"
+dna_t: "Thymine" | "T"
+
+dna: dna_a | dna_c | dna_g | dna_t
+
+rna_a: "adenine" | "a"
+rna_u: "uracil" | "u"
+rna_c: "cytosine" | "c"
+rna_g: "guanine" | "g"
+
+_rna: rna_a | rna_u | rna_c | rna_g
+
+// #####################################################################################################################
+// Causal Relationships
+// ====================
+// http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_causal_relationships
+increases: "increases" | "->"
+directly_increases: "directlyIncreases" | "=>"
+decreases: "decreases" | "-|"
+directly_decreases: "directlyDecreases" | "=|"
+rate_limiting_step_of: "rateLimitingStepOf"
+causes_no_change: "causesNoChange" | "cnc"
+regulates: "regulates" | "reg"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Correlative Relationships
+// =========================
+// http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcorRels
+negative_correlation: "negativeCorrelation" | "neg"
+positive_correlation: "positiveCorrelation" | "pos"
+association: "association" | "--"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Genomic Relationships
+// =====================
+// http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_genomic_relationships
+orthologous: "orthologous"
+transcribed_to: "transcribedTo" | ":>"
+translated_to: "translatedTo" | ">>"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Other Relationships
+// ===================
+// http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_other_relationships
+has_member: "hasMember"
+has_component: "hasComponent"
+is_a: "isA"
+sub_process_of: "subProcessOf"
+// ---------------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Deprecated Relationships
+// ========================
+// http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_deprecated_relationships
+analogous_to: "analogousTo"
+biomarker_for: "biomarkerFor"
+prognostic_biomarker_for: "prognosticBiomarkerFor"
+// ------------------------------------------------------------------------------------------------------------
+
+// #####################################################################################################################
+// Direct Relationships Injected by the Compiler
+// =============================================
+// reference: http://openbel.org/language/version_1.0/bel_specification_version_1.0.html#_direct_relationships_injected_by_the_compiler
+// ToDo: statements with this relations needs better specification. They should be not part of 'relation_basic'
+acts_in: "actsIn"
+has_product: "hasProduct"
+has_variant: "hasVariant"
+has_modification: "hasModification"
+reactant_in: "reactantIn"
+translocates: "translocates"
+includes: "includes"
+// following relationships added before by openBEL compiler but are valid
+// BEL relations
+// acts_in, has_product, has_variant, has_modification, reactant_in, translocates, includes
+// Removed biomarkerFor, progosticBiomarkerFor, rate_limiting_step_of, sub_process_of from relation_basic due to special
+// rules
+
+
+relation_basic: increases
+              |directly_increases
+              |decreases
+              |directly_decreases
+              |causes_no_change
+              |regulates
+              |negative_correlation
+              |positive_correlation
+              |association
+              |has_member
+              |is_a
+              |acts_in
+              |has_product
+              |has_variant
+              |has_modification
+              |reactant_in
+              |translocates
+              |includes
+
+// #####################################################################################################################
+// Protein Modifications
+// =====================
+// ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_protein_modifications
+
+ace: "Ac" | "acetylation" | "\"Ac\"" | "\"acetylation\""
+adr: "ADPRib" | "\"ADPRib\"" | "\"ADP-ribosylation\""
+add: "ADP-rybosylation" | "\"ADP-rybosylation\"" | "\"adenosine diphosphoribosyl\""
+far: "Farn" | "farnesylation" | "\"Farn\"" | "\"farnesylation\""
+ger: "Gerger" | "geranylgeranylation" | "\"Gerger\"" | "\"geranylgeranylation\""
+gly: "Glyco" | "glycosylation" | "\"Glyco\"" | "\"glycosylation\""
+hyd: "Hy" | "hydroxylation"| "\"Hy\"" | "\"hydroxylation\"" |
+isg: "ISG" | "ISGylation" | "\"ISG\"" | "\"ISGylation\""
+me0: "\"ISG15-protein conjugation\"" | "Me" | "\"Me\""
+me1: "methylation" | "Me1" | "\"methylation\"" | "\"Me1\""
+mon: "monomethylation" | "mono-methylation" | "\"monomethylation\"" | "\"mono-methylation\""
+me2: "Me2" | "dimethylation" | "\"Me2\"" | "\"dimethylation\""
+me3: "di-methylation" | "Me3" | "\"di-methylation\"" | "\"Me3\""
+tri: "trimethylation" | "tri-methylation" | "\"trimethylation\"" | "\"tri-methylation\""
+myr: "Myr" | "myristoylation" | "\"Myr\"" | "\"myristoylation\""
+ned: "Nedd" | "neddylation" | "\"Nedd\"" | "\"neddylation\""
+ngl: "NGlyco" | "N-linked glycosylation" | "\"NGlyco\"" | "\"N-linked glycosylation\""
+nit: "NO" | "Nitrosylation" | "\"NO\"" | "\"Nitrosylation\""
+ogl: "OGlyco" | "O-linked glycosylation" | "\"OGlyco\"" | "\"O-linked glycosylation\""
+pal: "Palm" | "palmitoylation" | "\"Palm\"" | "\"palmitoylation\""
+pho: "Ph" | "phosphorylation" | "\"Ph\"" | "\"phosphorylation\""
+sul: "Sulf" | "sulfation" | "\"Sulf\"" | "\"sulfation\""
+sup: "sulphation" | "\"sulphation\"" | "\"sulfur addition\""
+suh: "sulfonation" | "\"sulfonation\"" | "\"sulphur addition\""
+sum: "sulphonation" | "\"sulphonation\""
+suy: "SUMOylation" | "\"SUMOylation\"" | "Sumo" | "\"Sumo\""
+ubi: "Ub" | "\"Ub\"" | "ubiquitination" | "ubiquitinylation" | "\"ubiquitination\"" | "\"ubiquitinylation\"" | "\"ubiquitylation\"" | "ubiquitylation"
+u48: "UbK48" | "\"UbK48\"" | "\"Lysine 48-linked polyubiquitination\""
+u63: "UbK63" | "\"UbK63\"" | "\"Lysine 63-linked polyubiquitination\""
+ubm: "UbMono" | "\"UbMono\"" | "monoubiquitination" | "\"monoubiquitination\""
+ubp: "UbPoly" | "\"UbPoly\"" | "polyubiquitination" | "\"polyubiquitination\""
+
+pmod_type: ace | adr | add | far | ger | gly | hyd | isg | me0
+            | me1 | mon | me2 | me3 | tri | myr | ned | ngl | nit
+            | ogl | pal | pho | sul | sup | suh | sum | suy | ubi
+            | u48 | u63 | ubm | ubp
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+has_members: "hasMembers"
+has_components: "hasComponents"
+
+nn: NAMESPACE_KEYWORD ":" (( "\"" NAME_WITHOUT_QUOTES "\"") | STRING_SIMPLE )
+NAME_WITHOUT_QUOTES: /[^"]+/
+NAMESPACE_KEYWORD: /[^:,\s)("]+/
+STRING_SIMPLE: /[^",\s)(]+/
+
+KEYWORD: /(\w+)/
+
+DIGIT: "0".."9"
+INT: DIGIT+
+
+// exclude double quoate and eol, allow escaped quoate
+STRING: ( "\\\"" | /[^\"\r\n]/ )+
+
+STRING_IN_QUOTES: ("\\\""|"\\\\"|/[^"]/)+
+WORD: /[^" \t\n\r]+/
+
+_EOL: ("\n" | "\r" | "\r\n")+
+NON_EOL_STRING: /[^\r\n]+/
+WS: /(\\\n)|[ \t\f]/
+
+%ignore WS

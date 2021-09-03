@@ -1,0 +1,1 @@
+"""OrientDB methods and definitions."""

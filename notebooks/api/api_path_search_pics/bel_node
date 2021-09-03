@@ -1,0 +1,29 @@
+digraph {
+	graph [rankdir=LR]
+	node [shape=plaintext]
+	bio_list -> list
+	bio_list -> composite
+	genetic_flow -> protein
+	genetic_flow -> rna
+	genetic_flow -> gene
+	bio_act -> degradation
+	bio_act -> reaction
+	bio_act -> activity
+	bio_act -> cell_surface_expression
+	bio_act -> cell_secretion
+	bio_act -> translocation
+	bio_concept -> biological_process
+	bio_concept -> pathology
+	bel -> bio_list
+	bel -> bio_act
+	bel -> bio_concept
+	bel -> fusion_gene
+	bel -> bio_object
+	bel -> fusion_rna
+	bel -> fusion_protein
+	bio_object -> population
+	bio_object -> genetic_flow
+	bio_object -> abundance
+	bio_object -> complex
+	bio_object -> micro_rna
+}

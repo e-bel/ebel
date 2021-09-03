@@ -1,0 +1,53 @@
+##################################################################################
+# Document Properties
+##################################################################################
+SET DOCUMENT Authors = "Bruce Schultz"
+SET DOCUMENT ContactInfo = "bruce.schultz@scai.fraunhofer.de"
+SET DOCUMENT Copyright = "Copyright © 2019 Fraunhofer Institute SCAI, All rights reserved."
+SET DOCUMENT Description = "This document is for testing the BEL 2.1 updates - https://language.bel.bio/language/reference/2.1.0/"
+SET DOCUMENT Licenses = "Generic License"
+SET DOCUMENT Name = "bel_2_1_test_statements.bel"
+SET DOCUMENT Version = "1.0.0"
+
+###################################################################################
+# Definitions Section
+
+
+# NAMESPACES
+
+DEFINE NAMESPACE CHEBI AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/chebi/chebi-20180106.belns"
+DEFINE NAMESPACE HGNC AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/hgnc-human-genes/hgnc-human-genes-20170511.belns"
+
+DEFINE NAMESPACE MESHA AS URL "https://arty.scai.fraunhofer.de/artifactory/bel/namespace/mesh-anatomy/mesh-anatomy-20171030.belns"
+
+##################################################################################
+
+# Statements Section
+
+# BEP-0001 - populationAbundance() function
+SET Evidence = "A bunch of test statements using pop()"
+populationAbundance(MESHA:Adipocytes)
+pop(MESHA:Adipocytes)
+pop(MESHA:Microglia, loc(MESHA:Brain))
+a(CHEBI:metformin) -| pop(MESHA:Adipocytes)
+complex(p(HGNC:TNF), pop(MESHA:Adipocytes))
+composite(p(HGNC:TNF), pop(MESHA:Adipocytes))
+tloc(pop(MESHA:Microglia), fromLoc(MESHA:"Cerebrospinal Fluid"), toLoc(MESHA:Brain))
+
+
+# BEP-0003 - noCorrelation relationship
+SET Evidence = "TNFa has no correlation with IL2"
+p(HGNC:TNF) no p(HGNC:IL2)
+p(HGNC:TNF) noCorrelation p(HGNC:IL2)
+
+
+# BEP-0004 - equivalence relation
+SET Evidence = "Amyloid beta 40 is a fragment of the APP protein from amino acid 672 to 711."
+a(CHEBI:"amyloid-beta polypeptide 40") eq p(HGNC:APP, frag("672_711"))
+a(CHEBI:"amyloid-beta polypeptide 40") equivalentTo p(HGNC:APP, frag("672_711"))
+
+
+##### Errors #####
+# Check "frag" can't be used with population
+# Return False
+a(CHEBI:metformin) -| pop(MESHA:Adipocytes, frag("5_20"))
