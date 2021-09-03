@@ -12,4 +12,7 @@ python:
       path: .
       extra_requirements:
         - docs
+        - numpydoc
+        - sphinxcontrib-openapi
+        - sphinx-click
   system_packages: true
