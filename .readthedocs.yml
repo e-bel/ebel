@@ -10,9 +10,8 @@ python:
   install:
     - method: pip
       path: .
+      install:
+        - requirements: docs/doc_requirements.txt
       extra_requirements:
         - docs
-        - numpydoc
-        - sphinxcontrib-openapi
-        - sphinx-click
   system_packages: true
