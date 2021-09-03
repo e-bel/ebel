@@ -13,5 +13,4 @@ python:
       path: .
       extra_requirements:
         - docs
-        - pyorient @ git+https://github.com/orientechnologies/pyorient.git
   system_packages: true

@@ -1,3 +1,4 @@
 numpydoc
 sphinxcontrib-openapi
 sphinx-click
+pyorient @ git+https://github.com/orientechnologies/pyorient.git
