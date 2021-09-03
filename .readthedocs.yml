@@ -8,10 +8,9 @@ formats:
 python:
   version: "3.7"
   install:
+    - requirements: docs/doc_requirements.txt
     - method: pip
       path: .
-      install:
-        - requirements: docs/doc_requirements.txt
       extra_requirements:
         - docs
   system_packages: true
