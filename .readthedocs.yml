@@ -5,13 +5,8 @@ formats:
   - epub
   - pdf
 
-build:
-  image: latest
-
-requirements_file: requirements.txt
-
 python:
-  version: 3.7
+  version: "3.7"
   install:
     - method: pip
       path: .
