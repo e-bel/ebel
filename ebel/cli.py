@@ -347,12 +347,13 @@ def set_mysql(host: str, user: str, password: str, database: str, interactive: b
 
 
 @main.command()
+@click.option('-h', '--host', default='0.0.0.0', help='Server or host name')
 @click.option('-p', '--port', default='5000', help='server port [5000]')
 @click.option('-d', '--debug_mode', is_flag=True, default=False, help='debug mode')
 @click.option('-o', '--open_browser', is_flag=True, default=False, help='open browser')
-def serve(port, debug_mode, open_browser):
+def serve(host, port, debug_mode, open_browser):
     """Start the API RESTful server."""
-    web.app.run(port, debug_mode, open_browser)
+    web.app.run(host=host, port=port, debug_mode=debug_mode, open_browser=open_browser)
 
 
 if __name__ == '__main__':
