@@ -366,8 +366,7 @@ class DrugBank(odb_meta.Graph):
         for row in tqdm(self.execute(sql), desc=f"Update {self.biodb_name.upper()} interaction."):
             r = row.oRecordData
             protein_rid, uniprot = r['rid'], r['uniprot']
-            query = self.session.query(drugbank.Target).filter(drugbank.Target.action.isnot(None),
-                                                               drugbank.Target.uniprot == uniprot)
+            query = self.session.query(drugbank.Target).filter(drugbank.Target.uniprot == uniprot)
             for target in query.all():
                 drugbank_id = target.drugbank.drugbank_id
 
