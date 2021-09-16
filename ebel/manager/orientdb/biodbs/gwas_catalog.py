@@ -49,7 +49,11 @@ class GwasCatalog(odb_meta.Graph):
 
     def insert_data(self) -> Dict[str, int]:
         """Insert GwasCatalog data in generic table `gwascatalog`."""
-        df = pd.read_csv(get_file_path(self.urls[self.biodb_name], self.biodb_name), sep="\t", low_memory=False)
+        # TODO: error_bad_lines=False, inform data provider about problems in dataset
+        df = pd.read_csv(get_file_path(self.urls[self.biodb_name], self.biodb_name),
+                         sep="\t",
+                         low_memory=False,
+                         error_bad_lines=False)
         df.columns = self._standardize_column_names(df.columns)
         df.replace(np.inf, np.nan, inplace=True)  # Get rid of infinity
         # replace non-dates with np.nan
