@@ -265,27 +265,27 @@ def enrich(skip: str,
         DrugBank password.
     odb_name: str
         OrientDB database name
-    odb_user:
+    odb_user: str
         OrientDB user (with admin rights)
-    odb_password:
+    odb_password: str
         OrientDB user (with admin rights) password
-    odb_server:
+    odb_server: str
         OrientDB server name or URI
-    odb_port:
+    odb_port: int
         OrientDB server port
-    odb_user_reader:
+    odb_user_reader: str
         OrientDB user with only read rights
     odb_user_reader_password:
         OrientDB user with only read rights password
-    odb_root_password:
+    odb_root_password: str
         OrientDB root user password (only first database setup needed)
-    kegg_species:
+    kegg_species: str
         KEGG species 3-4 letter code https://www.genome.jp/kegg/catalog/org_list4.html
     sqlalchemy_connection_string:
         SQL Alchemy connection string schema: user:passwd@server/database
-    snp_related_traits:
+    snp_related_traits: str
         SNP related traits
-    gwas_catalog_disease_keyword:
+    gwas_catalog_disease_keyword: str
         GWAS Catalog disease keyword(s)
     """
     Graph.set_configuration(name=odb_name,
