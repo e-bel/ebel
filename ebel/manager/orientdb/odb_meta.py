@@ -135,6 +135,7 @@ class Graph(abc.ABC):
 
         except PyOrientCommandException:
             # Try to reconnect
+            self.client.close()
             self.client = self.get_client()
             #self.client.db_open(self.odb_name, self.odb_user, self.odb_password)
             print(command_str)
