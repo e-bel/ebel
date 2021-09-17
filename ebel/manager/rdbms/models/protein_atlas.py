@@ -11,12 +11,12 @@ class ProteinAtlasNormalTissue(Base):
     __tablename__ = 'protein_atlas_normal_tissue'
     id = Column(Integer, primary_key=True)
 
-    gene = Column(String(100))
+    gene = Column(String(100), index=True)
     gene_name = Column(String(100))
     tissue = Column(String(100))
     cell_type = Column(String(100))
-    level = Column(String(100))
-    reliability = Column(String(100))
+    level = Column(String(100), index=True)
+    reliability = Column(String(100), index=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""

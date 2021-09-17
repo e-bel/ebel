@@ -9,6 +9,7 @@ from ebel.manager.orientdb import odb_meta, urls
 from ebel.manager.orientdb.constants import PROTEIN_ATLAS
 
 from ebel.manager.rdbms.models import protein_atlas
+from tqdm import tqdm
 
 
 class ProteinAtlas(odb_meta.Graph):
@@ -120,6 +121,73 @@ class ProteinAtlas(odb_meta.Graph):
         """
         return self.__insert_table(protein_atlas.ProteinAtlasRnaMouseBrainAllen)
 
+    def get_tissues_by_ensembl_id(self, ensembl_gene_id):
+        level_exixs = protein_atlas.ProteinAtlasNormalTissue.level.in_(['Medium', 'High', 'Low'])
+        columns = (
+            protein_atlas.ProteinAtlasNormalTissue.tissue, 
+            protein_atlas.ProteinAtlasNormalTissue.cell_type, 
+            protein_atlas.ProteinAtlasNormalTissue.level
+            )
+        data = [x for x in self.session.query(*columns).filter(level_exixs).filter_by(gene=ensembl_gene_id,
+                                                                                      reliability='Approved')]
+        tissues = {}
+        for d in data:
+            if d.tissue not in tissues:
+                tissues[d.tissue] = {d.level: [d.cell_type]}
+            else:
+                if d.level not in tissues[d.tissue]:
+                    tissues[d.tissue][d.level] = [d.cell_type]
+                else:
+                    tissues[d.tissue][d.level].append(d.cell_type)
+        return tissues
+
     def update_interactions(self) -> int:
-        """Update edges with Protein Atlas metadata."""
-        pass
+        """Update edges with Protein Atlas metadata (human)."""
+        # TODO: implement also for other species
+        match = """Select 
+                @rid.asString() as rid, 
+                hgnc.@rid.asString() as hgnc_id,
+                hgnc.ensembl_gene_id as ensembl_gene_id,
+                namespace,
+                name,
+                uniprot,
+                label
+            from protein 
+            where 
+                pure=true and 
+                namespace='HGNC' and 
+                both('bel_relation').size()>=1 and 
+                hgnc.ensembl_gene_id IS NOT NULL"""
+        match += ""
+        rid_ensembl_gene_ids = {x.oRecordData['ensembl_gene_id']: x for x in self.execute(match)}
+
+        self.execute("Delete EDGE has_located_protein where levels IS NOT NULL")
+
+        for ensembl_gene_id, data in tqdm(rid_ensembl_gene_ids.items()):
+            pure = data.oRecordData
+            ns = pure['namespace']
+            name = pure['name']
+
+            value_dict = {'namespace': ns,
+                          'name': name,
+                          'hgnc': pure['hgnc_id'],
+                          'involved_genes': [pure['name']],
+                          'involved_other': [],
+                          'species': 9606,
+                          'uniprot': pure.get('uniprot'),
+                          'label': pure.get('label')}
+
+            tissues = self.get_tissues_by_ensembl_id(ensembl_gene_id)
+
+            for tissue, levels in tissues.items():
+                value_dict_located = value_dict.copy()
+                bel = f'p({ns}:"{name}",loc(PROTEIN_ATLAS:"{tissue}"))'
+                value_dict_located.update(bel=bel)
+                located_rid = self.get_create_rid(class_name='protein',
+                                                  value_dict=value_dict_located,
+                                                  check_for='bel')
+
+                self.create_edge(class_name='has_located_protein',
+                                 from_rid=pure['rid'],
+                                 to_rid=located_rid,
+                                 value_dict={'levels': levels})
