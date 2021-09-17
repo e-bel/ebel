@@ -136,6 +136,7 @@ class Graph(abc.ABC):
         except PyOrientCommandException:
             # Try to reconnect
             self.client = self.get_client()
+            #self.client.db_open(self.odb_name, self.odb_user, self.odb_password)
             print(command_str)
             return self.client.command(command_str)
 
@@ -1414,7 +1415,7 @@ class Graph(abc.ABC):
         r = self.get_pure_symbol_rids_dict_in_bel_context(class_name=class_name, namespace=namespace)
         return pd.DataFrame(r.items(), columns=['symbol', 'rid'])
 
-    def get_pure_symbol_rids_dict(self, class_name='protein', namespace='HGNC'):
+    def get_pure_symbol_rids_dict(self, class_name='protein', namespace='HGNC') -> Dict[str, str]:
         """Return dictionary with protein name as keys and node rIDs as values."""
         results = self.query_class(class_name, pure=True, namespace=namespace)
         return {r['name']: r['rid'] for r in results}
