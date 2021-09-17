@@ -379,7 +379,9 @@ bel_edges: Tuple[Edge, ...] = (
     has_located,
     Edge('has_located_gene', (has_located,), in_out=(gene, gene)),
     Edge('has_located_rna', (has_located,), in_out=(rna, rna)),
-    Edge('has_located_protein', (has_located,), in_out=(protein, protein)),
+    Edge('has_located_protein', (has_located,), in_out=(protein, protein), props=(
+        OProperty('levels', ODataType.EMBEDDEDMAP),
+    )),
     Edge('has_located_micro_rna', (has_located,), in_out=(micro_rna, micro_rna)),
     Edge('has_located_complex', (has_located,), in_out=(complex_, complex_)),
     Edge('has_located_abundance', (has_located,), in_out=(abundance, abundance)),
