@@ -1,7 +1,7 @@
 """DisGeNet API methods."""
 from flask import request
 
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import disgenet
 from ebel.web.api.ebel.v1 import _get_paginated_query_result, _get_terms_from_model_starts_with, \
     _get_paginated_ebel_query_result
@@ -31,7 +31,7 @@ def get_gene_disease_pmid_associations():
     """Get list of PMIDs with disease genes defined."""
     gene_cols = ['gene_id', 'disease_id', 'pmid']
     gene_paras = {k: v for k, v in request.args.items() if k in gene_cols and v}
-    query = session.query(disgenet.DisgenetGene).filter_by(**gene_paras)
+    query = RDBMS.get_session().query(disgenet.DisgenetGene).filter_by(**gene_paras)
     gene_symbol = request.args.get('gene_symbol')
     if gene_symbol:
         gs = disgenet.DisgenetGeneSymbol
@@ -52,7 +52,7 @@ def get_variant_disease_pmid_associations():
     """Get list of PMIDs with disease variants defined."""
     cols = ['snp_id', 'chromosome', 'position', 'disease_id', 'score', 'pmid', 'source_id']
     paras = {k: v for k, v in request.args.items() if k in cols and v}
-    query = session.query(disgenet.DisgenetVariant).filter_by(**paras)
+    query = RDBMS.get_session().query(disgenet.DisgenetVariant).filter_by(**paras)
     disease_name = request.args.get('disease_name')
     if disease_name:
         dd = disgenet.DisgenetDisease
@@ -75,12 +75,11 @@ def get_ebel_has_snp_disgenet():
                          'has_upstream_snp_dgn']
     relation = request.args.get('relation')
 
-    where = {}
+    where = {'@class': relation if relation in allowed_relations else None,
+             'out.name': request.args.get('name'),
+             'out.namespace': request.args.get('namespace'),
+             'in.rs_number': request.args.get('rs_number')}
     # non-edge parameter
-    where['@class'] = relation if relation in allowed_relations else None
-    where['out.name'] = request.args.get('name')
-    where['out.namespace'] = request.args.get('namespace')
-    where['in.rs_number'] = request.args.get('rs_number')
     # edge parameter
     edge_properties = ['disease_name', 'source', 'pmid']
     where.update({k: v for k, v in request.args.items() if k in edge_properties})

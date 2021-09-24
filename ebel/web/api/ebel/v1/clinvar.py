@@ -4,7 +4,7 @@ from flask import request
 
 from ebel import Bel
 from math import ceil
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import clinvar
 from ebel.web.api.ebel.v1 import _get_data, _get_paginated_query_result, _get_terms_from_model_starts_with, \
     __get_pagination
@@ -21,7 +21,7 @@ def get_clinvar_simple():
     cp = clinvar.ClinvarPhenotype
     paras = {k: v for k, v in request.args.items() if
              k in ['gene_id', 'gene_symbol', 'hgnc_id', 'allele_id', 'assembly', 'rs_db_snp']}
-    query = session.query(cc.id, cc.hgnc_id, cc.allele_id, cc.gene_symbol, cc.assembly, cc.rs_db_snp)\
+    query = RDBMS.get_session().query(cc.id, cc.hgnc_id, cc.allele_id, cc.gene_symbol, cc.assembly, cc.rs_db_snp)\
         .filter_by(**paras).join(clinvar.clinvar__clinvar_phenotype).join(cp)
 
     phenotype = request.args.get('phenotype')
@@ -43,14 +43,14 @@ def get_by_other_identifier():
 
     db = request.args.get('db')
     identifier = request.args.get('identifier')
-    query = session.query(co.db,
-                          co.identifier,
-                          cc.id,
-                          cc.hgnc_id,
-                          cc.allele_id,
-                          cc.gene_symbol,
-                          cc.assembly,
-                          cc.rs_db_snp).join(co).filter_by(db=db).filter(co.identifier.like(identifier))
+    query = RDBMS.get_session().query(co.db,
+                                      co.identifier,
+                                      cc.id,
+                                      cc.hgnc_id,
+                                      cc.allele_id,
+                                      cc.gene_symbol,
+                                      cc.assembly,
+                                      cc.rs_db_snp).join(co).filter_by(db=db).filter(co.identifier.like(identifier))
 
     return _get_paginated_query_result(query.distinct(), return_dict=True)
 
@@ -62,13 +62,13 @@ def get_by_medgen():
 
     # db = request.args.get('db')
     identifier = request.args.get('identifier')
-    query = session.query(cm.identifier,
-                          cc.id,
-                          cc.hgnc_id,
-                          cc.allele_id,
-                          cc.gene_symbol,
-                          cc.assembly,
-                          cc.rs_db_snp).join(cm).filter_by(identifier=identifier)
+    query = RDBMS.get_session().query(cm.identifier,
+                                      cc.id,
+                                      cc.hgnc_id,
+                                      cc.allele_id,
+                                      cc.gene_symbol,
+                                      cc.assembly,
+                                      cc.rs_db_snp).join(cm).filter_by(identifier=identifier)
 
     return _get_paginated_query_result(query.distinct(), return_dict=True)
 

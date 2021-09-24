@@ -3,7 +3,7 @@ from math import ceil
 from flask import request
 
 from ebel import Bel
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import chebi
 from . import __get_pagination
 
@@ -21,7 +21,7 @@ def get_compound_by_name(name: str):
     dict
         CHEBI compound information.
     """
-    return [x.as_dict() for x in session.query(chebi.Compound).filter_by(name=name).all()]
+    return [x.as_dict() for x in RDBMS.get_session().query(chebi.Compound).filter_by(name=name).all()]
 
 
 def get_compound_name_by_name_starts_with(name: str):
@@ -37,7 +37,7 @@ def get_compound_name_by_name_starts_with(name: str):
     dict
         Names and CHEBI IDs.
     """
-    query = session.query(chebi.Compound.id, chebi.Compound.name).filter(chebi.Compound.name.like(f"{name}%"))
+    query = RDBMS.get_session().query(chebi.Compound.id, chebi.Compound.name).filter(chebi.Compound.name.like(f"{name}%"))
     return {x.name: x.id for x in query.all()}
 
 
@@ -54,7 +54,7 @@ def get_compound_by_id(id: int):
     dict
         Compound information.
     """
-    return session.query(chebi.Compound).filter_by(id=id).first().as_dict()
+    return RDBMS.get_session().query(chebi.Compound).filter_by(id=id).first().as_dict()
 
 
 def get_compound_by_other_db_accession(accession_number: str, db_name: str = None):
@@ -76,9 +76,9 @@ def get_compound_by_other_db_accession(accession_number: str, db_name: str = Non
     query_filter.append(chebi.DatabaseAccession.accession_number == accession_number)
     if db_name:
         query_filter.append(chebi.DatabaseAccession.type == db_name)
-    chebi_ids_rs = session.query(chebi.DatabaseAccession.compound_id).filter(*query_filter).all()
+    chebi_ids_rs = RDBMS.get_session().query(chebi.DatabaseAccession.compound_id).filter(*query_filter).all()
     chebi_ids = {x[0] for x in chebi_ids_rs}
-    return [x.as_dict() for x in session.query(chebi.Compound).filter(chebi.Compound.id.in_(chebi_ids)).all()]
+    return [x.as_dict() for x in RDBMS.get_session().query(chebi.Compound).filter(chebi.Compound.id.in_(chebi_ids)).all()]
 
 
 def get_compound_reference():
@@ -88,7 +88,7 @@ def get_compound_reference():
     page = req.pop('page', 1)
     if not req:
         return {'error': "At least one of the parameters have to be filled."}
-    query = session.query(chebi.Reference).filter_by(**req)
+    query = RDBMS.get_session().query(chebi.Reference).filter_by(**req)
     number_of_results = query.count()
 
     limit = int(page_size)
@@ -111,7 +111,7 @@ def get_relation():
     """Get CHEBI defined relations."""
     if not (bool(request.args.get('final_id') or bool(request.args.get('init_id')))):
         return {'error': "At least final_id or init_id have to be filled."}
-    rs = session.query(chebi.Relation).filter_by(**request.args).all()
+    rs = RDBMS.get_session().query(chebi.Relation).filter_by(**request.args).all()
     return [x.as_dict() for x in rs]
 
 

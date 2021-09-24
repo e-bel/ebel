@@ -15,7 +15,7 @@ from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.orm.query import Query
 
 from ebel import Bel
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 
 Pagination = namedtuple('Pagination', ['page', 'page_size', 'skip'])
 
@@ -70,7 +70,7 @@ def _get_data(model: Type[DeclarativeMeta], print_sql=False, order_by: List[Inst
     request_obj = request.args if request.args else json.loads(request.data)
     params = {k: (bool_map[v] if v in bool_map else v) for k, v in request_obj.items() if k in columns and v}
     like_queries = [columns[k].like(v) for k, v in params.items()]
-    query = session.query(model).filter(*like_queries)
+    query = RDBMS.get_session().query(model).filter(*like_queries)
 
     return _get_paginated_query_result(query, print_sql=print_sql, order_by=order_by)
 
@@ -184,7 +184,7 @@ def _get_terms_from_model_like(form_field: str, sa_column: InstrumentedAttribute
 
     model = sa_column.class_
     primary_key = inspect(model).primary_key[0]
-    query = session.query(primary_key, sa_column).filter(sa_column.like(f"{search_term}%")).order_by(sa_column)
+    query = RDBMS.get_session().query(primary_key, sa_column).filter(sa_column.like(f"{search_term}%")).order_by(sa_column)
 
     number_of_results = query.count()
 

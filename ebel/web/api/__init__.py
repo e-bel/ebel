@@ -10,12 +10,25 @@ from ebel import Bel
 from ebel.tools import _get_connection_string
 
 
-engine = create_engine(_get_connection_string())
+class RDBMS:
+    engine = None
+    session = None
 
-if not database_exists(engine.url):
-    create_database(engine.url)
+    @staticmethod
+    def get_engine():
+        if not RDBMS.engine:
+            RDBMS.engine = create_engine(_get_connection_string())
+        return RDBMS.engine
 
-session = Session(bind=engine, autocommit=True, autoflush=True)
+    @staticmethod
+    def get_session():
+        if not RDBMS.session:
+            engine = RDBMS.get_engine()
+            if not database_exists(engine.url):
+                create_database(engine.url)
+
+            RDBMS.session = Session(bind=engine, autocommit=True, autoflush=True)
+        return RDBMS.session
 
 
 class OdbRequest:

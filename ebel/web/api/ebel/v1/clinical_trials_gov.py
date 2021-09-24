@@ -3,7 +3,7 @@ import json
 
 from flask import request
 
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import clinical_trials_gov as ct
 from ebel.web.api.ebel.v1 import _get_paginated_query_result, _get_terms_from_model_starts_with
 
@@ -34,7 +34,7 @@ def get_ct_by_mesh_term():
     mesh_term = request.args.get('mesh_term', None)
     if not mesh_term:
         return {'error': "Mesh term is required."}
-    query = session.query(ct.MeshTerm).filter(ct.MeshTerm.mesh_term.like(mesh_term))
+    query = RDBMS.get_session().query(ct.MeshTerm).filter(ct.MeshTerm.mesh_term.like(mesh_term))
 
     return _get_paginated_query_result(query)
 
@@ -45,7 +45,7 @@ def get_ct_by_intervention():
     intervention_type = request.args.get('intervention_type', None)
     if not (intervention_name or intervention_type):
         return {'error': "At least name or type is required."}
-    query = session.query(ct.Intervention)
+    query = RDBMS.get_session().query(ct.Intervention)
 
     if intervention_type:
         query = query.filter_by(intervention_type=intervention_type)
@@ -60,7 +60,7 @@ def get_ct_by_keyword():
     keyword = request.args.get('keyword', None)
     if not keyword:
         return {'error': "keyword is required."}
-    query = session.query(ct.Keyword).filter(ct.Keyword.keyword.like(keyword))
+    query = RDBMS.get_session().query(ct.Keyword).filter(ct.Keyword.keyword.like(keyword))
 
     return _get_paginated_query_result(query)
 
@@ -70,7 +70,7 @@ def get_ct_by_condition():
     condition = request.args.get('condition', None)
     if not condition:
         return {'error': "Condition is required."}
-    query = session.query(ct.Condition).filter(ct.Condition.condition.like(condition))
+    query = RDBMS.get_session().query(ct.Condition).filter(ct.Condition.condition.like(condition))
 
     return _get_paginated_query_result(query)
 

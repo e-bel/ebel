@@ -7,7 +7,7 @@ from flask import request
 from collections import Counter
 
 from ebel import Bel
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models.uniprot import Uniprot
 
 
@@ -60,7 +60,7 @@ def get_intact_by_uniprot():
      (Select u.name,u.recommended_name, i.int_a_uniprot_id as uniprot_interaction_partner, i.detection_method,
      i.interaction_type, i.confidence_value, CAST(i.pmid AS CHAR) from intact i inner join uniprot u on
      (u.accession=i.int_a_uniprot_id) where i.int_b_uniprot_id = '{acc}') order by confidence_value desc"""
-    df = pd.DataFrame(session.execute(sql), columns=columns)
+    df = pd.DataFrame(RDBMS.get_session().execute(sql), columns=columns)
     # rows = [dict(zip(columns, row)) for row in ]
     # statistics_name_10 = Counter([x['name'] for x in rows]).most_common(10)
 
@@ -81,6 +81,6 @@ def get_intact_by_uniprot():
 def find_all():
     """Get all UniProt entries."""
     term = json.loads(request.data)['term'].strip()
-    uniprot_entries = session.query(Uniprot.recommended_name).filter(
+    uniprot_entries = RDBMS.get_session().query(Uniprot.recommended_name).filter(
         Uniprot.recommended_name.like("%" + term + "%")).count()
     return uniprot_entries

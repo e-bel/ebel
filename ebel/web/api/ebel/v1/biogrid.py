@@ -17,7 +17,7 @@ from ebel.manager.rdbms.models.biogrid import (
     Taxonomy,
     Interactor,
     Publication)
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.web.api.ebel.v1 import _get_data
 
 
@@ -87,7 +87,7 @@ def get_biogrid_by_biogrid_id(biogrid_id: int) -> dict:
     Returns:
         dict: BioGrid entry.
     """
-    biogrid_entry = session.query(Biogrid).filter_by(biogrid_id=biogrid_id).first()
+    biogrid_entry = RDBMS.get_session().query(Biogrid).filter_by(biogrid_id=biogrid_id).first()
     return biogrid_entry.as_dict()
 
 
@@ -98,7 +98,7 @@ def get_experimental_systems() -> Dict[str, int]:
         Dict[str, int]: schema: Dict[experimental_system, table_id]
     """
     es = ExperimentalSystem.experimental_system
-    rs = session.query(es, ExperimentalSystem.id).order_by(es.asc()).all()
+    rs = RDBMS.get_session().query(es, ExperimentalSystem.id).order_by(es.asc()).all()
     return {x.experimental_system: x.id for x in rs}
 
 
@@ -108,7 +108,7 @@ def get_sources() -> Dict[str, int]:
     Returns:
         Dict[str, int]: schema: Dict[source, table_id]
     """
-    rs = session.query(Source.source, Source.id).order_by(Source.source.asc()).all()
+    rs = RDBMS.get_session().query(Source.source, Source.id).order_by(Source.source.asc()).all()
     return {x.source: x.id for x in rs}
 
 
@@ -119,7 +119,7 @@ def get_taxonomies() -> Dict[str, int]:
         Dict[str, int]: schema: Dict[organism_name, taxonomy_id]
     """
     org = Taxonomy.organism_name
-    rs = session.query(org, Taxonomy.taxonomy_id).order_by(org.asc()).all()
+    rs = RDBMS.get_session().query(org, Taxonomy.taxonomy_id).order_by(org.asc()).all()
     return {x.organism_name: x.taxonomy_id for x in rs}
 
 
@@ -130,7 +130,7 @@ def get_modifications() -> Dict[str, int]:
         Dict[str, int]: schema: Dict[modification, table_id]
     """
     mod = Modification.modification
-    rs = session.query(Modification.id, mod).order_by(mod.asc()).all()
+    rs = RDBMS.get_session().query(Modification.id, mod).order_by(mod.asc()).all()
     return {x.modification: x.id for x in rs}
 
 
@@ -143,8 +143,8 @@ def get_biogrid_by_pmid(pmid: int) -> List[dict]:
     Returns:
         List[dict]: List[BioGrid entry]
     """
-    publication_id = session.query(Publication.id).filter_by(source='PUBMED', source_identifier=pmid).first()[0]
-    biogrid_entry = session.query(Biogrid).filter_by(publication_id=publication_id).all()
+    publication_id = RDBMS.get_session().query(Publication.id).filter_by(source='PUBMED', source_identifier=pmid).first()[0]
+    biogrid_entry = RDBMS.get_session().query(Biogrid).filter_by(publication_id=publication_id).all()
     return [x.as_dict() for x in biogrid_entry]
 
 
@@ -196,12 +196,12 @@ def get_biogrid() -> dict:
     if req.interactor_a:
         a = {req.id_type_a: req.interactor_a, 'taxonomy_id': req.taxonomy_id_a}
         a = {k: v for k, v in a.items() if v}
-        biogrid_a_ids = [x[0] for x in session.query(Interactor.biogrid_id).filter_by(**a)]
+        biogrid_a_ids = [x[0] for x in RDBMS.get_session().query(Interactor.biogrid_id).filter_by(**a)]
 
     if req.interactor_b:
         b = {req.id_type_b: req.interactor_b, 'taxonomy_id': req.taxonomy_id_b}
         b = {k: v for k, v in b.items() if v}
-        biogrid_b_ids = [x[0] for x in session.query(Interactor.biogrid_id).filter_by(**b)]
+        biogrid_b_ids = [x[0] for x in RDBMS.get_session().query(Interactor.biogrid_id).filter_by(**b)]
 
     if req.interactor_a and req.interactor_b:
         interaction_forward = and_(Biogrid.biogrid_a_id.in_(biogrid_a_ids), Biogrid.biogrid_b_id.in_(biogrid_b_ids))
@@ -223,20 +223,20 @@ def get_biogrid() -> dict:
             else:
                 query_filter = or_(Biogrid.biogrid_a_id.in_(biogrid_b_ids), Biogrid.biogrid_b_id.in_(biogrid_b_ids))
 
-    query = session.query(Biogrid).filter(query_filter)
+    query = RDBMS.get_session().query(Biogrid).filter(query_filter)
 
     if req.experimental_system:
-        experimental_system_id = session.query(ExperimentalSystem.id).filter_by(
+        experimental_system_id = RDBMS.get_session().query(ExperimentalSystem.id).filter_by(
             experimental_system=req.experimental_system
         ).first()[0]
         query = query.filter_by(experimental_system_id=experimental_system_id)
 
     if req.modification:
-        modification_id = session.query(Modification.id).filter_by(modification=req.modification).first()[0]
+        modification_id = RDBMS.get_session().query(Modification.id).filter_by(modification=req.modification).first()[0]
         query = query.filter_by(modification_id=modification_id)
 
     if req.source:
-        source_id = session.query(Source.id).filter_by(source=req.source).first()[0]
+        source_id = RDBMS.get_session().query(Source.id).filter_by(source=req.source).first()[0]
         query = query.filter_by(source_id=source_id)
 
     number_of_results = query.count()
@@ -269,7 +269,7 @@ def get_interactor_by_symbol_starts_with():
     taxonomy_id = int(ra.get('taxonomy_id', 9606))
     search_term = ra.get('symbol', "")
 
-    query = session.query(Interactor).filter(
+    query = RDBMS.get_session().query(Interactor).filter(
         Interactor.taxonomy_id == taxonomy_id,
         Interactor.symbol.like(f'{search_term}%')
     )
