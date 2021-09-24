@@ -2,16 +2,24 @@
 
 import difflib
 import logging
+import random
 import re
+import string
 import sys
+from collections import namedtuple
+from getpass import getpass
 from textwrap import fill
+from urllib.parse import quote
 
 import click
+import pymysql
 
 import ebel.database
 from ebel import Bel, web
+from ebel.constants import TerminalFormatting as TF
 from ebel.manager.orientdb.constants import DRUGBANK
 from ebel.manager.orientdb.odb_meta import Graph
+from ebel.tools import get_config_as_dict
 from ebel.validate import validate_bel_file
 
 logger = logging.getLogger(__name__)
@@ -100,23 +108,21 @@ def repair(bel_script_path, new_file_path):
 @click.option('-g', '--p2g', is_flag=True, default=True, help='Flag to disable "protein2gene" during import')
 @click.option('-s', '--skip_drugbank', is_flag=True, default=False, help='Flag to disable DrugBank')
 @click.option('-i', '--include_subfolders', is_flag=True, default=False, help='Flag to enable directory walking')
-@click.option('--drugbank_user', default=None, help='Valid username for DrugBank')
-@click.option('--drugbank_password', default=None, help='Valid username for DrugBank')
-@click.option('-n', '--odb_name', default=None, help='OrientDB database name')
-@click.option('-u', '--odb_user', default=None, help='OrientDB user (with admin rights)')
-@click.option('-p', '--odb_password', default=None, help='OrientDB user (with admin rights) password')
-@click.option('-h', '--odb_server', default=None, help='OrientDB server name or URI')
-@click.option('-o', '--odb_port', default=None, help='OrientDB server port')
-@click.option('--odb_user_reader', default=None, help=' OrientDB user with only read rights')
-@click.option('--odb_user_reader_password', default=None, help='OrientDB user with only read rights password')
-@click.option('--odb_root_password', default=None, help='OrientDB root user password (only during database setup)')
-@click.option('--kegg_species', default='hsa,rno,mmu', help='KEGG species')
+@click.option('--drugbank_user', help='Valid username for DrugBank')
+@click.option('--drugbank_password', help='Valid username for DrugBank')
+@click.option('-n', '--odb_name', help='OrientDB database name')
+@click.option('-u', '--odb_user', help='OrientDB user (with admin rights)')
+@click.option('-p', '--odb_password', help='OrientDB user (with admin rights) password')
+@click.option('-h', '--odb_server', help='OrientDB server name or URI')
+@click.option('-o', '--odb_port', help='OrientDB server port')
+@click.option('--odb_user_reader', help=' OrientDB user with only read rights')
+@click.option('--odb_user_reader_password', help='OrientDB user with only read rights password')
+@click.option('--odb_root_password', help='OrientDB root user password (only during database setup)')
+@click.option('--kegg_species', help='KEGG species')
 @click.option('--sqlalchemy_connection_string', help='schema is user:password@server/database')
 @click.option('--snp_related_traits', help='key of SNP related traits in GWAS catalog')
 @click.option('--drugbank_user', help='Drugbank user')
 @click.option('--drugbank_password', help='DrugBank password')
-@click.option('--gwas_catalog_disease_keyword', help='one or several keywords seperated by comma for GWAS '
-                                                     'catalog diseases')
 def import_json(json_file_path: str,
                 extend: bool,
                 p2g: bool,
@@ -134,8 +140,7 @@ def import_json(json_file_path: str,
                 odb_root_password: str,
                 kegg_species: str,
                 sqlalchemy_connection_string: str,
-                snp_related_traits: str,
-                gwas_catalog_disease_keyword: str):
+                snp_related_traits: str):
     """Import JSON into OrientDB.
 
     Parameters
@@ -176,8 +181,6 @@ def import_json(json_file_path: str,
         SQL Alchemy connection string schema: user:passwd@server/database
     snp_related_traits:
         SNP related traits
-    gwas_catalog_disease_keyword:
-        GWAS Catalog disease keyword(s)
 
     Returns
     -------
@@ -197,8 +200,7 @@ def import_json(json_file_path: str,
                             sqlalchemy_connection_string=sqlalchemy_connection_string,
                             snp_related_traits=snp_related_traits,
                             drugbank_user=drugbank_user,
-                            drugbank_password=drugbank_password,
-                            gwas_catalog_disease_keyword=gwas_catalog_disease_keyword)
+                            drugbank_password=drugbank_password)
 
     bel = Bel()
     if "," in json_file_path:
@@ -229,9 +231,7 @@ def import_json(json_file_path: str,
 @click.option('--odb_root_password', default=None, help='OrientDB root user password (only during database setup)')
 @click.option('--kegg_species', default='hsa,rno,mmu', help='KEGG species')
 @click.option('--sqlalchemy_connection_string', help='schema is user:password@server/database')
-@click.option('--snp_related_traits', help='key of SNP related traits in GWAS catalog')
-@click.option('--gwas_catalog_disease_keyword', help='one or several keywords seperated by comma for GWAS '
-                                                     'catalog diseases')
+@click.option('--snp_related_traits', help='key of SNP related traits in GWAS catalog and ClinVar')
 def enrich(skip: str,
            include: str,
            skip_drugbank: bool,
@@ -247,8 +247,7 @@ def enrich(skip: str,
            odb_root_password: str,
            kegg_species: str,
            sqlalchemy_connection_string: str,
-           snp_related_traits: str,
-           gwas_catalog_disease_keyword: str):
+           snp_related_traits: str):
     """Trigger the enrichment step for a database.
 
     Parameters
@@ -285,8 +284,6 @@ def enrich(skip: str,
         SQL Alchemy connection string schema: user:passwd@server/database
     snp_related_traits: str
         SNP related traits
-    gwas_catalog_disease_keyword: str
-        GWAS Catalog disease keyword(s)
     """
     Graph.set_configuration(name=odb_name,
                             user=odb_user,
@@ -300,8 +297,7 @@ def enrich(skip: str,
                             sqlalchemy_connection_string=sqlalchemy_connection_string,
                             snp_related_traits=snp_related_traits,
                             drugbank_user=drugbank_user,
-                            drugbank_password=drugbank_password,
-                            gwas_catalog_disease_keyword=gwas_catalog_disease_keyword)
+                            drugbank_password=drugbank_password)
 
     bel = Bel()
 
@@ -344,6 +340,160 @@ def set_mysql(host: str, user: str, password: str, database: str, interactive: b
         password=password,
         db=database
     )
+
+
+@main.command()
+def settings():
+    """Interactive method to create a configuration file."""
+    old_configs = get_config_as_dict()
+    configs = {}
+    allowed_passwd_chars = string.ascii_letters
+
+    print(f"\n{TF.TITLE}e(BE:L) Configuration WIZARD{TF.RESET}")
+    print("\nThe following questionnaire will set all configurations for you.\n")
+    print("Before we start: Make sure\n\t1. OrientDB and\n\t2. MySQL/MariaDB\n are running and "
+          "you have the root password for both,\n if databases and users not already exists.\n")
+    print(f"Default {TF.DEFAULT_VALUE}[values]{TF.RESET} are written in square brackets and "
+          f"can be confirmed by RETURN.\n")
+
+    print(f"{TF.Format.UNDERLINED}Installation references{TF.RESET}")
+    print(f"\t OrientDB: {TF.Fore.BLUE}https://orientdb.org/docs/3.1.x/fiveminute/java.html{TF.RESET}")
+    print(f"\t MySQL: {TF.Fore.BLUE}"
+          f"https://dev.mysql.com/doc/mysql-getting-started/en/#mysql-getting-started-installing{TF.RESET}")
+    print(f"\t MariaDB: {TF.Fore.BLUE}https://mariadb.com/kb/en/getting-installing-and-upgrading-mariadb/{TF.RESET}")
+
+    print(f"\n{TF.HEADER}Graph database (OrientDB) settings{TF.RESET}")
+
+    Configuration = namedtuple('Configuration', ['name',
+                                                 'question',
+                                                 'default',
+                                                 'validation_regex',
+                                                 'is_password',
+                                                 'required'])
+
+    old_configs_odb = old_configs.get('DEFAULT_ODB', {})
+    orientdb_configs = {
+        'name': (f"OrientDB database name (created if not exists)",
+                 old_configs_odb.get('name', 'ebel'), r'^[A-Za-z]\w{2,}$', False, True),
+        'user': ("OrientDB user (admin) name (created if not exists)",
+                 old_configs_odb.get('user', 'ebel_user'), r'^[A-Za-z]\w{2,}$', False, True),
+        'password': ("OrientDB user (admin) password (created if not exists)",
+                     ''.join(random.sample(allowed_passwd_chars, 12)), None, True, True),
+        'server': ("OrientDB server",
+                   old_configs_odb.get('server', 'localhost'), None, False, True),
+        'port': ("OrientDB port",
+                 old_configs_odb.get('port', '2424'), r'^\d+$', False, True),
+        'user_reader': ("OrientDB user (reader) name (created if not exists).",
+                        old_configs_odb.get('user_reader', 'ebel_reader'), r'^[A-Za-z]\w{2,}$', False, False),
+        'user_reader_password': ("OrientDB user (reader) password (created if not exists).",
+                                 ''.join(random.sample(allowed_passwd_chars, 12)), None, True, True),
+    }
+
+    for param_name, options in orientdb_configs.items():
+        conf = Configuration(param_name, *options)
+        input_method = getpass if conf.is_password else input
+        invalid_value = True
+        while invalid_value:
+            if conf.default:
+                question = f"{TF.QUESTION}{conf.question}{TF.RESET} {TF.DEFAULT_VALUE}[{conf.default}]{TF.RESET}"
+                configs[conf.name] = input_method(f"\n{question} ?\n").strip() or conf.default
+            else:
+                configs[conf.name] = input_method(f"\n{TF.QUESTION}{conf.question}{TF.RESET}\n").strip()
+            if conf.validation_regex and conf.required:
+                invalid_value = not bool(re.search(conf.validation_regex, configs[conf.name]))
+                if invalid_value:
+                    print("!!!>>> WARNING <<<!!!\nThe value you type in is not valid. Please type in again.")
+            else:
+                invalid_value = False
+
+    ebel.database.get_orientdb_client(
+        server=configs['server'],
+        port=int(configs['port']),
+        name=configs['name'],
+        user=configs['user'],
+        password=configs['password'],
+        root_password=None,
+        user_reader=configs['user_reader'],
+        user_reader_password=configs['user_reader_password']
+    )
+
+    print(f"\n{TF.HEADER}KEGG settings{TF.RESET}")
+
+    kegg_question = f"{TF.QUESTION}KEGG species as 3-4 letter code comma separated.{TF.RESET}\n" \
+                    "(see here for the letter code: " \
+                    f"{TF.Fore.BLUE}https://www.genome.jp/kegg/catalog/org_list4.html{TF.RESET} )\n" \
+                    f"{TF.DEFAULT_VALUE}[hsa,rno,mmu]{TF.RESET}\n"
+    configs['kegg_species'] = input(kegg_question).strip() or 'hsa,rno,mmu'
+
+    print(f"\n{TF.HEADER}MySQL/MariaDB settings{TF.RESET}")
+
+    old_mysql = {}
+    old_sa_con_str = old_configs.get('sqlalchemy_connection_string', '').strip()
+    if old_sa_con_str:
+        regex_con_str = r"^mysql\+pymysql://(?P<mysql_user>.*?):" \
+                        r"(?P<mysql_passwd>.*?)@(?P<mysql_host>.*?)/(?P<mysql_db>.*)$"
+        found_old_mysql = re.search(regex_con_str, old_sa_con_str)
+        if found_old_mysql:
+            old_mysql = found_old_mysql.groupdict()
+
+    default_mysql_host = old_mysql.get('mysql_host') or 'localhost'
+    mysql_host_question = f"{TF.QUESTION}MySQL/MariaDB sever name{TF.RESET} " \
+                          f"{TF.DEFAULT_VALUE}[{default_mysql_host}]{TF.RESET}\n"
+    mysql_host = input(mysql_host_question) or default_mysql_host
+    default_mysql_user = old_mysql.get('mysql_user') or 'ebel'
+    mysql_user_question = f"{TF.QUESTION}MySQL/MariaDB ebel user{TF.RESET} " \
+                          f"{TF.DEFAULT_VALUE}[{default_mysql_user}]{TF.RESET}\n"
+    mysql_user = input(mysql_user_question).strip() or default_mysql_user
+    mysql_random_password = ''.join(random.sample(allowed_passwd_chars, 12))
+    mysql_passed_question = f"{TF.QUESTION}MySQL/MariaDB ebel database password{TF.RESET} " \
+                            f"{TF.DEFAULT_VALUE}[{mysql_random_password}]{TF.RESET}\n"
+    mysql_passwd = getpass(mysql_passed_question).strip() or mysql_random_password
+    default_mysql_db = old_mysql.get('mysql_db') or 'ebel'
+    mysql_db_question = f"{TF.QUESTION}MySQL ebel database name{TF.RESET} " \
+                        f"{TF.DEFAULT_VALUE}[{default_mysql_db}]{TF.RESET}\n"
+    mysql_db = input(mysql_db_question).strip() or default_mysql_db
+    configs['sqlalchemy_connection_string'] = f"{mysql_user}:{quote(mysql_passwd)}@" \
+                                              f"{mysql_host}/{mysql_db}?charset=utf8mb4"
+    try:
+        pymysql.connect(host=mysql_host, user=mysql_user, password=mysql_passwd, db=mysql_db)
+    except pymysql.err.OperationalError:
+        mysql_root_passwd = getpass(f"{TF.QUESTION}MySQL root password (will be not stored) "
+                                    f"to create database and user{TF.RESET}\n")
+        print(mysql_host, 'root', mysql_root_passwd)
+        cursor = pymysql.connect(host=mysql_host, user='root', password=mysql_root_passwd).cursor()
+        db_exists = cursor.execute(f"show databases like %s", mysql_db)
+        if not db_exists:
+            cursor.execute(f"CREATE DATABASE {mysql_db} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci")
+
+        user_exists = cursor.execute(f"Select 1 from mysql.user where User=%s", mysql_user)
+        if not user_exists:
+            sql = f"CREATE USER '{mysql_user}'@'{mysql_host}' IDENTIFIED BY '{mysql_passwd}'"
+            print(sql)
+            cursor.execute(sql)
+            cursor.execute("FLUSH PRIVILEGES")
+
+        privileges_exists = cursor.execute("Select 1 from mysql.db where User=%s and Db=%s", (mysql_user, mysql_db))
+        if not privileges_exists:
+            sql = f"GRANT ALL PRIVILEGES ON `{mysql_db}`.*  TO %s@%s"
+            cursor.execute(sql, (mysql_user, mysql_host))
+            cursor.execute("FLUSH PRIVILEGES")
+
+    print(f"\n{TF.HEADER}SNP related traits settings{TF.RESET}")
+
+    default_snp_related_traits = old_configs.get('snp_related_traits') or 'Alzheimer,Parkinson'
+    snp_related_traits_question = f"{TF.QUESTION}SNPs related to (separated by comma){TF.RESET} " \
+                                  f"{TF.DEFAULT_VALUE}[{default_snp_related_traits}]{TF.RESET}\n"
+    snp_related_traits = input(snp_related_traits_question).strip()
+    configs['snp_related_traits'] = snp_related_traits or default_snp_related_traits
+
+    print(f"\n{TF.HEADER}DrugBank settings{TF.RESET}")
+    print("\nIf you have a valid DrugBank account (otherwise leave it blank):\n")
+    drugbank_user = input(f"{TF.QUESTION}DrugBank user?{TF.RESET}\n").strip()
+    if drugbank_user:
+        configs['drugbank_user'] = drugbank_user
+        configs['drugbank_password'] = getpass(f"{TF.QUESTION}DrugBank password?{TF.RESET}\n")
+
+    Graph.set_configuration(**configs)
 
 
 @main.command()
