@@ -123,3 +123,51 @@ CAUSAL_DECREASE = {DECREASES, DIRECTLY_DECREASES}
 # Correlative
 POSITIVE_CORRELATION = 'positive_correlation'
 NEGATIVE_CORRELATION = 'negative_correlation'
+
+
+# Terminal Colors
+class TerminalFormatting:
+    RESET = "\033[0m"
+
+    class Format:
+        BOLD = "\033[1m"
+        ITALIC = "\033[3m"
+        UNDERLINED = "\033[4m"
+        STRIKETHROUGH = "\033[9m"
+
+    class Fore:
+        __temp = "\033[{}m"
+        __temp_b = "\033[1;{}m"
+        RED = __temp.format(31)
+        RED_BRIGHT = __temp_b.format(31)
+        GREEN = __temp.format(32)
+        GREEN_BRIGHT = __temp_b.format(32)
+        YELLOW = __temp.format(33)
+        YELLOW_BRIGHT = __temp_b.format(33)
+        BLUE = __temp.format(34)
+        BLUE_BRIGHT = __temp_b.format(34)
+        PINK = __temp.format(35)
+        PINK_BRIGHT = __temp_b.format(35)
+        CYAN = __temp.format(36)
+        CYAN_BRIGHT = __temp_b.format(36)
+        WHITE = __temp_b.format(37)
+        BLACK = __temp.format(30)
+        GREY = __temp_b.format(30)
+        GREY_BRIGHT = __temp_b.format(37)
+
+    class Back:
+        __temp = "\033[{}m"
+        NOTHING = __temp.format(40)
+        RED = __temp.format(41)
+        GREEN = __temp.format(42)
+        YELLOW = __temp.format(43)
+        BLUE = __temp.format(44)
+        PINK = __temp.format(45)
+        BLUE_LIGHT = __temp.format(46)
+        GREY = __temp.format(47)
+
+    TITLE = f"{Back.GREY}{Fore.BLUE}{Format.BOLD}{Format.UNDERLINED}"
+    HEADER = f"{Fore.YELLOW}{Format.BOLD}{Format.UNDERLINED}"
+    QUESTION = f"{Fore.GREEN}{Format.ITALIC}"
+    DEFAULT_VALUE = f"{Fore.GREEN_BRIGHT}"
+
