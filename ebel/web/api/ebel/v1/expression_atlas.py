@@ -6,7 +6,6 @@ import re
 from collections import Counter
 from ebel.manager.rdbms.models.expression_atlas import Gsea
 from ebel import Bel
-from enum import Enum
 
 
 def get_expriment():
