@@ -54,7 +54,7 @@ statement: ( subject
          | ( transl_subject transl_relation transl_object )
 	     | ( subject relation_basic "(" nested_subject nested_relation nested_object ")" )
 	     | ( complex_abundance has_component object )
-	     | ( complex_abundance has_components list )
+         | ( complex_abundance has_components list )
 	     | ( subject has_members list )) [ statement_comment ] _EOL
 
 transc_relation: transcribed_to
@@ -306,7 +306,7 @@ protein_changes: ( pmod | var | frag | loc )*
 // ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_proteolytic_fragments
 frag: "," _fragment_function "(" "\"" F_RANGE "\"" [ "," "\"" F_DESCRIPTOR "\"" ] ")"
 _fragment_function: "fragment" | "frag"
-F_RANGE: ( INT UNDERSCORE ( INT | US_STAR ) ) | UNKNOWN_CARBOXYL_TERMINAL | QUESTION_MARK | UNKNOWN_AMINO_TERMINAL
+F_RANGE: ( INT UNDERSCORE ( INT | US_STAR ) ) | ( INT UNDERSCORE QUESTION_MARK ) | ( QUESTION_MARK UNDERSCORE INT ) | UNKNOWN_CARBOXYL_TERMINAL | QUESTION_MARK | UNKNOWN_AMINO_TERMINAL
 F_DESCRIPTOR: STRING
 US_STAR: "*"
 QUESTION_MARK: "?"
