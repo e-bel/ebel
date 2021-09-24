@@ -1,11 +1,101 @@
 """Methods for interfacing with the RDBMS."""
 import getpass
+import sys
+from getpass import getpass
+from typing import Optional
 
 import pymysql
+from pyorient import OrientDB
+from pyorient.exceptions import PyOrientCommandException, PyOrientConnectionException, \
+    PyOrientSecurityAccessException
 
 from ebel.cache import logger
-from ebel.tools import write_to_config
 from ebel.defaults import CONN_STR_DEFAULT
+from ebel.tools import write_to_config
+
+
+def orientdb_connection_works(server: str, port: int, name: str, user: str, password: str) -> bool:
+    try:
+        client = OrientDB(server, port)
+        client.set_session_token(True)
+        client.db_open(name, user, password)
+        works = True
+    except Exception as inst:
+        print(type(inst))
+        works = False
+
+    return works
+
+
+def get_orientdb_client(server: str, port: int, name: str, user: str, password: str,
+                        root_password: Optional[str] = None, user_reader: Optional[str] = None,
+                        user_reader_password: Optional[str] = None) -> OrientDB:
+    """Attempts to connect to the OrientDB client. This is currently done by using session tokens."""
+    client = OrientDB(server, port)
+
+    # First try connect as admin user if this fails connect root_user from config,
+    # if this fails ask for root password and create user with admin in database
+    try:
+        client.set_session_token(True)
+        client.db_open(name, user, password)
+
+    except (PyOrientCommandException, PyOrientConnectionException, PyOrientSecurityAccessException):
+        client.set_session_token(True)
+        root_passwd_correct = False
+        while not root_passwd_correct:
+            root_password = root_password or getpass('OrientDB root password (to create database and users)\n')
+            try:
+                client.connect('root', root_password)
+                root_passwd_correct = True
+            except (PyOrientConnectionException, PyOrientSecurityAccessException):
+                logger.error(f'Connection problem to OrientDB server {server}:{port}')
+                print(f"Please make sure the OrientDB server is running, port ({port}), "
+                      f"as well server ({server}) and root password are correct")
+                sys.exit()
+
+        if not client.db_exists(name):
+            client.db_create(name)
+            logger.info(f"Create database '{name}'")
+            client.db_open(name, 'root', root_password)
+            # create user with admin rights
+            client.command(
+                f"CREATE USER {user} IDENTIFIED BY {password} ROLE admin")
+            # create a reader
+            if user_reader and user_reader_password:
+                client.command(
+                    f"CREATE USER {user_reader} IDENTIFIED BY {user_reader_password} ROLE reader")
+            client.close()
+            # reopen with new user and password
+            client = OrientDB(server, int(port))
+            client.set_session_token(True)
+            client.db_open(name, user, password)
+        else:
+            client.db_open(name, 'root', root_password)
+            # admin
+            admin_user_exists_sql = "Select true as admin_user_exists from OUser " \
+                                    f"where name = '{user}' and status='ACTIVE' and 'admin' in roles.name"
+            admin_user_exists = client.command(admin_user_exists_sql)
+            if admin_user_exists:
+                print("Update password for OrientDB admin")
+                client.command(
+                    f"UPDATE OUser SET password = '{password}' WHERE name = '{user}'")
+            else:
+                print("Create password for OrientDB reader")
+                client.command(
+                    f"CREATE USER {user} IDENTIFIED BY {password} ROLE admin")
+
+            # reader
+            if user_reader and user_reader_password:
+                reader_user_exists_sql = "Select true as admin_user_exists from OUser " \
+                                         f"where name = '{user_reader}' and status='ACTIVE' and 'reader' in roles.name"
+                reader_user_exists = client.command(reader_user_exists_sql)
+                if reader_user_exists:
+                    client.command(
+                        f"UPDATE OUser SET password = '{user_reader_password}' WHERE name = '{user_reader}'")
+                else:
+                    client.command(
+                        f"CREATE USER {user_reader} IDENTIFIED BY {user_reader_password} ROLE admin")
+    return client
 
 
 def set_mysql_interactive() -> tuple:
@@ -23,7 +113,7 @@ def set_mysql_interactive() -> tuple:
 
     if root_pwd:
         root_host = getpass.getpass(prompt='IP or name mysql server [localhost]:') or 'localhost'
-        conn = pymysql.connect(root_host, 'root', root_pwd)
+        conn = pymysql.connect(host=root_host, user='root', password=root_pwd)
         c = conn.cursor()
         db_exists = c.execute(f"show databases like '{db}'")
 
