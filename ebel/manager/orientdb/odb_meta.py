@@ -9,7 +9,6 @@ import socket
 import time
 from abc import abstractmethod
 from collections import defaultdict, OrderedDict
-from getpass import getpass
 from http.client import RemoteDisconnected
 from shutil import copyfileobj
 from typing import List, Iterable, Dict, Union, Tuple, Set, Optional
@@ -21,11 +20,12 @@ import requests
 import sqlalchemy as sqla
 import xmltodict
 from pyorient import OrientDB, orient
-from pyorient.exceptions import PyOrientIndexException, PyOrientCommandException, PyOrientConnectionException
+from pyorient.exceptions import PyOrientIndexException, PyOrientCommandException, PyOrientSecurityAccessException
 from pyorient.otypes import OrientRecord
 from sqlalchemy.sql.schema import Table
 from tqdm import tqdm
 
+import ebel.database
 from ebel.constants import RID, DEFAULT_ODB
 from ebel.manager.orientdb import urls as default_urls
 from ebel.manager.orientdb.odb_structure import OClass, OIndex, OProperty, Edge
@@ -79,7 +79,7 @@ class Graph(abc.ABC):
                        "user": self.odb_user,
                        "password": self.odb_password,
                        "server": self.odb_server or "localhost",
-                       "port": self.odb_port or "2424",
+                       "port": int(self.odb_port or "2424"),
                        "root_password": self._odb_root_password}
 
         # Set the client
@@ -133,12 +133,14 @@ class Graph(abc.ABC):
         try:
             return self.client.command(command_str)
 
-        except PyOrientCommandException:
+        # TODO: following exceptions seems not to cover connection error
+        # except (PyOrientCommandException, PyOrientSecurityAccessException):
+        except:
             # Try to reconnect
             self.client.close()
             self.client = self.get_client()
-            #self.client.db_open(self.odb_name, self.odb_user, self.odb_password)
-            print(command_str)
+            # self.client.db_open(self.odb_name, self.odb_user, self.odb_password)
+            # print(command_str)
             return self.client.command(command_str)
 
     def set_configuration_parameters(self):
@@ -149,7 +151,7 @@ class Graph(abc.ABC):
         self.odb_user = self.odb_user or odb_config.get('user')
         self.odb_password = self.odb_password or odb_config.get('password')
         self.odb_server = self.odb_server or odb_config.get('server')
-        self.odb_port = self.odb_port or odb_config.get('port') or '2424'
+        self.odb_port = int(self.odb_port or odb_config.get('port') or '2424')
         self.odb_user_reader = self.odb_user_reader or odb_config.get('user_reader')
         self.odb_user_reader_password = self.odb_user_reader_password or odb_config.get('user_reader_password')
 
@@ -161,8 +163,8 @@ class Graph(abc.ABC):
                           name: str = None,
                           user: str = None,
                           password: str = None,
-                          server: str = "localhost",
-                          port: str = "2424",
+                          server: str = None,
+                          port: str = None,
                           user_reader: str = None,
                           user_reader_password: str = None,
                           root_password: str = None,
@@ -170,36 +172,30 @@ class Graph(abc.ABC):
                           sqlalchemy_connection_string: str = None,
                           snp_related_traits: str = None,
                           drugbank_user: str = None,
-                          drugbank_password: str = None,
-                          gwas_catalog_disease_keyword: str = None):
+                          drugbank_password: str = None):
         """Set configuration for OrientDB database."""
-        if name:
-            write_to_config(DEFAULT_ODB, 'name', name)
-        cls.odb_name = name
+        config = get_config_as_dict()
+        config_odb = config.get(DEFAULT_ODB)
+        cls.odb_name = name or config_odb.get('name')
+        cls.odb_user = user or config_odb.get('user')
+        cls.odb_password = password or config_odb.get('password')
+        cls.odb_server = server or config_odb.get('server')
+        cls.odb_port = port or config_odb.get('port')
+        cls.odb_user_reader = user_reader or config_odb.get('user_reader')
+        cls.odb_user_reader_password = user_reader_password or config_odb.get('reader_password')
 
-        if user:
-            write_to_config(DEFAULT_ODB, 'user', user)
-        cls.odb_user = user
+        odb_class_attribs = {
+            'name': cls.odb_name,
+            'user': cls.odb_user,
+            'password': cls.odb_password,
+            'server': cls.odb_server,
+            'port': cls.odb_port,
+            'user_reader': cls.odb_user_reader,
+            'user_reader_password': cls.odb_user_reader_password
+        }
 
-        if password:
-            write_to_config(DEFAULT_ODB, 'password', password)
-        cls.odb_password = password
-
-        if server:
-            write_to_config(DEFAULT_ODB, 'server', server)
-        cls.odb_server = server
-
-        if port:
-            write_to_config(DEFAULT_ODB, 'port', port)
-        cls.odb_port = port
-
-        if user_reader:
-            write_to_config(DEFAULT_ODB, 'user_reader', user_reader)
-        cls.odb_user_reader = user_reader
-
-        if user_reader_password:
-            write_to_config(DEFAULT_ODB, 'user_reader_password', user_reader_password)
-        cls.odb_user_reader_password = user_reader_password
+        for param, value in odb_class_attribs.items():
+            write_to_config(DEFAULT_ODB, param, value)
 
         if kegg_species:
             write_to_config('KEGG', 'species', kegg_species)
@@ -217,46 +213,13 @@ class Graph(abc.ABC):
         if drugbank_password:
             write_to_config('DRUGBANK', 'password', drugbank_password)
 
-        if gwas_catalog_disease_keyword:
-            write_to_config('GWASCATALOG', 'disease_keyword', gwas_catalog_disease_keyword)
-
         cls._odb_root_password = root_password
 
     def get_client(self) -> OrientDB:
         """Attempts to connect to the OrientDB client. This is currently done by using session tokens."""
-        client = OrientDB(self.odb_server, int(self.odb_port))
-
-        # First try connect as admin user if this fails connect root_user from config,
-        # if this fails ask for root password and create user with admin in database
-        try:
-            client.set_session_token(True)
-            client.db_open(self.odb_name, self.odb_user, self.odb_password)
-
-        except (PyOrientCommandException, PyOrientConnectionException):
-            client.set_session_token(True)
-            root_password = self._odb_root_password or getpass('Please insert OrientDB root password: ')
-
-            try:
-                client.connect('root', root_password)
-            except PyOrientConnectionException:
-                logger.error(f'Connection problem to OrientDB server {self.odb_server}:{self.odb_port}')
-                print("Please make sure the OrientDB server is running")
-
-            if not client.db_exists(self.odb_name):
-                client.db_create(self.odb_name)
-                logger.info(f"Create database '{self.odb_name}'")
-                client.db_open(self.odb_name, 'root', root_password)
-                # create user with admin rights
-                client.command(
-                    f"CREATE USER {self.odb_user} IDENTIFIED BY {self.odb_password} ROLE admin")
-                # create a reader
-                client.command(
-                    f"CREATE USER {self.odb_user_reader} IDENTIFIED BY {self.odb_user_reader_password} ROLE reader")
-                client.close()
-                # reopen with new user and password
-                client = OrientDB(self.odb_server, int(self.odb_port))
-                client.set_session_token(True)
-                client.db_open(self.odb_name, self.odb_user, self.odb_password)
+        client = ebel.database.get_orientdb_client(self.odb_server, self.odb_port, self.odb_name, self.odb_user,
+                                                   self.odb_password, self._odb_root_password, self.odb_user_reader,
+                                                   self.odb_user_reader_password)
 
         return client
 
@@ -1029,7 +992,7 @@ class Graph(abc.ABC):
             for pmid_sublist in chunks(pmids_with_missing_pmc, size=200):
                 pmid_string = ','.join([str(x) for x in pmid_sublist])
                 url_filled = default_urls.PMID_NCBI.format(pmid_string)
-
+    
                 api_query_response = requests.get(url_filled)
                 pmcids_json = json.loads(api_query_response.text)
 
