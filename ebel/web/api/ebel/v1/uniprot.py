@@ -2,14 +2,14 @@
 from flask import request
 
 from ebel import Bel
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import uniprot
 from ebel.web.api.ebel.v1 import _get_paginated_query_result, _get_terms_from_model_starts_with
 
 
 def get_uniprot():
     """Get paginated list of UniProt entries."""
-    q = session.query(uniprot.Uniprot)
+    q = RDBMS.get_session().query(uniprot.Uniprot)
 
     accession = request.args.get('accession')
     q = q.filter_by(accession=accession) if accession else q
