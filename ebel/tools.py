@@ -55,21 +55,22 @@ def write_to_config(section: str, option: str, value: str) -> None:
     value : str
         Option value.
     """
-    cfp = defaults.config_file_path
-    config = RawConfigParser()
+    if value:
+        cfp = defaults.config_file_path
+        config = RawConfigParser()
 
-    if not os.path.exists(cfp):
-        with open(cfp, 'w') as config_file:
-            config[section] = {option: value}
-            config.write(config_file)
-            logging.info(f'Set in configuration file {cfp} in section {section} {option}={value}')
-    else:
-        config.read(cfp)
-        if not config.has_section(section):
-            config.add_section(section)
-        config.set(section, option, value)
-        with open(cfp, 'w') as configfile:
-            config.write(configfile)
+        if not os.path.exists(cfp):
+            with open(cfp, 'w') as config_file:
+                config[section] = {option: value}
+                config.write(config_file)
+                logging.info(f'Set in configuration file {cfp} in section {section} {option}={value}')
+        else:
+            config.read(cfp)
+            if not config.has_section(section):
+                config.add_section(section)
+            config.set(section, option, value)
+            with open(cfp, 'w') as configfile:
+                config.write(configfile)
 
 
 def get_config_as_dict():
