@@ -5,11 +5,41 @@ e(BE:L) is a Python package built for both validating and modeling information e
 This software package serves a comprehensive tool for all of your BEL needs and serves to create enriched knowledge graphs
 for developing and testing new theories and hypotheses.
 
+**e(BE:L)** have implemneted several other knowledge bases to extend the BEL knowledge graph or map identifiers. 
+
+* `BioGrid <https://thebiogrid.org/>`_
+* `ChEBI <https://www.ebi.ac.uk/chebi/>`_
+* `ClinicalTrials.gov <https://clinicaltrials.gov/>`_
+* `ClinVar <https://www.ncbi.nlm.nih.gov/clinvar/>`_
+* `DisGeNET <https://www.disgenet.org/>`_
+* `DrugBank <https://go.drugbank.com/>`_
+* `Ensembl <https://www.ensembl.org/index.html>`_
+* `Expression Atlas <https://www.ebi.ac.uk/gxa/home>`_
+* `GWAS Catalog <https://www.ebi.ac.uk/gxa/home>`_
+* `HGNC <https://www.genenames.org/>`_
+* `IntAct <https://www.ebi.ac.uk/intact/>`_
+* `Guide to PHARMACOLOGY <https://www.guidetopharmacology.org/>`_
+* `KEGG <https://www.genome.jp/kegg/>`_
+* `MirTarBase <https://mirtarbase.cuhk.edu.cn/~miRTarBase/miRTarBase_2022/php/index.php>`_
+* `Different resources from NCBI <https://www.ncbi.nlm.nih.gov/>`_
+* `OffSides <http://tatonettilab.org/offsides/>`_
+* `Pathway Commons <https://www.pathwaycommons.org/>`_
+* `The Human Protein Atlas <https://www.proteinatlas.org/>`_
+* `Reactome <https://reactome.org/>`_
+* `STRING <https://string-db.org/>`_
+* `UniProt`_
+
+
 Installation |pypi_version| |pypi_license|
 ==========================================
+
 ``ebel`` can be directly installed from PyPi with pip::
 
     $ pip install ebel
+
+But we want to encourage you to use the latest development version which can be installed with::
+
+    $ pip install git+https://github.com/e-bel/ebel
 
 Installing pyorient
 -------------------
@@ -28,24 +58,57 @@ Package Requirements
 
 Installing OrientDB
 -------------------
-This software package is designed to work in conjunction with `OrientDB <https://www.orientdb.org/>`_, a NoSQL, multi-model database
+
+This software package is designed to work in conjunction with `OrientDB`_, a NoSQL, multi-model database
 that acts as both a graph and relational database. e(BE:L) uses OrientDB for generating the knowledge graph derived from BEL files. To get
-started with e(BE:L), first `download OrientDB <https://www.orientdb.org/download/>`_ and get a server up and running.
+started with e(BE:L), first `download OrientDB`_ and get a server up and running.
 The first time the server is ran, you will need to create a root password. Once it is up and running, you can get
 start importing BEL files into it!
 
+On Linux you can use following commands::
+
+    wget https://repo1.maven.org/maven2/com/orientechnologies/orientdb-community/3.2.2/orientdb-community-3.2.2.tar.gz
+    tar -xvzf orientdb-community-3.2.2.tar.gz
+    cd orientdb-community-3.2.2/bin
+    ./server.sh
+
+
 SQL Databases
 --------------
+
 This package is capable of enriching the compiled knowledge graphs with a lot of external information, however, this requires
 a SQL databases for storage. While, a SQLite database can be used, this is not recommended as the amount of data and
 complexity of queries will be quite slow. Additionally, SQLite will not be directly supported, the methods will be built
 such that they should work with both SQLite and MySQL, but we will not address performance issues due to using SQLite.
 
-Instead, we recommend setting up a `MySQL server <https://www.mysql.com/downloads/>`_ to use with e(BE:L). By default,
-`PyMySQL <https://pypi.org/project/PyMySQL/>`_ is installed as a driver by e(BE:L), but others can also be used.
+Instead, we recommend setting up a `MySQL server <https://www.mysql.com/downloads/>`_ or 
+`MariaDB <https://mariadb.org/download/>`_ to use with e(BE:L). By default, `PyMySQL <https://pypi.org/project/PyMySQL/>`_ 
+is installed as a driver by e(BE:L), but others can also be used.
+
+On Lunux Ubuntu you can use following command::
+
+    sudo apt install mysql-server -y
+
+or::
+
+    sudo apt install mariadb-server -y
+
+
+Configuration
+=============
+
+Before you start working with e(BE:L), a simple to use wizard helps you to setup all configurations. Make sure OrientDB 
+and MySQL (or MariaDB) are running. Then start the configuration wizard with::
+
+    ebel settings
+
+The wizard will create the needed databases and users in OrientDB and MySQL/MariaDB.
 
 Package Components
 ==================
+
+To test the different components you find [here](https://github.com/e-bel/covid19_knowledge_graph/) several BEL and 
+already compiled JSON files.
 
 BEL Validation
 --------------
@@ -88,14 +151,34 @@ Model Enrichment - MySQL
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 e(BE:L) goes one step farther when compiling your BEL statements into a knowledge graph by supplementing your new graph model with information derived from several
-publicly available repositories. Data is automatically downloaded from several useful sites including `UniProt <https://www.uniprot.org/>`_,
+publicly available repositories. Data is automatically downloaded from several useful sites including `UniProt`_ ,
 `Ensembl <https://www.ensembl.org/index.html>`_, and `IntAct <https://www.ebi.ac.uk/intact/>`_ and added as generic tables in your newly built database.
 Information from these popular repositories are then linked to the nodes and edges residing in your graph model, allowing for more complex and
 useful queries to be made against your data. This data is automatically downloaded, parsed, and imported into a specified SQL database.
 
 Importing - Getting Started
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Make sure you have downloaded OrientDB and have the server running. This can be configured as a service in both Windows and Unix systems.
+
+e(BE:L) supports OrientDB as graph database and `MySQL <https://www.mysql.com>`_ and `MariaDB`_ as `RDBMS <https://en.wikipedia.org/wiki/Relational_database>`_
+
+Make sure you have downloaded/installed and running
+
+1. `OrientDB`_
+2. MySQL or MariaDB
+    a. MySQL
+        - `Windows <https://dev.mysql.com/doc/refman/8.0/en/windows-installation.html>`_
+        - `MacOS <https://dev.mysql.com/doc/refman/8.0/en/macos-installation.html>`_
+        - Linux
+            - `Ubuntu, Debian, Linux Mint, ... <https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/>`_
+            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://dev.mysql.com/doc/refman/8.0/en/linux-installation-yum-repo.html>`_
+    b. MariaDB
+        - `Windows <https://mariadb.com/kb/en/installing-mariadb-msi-packages-on-windows/>`_
+        - MacOS (`PKG <https://mariadb.com/kb/en/installing-mariadb-server-pkg-packages-on-macos/>`_, `Homebrew <https://mariadb.com/kb/en/installing-mariadb-on-macos-using-homebrew/>`_)
+        - Linux
+            - `Ubuntu, Debian, Linux Mint, ... <https://mariadb.com/kb/en/yum/>`_
+            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://mariadb.com/kb/en/installing-mariadb-deb-files/>`_
+
+ and have the server running. This can be configured as a service in both Windows and Unix systems.
 Set your MySQL connection parameters in e(BE:L)::
 
     $ ebel set-mysql --host localhost --user root --password myPassWord --database ebel
@@ -144,7 +227,8 @@ You can also specify certain parameters as options::
 
 Disclaimer
 ==========
-e(BE:L) is a scientific software that has been developed in an academic capacity, and thus comes with no warranty or guarantee of maintenance, support, or back-up of data.
+e(BE:L) is a scientific software that has been developed in an academic capacity, and thus comes with no warranty or
+guarantee of maintenance, support, or back-up of data.
 
 
 .. |docs| image:: http://readthedocs.org/projects/ebel/badge/?version=latest
@@ -158,4 +242,12 @@ e(BE:L) is a scientific software that has been developed in an academic capacity
     :alt: Current version on PyPI
 
 .. |pypi_license| image:: https://img.shields.io/pypi/l/ebel.svg
-    :alt: Apache-2.0
+    :alt: MIT
+
+.. _UniProt: https://https://uniprot.org/
+
+.. _OrientDB: https://orientdb.org/
+
+.. _download OrientDB: https://www.orientdb.org/download/
+
+.. _MariaDB: https://mariadb.org/
