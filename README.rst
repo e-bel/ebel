@@ -107,7 +107,7 @@ The wizard will create the needed databases and users in OrientDB and MySQL/Mari
 Package Components
 ==================
 
-To test the different components you find [here](https://github.com/e-bel/covid19_knowledge_graph/) several BEL and 
+To test the different components you find `here <https://github.com/e-bel/covid19_knowledge_graph/>`_ several BEL and 
 already compiled JSON files.
 
 BEL Validation
