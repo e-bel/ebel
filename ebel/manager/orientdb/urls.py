@@ -1,7 +1,7 @@
 """URLs to download files."""
 
 PMID_NCBI = "https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=ebel&" \
-            "email=christian.ebeling@scai.fraunhofer.de&ids={}&idtype=pmid&versions=no&format=json"
+            "ids={}&idtype=pmid&versions=no&format=json"
 MESH_NCBI = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id="
 HGNC_JSON = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/json/hgnc_complete_set.json"
 HGNC_TSV = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/hgnc_complete_set.txt"
