@@ -3,7 +3,7 @@
 from sqlalchemy import or_
 from flask.globals import request
 
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models.kegg import Kegg
 from ebel.web.api.ebel.v1 import _get_data, _get_paginated_query_result, _get_paginated_ebel_query_result
 
@@ -17,7 +17,7 @@ def get_by_gene_symbol():
     """Get KEGG entry by gene symbol."""
     symbol = request.args.get('gene_symbol')
     query_filter = or_(Kegg.gene_symbol_a == symbol, Kegg.gene_symbol_b == symbol)
-    query = session.query(Kegg).filter(query_filter)
+    query = RDBMS.get_session().query(Kegg).filter(query_filter)
     return _get_paginated_query_result(query)
 
 

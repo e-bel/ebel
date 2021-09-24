@@ -2,7 +2,7 @@
 from flask.globals import request
 from ebel.manager.orientdb.odb_structure import iuphar_edges
 
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import iuphar
 from ebel.web.api.ebel.v1 import _get_data, _get_paginated_ebel_query_result
 
@@ -15,7 +15,7 @@ def get_interaction():
 def get_ligandby_by_id():
     """Get IUPHAR ligand entry by ID."""
     ligand_id = request.args.get('id')
-    return session.query(iuphar.IupharLigand).get(ligand_id).as_dict()
+    return RDBMS.get_session().query(iuphar.IupharLigand).get(ligand_id).as_dict()
 
 
 def get_interaction_by_target_uniprot():

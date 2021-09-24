@@ -2,7 +2,7 @@
 from sqlalchemy import or_
 from flask.globals import request
 
-from ebel.web.api import session
+from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models.intact import Intact
 from ebel.manager.orientdb.odb_structure import intact_edges
 from ebel.web.api.ebel.v1 import _get_data, _get_paginated_query_result, _get_paginated_ebel_query_result
@@ -19,7 +19,7 @@ def get_by_uniprot():
     if ua:
         a = Intact.int_a_uniprot_id
         b = Intact.int_a_uniprot_id
-        query = session.query(Intact).filter(or_(a == ua, b == ua))
+        query = RDBMS.get_session().query(Intact).filter(or_(a == ua, b == ua))
         return _get_paginated_query_result(query)
 
 
