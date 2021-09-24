@@ -329,6 +329,10 @@ class _BelTransformer(Transformer):
         """Return relation."""
         return self._get_rel(n)
 
+    def has_members(self, n):
+        """Return relation."""
+        return {'relation': 'has_members'}
+
     def statement(self, n: list):
         """Return statement."""
         return {'statement': n}
