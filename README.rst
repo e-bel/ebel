@@ -13,11 +13,11 @@ for developing and testing new theories and hypotheses.
 * `ClinVar <https://www.ncbi.nlm.nih.gov/clinvar/>`_
 * `DisGeNET <https://www.disgenet.org/>`_
 * `DrugBank <https://go.drugbank.com/>`_
-* `Ensembl <https://www.ensembl.org/index.html>`_
+* `Ensembl`_
 * `Expression Atlas <https://www.ebi.ac.uk/gxa/home>`_
 * `GWAS Catalog <https://www.ebi.ac.uk/gxa/home>`_
 * `HGNC <https://www.genenames.org/>`_
-* `IntAct <https://www.ebi.ac.uk/intact/>`_
+* `IntAct`_
 * `Guide to PHARMACOLOGY <https://www.guidetopharmacology.org/>`_
 * `KEGG <https://www.genome.jp/kegg/>`_
 * `MirTarBase <https://mirtarbase.cuhk.edu.cn/~miRTarBase/miRTarBase_2022/php/index.php>`_
@@ -82,7 +82,7 @@ complexity of queries will be quite slow. Additionally, SQLite will not be direc
 such that they should work with both SQLite and MySQL, but we will not address performance issues due to using SQLite.
 
 Instead, we recommend setting up a `MySQL server <https://www.mysql.com/downloads/>`_ or 
-`MariaDB <https://mariadb.org/download/>`_ to use with e(BE:L). By default, `PyMySQL <https://pypi.org/project/PyMySQL/>`_ 
+`MariaDB`_ to use with e(BE:L). By default, `PyMySQL <https://pypi.org/project/PyMySQL/>`_
 is installed as a driver by e(BE:L), but others can also be used.
 
 On Lunux Ubuntu you can use following command::
@@ -152,7 +152,7 @@ Model Enrichment - MySQL
 
 e(BE:L) goes one step farther when compiling your BEL statements into a knowledge graph by supplementing your new graph model with information derived from several
 publicly available repositories. Data is automatically downloaded from several useful sites including `UniProt`_ ,
-`Ensembl <https://www.ensembl.org/index.html>`_, and `IntAct <https://www.ebi.ac.uk/intact/>`_ and added as generic tables in your newly built database.
+`Ensembl`_, and `IntAct`_ and added as generic tables in your newly built database.
 Information from these popular repositories are then linked to the nodes and edges residing in your graph model, allowing for more complex and
 useful queries to be made against your data. This data is automatically downloaded, parsed, and imported into a specified SQL database.
 
@@ -166,19 +166,20 @@ Make sure you have downloaded/installed and running
 1. `OrientDB`_
 2. MySQL or MariaDB
     a. MySQL
-        - `Windows <https://dev.mysql.com/doc/refman/8.0/en/windows-installation.html>`_
+        - `Windows <https://dev.mysql.com/doc/refman/8.0/en/windows-installation.html>`__
         - `MacOS <https://dev.mysql.com/doc/refman/8.0/en/macos-installation.html>`_
         - Linux
-            - `Ubuntu, Debian, Linux Mint, ... <https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/>`_
+            - `Ubuntu, Debian, Linux Mint, ... <https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/>`__
             - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://dev.mysql.com/doc/refman/8.0/en/linux-installation-yum-repo.html>`_
     b. MariaDB
-        - `Windows <https://mariadb.com/kb/en/installing-mariadb-msi-packages-on-windows/>`_
+        - `Windows <https://mariadb.com/kb/en/installing-mariadb-msi-packages-on-windows/>`__
         - MacOS (`PKG <https://mariadb.com/kb/en/installing-mariadb-server-pkg-packages-on-macos/>`_, `Homebrew <https://mariadb.com/kb/en/installing-mariadb-on-macos-using-homebrew/>`_)
         - Linux
-            - `Ubuntu, Debian, Linux Mint, ... <https://mariadb.com/kb/en/yum/>`_
-            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://mariadb.com/kb/en/installing-mariadb-deb-files/>`_
+            - `Ubuntu, Debian, Linux Mint, ... <https://mariadb.com/kb/en/yum/>`__
+            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://mariadb.com/kb/en/installing-mariadb-deb-files/>`__
 
- and have the server running. This can be configured as a service in both Windows and Unix systems.
+This can be configured as a service in both Windows and Unix systems.
+
 Set your MySQL connection parameters in e(BE:L)::
 
     $ ebel set-mysql --host localhost --user root --password myPassWord --database ebel
@@ -251,3 +252,7 @@ guarantee of maintenance, support, or back-up of data.
 .. _download OrientDB: https://www.orientdb.org/download/
 
 .. _MariaDB: https://mariadb.org/
+
+.. _Ensembl: https://www.ensembl.org/index.html
+
+.. _IntAct: https://www.ebi.ac.uk/intact/
