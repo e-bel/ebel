@@ -1,14 +1,13 @@
 """Command line interface to e(BE:L)."""
 
-import difflib
+import re
+import sys
 import logging
 import random
-import re
 import string
-import sys
+
 from collections import namedtuple
 from getpass import getpass
-from textwrap import fill
 from urllib.parse import quote
 
 import click
@@ -16,11 +15,11 @@ import pymysql
 
 import ebel.database
 from ebel import Bel, web
-from ebel.constants import TerminalFormatting as TF
-from ebel.manager.orientdb.constants import DRUGBANK
-from ebel.manager.orientdb.odb_meta import Graph
 from ebel.tools import get_config_as_dict
-from ebel.validate import validate_bel_file
+from ebel.manager.orientdb.odb_meta import Graph
+from ebel.manager.orientdb.constants import DRUGBANK
+from ebel.constants import TerminalFormatting as TF
+from ebel.validate import validate_bel_file, repair_bel_file
 
 logger = logging.getLogger(__name__)
 
@@ -58,48 +57,9 @@ def validate(bel_script_path: str, force_new_db: bool, line_by_line: bool, repor
 @main.command()
 @click.argument('bel_script_path')
 @click.option('-n', '--new_file_path', default=None,
-              help='path to file, if you want create a new file instead of overwrite')
-def repair(bel_script_path, new_file_path):
-    """Repair a BEL document.
-
-    Parameters
-    ----------
-    bel_script_path : str
-        Path to the BEL file.
-    new_file_path : str (optional)
-        Export repaired version of file to new path.
-    """
-    # if evidence:
-    # regular expression for missing continuous line (\ at the end of line)
-    with open(bel_script_path, "r") as belfile:
-        content = belfile.read()
-
-    new_content = content
-
-    for regex_pattern in re.findall(r'\n((SET\s+(DOCUMENT\s+Description|Evidence|SupportingText)'
-                                    r'\s*=\s*)"(((?<=\\)"|[^"])+)"\s*\n*)',
-                                    content):
-        if regex_pattern[2].startswith("DOCUMENT"):
-            new_prefix = "SET DOCUMENT Description = "
-        else:
-            new_prefix = "SET Support = "
-
-        new_evidence_text = re.sub(r"(\\?[\r\n]+)|\\ ", " ", regex_pattern[3].strip())
-        new_evidence_text = re.sub(r"\s{2,}", " ", new_evidence_text)
-        new_evidence_text = re.sub(r'(\\)(\w)', r'\g<2>', new_evidence_text)
-        new_evidence_text = fill(new_evidence_text, break_long_words=False).replace("\n", " \\\n")
-        new_evidence = new_prefix + '"' + new_evidence_text + '"\n\n'
-
-        new_content = new_content.replace(regex_pattern[0], new_evidence)
-
-    if content != new_content:
-        if new_file_path:
-            with open(new_file_path + ".diff2repaired", "w") as new_file:
-                new_file.write('\n'.join(list(difflib.ndiff(content.split("\n"), new_content.split("\n")))))
-
-        else:
-            with open(bel_script_path, "w") as output_file:
-                output_file.write(new_content)
+              help='Path to write repaired file to. If none passed, will overwrite original file.')
+def repair(bel_script_path: str, new_file_path: str):
+    repair_bel_file(bel_script_path, new_file_path)
 
 
 @main.command()

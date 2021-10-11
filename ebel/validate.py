@@ -1,8 +1,12 @@
 """Collect of methods used for validating a BEL file."""
 import os
+import re
 import csv
+import difflib
 import logging
-from typing import Iterable, Union
+
+from typing import Iterable, Union, Optional
+from textwrap import fill
 
 import numpy as np
 import pandas as pd
@@ -115,6 +119,49 @@ def validate_bel_file(bel_script_path: str, force_new_db: bool = False, line_by_
                     logger.info('\n'.join([x.to_string() for x in result['errors']]) + "\n")
                 else:
                     _write_report(reports, result, report_type='errors')
+
+
+def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
+    """Repair a BEL document.
+
+    Parameters
+    ----------
+    bel_script_path : str
+        Path to the BEL file.
+    new_file_path : str (optional)
+        Export repaired version of file to new path.
+    """
+    # if evidence:
+    # regular expression for missing continuous line (\ at the end of line)
+    with open(bel_script_path, "r") as belfile:
+        content = belfile.read()
+
+    new_content = content
+
+    for regex_pattern in re.findall(r'\n((SET\s+(DOCUMENT\s+Description|Evidence|SupportingText)'
+                                    r'\s*=\s*)"(((?<=\\)"|[^"])+)"\s*\n*)',
+                                    content):
+        if regex_pattern[2].startswith("DOCUMENT"):
+            new_prefix = "SET DOCUMENT Description = "
+        else:
+            new_prefix = "SET Support = "
+
+        new_evidence_text = re.sub(r"(\\?[\r\n]+)|\\ ", " ", regex_pattern[3].strip())
+        new_evidence_text = re.sub(r"\s{2,}", " ", new_evidence_text)
+        new_evidence_text = re.sub(r'(\\)(\w)', r'\g<2>', new_evidence_text)
+        new_evidence_text = fill(new_evidence_text, break_long_words=False).replace("\n", " \\\n")
+        new_evidence = new_prefix + '"' + new_evidence_text + '"\n\n'
+
+        new_content = new_content.replace(regex_pattern[0], new_evidence)
+
+    if content != new_content:
+        if new_file_path:
+            with open(new_file_path + ".diff2repaired", "w") as new_file:
+                new_file.write('\n'.join(list(difflib.ndiff(content.split("\n"), new_content.split("\n")))))
+
+        else:
+            with open(bel_script_path, "w") as output_file:
+                output_file.write(new_content)
 
 
 def _write_success_json(bel_path: str, results: dict, bel_version: str):
