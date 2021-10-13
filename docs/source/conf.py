@@ -16,7 +16,7 @@ copyright = '2021, Christian Ebeling, Bruce Schultz'
 author = 'Christian Ebeling, Bruce Schultz'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.2'
+release = '1.0.3'
 
 extensions = [
     'sphinx.ext.autodoc',  # Core Sphinx library for auto html doc generation from docstrings
