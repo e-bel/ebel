@@ -144,7 +144,7 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
     """
     # if evidence:
     # regular expression for missing continuous line (\ at the end of line)
-    with open(bel_script_path, "r") as belfile:
+    with open(bel_script_path, "r", encoding="utf-8") as belfile:
         content = belfile.read()
 
     new_content = content
