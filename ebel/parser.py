@@ -463,7 +463,7 @@ def check_bel_script_line_by_line(bel_script_path, error_report_file_path, bel_v
 
 def check_bel_script(bel_script_path,
                      bel_version,
-                     force_new_db=False):
+                     force_new_db=False) -> dict:
     """Check BEL script.
 
     Parameters

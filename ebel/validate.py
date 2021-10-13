@@ -18,9 +18,15 @@ from ebel.parser import check_bel_script_line_by_line, check_bel_script, bel_to_
 logger = logging.getLogger(__name__)
 
 
-def validate_bel_file(bel_script_path: str, force_new_db: bool = False, line_by_line: bool = False,
-                      reports: Union[Iterable[str], str] = None, bel_version: str = '2_1', tree: bool = False,
-                      sqlalchemy_connection_str: str = None, json_file: bool = True):
+def validate_bel_file(bel_script_path: str,
+                      force_new_db: bool = False,
+                      line_by_line: bool = False,
+                      reports: Union[Iterable[str], str] = None,
+                      bel_version: str = '2_1',
+                      tree: bool = False,
+                      sqlalchemy_connection_str: str = None,
+                      json_file: bool = True,
+                      force_json: bool = False,):
     """Validate BEL script for correct syntax following eBNF grammar.
 
     Parameters
@@ -45,6 +51,8 @@ def validate_bel_file(bel_script_path: str, force_new_db: bool = False, line_by_
     json_file: bool
         If True, generates a JSON file that can be used for importing BEL relationships into an e(BE:L) generated
         OrientDB database. Only creates the JSON file when there are no grammar or syntax errors. Defaults to True.
+    force_json: bool
+        If True, will create an importable JSON file even if there are namespace/value errors. Defaults to False.
 
     Returns
     -------
@@ -97,14 +105,16 @@ def validate_bel_file(bel_script_path: str, force_new_db: bool = False, line_by_
                 bel_version=bel_version,
             )
 
-            if not result['errors'] and json_file:
-                json_file = _write_success_json(bel_path=bel_file, results=result, bel_version=bel_version)
-                validation_results[bel_file]['json'] = json_file
+            if json_file:
+                if not result['errors'] or force_json:
+                    json_file = _write_odb_json(bel_path=bel_file, results=result, bel_version=bel_version)
+                    validation_results[bel_file]['json'] = json_file
 
             if tree:
 
                 if result['errors']:
                     logger.error("Tree can not be printed because errors still exists\n")
+
                 else:
                     logger.debug(result['tree'])
                     validation_results[bel_file]['tree'] = result['tree']
@@ -117,6 +127,7 @@ def validate_bel_file(bel_script_path: str, force_new_db: bool = False, line_by_
 
                 if not reports:
                     logger.info('\n'.join([x.to_string() for x in result['errors']]) + "\n")
+
                 else:
                     _write_report(reports, result, report_type='errors')
 
@@ -164,10 +175,10 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
                 output_file.write(new_content)
 
 
-def _write_success_json(bel_path: str, results: dict, bel_version: str):
+def _write_odb_json(bel_path: str, results: dict, bel_version: str) -> str:
+    json_path = bel_path + ".json"
     if int(bel_version[0]) > 1:
         json_tree = bel_to_json(results['tree'])
-        json_path = bel_path + ".json"
         open(json_path, "w").write(json_tree)
 
     return json_path
