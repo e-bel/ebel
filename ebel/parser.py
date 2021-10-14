@@ -355,8 +355,6 @@ class _BELParser:
             BEL version 1 or 2.
         force_new_db : bool
             Force to create a new database if already exists.
-        path_to_db : str
-            SQLite database file location.
 
         Returns
         -------
