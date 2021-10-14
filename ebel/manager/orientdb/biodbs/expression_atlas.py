@@ -49,7 +49,7 @@ class ExpressionAtlas(odb_meta.Graph):
             self.insert()
 
     def extract_files(self):
-        """Download latest file and extract relevant files."""
+        """Extract relevant files."""
         os.chdir(self.data_dir)
         cmd_temp = "tar -xzf atlas-latest-data.tar.gz --wildcards --no-anchored '{}'"
         patterns = ['*.sdrf.txt',
@@ -61,9 +61,11 @@ class ExpressionAtlas(odb_meta.Graph):
                     '*.interpro.gsea.tsv',
                     '*.reactome.gsea.tsv'
                     ]
-        for pattern in patterns:
-            command = cmd_temp.format(pattern)
-            os.system(command)
+        with tqdm(patterns) as t_patterns:
+            for pattern in t_patterns:
+                t_patterns.set_description(f"Extract files with pattern {pattern}")
+                command = cmd_temp.format(pattern)
+                os.system(command)
 
     def insert_data(self):
         """Class method."""
@@ -199,7 +201,7 @@ class ExpressionAtlas(odb_meta.Graph):
         dfs = []
         for groups_str in groups_strs:
             for gsea_type in ['go', 'reactome', 'interpro']:
-                df = self.get_gsea(groups_str, gsea_type, experiment_name)
+                df = self.get_gsea(experiment_name, groups_str, gsea_type)
                 if isinstance(df, pd.DataFrame):
                     df['gsea_type'] = gsea_type
                     df['group_comparison_id'] = self.__get_group_comparison_id(groups_str, experiment_id)
