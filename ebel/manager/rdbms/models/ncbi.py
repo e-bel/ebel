@@ -23,14 +23,13 @@ class NcbiGeneInfo(Base):
     description_id = Column(Integer, ForeignKey('ncbi_gene_info_description.id'))
     description = relationship("NcbiGeneInfoDescription", foreign_keys=[description_id])
     xrefs = relationship("NcbiGeneInfoXref", back_populates="gene")
-    mims = relationship("NcbiGeneMim", back_populates="gene")
+    mims = relationship("NcbiGeneMim", foreign_keys='NcbiGeneMim.gene_id', back_populates="gene")
     orthologs = relationship("NcbiGeneOrtholog", foreign_keys='NcbiGeneOrtholog.gene_id', back_populates="gene")
     ensembl_ids = relationship("NcbiGeneEnsembl", back_populates="genes")
     gene_ids_right = relationship("NcbiGeneOnRight", foreign_keys='NcbiGeneOnRight.gene_id', back_populates="gene")
     gene_ids_left = relationship("NcbiGeneOnLeft", foreign_keys='NcbiGeneOnLeft.gene_id', back_populates="gene")
     gene_ids_overlapping = relationship("NcbiGeneOverlapping", foreign_keys='NcbiGeneOverlapping.gene_id',
                                         back_populates="gene")
-
     def as_dict(self):
         """Convert object values to dictionary."""
         rdict = object_as_dict(self, ['description_id'])
@@ -132,7 +131,7 @@ class NcbiGeneMim(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     mim_number = Column(Integer)
-    gene_id = Column(Integer)
+    gene_id = Column(Integer, ForeignKey('ncbi_gene_info.gene_id'))
     type = Column(String(100))
     source = Column(String(100))
     med_gen_cui = Column(String(100), index=True)
