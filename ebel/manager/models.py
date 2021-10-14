@@ -20,6 +20,8 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy import Column, ForeignKey, Integer, String, Index, Boolean
 
+from sqlalchemy_utils import create_database, database_exists
+
 from ebel import parser
 from ebel.tools import BelRdb
 from ebel.constants import GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_NS, GRAMMAR_START_ANNO, URL, FILE
@@ -39,6 +41,9 @@ def reset_tables(engine: sqlalchemy.engine.Engine, force_new_db: bool) -> None:
     force_new_db: bool : bool
         True forces to create new tables.
     """
+    if not database_exists(engine.url):
+        create_database(engine.url)
+
     if force_new_db:
         Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine, checkfirst=True)

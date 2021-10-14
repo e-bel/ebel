@@ -152,8 +152,8 @@ class Graph(abc.ABC):
         self.odb_password = self.odb_password or odb_config.get('password')
         self.odb_server = self.odb_server or odb_config.get('server')
         self.odb_port = int(self.odb_port or odb_config.get('port') or '2424')
-        self.odb_user_reader = self.odb_user_reader or odb_config.get('user_reader')
-        self.odb_user_reader_password = self.odb_user_reader_password or odb_config.get('user_reader_password')
+        self.odb_user_reader = self.odb_user_reader or odb_config.get('user_reader') or None
+        self.odb_user_reader_password = self.odb_user_reader_password or odb_config.get('user_reader_password') or None
 
         # Root password should not be written in the config file, but it's possible
         self._odb_root_password = self._odb_root_password or odb_config.get('root_password')
@@ -164,7 +164,7 @@ class Graph(abc.ABC):
                           user: str = None,
                           password: str = None,
                           server: str = None,
-                          port: str = None,
+                          port: Union[str, int] = None,
                           user_reader: str = None,
                           user_reader_password: str = None,
                           root_password: str = None,
@@ -175,14 +175,20 @@ class Graph(abc.ABC):
                           drugbank_password: str = None):
         """Set configuration for OrientDB database."""
         config = get_config_as_dict()
-        config_odb = config.get(DEFAULT_ODB)
+
+        # TODO find better spot to initialize section
+        config_odb = config.get(DEFAULT_ODB) if DEFAULT_ODB in config else {}
+
         cls.odb_name = name or config_odb.get('name')
         cls.odb_user = user or config_odb.get('user')
         cls.odb_password = password or config_odb.get('password')
         cls.odb_server = server or config_odb.get('server')
         cls.odb_port = port or config_odb.get('port')
-        cls.odb_user_reader = user_reader or config_odb.get('user_reader')
-        cls.odb_user_reader_password = user_reader_password or config_odb.get('reader_password')
+
+        cls.odb_user_reader = user_reader or (config_odb.get('user_reader') if "user_reader" in config_odb else None)
+        cls.odb_user_reader_password = user_reader_password or (
+            config_odb.get('user_reader_password') if "user_reader_password" in config_odb else None
+        )
 
         odb_class_attribs = {
             'name': cls.odb_name,

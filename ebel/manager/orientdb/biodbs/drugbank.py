@@ -218,6 +218,7 @@ class DrugBank(odb_meta.Graph):
         def timeout_error(*_):
             raise TimeoutError
 
+        # TODO signal.SIGALRM does not work on Windows - need to find alternative
         signal.signal(signal.SIGALRM, timeout_error)
         signal.alarm(timeout)
         try:
