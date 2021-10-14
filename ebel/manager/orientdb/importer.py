@@ -11,6 +11,7 @@ from typing import Tuple
 from copy import deepcopy
 from pyorient import OrientDB
 from datetime import datetime
+from pathlib import Path
 from git.exc import InvalidGitRepositoryError
 from collections import OrderedDict, defaultdict, namedtuple
 
@@ -91,7 +92,7 @@ class _BelImporter:
 
         """
         bel_git_id = None
-        absolute_path = os.path.abspath(self.file_path)
+        absolute_path = Path(self.file_path)
 
         if self.file_is_in_git_repo(absolute_path):
             repo = git.Repo(absolute_path, search_parent_directories=True)
@@ -210,17 +211,13 @@ class _BelImporter:
         return keyword_rids
 
     def network_exists(self, version, file_path, md5, last_modified, git_info_dict) -> bool:
-        sql = """Select 1 from bel_document where
-                    version = '{}' and
-                    file.path = '{}' and
-                    file.md5 = '{}' and
-                    file.last_modified = '{}' and
-                    git_info = {}
-                    """.format(version,
-                               file_path,
-                               md5,
-                               last_modified,
-                               json.dumps(git_info_dict))
+        sql = f"""Select 1 from bel_document where
+                    version = '{version}' and
+                    file.path = '{Path(file_path).as_posix()}' and
+                    file.md5 = '{md5}' and
+                    file.last_modified = '{last_modified}' and
+                    git_info = {json.dumps(git_info_dict)}
+                    """
         return not len(self.client.command(sql)) == 0
 
     @staticmethod
