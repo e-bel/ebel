@@ -7,7 +7,7 @@ from math import ceil
 from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import clinvar
 from ebel.web.api.ebel.v1 import _get_data, _get_paginated_query_result, _get_terms_from_model_starts_with, \
-    __get_pagination
+    _get_pagination
 
 
 def get_clinvar():
@@ -76,7 +76,7 @@ def get_by_medgen():
 def get_ebel_relation():
     """Get ClinVar related eBEL relations."""
     b = Bel()
-    p = __get_pagination()
+    p = _get_pagination()
     req = dict(request.args.copy())
     wheres = []
     if req.get('rs_number'):

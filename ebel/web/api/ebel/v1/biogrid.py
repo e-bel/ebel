@@ -49,8 +49,8 @@ def get_has_ppi_bg_by_symbol_taxid():
     namespace = request.args.get('namespace', 'HGNC')
     modification = request.args.get('modification')
 
-    sql = f"""{SQL_SELECT_HAS_PPI_BG}((in.name='{symbol}' and in.namespace={namespace})
-            or (out.name='{symbol}' and out.namespace={namespace}))"""
+    sql = f"""{SQL_SELECT_HAS_PPI_BG}((in.name='{symbol}' and in.namespace='{namespace}')
+            or (out.name='{symbol}' and out.namespace='{namespace}'))"""
     if modification and modification in MODIFICATIONS:
         sql += f" and modification = '{modification}'"
     return Bel().query_get_dict(sql)
@@ -68,17 +68,7 @@ def get_has_ppi_bg_by_uniprot() -> List[dict]:
     return Bel().query_get_dict(sql)
 
 
-def get_biogrid_by_biogrid_id_using_post() -> dict:
-    """Get BioGrid entry by POST request with parameter `biogrid_id`.
-
-    Returns:
-        dict: BioGrid entry
-    """
-    biogrid_id = json.loads(request.data)['biogrid_id']
-    return get_biogrid_by_biogrid_id(biogrid_id)
-
-
-def get_biogrid_by_biogrid_id(biogrid_id: int) -> dict:
+def get_biogrid_by_biogrid_id() -> dict:
     """Get BioGrid entry by biogrid_id.
 
     Parameters:
@@ -87,6 +77,7 @@ def get_biogrid_by_biogrid_id(biogrid_id: int) -> dict:
     Returns:
         dict: BioGrid entry.
     """
+    biogrid_id: int = request.args.get('biogrid_id')
     biogrid_entry = RDBMS.get_session().query(Biogrid).filter_by(biogrid_id=biogrid_id).first()
     return biogrid_entry.as_dict()
 
@@ -134,7 +125,7 @@ def get_modifications() -> Dict[str, int]:
     return {x.modification: x.id for x in rs}
 
 
-def get_biogrid_by_pmid(pmid: int) -> List[dict]:
+def get_biogrid_by_pmid() -> List[dict]:
     """List of BioGrid entries by PubMed identifier.
 
     Parameters:
@@ -143,6 +134,7 @@ def get_biogrid_by_pmid(pmid: int) -> List[dict]:
     Returns:
         List[dict]: List[BioGrid entry]
     """
+    pmid = request.args.get('pmid')
     publication_id = RDBMS.get_session().query(Publication.id).filter_by(source='PUBMED', source_identifier=pmid).first()[0]
     biogrid_entry = RDBMS.get_session().query(Biogrid).filter_by(publication_id=publication_id).all()
     return [x.as_dict() for x in biogrid_entry]
@@ -262,8 +254,8 @@ def get_biogrid_using_post():
     return _get_data(Biogrid)
 
 
-def get_interactor_by_symbol_starts_with():
-    """Get an interactor by beginning of gene symbol."""
+def get_interactor_by_symbol():
+    """Get interactor by gene symbol."""
     ra = request.args
 
     taxonomy_id = int(ra.get('taxonomy_id', 9606))

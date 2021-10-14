@@ -11,7 +11,7 @@ from ebel.web.api.ebel.v1 import _get_paginated_query_result, _get_terms_from_mo
 def get_ct_by_nct_id():
     """Get CT entry based on given NCT ID."""
     nct_id = request.args.get('nct_id')
-    c = session.query(ct.ClinicalTrialGov).filter_by(nct_id=nct_id).first()
+    c = RDBMS.get_session().query(ct.ClinicalTrialGov).filter_by(nct_id=nct_id).first()
     if c:
         return c.as_dict()
 

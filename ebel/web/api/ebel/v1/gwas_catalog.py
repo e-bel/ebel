@@ -32,7 +32,7 @@ def get_ebel_relation():
 
     sql = "SELECT "
     sql += ', '.join([f"{v} as {k}" for k, v in conf.items()])
-    sql += " FROM {relation}"
+    sql += f" FROM {relation}"
 
     ra = request.args
     paras = {k: ra[k] for k in ra if k in conf}

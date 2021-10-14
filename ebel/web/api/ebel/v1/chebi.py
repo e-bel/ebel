@@ -5,7 +5,7 @@ from flask import request
 from ebel import Bel
 from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import chebi
-from . import __get_pagination
+from . import _get_pagination
 
 
 def get_compound_by_name(name: str):
@@ -119,17 +119,19 @@ def get_bel_chebi_ids():
     """Get BEL nodes with the CHEBI namespace."""
     b = Bel()
     sql_count = "SELECT count(*) FROM V where chebi IS NOT NULL"
-    p = __get_pagination()
+    p = _get_pagination()
     number_of_results = b.query_get_dict(sql_count)[0]['count']
     pages = ceil(number_of_results / p.page_size)
-    sql_rows = "SELECT @rid.asString(), namespace, name, chebi, bel FROM V where chebi IS NOT NULL"
+    query = "SELECT @rid.asString(), namespace, name, chebi, bel FROM V where chebi IS NOT NULL"
     paras = {k: v for k, v in dict(request.args.copy()).items() if k in ['namespace', 'name', 'chebi']}
     if paras:
-        sql_rows += " AND " + ' AND '.join([f"{k} like '{v.strip()}'" for k, v in paras.items()])
+        query += " AND " + ' AND '.join([f"{k} like '{v.strip()}'" for k, v in paras.items()])
+    
+    print(query)
     return {
         'page': p.page,
         'page_size': p.page_size,
         'number_of_results': number_of_results,
         'pages': pages,
-        'results': b.query_get_dict(f"{sql_rows} LIMIT {p.page_size} SKIP {p.skip}")
+        'results': b.query_get_dict(f"{query} LIMIT {p.page_size} SKIP {p.skip}")
     }
