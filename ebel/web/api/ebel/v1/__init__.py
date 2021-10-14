@@ -50,8 +50,9 @@ class SubRelObj(Enum):
     OBJECT = 'o'
 
 
-def __get_pagination() -> Pagination:
+def _get_pagination() -> Pagination:
     """Get page and page_size from request."""
+    print(request.args)
     request_obj = request.args if request.args else json.loads(request.data)
     page_size = request_obj.get('page_size', 10)
     page_size = int(page_size) if (isinstance(page_size, int) or re.search(r"^\d+$", page_size)) else 10
@@ -71,7 +72,6 @@ def _get_data(model: Type[DeclarativeMeta], print_sql=False, order_by: List[Inst
     params = {k: (bool_map[v] if v in bool_map else v) for k, v in request_obj.items() if k in columns and v}
     like_queries = [columns[k].like(v) for k, v in params.items()]
     query = RDBMS.get_session().query(model).filter(*like_queries)
-
     return _get_paginated_query_result(query, print_sql=print_sql, order_by=order_by)
 
 
@@ -81,7 +81,7 @@ def _get_paginated_query_result(query: Query, return_dict=False, print_sql=False
 
     Method requires page_size and page in `request.args`
     """
-    p = __get_pagination()
+    p = _get_pagination()
 
     if not (p.page and p.page_size):
         return {'error': "Please add page and page_size to your method."}
@@ -117,7 +117,7 @@ def _get_paginated_query_result(query: Query, return_dict=False, print_sql=False
 def _get_paginated_ebel_query_result(sql: str, print_sql=False):
     """Return paginated ebel query result. Method requires page_size and page in `request.args`."""
     b = Bel()
-    p = __get_pagination()
+    p = _get_pagination()
 
     if not (p.page and p.page_size):
         return {'error': "Please add page and page_size to your method."}
