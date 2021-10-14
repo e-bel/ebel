@@ -375,7 +375,7 @@ class Bel(Graph):
             db.update()
             logger.info(f"Enrichment with {db_name} completed.")
             updated.add(db_name)
-
+        self._update_involved()
         return updated
 
     @property
