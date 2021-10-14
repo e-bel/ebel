@@ -8,7 +8,7 @@ from collections import namedtuple
 from sqlalchemy.sql import func
 
 from ebel import Bel
-from ebel.web.api.ebel.v1 import __get_pagination
+from ebel.web.api.ebel.v1 import _get_pagination
 
 Relation = namedtuple('Relation', ['sub', 'sub_bel', 'rel_rid', 'evidence', 'rel', 'pmid', 'obj', 'obj_bel'])
 ComparisonGroupValue = namedtuple('CompGroupFoldChange', ['group_comparison_id', 'log2foldchange', 'p_value'])
@@ -61,7 +61,7 @@ def get_fold_changes(session,
 
 def validate_bel_against_experiment() -> dict:
     """Check whether BEL edges match experimental results."""
-    pagination = __get_pagination()
+    pagination = _get_pagination()
 
     subject_class = request.args.get('subject_class', 'genetic_flow')
     subject_name = request.args.get('subject_hgnc_symbol')
