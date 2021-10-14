@@ -52,7 +52,6 @@ class SubRelObj(Enum):
 
 def _get_pagination() -> Pagination:
     """Get page and page_size from request."""
-    print(request.args)
     request_obj = request.args if request.args else json.loads(request.data)
     page_size = request_obj.get('page_size', 10)
     page_size = int(page_size) if (isinstance(page_size, int) or re.search(r"^\d+$", page_size)) else 10
