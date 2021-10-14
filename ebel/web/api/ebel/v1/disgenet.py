@@ -10,7 +10,7 @@ from ebel.web.api.ebel.v1 import _get_paginated_query_result, _get_terms_from_mo
 def get_sources():
     """Return all sources."""
     d = disgenet.DisgenetSource
-    return {x.source: x.id for x in session.query(d.source, d.id).all()}
+    return {x.source: x.id for x in RDBMS.get_session().query(d.source, d.id).all()}
 
 
 def get_disease_name_starts_with():
@@ -85,12 +85,15 @@ def get_ebel_has_snp_disgenet():
     where.update({k: v for k, v in request.args.items() if k in edge_properties})
 
     sql = f"""SELECT
+        @rid.asString() as rid, 
         @class as relation,
-        in.rs_number as rs_number,
+        in.rs_number as snp_rs_number,
+        in.@rid.asString() as snp_rid,
         score,
         disease_name,
         source,
         set(pmid) as pmids,
+        out.@rid.asString() as gene_rid,
         out.name as gene_symbol FROM {edge_class}"""
     if where:
         sql += " WHERE " + " AND ".join([f'{k} like "{v}"' for k, v in where.items() if v])

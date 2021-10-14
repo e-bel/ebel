@@ -12,7 +12,7 @@ from graphviz import Digraph
 
 from ebel import Bel
 from ebel.manager.orientdb.odb_structure import get_columns, get_node_view_labels
-from ebel.web.api.ebel.v1 import __get_pagination, DataType, SqlOperator
+from ebel.web.api.ebel.v1 import _get_pagination, DataType, SqlOperator
 
 PathLengthDict = Dict[int, List[Dict[str, list]]]
 PathLength = int
@@ -58,7 +58,10 @@ class Column:
                  form_name: str,
                  column: str,
                  sql_operator: SqlOperator = SqlOperator.EQUALS,
-                 data_type: DataType = DataType.STRING):
+                 data_type: DataType = DataType.STRING,
+                 value: str = None,
+                 show_in_results: bool = True,
+                 switch_where_terms=False):
         """Init method for column.
 
         Parameters
@@ -73,7 +76,9 @@ class Column:
         self.sql_operator = sql_operator
         self.form_name = form_name
         self.data_type = data_type
-        self.value = None
+        self.value = value
+        self.show_in_results = show_in_results
+        self.switch_where_terms = switch_where_terms
 
     def set_search_term(self, value: str):
         """Return value for a given search term."""
@@ -85,6 +90,9 @@ class Column:
         column = f"{self.column}.asString()" if "@" in self.column else self.column
         return f"{column} as {self.form_name}"
 
+    def __str__(self):
+        return f"<Column: form_name={self.form_name}; column={self.column}; sql_operator={self.sql_operator}; data_type={self.data_type}>"
+
 
 bel_relation_default_columns: List[Column] = [
     Column('subject_rid', 'out.@rid'),
@@ -94,7 +102,7 @@ bel_relation_default_columns: List[Column] = [
     Column('subject_bel', 'out.bel', SqlOperator.LIKE),
     Column('subject_gene_symbol_involved_in', 'out.involved_genes', SqlOperator.IN, DataType.LIST_STRING),
     Column('subject_other_involved_in', 'out.involved_other', SqlOperator.IN, DataType.LIST_STRING),
-    Column('edge_rid', '@rid'),
+    Column('relation_rid', '@rid'),
     Column('relation', '@class'),
     Column('evidence', 'evidence', SqlOperator.LIKE),
     Column('citation_full_journal_name', 'citation.full_journal_name', SqlOperator.LIKE),
@@ -144,10 +152,15 @@ class Query:
         wheres = []
         for col in self.columns:
             if col.value:
-                if col.column.endswith('@rid') and "," in col.value:
-                    rids = [x.strip() for x in col.value.split(",") if re.search(r"^#\d+:\d+$", x.strip())]
-                    rids_str = "[" + ','.join(rids) + "]"
-                    wheres.append(f"{col.column} in {rids_str}")
+                if col.column.endswith('@rid'):
+                    if  "," in col.value:
+                        rids = [x.strip() for x in col.value.split(",") if re.search(r"^#\d+:\d+$", x.strip())]
+                        rids_str = "[" + ','.join(rids) + "]"
+                        wheres.append(f"{col.column} in {rids_str}")
+                    else:
+                        rid = col.value.strip()
+                        if rid:
+                            wheres.append(f"{col.column} = {rid}")
                 elif col.column != "@class":
                     if col.data_type in [DataType.STRING, DataType.LIST_STRING]:
                         value = f'"{col.value}"'
@@ -157,7 +170,10 @@ class Query:
                     if col.data_type in [DataType.LIST_STRING, DataType.LIST_NUMBER, DataType.LIST_INTEGER]:
                         wheres.append(f'{value} {col.sql_operator.value} {col.column}')
                     else:
-                        wheres.append(f'{col.column} {col.sql_operator.value} {value}')
+                        if col.switch_where_terms:
+                            wheres.append(f'{value} {col.sql_operator.value} {col.column}')
+                        else:
+                            wheres.append(f'{col.column} {col.sql_operator.value} {value}')
         if wheres:
             where = " WHERE " + ' AND '.join(wheres)
         return where
@@ -166,7 +182,7 @@ class Query:
     def sql(self):
         """Generic sql execution method."""
         select = "SELECT "
-        select += ', '.join([f"{sw.display_column} as {sw.form_name}" for sw in self.columns])
+        select += ', '.join([f"{sw.display_column} as {sw.form_name}" for sw in self.columns if sw.show_in_results])
         select += " FROM " + self.odb_class
         sql = select + self.where
         return sql
@@ -195,11 +211,56 @@ class Query:
         }
 
 
+def get_edge_by_annotation() -> list:
+    """Return list of edges with a given annotation."""
+    columns = deepcopy(bel_relation_default_columns)
+    annotation_key = request.args.get('annotation_key')
+    annotation_term = request.args.get('annotation_term')
+    if annotation_key and annotation_term:
+        column = Column('annotation_key', f"annotation['{annotation_key}']", 
+                        sql_operator=SqlOperator.IN, value=annotation_term, switch_where_terms=True)
+        columns.append(column)
+
+    sql_builder = Query('bel_relation', columns)
+    return sql_builder.get_result()
+
+
+def get_edge_rids():
+    subject_rid = request.args.get('subject_rid')
+    relation_rid = request.args.get('relation_rid')
+    object_rid = request.args.get('object_rid')
+    document_rid = request.args.get('document_rid')
+    columns = [
+        Column(form_name='subject_rid', column='in.@rid', value=subject_rid),
+        Column(form_name='relation_rid', column='@rid', value=relation_rid),
+        Column(form_name='object_rid', column='out.@rid', value=object_rid),
+        Column(form_name='document_rid', column='document.@rid', value=document_rid),
+    ]
+    sql_builder = Query('bel_relation', columns)
+    return sql_builder.get_result()
+
+
+def get_annotation_keys():
+    sql = """Select value as annotation_key, count(*) as number_of_edges from 
+          (Select expand(annotation.keys()) as mesh from bel_relation 
+          where annotation.mesh is not null) group by value order by number_of_edges desc"""
+    return [x.oRecordData for x in Bel().execute(sql)]
+
+
+def get_annotation_terms():
+    annotation_key = request.args.get('annotation_key')
+    if annotation_key:
+        sql = "Select value as annotation_term, count(*) as number_of_edges from " \
+          f"(Select expand(annotation['{annotation_key}']) as mesh from bel_relation " \
+          "where annotation.mesh is not null) group by value order by number_of_edges desc"
+        return [x.oRecordData for x in Bel().execute(sql)]
+
+
 def get_edges():
     """Return data for a BEL relation edge."""
     columns = deepcopy(bel_relation_default_columns)
 
-    for column in bel_relation_default_columns:
+    for column in columns:
         column.set_search_term(request.args.get(column.form_name))
 
     relation = request.args.get('relation', 'bel_relation')
@@ -228,14 +289,14 @@ def get_nodes() -> dict:
         where_list.append(f"{conn2ebel_rel_dir}('{conn2ebel_rel}').size()>0")
 
     node_class = request.args.get('node_class')
-    p = __get_pagination()
+    p = _get_pagination()
     number_of_results = b.query_class(class_name=node_class,
                                       columns=['count(*)'],
                                       with_rid=False,
                                       **params)[0]['count']
     pages = ceil(number_of_results / p.page_size)
     results = b.query_class(class_name=node_class,
-                            columns=['namespace', 'name', 'bel', 'pure'],
+                            columns=['namespace', 'name', 'bel', 'pure', 'involved_genes', 'involved_other'],
                             skip=p.skip,
                             limit=p.page_size,
                             where_list=tuple(where_list),
@@ -271,42 +332,51 @@ def get_by_rid() -> Optional[str]:
             elif isinstance(value, list):
                 if all([isinstance(x, (str, int, float)) for x in value]):
                     result_dict[key] = value
-            else:
-                print(dir(value))
         return result_dict
 
 
 def get_adjacent_nodes_by_rid() -> list:
     """Return neighboring nodes of given rID."""
+    # d := direction
+    # od := oposite direction
     rid = _get_rid()
     relation = request.args.get('relation', 'bel_relation')
+    sql_temp = "Select '{d}' as direction, @rid.asString() as edge_rid, @class.asString() " \
+                "as edge_class, {d}.@rid.asString() as node_rid, {d}.@class.asString()as node_class , " \
+                "{d}.bel as bel, {d}.name as name, {d}.namespace as namespace, {d}.involved_genes as "\
+                f"involved_genes, {{d}}.involved_other as involved_other from {relation} " \
+                f"where {{od}}.@rid = {rid}"
+
     direction = request.args.get('direction', 'both')
     if rid:
-        b = Bel()
-        sql = "Select @rid.asString() as rid, @class.asString()as class ,bel, name, namespace" \
-              f" from (SELECT expand({direction}('{relation}')) from {rid})"
-        return [x.oRecordData for x in b.execute(sql)]
-
-
-def get_edge_by_annotation() -> list:
-    """Return list of edges with a given annotation."""
-    columns = deepcopy(bel_relation_default_columns)
-    cols_str = ', '.join([x.get_sql() for x in columns])
-    annotation_group = request.args.get('annotation')
-    mesh_term = request.args.get('mesh_term')
-    sql_temp = f"Select {cols_str} from bel_relation where '{{}}' in annotation['{annotation_group}']"
-    if mesh_term and annotation_group:
-        sql = sql_temp.format(mesh_term)
-        print(sql)
+        sql_in = sql_temp.format(d='in', od='out')
+        sql_out = sql_temp.format(d='out', od='in')
+        if direction=='in':
+            sql = sql_in
+        elif direction=='out':
+            sql = sql_out
+        else:
+            sql = f"select expand($c) let $a = ({sql_in}), $b = ({sql_out}), $c = unionAll( $a, $b )"
         return [x.oRecordData for x in Bel().execute(sql)]
 
 
 def get_number_of_edges() -> int:
     """Return the number of edges."""
     b = Bel()
-    relation = request.args.get('relation', 'bel_relation')
+    relation = request.args.get('relation', 'E')
     r = b.execute(f"Select count(*) as number_of_edges from {relation} limit 1")
     return r[0].oRecordData['number_of_edges']
+
+
+def get_number_of_nodes() -> int:
+    """Return the number of edges."""
+    b = Bel()
+    node_class = request.args.get('node_class', 'V')
+    pure = request.args.get('pure')
+    where_pure = "where pure = true" if pure else ''
+    sql = f"Select count(*) as number_of_nodes from {node_class} {where_pure} limit 1"
+    r = b.execute(sql)
+    return r[0].oRecordData['number_of_nodes']
 
 
 def get_pure_rid() -> Optional[str]:
@@ -545,7 +615,7 @@ class PathQuery:
             node.set_inside(gene_path, inside_node_class)
 
         self.too_many_paths = "With the path length of {} we found already more than " \
-                              f"{self.max_paths} pathways. Please specify you query and run again."
+                              f"{self.max_paths} pathways. Please specify you query (or set limit) and run again."
 
         self.too_many_edges = f"We found too many unique edges ({{}}, max allowed={self.max_unique_edges} ) with an " \
                               f"allowed maximum of {self.max_paths} paths. Please specify you query and run again. " \
@@ -590,8 +660,9 @@ class PathQuery:
         """Get node metadata by given rID."""
         sql = f"Select @class.asString() as class, * from {rid}"
         data = self.execute(sql)[0].oRecordData
-        columns = get_columns(data['class']) + ['class']  # serializable
-        return {k: v for k, v in data.items() if k in columns}
+        serializable_columns = get_columns(data['class'], exclude_non_serializable=True) + ['class']
+        serializable_data = {k: v for k, v in data.items() if k in serializable_columns}
+        return serializable_data
 
     @property
     def allowed_edges(self) -> List[str]:
@@ -636,7 +707,7 @@ class PathQuery:
             '<-': {'one_class': ".inE(){{class:{},as:e{}{}}}.outV()", 'multi_class': ".inE({}){{as:e{}{}}}.outV()"},
         }
         re_node_in_box = re.compile(
-            r'^\[\s*(?P<class_name>\w+)(?P<params>(\s+\w+(\.\w+)?(=|>|<|~|\*)(\d+|\d+\.\d+|[\w%]+|"[^"]+"))*)\s*\]$')
+            r'^\[\s*(?P<class_name>\w+)(?P<params>(\s+\w+(\.\w+)?(!=|=|>|<|~|\*)(\d+|\d+\.\d+|[\w%]+|"[^"]+"))*)\s*\]$')
 
         match_str = 'match '
         for i in range(len(node_strings)):
@@ -668,7 +739,7 @@ class PathQuery:
     def get_where_list_by_params(params_str):
         """Build WHERE section of query based on the passed parameters."""
         where_list = []
-        re_params_in_box = re.compile(r'(\w+(\.\w+)?)(=|>|<|~|\*)(\d+|\d+\.\d+|[\w%]+|"[^"]+")')
+        re_params_in_box = re.compile(r'(\w+(\.\w+)?)(!=|=|>|<|~|\*)(\d+|\d+\.\d+|[\w%]+|"[^"]+")')
         for param, sub_param, operator, value in re_params_in_box.findall(params_str):
             operator = 'like' if operator == '~' else operator
             operator = 'in' if operator == '*' else operator
@@ -691,7 +762,6 @@ class PathQuery:
         edges: List[BELishEdge] = [
             BELishEdge(x[0] or x[1] or '', x[3] or x[4] or x[5] or x[6], x[7]) for x in edge_zip
         ]
-        print(nodes, edges)
         return nodes, edges
 
     def get_paths(self) -> Union[PathsResult, Dict]:
@@ -705,7 +775,6 @@ class PathQuery:
 
         for number_of_edges in range(self.min_length, self.max_length + 1):
             query_str = self.get_query_str(number_of_edges)
-            print(query_str)
             paths: List[Dict[str, Any]] = [x.oRecordData for x in self.execute(query_str)]
 
             if len(paths) > self.max_paths:
@@ -730,10 +799,10 @@ class PathQuery:
         path_length_dict: PathLengthDict = {}
         edge_paths_by_length: EdgePathsByLength = {}
         query_str_belish_num_edges = self.get_query_str_belish_num_edges()
+        print(query_str_belish_num_edges)
 
         if query_str_belish_num_edges:
             query_str, number_of_edges = query_str_belish_num_edges
-            print(query_str)
             paths: List[Dict[str, Any]] = [x.oRecordData for x in self.execute(query_str)]
             if len(paths) > self.max_paths:
                 return {'error': self.too_many_paths.format(number_of_edges)}
@@ -831,7 +900,11 @@ def get_paths() -> Union[dict, PathQuery]:
     """Return paths found for query."""
     path_query = _get_path_query()
     if isinstance(path_query, PathQuery):
-        return path_query.get_paths()._asdict()
+        paths = path_query.get_paths()
+        if isinstance(paths, dict):
+            return paths
+        else:
+            return paths._asdict()
     else:
         return path_query
 
@@ -840,7 +913,12 @@ def get_paths_by_belish() -> Union[dict, PathQuery]:
     """Find all paths from given BELish query and return results as dictionary."""
     path_query = _get_path_query()
     if isinstance(path_query, PathQuery):
-        return path_query.get_paths_by_belish()._asdict()
+        paths_by_belish = path_query.get_paths_by_belish()
+        print('path_query:', type(paths_by_belish))
+        if isinstance(paths_by_belish, dict):
+            return paths_by_belish
+        else:
+            return paths_by_belish._asdict()
     else:
         return path_query
 
@@ -877,13 +955,12 @@ def _get_paths_as_dot(paths):
         d.attr('node', style='filled')
 
         for rid, v in paths.unique_nodes.items():
-            # print(v['class'])
             node_id = rid.replace(':', '.')
             d.attr('node', fillcolor=node_colours.get(v['class'], 'grey'))
             view_labels = get_node_view_labels(v['class'])
 
             sub_label = view_labels['sub_label']
-            if 'involved_genes' in v:
+            if 'involved_genes' in v or 'involved_other' in v:
                 involved = ','.join(
                     v['involved_genes'] + v['involved_other']
                 ).replace('<', '&lt;').replace('>', '&gt;')
@@ -983,7 +1060,7 @@ def get_class_infos():
     return results
 
 
-def get_node_type_by_name():
+def get_class_info_by_name():
     """Return node type by given name."""
     results = get_class_infos()
     return results.get(request.args.get('name'))
@@ -1046,22 +1123,34 @@ def get_ebel_relation_types_as_dot():
     """Return eBEL added edges as DOT."""
     return _get_class_info_as_dot(get_ebel_relation_types)
 
-
+# ApiResult = namedtuple('ApiResult', ['results', 'number_of_results', 'page', 'pages','page_size'])
 def get_documents():
     """Return a list of documents that were imported to compile BEL graph."""
-    return Bel().get_documents_as_dict()
+    sql = """Select
+        @rid.asString() as rid,
+        description,
+        contact_info,
+        version,
+        licence,
+        date.uploaded as uploaded, 
+        copyright,
+        keywords.label as keywords,
+        file.last_modified as file_last_modified,
+        name as file_name,
+        git_info.origin_url as git_origin_url,
+        git_info.hexsha as git_hexsha,
+        git_info.repo_path as git_repo_path,
+        authors
+    from bel_document"""
+    results = [x.oRecordData for x in Bel().execute(sql)]
+    len_results = len(results)
+    return {'results': results, 'number_of_results': len_results, 'page': 1, 'pages': 1, 'page_size': len_results}
 
 
 def get_pmids():
     """Return all PMIDs and their counts from BEL edges."""
-    sql = "Select pmid, count(*) as number_of_edges from bel_relation " \
+    sql = "Select pmid, count(*) as number_of_edges, citation" \
+          " from bel_relation " \
           "where pmid!=0 group by pmid order by number_of_edges desc"
     return [x.oRecordData for x in Bel().execute(sql)]
 
-
-def get_mesh_list():
-    """Return all MeSH terms and their counts from BEL edges."""
-    sql = "Select value as mesh_term, count(*) as number_of_edges from " \
-          "(Select expand(annotation.mesh) as mesh from bel_relation " \
-          "where annotation.mesh is not null) group by value order by number_of_edges desc"
-    return [x.oRecordData for x in Bel().execute(sql)]

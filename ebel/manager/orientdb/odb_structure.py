@@ -893,12 +893,12 @@ abstract_nodes_and_edges_dict: Dict[str, OClass] = {o_class.name: o_class for o_
                                                     o_class.abstract is True}
 
 
-def get_columns(name, columns: List[str] = None, exclude_non_serializable: bool = True) -> list:
+def get_columns(class_name, columns: Tuple[str] = (), exclude_non_serializable: bool = True) -> list:
     """Return list of columns.
 
     Parameters
     ----------
-    name : str
+    class_name : str
         Class name of edge or node.
     columns : List[str], optional
         List of columns.
@@ -910,11 +910,10 @@ def get_columns(name, columns: List[str] = None, exclude_non_serializable: bool 
     list
         List of columns.
     """
-    o_class = nodes_and_edges_dict[name]
+    o_class: OClass = nodes_and_edges_dict[class_name]
     exclude_classes = [ODataType.LINK, ODataType.LINKSET, ODataType.LINKMAP, ODataType.LINKBAG]
 
-    if not columns:
-        columns = []
+    columns = list(columns)
 
     if exclude_non_serializable:
         columns += [p.prop_name for p in o_class.props if p.data_type not in exclude_classes]
@@ -922,7 +921,7 @@ def get_columns(name, columns: List[str] = None, exclude_non_serializable: bool 
         columns += [p.prop_name for p in o_class.props]
     for extends_name in o_class.extends:
         if extends_name not in ['V', 'E']:
-            get_columns(extends_name, columns, exclude_non_serializable)
+            columns += get_columns(extends_name, tuple(columns), exclude_non_serializable)
     return columns
 
 

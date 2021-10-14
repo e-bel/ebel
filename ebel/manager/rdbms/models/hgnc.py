@@ -3,6 +3,8 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, BigInteger, Text, ForeignKey, Date
 
+from ebel.manager.rdbms.models import object_as_dict
+
 Base = declarative_base()
 
 
@@ -229,6 +231,9 @@ class GeneGroupName(Base):
 
     def __str__(self):
         return self.name
+
+    def as_dict(self):
+        return object_as_dict(self)
 
 
 class GeneGroupId(Base):

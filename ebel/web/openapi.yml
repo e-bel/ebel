@@ -159,41 +159,14 @@ paths:
   # BioGRID
   ########################################################################################################################
   
-  /api/v1/biogrid/by_biogrid_id:
-    post:
-      operationId: ebel.web.api.ebel.v1.biogrid.get_biogrid_by_biogrid_id_using_post
-      tags:
-        - BioGRID
-      summary: Get BioGrid entry by BioGrid ID.
-      description: Get BioGrid entry by BioGrid ID.
-      requestBody:
-        content:
-          application/json:
-            schema: # Request body contents
-              type: object
-              properties:
-                biogrid_id:
-                  type: integer
-              example: # Sample object
-                biogrid_id: 2658248
-      responses:
-        200:
-          description: BioGrid entries
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-
 
   /api/v1/biogrid/experimental_systems:
     get:
       operationId: ebel.web.api.ebel.v1.biogrid.get_experimental_systems
       tags:
         - BioGRID
-      summary: Distinct experimental systems
-      description: "Returns distinct experimental systems."
+      summary: Distinct BioGRID experimental systems
+      description: Distinct BioGRID experimental systems
       responses:
         '200':
           description: Return results
@@ -210,8 +183,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.biogrid.get_sources
       tags:
         - BioGRID
-      summary: Distinct database resouces
-      description: "Returns distinct database resources."
+      summary: Distinct BioGRID database resouces
+      description: Distinct BioGRID database resouces
       responses:
         '200':
           description: Return results
@@ -227,8 +200,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.biogrid.get_taxonomies
       tags:
         - BioGRID
-      summary: Distinct NCBI taxonomy IDs and organism names.
-      description: "Returns distinct database resources."
+      summary: Distinct NCBI taxonomy IDs and organism names in BioGRID
+      description: Distinct NCBI taxonomy IDs and organism names in BioGRID
       responses:
         '200':
           description: Distinct NCBI taxonomy IDs and organism names.
@@ -244,8 +217,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.biogrid.get_modifications
       tags:
         - BioGRID
-      summary: Distinct Modifications.
-      description: "Returns distinct modifications."
+      summary: Distinct BioGRID modifications
+      description: Distinct BioGRID modifications
       responses:
         '200':
           description: Distinct modifications.
@@ -256,32 +229,30 @@ paths:
                     items:
                       type: string
 
-  /api/v1/biogrid/by_biogrid_id/{biogrid_id}:
+
+  /api/v1/biogrid/by_biogrid_id:
     get:
       operationId: ebel.web.api.ebel.v1.biogrid.get_biogrid_by_biogrid_id
       tags:
         - BioGRID
-      summary: Get BioGrid entry by BioGrid ID.
-      description: Get BioGrid entry by BioGrid ID.
+      summary: BioGrid entry by BioGrid ID
+      description: BioGrid entry by BioGrid ID
       parameters:
         - name: biogrid_id
-          in: path
-          description: BioGRID ID
+          in: query
           required: true
           schema:
             type: integer
-          example: 2658248
+            example: 2658248
       responses:
-        '200':
+        200:
           description: Return results
           content:
-              application/json:
-                schema:
-                    type: array
-                    items:
-                        type: number
+            application/json:
+              schema:
+                type: object                        
 
-  /api/v1/biogrid/by_pmid/{pmid}:
+  /api/v1/biogrid/by_pmid:
     get:
       operationId: ebel.web.api.ebel.v1.biogrid.get_biogrid_by_pmid
       tags:
@@ -290,12 +261,12 @@ paths:
       description: Get BioGrid entry by PubMed Identifier.
       parameters:
         - name: pmid
-          in: path
+          in: query
           description: NCBI PubMed Identifier.
           required: true
           schema:
             type: integer
-          example: 21685874
+            example: 21685874
       responses:
         '200':
           description: Return results
@@ -306,13 +277,13 @@ paths:
                     items:
                         type: number
 
-  /api/v1/biogrid/interactor/by_symbol_starts_with:
+  /api/v1/biogrid/interactor/by_symbol:
     get:
-      operationId: ebel.web.api.ebel.v1.biogrid.get_interactor_by_symbol_starts_with
+      operationId: ebel.web.api.ebel.v1.biogrid.get_interactor_by_symbol
       tags:
         - BioGRID
-      summary: Search BioGrid Interactor by .
-      description: Get BioGrid entry by PubMed Identifier.
+      summary: BioGrid Interactor by gene symbol.
+      description: BioGrid Interactor by gene symbol.
       parameters:
         - name: symbol
           in: query
@@ -320,28 +291,26 @@ paths:
           description: Gene symbol of interactor.
           schema:
             type: string
-            example: trem
+            example: trem%
         - name: taxonomy_id
           in: query
           required: true
           description: NCBI taxonomy ID interactor A
           schema:
             type: integer
-            default: 9606
+            example: 9606
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -443,7 +412,6 @@ paths:
               value: 11103
         - name: id_type_b
           in: query
-          required: false
           description: Interactor B identifier type. This value is only considered if `interactor_b` is set.
           schema:
             type: string
@@ -451,7 +419,6 @@ paths:
             default: symbol
         - name: interactor_b
           in: query
-          required: false
           description: Interactor B identifier. This value depends on `id_type_b` and `taxonomy_id_b`.
           schema:
             type: string
@@ -564,17 +531,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -707,6 +672,7 @@ paths:
         - BioGRID
         - e(BE:L)
       summary: Get e(BE:L) has_ppi_bg by subject (and object) gene symbol and taxonomy ID
+      description: Get e(BE:L) has_ppi_bg by subject (and object) gene symbol and taxonomy ID
       parameters:
         - name: symbol
           in: query
@@ -770,17 +736,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -994,17 +958,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1146,8 +1108,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.clinical_trials_gov.get_mesh_term_starts_with
       tags:
         - ClinicalTrials.gov
-      summary: Search MeSH term starts with search_term
-      description: Search MeSH term starts with search_term
+      summary: ClinicalTrials.gov MeSH terms starts with
+      description: ClinicalTrials.gov MeSH terms starts with
       parameters:
         - name: mesh_term
           in: query
@@ -1158,17 +1120,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1183,13 +1143,13 @@ paths:
                     items:
                         type: number
 
-  /api/v1/clinical_trial/condition/starts_with:
+  /api/v1/clinical_trial/condition_starts_with:
     get:
       operationId: ebel.web.api.ebel.v1.clinical_trials_gov.get_condition_starts_with
       tags:
         - ClinicalTrials.gov
-      summary: Search condition starts with search_term
-      description: Search condition starts with search_term
+      summary: ClinicalTrials.gov conditions
+      description: CClinicalTrials.gov conditions
       parameters:
         - name: condition
           in: query
@@ -1200,17 +1160,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1230,8 +1188,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.clinical_trials_gov.get_keyword_starts_with
       tags:
         - ClinicalTrials.gov
-      summary: Search keyword starts with search_term
-      description: Search keyword starts with search_term
+      summary: ClinicalTrials.gov keywords
+      description: ClinicalTrials.gov keywords
       parameters:
         - name: keyword
           in: query
@@ -1242,17 +1200,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1272,8 +1228,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.clinical_trials_gov.get_ct_by_mesh_term
       tags:
         - ClinicalTrials.gov
-      summary: Get clinical trials by MeSH term 
-      description: Get clinical trials by MeSH term 
+      summary: ClinicalTrials.gov trials by MeSH term 
+      description: ClinicalTrials.gov trials by MeSH term 
       parameters:
         - name: mesh_term
           in: query
@@ -1284,17 +1240,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1312,8 +1266,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.clinical_trials_gov.get_ct_by_intervention
       tags:
         - ClinicalTrials.gov
-      summary: Get clinical trials by intervention 
-      description: Get clinical trials by intervention 
+      summary: ClinicalTrials.gov trials by intervention 
+      description: ClinicalTrials.gov trials by intervention 
       parameters:
         - name: intervention_name
           in: query
@@ -1353,17 +1307,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1381,8 +1333,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.clinical_trials_gov.get_ct_by_keyword
       tags:
         - ClinicalTrials.gov
-      summary: Get clinical trials by MeSH term 
-      description: Get clinical trials by MeSH term 
+      summary: Get clinical trials by keyword
+      description: Get clinical trials by keyword
       parameters:
         - name: keyword
           in: query
@@ -1393,17 +1345,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1433,17 +1383,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1646,17 +1594,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1715,17 +1661,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1756,17 +1700,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1885,17 +1827,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -1925,17 +1865,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2001,17 +1939,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2034,8 +1970,8 @@ paths:
       tags:
         - DisGeNET
         - e(BE:L)
-      summary: Get SNP-gene relation from e(BE:L) knowledge graph
-      description: Get SNP-gene relation from e(BE:L) knowledge graph
+      summary: DisGeNET SNP-gene relation from e(BE:L) knowledge graph
+      description: DisGeNET SNP-gene relation from e(BE:L) knowledge graph
       parameters:
         - name: relation
           in: query
@@ -2096,7 +2032,7 @@ paths:
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
@@ -2117,8 +2053,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.disgenet.get_sources
       tags:
         - DisGeNET
-      summary: Get all available sources
-      description: Get all available sources
+      summary: DisGeNET sources
+      description: DisGeNET sources
       responses:
         200:
           description: List of DisGeNET entries
@@ -2132,8 +2068,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.disgenet.get_disease_name_starts_with
       tags:
         - DisGeNET
-      summary: Search disease names starts with
-      description: Search MeSH term starts with
+      summary: DisGeNET disease names starts with
+      description: DisGeNET MeSH term starts with
       parameters:
         - name: disease_name
           in: query
@@ -2144,17 +2080,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2174,8 +2108,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.disgenet.get_gene_symbol_starts_with
       tags:
         - DisGeNET
-      summary: Search gene symbol starts with
-      description: Search gene symbol starts with
+      summary: DisGeNET gene symbol starts with
+      description: DisGeNET gene symbol starts with
       parameters:
         - name: gene_symbol
           in: query
@@ -2186,17 +2120,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2216,8 +2148,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.disgenet.get_gene_disease_pmid_associations
       tags:
         - DisGeNET
-      summary: Get Gene-Disease-PubMed associations
-      description: Get Gene-Disease-PubMed associations
+      summary: DisGeNET Gene-Disease-PubMed associations
+      description: DisGeNET Gene-Disease-PubMed associations
       parameters:
         - name: gene_id
           in: query
@@ -2262,17 +2194,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2290,8 +2220,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.disgenet.get_variant_disease_pmid_associations
       tags:
         - DisGeNET
-      summary: Get variant_disease_pmid_associations
-      description: Get Variant-Disease-PMID associations
+      summary: DisGeNET variant_disease_pmid_associations
+      description: DisGeNET Variant-Disease-PMID associations
       parameters:
         - name: snp_id
           in: query
@@ -2333,17 +2263,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2408,17 +2336,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2451,17 +2377,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2494,17 +2418,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2582,17 +2504,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2625,17 +2545,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2676,17 +2594,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2719,17 +2635,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2762,17 +2676,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2809,17 +2721,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -2927,17 +2837,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -3013,17 +2921,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -3107,8 +3013,8 @@ paths:
       tags:
         - GWAS Catalog
         - e(BE:L)
-      summary: Search clinvar by e(BE:L) relation
-      description: Search clinvar by e(BE:L) relation
+      summary: GWAS Catalog related eBEL relations
+      description: GWAS Catalog related eBEL relations
       parameters:
         - name: namespace
           in: query
@@ -3149,17 +3055,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -3185,77 +3089,62 @@ paths:
           in: query
           schema:
             type: string
-            example: 2013-10-24
         - name: pubmedid
           in: query
           schema:
             type: integer
-            example: 23563609
         - name: first_author
           in: query
           schema:
             type: string
-            example: Wheeler E
         - name: date
           in: query
           schema:
             type: string
-            example: 2013-04-07
         - name: journal
           in: query
           schema:
             type: string
-            example: Nat Genet
         - name: link
           in: query
           schema:
             type: string
-            example: www.ncbi.nlm.nih.gov/pubmed/23563609
         - name: study
           in: query
           schema:
             type: string
-            example: Genome-wide SNP and CNV analysis identifies common and low-frequency variants associated with severe early-onset obesity.
         - name: disease_trait
           in: query
           schema:
             type: string
-            example: Obesity (early onset extreme)
         - name: initial_sample_size
           in: query
           schema:
             type: string
-            example: 1,509 European ancestry cases, 5,380 European ancestry controls
         - name: replication_sample_size
           in: query
           schema:
             type: string
-            example: 971 European ancestry cases, 1,990 European ancestry controls
         - name: region
           in: query
           schema:
             type: string
-            example: 16q12.2
         - name: chr_id
           in: query
           schema:
             type: string
-            example: 16
         - name: chr_pos
           in: query
           schema:
             type: integer
-            example: 53767042
         - name: reported_gene_s
           in: query
           schema:
             type: string
-            example: FTO
         - name: mapped_gene
           in: query
           schema:
             type: string
-            example: FTO
         - name: upstream_gene_id
           in: query
           schema:
@@ -3276,7 +3165,6 @@ paths:
           in: query
           schema:
             type: string
-            example: rs1421085-C
         - name: snp
           in: query
           description: RS number
@@ -3292,12 +3180,10 @@ paths:
           in: query
           schema:
             type: integer
-            example: 1421085
         - name: context
           in: query
           schema:
             type: string
-            example: intron_variant
         - name: intergenic
           in: query
           schema:
@@ -3307,17 +3193,14 @@ paths:
           in: query
           schema:
             type: number
-            example: 0.41
         - name: p_value
           in: query
           schema:
             type: string
-            example: 3e-28
         - name: pvalue_mlog
           in: query
           schema:
             type: number
-            example: 27.5229
         - name: p_value_text
           in: query
           schema:
@@ -3326,22 +3209,34 @@ paths:
           in: query
           schema:
             type: string
-            example: 1.44
         - name: _95_ci_text
           in: query
           schema:
             type: string
-            example: '[1.35-1.54]'
         - name: platform_snps_passing_qc
           in: query
           schema:
             type: string
-            example: Affymetrix [~ 2000000] (imputed)
         - name: cnv
           in: query
           schema:
             type: string
-            example: N
+        - name: page_size
+          in: query
+          description: Results per page
+          schema:
+            type: integer
+            default: 10
+            maximum: 100
+            minimum: 1
+            example: 1
+        - name: page
+          in: query
+          description: Page number (starting with 1)
+          schema:
+            type: integer
+            default: 1
+            example: 1            
       responses:
         200:
           description: List of DisGeNET entries
@@ -3359,8 +3254,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.hgnc.get_gene_group_name
       tags:
         - HGNC
-      summary: Get HGNC
-      description: Get HGNC
+      summary: HGNC group name
+      description: HGNC group name
       parameters:
         - name: hgnc_id
           in: query
@@ -3373,17 +3268,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -3559,17 +3452,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -3685,17 +3576,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -3731,17 +3620,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -3832,17 +3719,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -3865,19 +3750,17 @@ paths:
       operationId: ebel.web.api.ebel.v1.iuphar.get_interaction
       tags:
         - IUPHAR
-      summary: Get IUPHAR interaction
-      description: Get IUPHAR interaction
+      summary: IUPHAR interaction
+      description: IUPHAR interaction
       parameters:
         - name: target
           in: query
           schema:
             type: string
-            example: CD33
         - name: target_id
           in: query
           schema:
             type: integer
-            example: 2601
         - name: target_gene_symbol
           in: query
           schema:
@@ -3887,12 +3770,10 @@ paths:
           in: query
           schema:
             type: string
-            example: P20138
         - name: target_ensembl_gene_id
           in: query
           schema:
             type: string
-            example: ENSG00000105383
         - name: target_ligand
           in: query
           schema:
@@ -3921,17 +3802,14 @@ paths:
           in: query
           schema:
             type: string
-            example: Human
         - name: ligand
           in: query
           schema:
             type: string
-            example: gemtuzumab ozogamicin
         - name: ligand_id
           in: query
           schema:
             type: integer
-            example: 6775
         - name: ligand_gene_symbol
           in: query
           schema:
@@ -3944,22 +3822,18 @@ paths:
           in: query
           schema:
             type: integer
-            example: 178103381
         - name: approved_drug
           in: query
           schema:
             type: string
-            example: 1
         - name: type
           in: query
           schema:
             type: string
-            example: Antibody
         - name: action
           in: query
           schema:
             type: string
-            example: Binding
         - name: action_comment
           in: query
           schema:
@@ -3968,17 +3842,14 @@ paths:
           in: query
           schema:
             type: string
-            example: Selective
         - name: endogenous
           in: query
           schema:
             type: boolean
-            example: false
         - name: primary_target
           in: query
           schema:
             type: boolean
-            example: true
         - name: concentration_range
           in: query
           schema:
@@ -4019,7 +3890,6 @@ paths:
           in: query
           schema:
             type: string
-            example: "="
         - name: assay_description
           in: query
           schema:
@@ -4036,21 +3906,18 @@ paths:
           in: query
           schema:
             type: string
-            example: 10720144
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4068,8 +3935,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.iuphar.get_interaction_by_target_uniprot
       tags:
         - IUPHAR
-      summary: Get IUPHAR interaction
-      description: Get IUPHAR interaction
+      summary: IUPHAR interaction by target uniprot accession
+      description: IUPHAR interaction by target uniprot accession
       parameters:
         - name: target_uniprot
           in: query
@@ -4079,17 +3946,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4107,8 +3972,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.iuphar.get_interaction_by_target_gene_symbol
       tags:
         - IUPHAR
-      summary: Get IUPHAR interaction
-      description: Get IUPHAR interaction
+      summary: IUPHAR interaction by target gene symbol
+      description: IUPHAR interaction by target gene symbol
       parameters:
         - name: target_gene_symbol
           in: query
@@ -4118,17 +3983,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4147,8 +4010,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.iuphar.get_ligandby_by_id
       tags:
         - IUPHAR
-      summary: Get IUPHAR ligand
-      description: Get IUPHAR ligand
+      summary: IUPHAR ligand by ID
+      description: IUPHAR ligand by ID
       parameters:
         - name: id
           in: query
@@ -4170,8 +4033,8 @@ paths:
       tags:
         - IUPHAR
         - e(BE:L)
-      summary: Get e(BE:L) interaction
-      description: Get e(BE:L) interaction
+      summary: IUPHAR e(BE:L) interaction
+      description: IUPHAR e(BE:L) interaction
       parameters:
         - name: interactor_a_rid
           in: query
@@ -4277,17 +4140,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4310,8 +4171,8 @@ paths:
       tags:
         - KEGG
         - e(BE:L)
-      summary: Get KEGG e(BE:L) relations
-      description: Get KEGG e(BE:L) relations
+      summary: KEGG e(BE:L) relations
+      description: KEGG e(BE:L) relations
       parameters:
         - name: interactor_a_rid
           in: query
@@ -4373,17 +4234,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4401,8 +4260,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.kegg.get_by_gene_symbol
       tags:
         - KEGG
-      summary: Get KEGG interaction
-      description: Get KEGG interaction
+      summary: KEGG interaction by gene symbol
+      description: KEGG interaction by gene symbol
       parameters:
         - name: gene_symbol
           in: query
@@ -4412,17 +4271,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4440,8 +4297,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.kegg.get_kegg
       tags:
         - KEGG
-      summary: Get KEGG interaction
-      description: Get KEGG interaction
+      summary: KEGG interaction
+      description: KEGG interaction
       parameters:
         - name: pathway_identifier
           in: query
@@ -4491,17 +4348,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4523,8 +4378,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.mirtarbase.get_mirtarbase
       tags:
         - miRTarBase
-      summary: Get miRTarBase entries
-      description: Get miRTarBase entries
+      summary: miRTarBase
+      description: miRTarBase
       parameters:
         - name: mi_rtar_base_id
           in: query
@@ -4574,17 +4429,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4603,8 +4456,8 @@ paths:
       tags:
         - miRTarBase
         - e(BE:L)
-      summary: Get microRNA/target e(BE:L) relation
-      description: Get microRNA/target e(BE:L) relation
+      summary: microRNA/target e(BE:L) relation
+      description: microRNA/target e(BE:L) relation
       parameters:
         - name: mirbase_id
           in: query
@@ -4660,17 +4513,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4692,8 +4543,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.ncbi.get_gene_by_go
       tags:
         - NCBI Gene
-      summary: Find NCBI Gene IDs by Gene Ontology proterties tax_id, go_id, evidence, qualifier, go_term ,pub_med and/or category
-      description: Find NCBI Gene IDs by Gene Ontology identifier
+      summary: NCBI Gene ID
+      description: NCBI Gene ID
       parameters:
         - name: tax_id
           in: query
@@ -4733,17 +4584,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4761,8 +4610,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.ncbi.get_gene_by_mim
       tags:
         - NCBI Gene
-      summary: Find NCBI Gene IDs by MIM
-      description: Find NCBI Gene IDs by MIM
+      summary: NCBI Gene IDs by MIM
+      description: NCBI Gene IDs by MIM
       parameters:
         - name: mim_number
           in: query
@@ -4794,17 +4643,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4822,8 +4669,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.ncbi.get_gene_by_ensembl
       tags:
         - NCBI Gene
-      summary: Find NCBI Gene IDs by Ensembl
-      description: Find NCBI Gene IDs by Ensembl
+      summary: NCBI Gene IDs by Ensembl
+      description: NCBI Gene IDs by Ensembl
       parameters:
         - name: tax_id
           in: query
@@ -4863,17 +4710,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4892,8 +4737,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.ncbi.get_gene_info
       tags:
         - NCBI Gene
-      summary: Find NCBI Gene IDs by Ensembl
-      description: Find NCBI Gene IDs by Ensembl
+      summary: NCBI Gene IDs by Ensembl
+      description: NCBI Gene IDs by Ensembl
       parameters:
         - name: gene_id
           in: query
@@ -4936,17 +4781,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -4990,17 +4833,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5029,17 +4870,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5068,17 +4907,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5101,8 +4938,8 @@ paths:
       tags:
         - Offsides
         - e(BE:L)
-      summary: Get Offsides entries
-      description: Get Offsides entries
+      summary: Offsides entries
+      description: Offsides entries
       parameters:
         - name: drugbank_id
           description: DrugBank ID
@@ -5139,17 +4976,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5167,8 +5002,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.offsides.get_offsides
       tags:
         - Offsides
-      summary: Get Offsides entries
-      description: Get Offsides entries
+      summary: Offsides entries
+      description: Offsides entries
       parameters:
         - name: drug_rxnorn_id
           description: RxNorm CUI (RxCUI) of each drug
@@ -5239,17 +5074,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5272,8 +5105,8 @@ paths:
       tags:
         - Pathway Commons
         - e(BE:L)
-      summary: Get Pathway e(BE:L) relations
-      description: Get Pathway e(BE:L) relations
+      summary: Pathway Commons e(BE:L) relations
+      description: Pathway Commons e(BE:L) relations
       parameters:
         - name: interactor_a_namespace
           in: query
@@ -5321,17 +5154,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5349,8 +5180,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.pathway_commons.get_pathway_name_starts_with
       tags:
         - Pathway Commons
-      summary: Get Pathway Commons entries by gene symbol
-      description: Get Pathway Commons entries by gene symbol
+      summary: Pathway Commons pathway name starts with
+      description: Pathway Commons pathway name starts with
       parameters:
         - name: pathway_name
           in: query
@@ -5360,17 +5191,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5388,8 +5217,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.pathway_commons.get_by_pmid
       tags:
         - Pathway Commons
-      summary: Get Pathway Commons by PubMed identifier
-      description: Get Pathway Commons entries by PubMed identifier
+      summary: Pathway Commons by PubMed ID
+      description: Pathway Commons entries by PubMed ID
       parameters:
         - name: pmid
           in: query
@@ -5399,17 +5228,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5427,8 +5254,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.pathway_commons.get_by_pathway_name
       tags:
         - Pathway Commons
-      summary: Get Pathway Commons entries by gene symbol
-      description: Get Pathway Commons entries by gene symbol
+      summary: Pathway Commons by pathway name 
+      description: Pathway Commons by pathway name 
       parameters:
         - name: pathway_name
           in: query
@@ -5438,17 +5265,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5467,8 +5292,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.pathway_commons.get_by_gene_symbol
       tags:
         - Pathway Commons
-      summary: Get Pathway Commons entries by gene symbol
-      description: Get Pathway Commons entries by gene symbol
+      summary: Pathway Commons entries by gene symbol
+      description: Pathway Commons entries by gene symbol
       parameters:
         - name: gene_symbol
           in: query
@@ -5478,17 +5303,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5506,8 +5329,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.pathway_commons.get_pathway_commons
       tags:
         - Pathway Commons
-      summary: Get Pathway Commons entries
-      description: Get Pathway Commons entries
+      summary: Pathway Commons entries
+      description: Pathway Commons entries
       parameters:
         - name: participant_a
           in: query
@@ -5527,17 +5350,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5595,17 +5416,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5649,17 +5468,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5713,17 +5530,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5817,17 +5632,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5871,17 +5684,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5935,17 +5746,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -5969,8 +5778,8 @@ paths:
       tags:
         - Reactome
         - e(BE:L)
-      summary: Get Reactome entries
-      description: Get Reactome entries
+      summary: Reactome by pathway name
+      description: Reactome by pathway name
       parameters:
         - name: pathway_name
           in: query
@@ -5980,17 +5789,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6008,8 +5815,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.reactome.get_reactome
       tags:
         - Reactome
-      summary: Get Reactome entries
-      description: Get Reactome entries
+      summary: Reactome
+      description: Reactome
       parameters:
         - name: identifier
           in: query
@@ -6039,17 +5846,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6072,8 +5877,8 @@ paths:
       tags:
         - STRING
         - e(BE:L)
-      summary: Get STRING e(BE:L) relation
-      description: Get STRING e(BE:L) relation
+      summary: STRING db e(BE:L) relation
+      description: STRING db e(BE:L) relation
       parameters:
         - name: interactor_a_rid
           in: query
@@ -6128,17 +5933,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6157,8 +5960,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.stringdb.get_stringdb
       tags:
         - STRING
-      summary: Get STRING entries
-      description: Get STRING entries
+      summary: STRING db
+      description: STRING db
       parameters:
         - name: protein1
           in: query
@@ -6253,17 +6056,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6282,8 +6083,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.stringdb.get_stringdb_action
       tags:
         - STRING
-      summary: Get STRING entries
-      description: Get STRING entries
+      summary: STRING db action
+      description: STRING db action
       parameters:
         - name: item_id_a
           in: query
@@ -6341,17 +6142,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6373,8 +6172,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.uniprot.get_bel_node_uniprot
       tags:
         - UniProt
-      summary: Get UniProt
-      description: Get UniProt
+      summary: UniProt entries in Knowledge Graph
+      description: UniProt entries in Knowledge Graph
       parameters:
         - name: accession
           description: 1st accession number
@@ -6390,7 +6189,7 @@ paths:
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
@@ -6412,8 +6211,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.uniprot.get_uniprot
       tags:
         - UniProt
-      summary: Get UniProt
-      description: Get UniProt
+      summary: UniProt
+      description: UniProt
       parameters:
         - name: accession
           description: 1st accession number
@@ -6463,7 +6262,7 @@ paths:
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
@@ -6485,8 +6284,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.uniprot.get_keyword_starts_with
       tags:
         - UniProt
-      summary: UniProt keyword starts with.
-      description: UniProt keyword starts with.
+      summary: UniProt keyword starts with
+      description: UniProt keyword starts with
       parameters:
         - name: keyword
           in: query
@@ -6497,17 +6296,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6527,8 +6324,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.uniprot.get_subcellular_location_starts_with
       tags:
         - UniProt
-      summary: UniProt subcellular location starts with.
-      description: UniProt subcellular location starts with.
+      summary: UniProt subcellular location starts with
+      description: UniProt subcellular location starts with
       parameters:
         - name: subcellular_location
           in: query
@@ -6539,17 +6336,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6569,8 +6364,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.uniprot.get_gene_symbol_starts_with
       tags:
         - UniProt
-      summary: UniProt gene symbol starts with.
-      description: UniProt gene symbol starts with.
+      summary: UniProt gene symbol starts with
+      description: UniProt gene symbol starts with
       parameters:
         - name: gene_symbol
           in: query
@@ -6581,17 +6376,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6611,8 +6404,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.uniprot.get_gene_starts_with
       tags:
         - UniProt
-      summary: UniProt gene starts with.
-      description: UniProt gene starts with.
+      summary: UniProt gene starts with
+      description: UniProt gene starts with
       parameters:
         - name: gene
           in: query
@@ -6623,17 +6416,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6653,8 +6444,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.uniprot.get_organism_starts_with
       tags:
         - UniProt
-      summary: UniProt organism starts with.
-      description: UniProt organism starts with.
+      summary: UniProt organism starts with
+      description: UniProt organism starts with
       parameters:
         - name: organism
           in: query
@@ -6665,17 +6456,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6695,8 +6484,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.uniprot.get_function_starts_with
       tags:
         - UniProt
-      summary: UniProt function starts with.
-      description: UniProt function starts with.
+      summary: UniProt function starts with
+      description: UniProt function starts with
       parameters:
         - name: description
           in: query
@@ -6707,17 +6496,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6741,8 +6528,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.expression_atlas.get_expriment
       tags:
         - Expression Atlas
-      summary: Get expression atlas experiment.
-      description: Get expression atlas experiment.
+      summary: Expression Atlas experiment
+      description: Expression Atlas experiment
       parameters:
         - name: id
           in: query
@@ -6761,17 +6548,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6791,8 +6576,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.expression_atlas.get_idf
       tags:
         - Expression Atlas
-      summary: Get expression atlas IDF.
-      description: Get expression atlas IDF.
+      summary: Expression Atlas IDF
+      description: Expression Atlas IDF
       parameters:
         - name: key_name
           in: query
@@ -6812,17 +6597,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6843,8 +6626,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.expression_atlas.get_group_comparison
       tags:
         - Expression Atlas
-      summary: Get expression atlas group_comparison.
-      description: Get expression atlas group_comparison.
+      summary: Expression Atlas group comparison
+      description: Expression Atlas group_comparison
       parameters:
         - name: id
           in: query
@@ -6867,17 +6650,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6897,8 +6678,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.expression_atlas.get_fold_change
       tags:
         - Expression Atlas
-      summary: Get expression atlas foldchange.
-      description: Get expression atlas foldchange.
+      summary: Expression Atlas fold change
+      description: Expression Atlass fold change
       parameters:
         - name: gene_id
           in: query
@@ -6918,17 +6699,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -6949,8 +6728,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.expression_atlas.get_sdrf_condensed
       tags:
         - Expression Atlas
-      summary: Get expression atlas sdrf condensed.
-      description: Get expression atlas sdrf condensed.
+      summary: Expression Atlas SDRF condensed
+      description: Expression Atlas SDRF (Sample and Data Relationship Format) condensed
       parameters:
         - name: experiment_id
           in: query
@@ -6984,17 +6763,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -7014,8 +6791,8 @@ paths:
       operationId: ebel.web.api.ebel.v1.expression_atlas.get_gsea
       tags:
         - Expression Atlas
-      summary: Get expression atlas GSEA.
-      description: Get expression atlas GSEA.
+      summary: Expression Atlas GSEA
+      description: Expression Atlas GSEA (Gene Set Enrichment Analysis)
       parameters:
         - name: experiment_id
           in: query
@@ -7074,17 +6851,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -7251,17 +7026,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -7331,17 +7104,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -7543,17 +7314,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -7583,17 +7352,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -7630,16 +7397,32 @@ paths:
       summary: Get BEL edge by MeSH
       description: Get BEL edge by MeSH
       parameters:
-        - name: annotation
+        - name: annotation_key
           in: query
           schema:
             type: string
             example: "mesh"
-        - name: mesh_term
+        - name: annotation_term
           in: query
           schema:
             type: string
-            example: "Hematologic Diseases"
+            example: "Alzheimer Disease"
+        - name: page_size
+          in: query
+          description: Results per page
+          schema:
+            type: integer
+            default: 10
+            maximum: 100
+            minimum: 1
+            example: 1
+        - name: page
+          in: query
+          description: Page number (starting with 1)
+          schema:
+            type: integer
+            default: 1
+            example: 1            
       responses:
         '200':
           description: Documents.
@@ -7650,23 +7433,6 @@ paths:
                     items:
                       type: object
 
-
-  /api/v1/bel/mesh_list:
-    get:
-      operationId: ebel.web.api.ebel.v1.bel.get_mesh_list
-      tags:
-        - BEL
-      summary: All MeSH terms used in the knowledge graph.
-      description: All MeSH terms used in the knowledge graph.
-      responses:
-        '200':
-          description: Documents.
-          content:
-              application/json:
-                schema:
-                    type: array
-                    items:
-                      type: object
 
   /api/v1/bel/pmids:
     get:
@@ -7685,6 +7451,56 @@ paths:
                     items:
                       type: integer
 
+  /api/v1/bel/get_edge_rids:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_edge_rids
+      tags:
+        - BEL
+      summary: Get subject, realtion, object and document rids
+      description: Get subject, realtion, object and document rids
+      parameters:
+        - name: document_rid
+          in: query
+          schema:
+            type: string
+        - name: subject_rid
+          in: query
+          schema:
+            type: string
+        - name: relation_rid
+          in: query
+          schema:
+            type: string
+        - name: object_rid
+          in: query
+          schema:
+            type: string
+        - name: page_size
+          in: query
+          description: Results per page
+          schema:
+            type: integer
+            example: 1
+            default: 10
+            maximum: 100
+            minimum: 1
+        - name: page
+          in: query
+          description: Page number (starting with 1)
+          schema:
+            type: integer
+            example: 1
+            default: 1
+      responses:
+        '200':
+          description: Return results
+          content:
+              application/json:
+                schema:
+                    type: array
+                    items:
+                        type: object
+
   /api/v1/bel/documents:
     get:
       operationId: ebel.web.api.ebel.v1.bel.get_documents
@@ -7702,19 +7518,23 @@ paths:
                     items:
                       type: object
 
-  /api/v1/bel/node_type_by_name:
+  /api/v1/bel/class_info_by_name:
     get:
-      operationId: ebel.web.api.ebel.v1.bel.get_node_type_by_name
+      operationId: ebel.web.api.ebel.v1.bel.get_class_info_by_name
       tags:
         - BEL
         - e(BE:L)
-      summary: get info on node or relation(edge) class.
-      description: get info on node or relation(edge) class.      
+      summary: get knowledge graph class info on node or relation(edge) class.
+      description: get knowledge graph class info on node or relation(edge) class.
       parameters:
         - name: name
+          description: name of node or edge class
+          example: bel_relation
+          required: true
           in: query
           schema:
             type: string
+            example: causal
       responses:
         '200':
           description: Documents.
@@ -7879,6 +7699,47 @@ paths:
                     items:
                         type: object
 
+  /api/v1/bel/annotation_keys:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_annotation_keys
+      tags:
+        - BEL
+      summary: Get annotation keywords
+      description: Get annotation keywords
+      responses:
+        '200':
+          description: Return results
+          content:
+              application/json:
+                schema:
+                    type: array
+                    items:
+                        type: object                        
+
+  /api/v1/bel/annotation_terms:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_annotation_terms
+      tags:
+        - BEL
+      summary: Get annotation terms by keyword
+      description: Get annotation terms by keyword
+      parameters:
+        - name: annotation_key
+          required: true
+          in: query
+          schema:
+            type: string
+            example: "mesh"
+      responses:
+        '200':
+          description: Return results
+          content:
+              application/json:
+                schema:
+                    type: array
+                    items:
+                        type: object
+
   /api/v1/bel/paths_by_belish:
     get:
       operationId: ebel.web.api.ebel.v1.bel.get_paths_by_belish
@@ -7893,13 +7754,13 @@ paths:
           in: query
           schema:
             type: string
-            example: "p(HGNC:\"%\") -increases-> complex(%) <-decreases- p(HGNC:\"%\")"
+            example: "p(HGNC:\"%\") -increases-> p(%) <-decreases- p(HGNC:\"%\")"
         - name: limit
           in: query
           schema:
             type: integer
             default: 30
-            example: 10
+            example: 1
       responses:
         '200':
           description: Return results
@@ -7928,77 +7789,63 @@ paths:
             type: string
             enum: ['abundance', 'activity', 'bel', 'bio_act', 'bio_concept', 'bio_list', 'bio_object', 'biological_process', 'cell_secretion', 'cell_surface_expression', 'complex', 'composite', 'degradation', 'drug', 'drug_db', 'ebel', 'fragment', 'from_location', 'fusion_gene', 'fusion_protein', 'fusion_rna', 'gene', 'genetic_flow', 'gmod', 'list', 'location', 'micro_rna', 'pathology', 'pmod', 'population', 'products', 'protein', 'reactants', 'reaction', 'rna', 'side_effect', 'snp', 'to_location', 'translocation', 'variant']
             example: protein
-            default: protein
         - name: start_node_namespace
           description: "Namespace of start node in which a name is valid."
           in: query
           schema:
             type: string
-            example: HGNC            
         - name: start_node_name
           description: "Start node name of a path."
           in: query
           schema:
             type: string
-            example: TNF
         - name: connecting_relation
           description: "Connecting relation types over all edges in the path."
           in: query
           schema:
             type: string
             enum: ['activates__iu', 'activates_st', 'acts_in', 'agonist_of__iu', 'allosteric_modulator_of__iu', 'analogous_to', 'antagonist_of__iu', 'antibody_against__iu', 'association', 'bel_relation', 'biomarker_for', 'causal', 'causes_no_change', 'channel_blocker_of__iu', 'compiler', 'controls_expression_of_pc', 'controls_expression_of_st', 'controls_phosphorylation_of_pc', 'controls_pmod_of_st', 'controls_transport_of_pc', 'correlative', 'decreases', 'decreases_ace_bg', 'decreases_add_bg', 'decreases_adr_bg', 'decreases_bg', 'decreases_dei_bg', 'decreases_expression_of_st', 'decreases_far_bg', 'decreases_fat_bg', 'decreases_ger_bg', 'decreases_gly_bg', 'decreases_hyd_bg', 'decreases_isg_bg', 'decreases_me0_bg', 'decreases_me1_bg', 'decreases_me2_bg', 'decreases_me3_bg', 'decreases_mon_bg', 'decreases_myr_bg', 'decreases_ned_bg', 'decreases_ngl_bg', 'decreases_nit_bg', 'decreases_ogl_bg', 'decreases_pal_bg', 'decreases_pho_bg', 'decreases_pho_kg', 'decreases_pre_bg', 'decreases_suh_bg', 'decreases_sul_bg', 'decreases_sum_bg', 'decreases_sup_bg', 'decreases_suy_bg', 'decreases_tri_bg', 'decreases_u48_bg', 'decreases_u63_bg', 'decreases_ubi_bg', 'decreases_ubm_bg', 'decreases_ubp_bg', 'deprecated', 'directly_decreases', 'directly_increases', 'disgenet_gene_disease', 'ebel_relation', 'gene_disease_association', 'genomic', 'has__abundance', 'has__complex', 'has__composite', 'has__fragment', 'has__from_location', 'has__gene', 'has__gmod', 'has__location', 'has__micro_rna', 'has__pmod', 'has__population', 'has__products', 'has__protein', 'has__reactants', 'has__rna', 'has__to_location', 'has__variant', 'has_action', 'has_action_pc', 'has_action_st', 'has_downstream_snp', 'has_downstream_snp_cv', 'has_downstream_snp_dgn', 'has_downstream_snp_gc', 'has_drug_target', 'has_drug_target_db', 'has_fragmented_protein', 'has_located', 'has_located_abundance', 'has_located_complex', 'has_located_gene', 'has_located_micro_rna', 'has_located_population', 'has_located_protein', 'has_located_rna', 'has_mapped_snp', 'has_mapped_snp_cv', 'has_mapped_snp_dgn', 'has_mapped_snp_gc', 'has_mirgene_target', 'has_modification', 'has_modified', 'has_modified_gene', 'has_modified_protein', 'has_ppi', 'has_ppi_bg', 'has_ppi_ia', 'has_ppi_kg', 'has_ppi_st', 'has_product', 'has_side_effect', 'has_snp', 'has_snp_clinvar', 'has_snp_disgenet', 'has_snp_gwascatalog', 'has_upstream_snp', 'has_upstream_snp_cv', 'has_upstream_snp_dgn', 'has_upstream_snp_gc', 'has_variant', 'has_variant_gene', 'has_variant_micro_rna', 'has_variant_obj', 'has_variant_protein', 'has_variant_rna', 'includes', 'increases', 'increases_ace_bg', 'increases_add_bg', 'increases_adr_bg', 'increases_dei_bg', 'increases_expression_of_st', 'increases_far_bg', 'increases_fat_bg', 'increases_ger_bg', 'increases_gly_bg', 'increases_gly_kg', 'increases_hyd_bg', 'increases_isg_bg', 'increases_me0_bg', 'increases_me0_kg', 'increases_me1_bg', 'increases_me2_bg', 'increases_me3_bg', 'increases_mon_bg', 'increases_myr_bg', 'increases_ned_bg', 'increases_ngl_bg', 'increases_nit_bg', 'increases_ogl_bg', 'increases_pal_bg', 'increases_pho_bg', 'increases_pho_kg', 'increases_pre_bg', 'increases_suh_bg', 'increases_sul_bg', 'increases_sum_bg', 'increases_sup_bg', 'increases_suy_bg', 'increases_tri_bg', 'increases_u48_bg', 'increases_u63_bg', 'increases_ubi_bg', 'increases_ubi_kg', 'increases_ubm_bg', 'increases_ubp_bg', 'inhibits__iu', 'inhibits_gating__iu', 'inhibits_st', 'iuphar_interaction', 'negative_correlation', 'no_correlation', 'pathway_interaction', 'positive_correlation', 'prognostic_biomarker_for', 'rate_limiting_step_of', 'reactant_in', 'regulates', 'transcribed_to', 'translated_to', 'translocates']
-            example: causal
         - name: multiple_connecting_relations
           in: query
           description: "Multiple connecting relation types seperated by comma. If it's set, it overrides connecting_relation"
           schema:
             type: string
-            example: increases,decreases
         - name: connecting_node_class
           description: "All node classes between start and end."
           in: query
           schema:
             type: string
-            example: bel      
         - name: mesh_term
           description: "One or several MeSH term(s) seperated by semicolon"
           in: query
           schema:
             type: string
-            example: SARS-CoV-2;Drug Repositioning
         - name: pmid
           description: "One or several PubMed Identifier(s) seperated by any non-numeric character"
           in: query
           schema:
             type: string
-            example: 18675468
         - name: end_node_class
           description: "End node class of a path like protein"
           in: query
           schema:
             type: string
             enum: ['abundance', 'activity', 'bel', 'bio_act', 'bio_concept', 'bio_list', 'bio_object', 'biological_process', 'cell_secretion', 'cell_surface_expression', 'complex', 'composite', 'degradation', 'drug', 'drug_db', 'ebel', 'fragment', 'from_location', 'fusion_gene', 'fusion_protein', 'fusion_rna', 'gene', 'genetic_flow', 'gmod', 'list', 'location', 'micro_rna', 'pathology', 'pmod', 'population', 'products', 'protein', 'reactants', 'reaction', 'rna', 'side_effect', 'snp', 'to_location', 'translocation', 'variant']
-            example: protein
-            default: protein
         - name: end_node_namespace
           description: "Namespace of end node in which a name is valid."
           in: query
           schema:
             type: string
-            example: HGNC
-            default: HGNC
         - name: end_node_name
           description: "End node name of a path."
           in: query
           schema:
             type: string
-            example: IL6
         - name: only_gene_related_nodes_on_path
           description: "Only gene realted nodes like gene, rna or protein on pathway"
           in: query
           schema:
             type: boolean
-            example: true
         - name: min_path_length
           description: Minimum path length.
           in: query
@@ -8037,13 +7884,13 @@ paths:
           in: query
           schema:
             type: string
-            example: "p(HGNC:\"%\") -increases-> complex(%) <-decreases- p(HGNC:\"%\")"
+            example: "p(HGNC:\"%\") -increases-> p(%) <-decreases- p(HGNC:\"%\")"
         - name: limit
           in: query
           schema:
             type: integer
             default: 30
-            example: 10            
+            example: 1            
       responses:
         '200':
           description: Return results
@@ -8060,12 +7907,7 @@ paths:
         - BEL
       summary: Causal pathway search by gene names
       description: |
-        Method to find all directed paths between genes using BEL or e(BE:L) edges. 
-        Condition for all nodes between is that a gene/protein is involved. 
-        The search algorithm is an iterative process starting from 1 up to 5 edges. 
-        Once a results found the process stops. In order to get a minimum nuber of 
-        edges between gene symbol 1 and 2 a third integer parameter can be used. 
-
+        Method to find all directed paths between nodes using BEL or e(BE:L) edges. 
       parameters:
         - name: start_node_class
           in: query
@@ -8077,7 +7919,6 @@ paths:
           in: query
           schema:
             type: string
-            example: HGNC          
         - name: start_node_name
           in: query
           schema:
@@ -8101,7 +7942,6 @@ paths:
           in: query
           schema:
             type: string
-            example: SARS-CoV-2;Drug Repositioning
         - name: pmid
           in: query
           schema:
@@ -8112,12 +7952,10 @@ paths:
           schema:
             type: string
             enum: ['abundance', 'activity', 'bel', 'bio_act', 'bio_concept', 'bio_list', 'bio_object', 'biological_process', 'cell_secretion', 'cell_surface_expression', 'complex', 'composite', 'degradation', 'drug', 'drug_db', 'ebel', 'fragment', 'from_location', 'fusion_gene', 'fusion_protein', 'fusion_rna', 'gene', 'genetic_flow', 'gmod', 'list', 'location', 'micro_rna', 'pathology', 'pmod', 'population', 'products', 'protein', 'reactants', 'reaction', 'rna', 'side_effect', 'snp', 'to_location', 'translocation', 'variant']
-            example: protein
         - name: end_node_namespace
           in: query
           schema:
             type: string
-            example: HGNC
         - name: end_node_name
           in: query
           schema:
@@ -8127,7 +7965,6 @@ paths:
           in: query
           schema:
             type: boolean
-            example: true
         - name: min_path_length
           in: query
           schema:
@@ -8141,7 +7978,8 @@ paths:
         - name: limit
           in: query
           schema:
-            type: number            
+            type: number
+            example: 1       
       responses:
         '200':
           description: Return results
@@ -8160,20 +7998,22 @@ paths:
       parameters:
         - name: node_class
           in: query
+          required: true
           schema:
             default: protein
             type: string
+            example: protein
             enum: [protein, rna, gene]
         - name: name
           in: query
+          required: true
           schema:
             type: string
-            example: TREM2     
         - name: namespace
           in: query
+          required: true
           schema:
             type: string
-            default: HGNC
       responses:
         '200':
           description: Return results
@@ -8181,6 +8021,34 @@ paths:
               application/json:
                 schema:
                     type: string
+
+  /api/v1/bel/number_of_nodes:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_number_of_nodes
+      tags:
+        - BEL
+      summary: Get number of nodes by node class
+      description: Get number of nodes by node class
+      parameters:
+        - name: node_class
+          in: query
+          schema:
+            type: string
+            enum: ['abundance', 'activity', 'bel', 'bio_act', 'bio_concept', 'bio_list', 'bio_object', 'biological_process', 'cell_secretion', 'cell_surface_expression', 'complex', 'composite', 'degradation', 'drug', 'drug_db', 'ebel', 'fragment', 'from_location', 'fusion_gene', 'fusion_protein', 'fusion_rna', 'gene', 'genetic_flow', 'gmod', 'list', 'location', 'micro_rna', 'pathology', 'pmod', 'population', 'products', 'protein', 'reactants', 'reaction', 'rna', 'side_effect', 'snp', 'to_location', 'translocation', 'variant']             
+            example: protein
+        - name: pure
+          in: query
+          description: "'pure' is a tag for no modification (mod), variation (var) or location (loc)."
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Return results
+          content:
+              application/json:
+                schema:
+                    type: number
+
 
   /api/v1/bel/number_of_edges:
     get:
@@ -8193,33 +8061,7 @@ paths:
         - name: relation
           in: query
           schema:
-            type: string
-            enum:
-              - bel_relation
-              - association
-              - causal
-              - correlative
-              - decreases
-              - directly_decreases
-              - directly_increases
-              - equivalent_to
-              - genomic
-              - has_component
-              - has_components
-              - has_member
-              - has_members
-              - increases
-              - is_a
-              - negative_correlation
-              - no_correlation
-              - orthologous
-              - other
-              - positive_correlation
-              - rate_limiting_step_of
-              - regulates
-              - sub_process_of
-              - transcribed_to
-              - translated_to             
+            type: string             
             example: increases            
       responses:
         '200':
@@ -8234,11 +8076,12 @@ paths:
       operationId: ebel.web.api.ebel.v1.bel.get_adjacent_nodes_by_rid
       tags:
         - BEL
-      summary: Get adjacent outgoing nodes to node with rid
-      description: Get adjacent outgoing nodes to node with rid
+      summary: Adjacent outgoing or incomming nodes
+      description: Get adjacent outgoing or incomming nodes nodes to node with rid
       parameters:
         - name: rid
           in: query
+          required: true
           schema:
             type: string
         - name: direction
@@ -8278,7 +8121,7 @@ paths:
               - sub_process_of
               - transcribed_to
               - translated_to             
-            example: increases            
+            example: bel_relation            
       responses:
         '200':
           description: Return results
@@ -8319,6 +8162,7 @@ paths:
       parameters:
         - name: node_class
           in: query
+          required: true
           schema:
             type: string
             enum: [bel, genetic_flow, gene, rna, protein, abundance, activity, biological_process, complex, micro_rna, pathology, population]
@@ -8327,18 +8171,15 @@ paths:
           in: query
           schema:
             type: string
-            example: HGNC
         - name: name
           in: query
           schema:
             type: string
-            example: TREM2
         - name: pure
           in: query
           description: "'pure' is a tag for no modification (mod), variation (var) or location (loc)."
           schema:
             type: boolean
-            example: false
         - name: connected_to_bel_relation
           in: query
           description: "Select BEL relation the node is conneceted to."
@@ -8368,17 +8209,15 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
           schema:
             type: integer
             default: 1
@@ -8559,17 +8398,16 @@ paths:
         - name: page_size
           in: query
           description: Results per page
-          required: false
           schema:
             type: integer
             default: 10
             maximum: 100
             minimum: 1
-            example: 10
+            example: 1
         - name: page
           in: query
           description: Page number (starting with 1)
-          required: false
+          
           schema:
             type: integer
             default: 1

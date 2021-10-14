@@ -2,7 +2,7 @@
 
 from ebel import Bel
 from flask import request
-from ebel.web.api.ebel.v1 import __get_pagination
+from ebel.web.api.ebel.v1 import _get_pagination
 from math import ceil
 from typing import Dict
 
@@ -27,7 +27,7 @@ def get_contradictory_edges():
     obj['namespace'] = request.args.get('object_namespace')
     obj['name'] = request.args.get('object_name')
 
-    pagination = __get_pagination()
+    pagination = _get_pagination()
     match = f"match {{class:{subject_class}, as:subject_1 {_get_where_sql(sub)} }}" \
             ".outE('directly_increases', 'increases'){as:relation_1}" \
             f".inV(){{class:{object_class}, as:object {_get_where_sql(obj)} }}" \
