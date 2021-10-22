@@ -131,7 +131,7 @@ class NcbiGeneMim(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     mim_number = Column(Integer)
-    gene_id = Column(Integer, ForeignKey('ncbi_gene_info.gene_id'))
+    gene_id = Column(Integer, ForeignKey('ncbi_gene_info.gene_id'), nullable=True)
     type = Column(String(100))
     source = Column(String(100))
     med_gen_cui = Column(String(100), index=True)
