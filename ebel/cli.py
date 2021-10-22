@@ -147,6 +147,7 @@ def import_json(json_file_path: str,
     type
         returns True if imported.
     """
+    print("Start import JSON BEL file(s).")
     # if one of the parameters is not None it will overwrite the default values from the configfile
     Graph.set_configuration(name=odb_name,
                             user=odb_user,
@@ -424,19 +425,27 @@ def settings():
         db_exists = cursor.execute(f"show databases like %s", mysql_db)
         if not db_exists:
             cursor.execute(f"CREATE DATABASE {mysql_db} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci")
+        else:
+            print(f"Database {mysql_db} alreay exists.")
 
         user_exists = cursor.execute(f"Select 1 from mysql.user where User=%s", mysql_user)
-        if not user_exists:
-            sql = f"CREATE USER '{mysql_user}'@'{mysql_host}' IDENTIFIED BY '{mysql_passwd}'"
-            print(sql)
-            cursor.execute(sql)
+        if user_exists:
+            print("Recreate user, because already exists")
+            cursor.execute(f"DROP USER '{mysql_user}'@'%'")
             cursor.execute("FLUSH PRIVILEGES")
+        sql = f"CREATE USER '{mysql_user}'@'%' IDENTIFIED BY '{mysql_passwd}'"
+        print(sql)
+        cursor.execute(sql)
+        cursor.execute("FLUSH PRIVILEGES")
 
         privileges_exists = cursor.execute("Select 1 from mysql.db where User=%s and Db=%s", (mysql_user, mysql_db))
         if not privileges_exists:
-            sql = f"GRANT ALL PRIVILEGES ON `{mysql_db}`.*  TO %s@%s"
-            cursor.execute(sql, (mysql_user, mysql_host))
+            sql = f"GRANT ALL PRIVILEGES ON `{mysql_db}`.*  TO '{mysql_user}'@'%'"
+            print(sql)
+            cursor.execute(sql)
             cursor.execute("FLUSH PRIVILEGES")
+        else:
+            print(f"MySQL user {mysql_user} have alreay the rights for {mysql_db}.")
 
     print(f"\n{TF.HEADER}SNP related traits settings{TF.RESET}")
 

@@ -519,6 +519,7 @@ class Bel(Graph):
         results = self.execute(sql_rids)
         updated_involved_genes = 0
         updated_involved_other = 0
+        
         for r in tqdm(results, desc="Add e(BE:L) nodes"):
             rid = r.oRecordData[RID]
             sql = f"""Update {rid} set involved_genes =

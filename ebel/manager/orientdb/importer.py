@@ -102,7 +102,7 @@ class _BelImporter:
             if origin_url_found:
                 protocol, user, origin_url = origin_url_found.groups()
 
-            repo_path = absolute_path[len(repo.working_dir) + 1:]
+            repo_path = absolute_path.as_posix()[len(repo.working_dir) + 1:]
             commits = list(repo.iter_commits(paths=absolute_path))
 
             if commits:

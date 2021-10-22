@@ -74,7 +74,7 @@ def get_by_medgen():
 
 
 def get_ebel_relation():
-    """Get ClinVar related eBEL relations."""
+    """Get ClinVar related e(BE:L) relations."""
     b = Bel()
     p = _get_pagination()
     req = dict(request.args.copy())
