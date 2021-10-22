@@ -19,5 +19,6 @@ then
   echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   # shellcheck disable=SC2086
   docker build . -t cebelin/ebel:latest -t cebelin/ebel:"$CURRENT_VERSION"
-  docker push cebelin/ebel:latest cebelin/ebel:"$CURRENT_VERSION"
+  docker image push cebelin/ebel:latest
+  docker image push cebelin/ebel:"$CURRENT_VERSION"
 fi
