@@ -1,0 +1,10 @@
+# Config file for automatic testing at travis-ci.com
+os: linux
+dist: xenial
+cache: pip
+
+services:
+  - docker
+
+# Run docker_push script
+script: sh docker_push.sh
