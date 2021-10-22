@@ -5,7 +5,13 @@ CURRENT_VERSION=`grep "version" setup.cfg | awk '{print$3}'`
 echo "$CURRENT_VERSION"
 
 # shellcheck disable=SC2006
-DOCKER_VERSION_PRESENT=`docker image search --list-tags cebelin/ebel | awk '{print $2}' | grep "$CURRENT_VERSION"`
+REPO="cebelin/ebel"
+DOCKER_VERSION_PRESENT=`curl -s -S "https://registry.hub.docker.com/v2/repositories/cebelin/ebel/tags/" | \
+  sed -e 's/,/,\n/g' -e 's/\[/\[\n/g' | \
+  grep '"name"' | \
+  awk -F\" '{print $4;}' | \
+  sort -fu | \
+  grep "$CURRENT_VERSION"`
 echo "$DOCKER_VERSION_PRESENT"
 
 if [ ! "$DOCKER_VERSION_PRESENT" ]
