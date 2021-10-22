@@ -50,7 +50,7 @@ class Ncbi(odb_meta.Graph):
         inserts[ncbi.NcbiGeneInfo.__tablename__] = self._insert_info()
         inserts[ncbi.NcbiGeneGo.__tablename__] = self._insert_go()
         inserts[ncbi.NcbiGeneEnsembl.__tablename__] = self._insert_ensembl()
-        inserts[ncbi.NcbiGeneMim.__tablename__] = self._insert_mim()
+        # inserts[ncbi.NcbiGeneMim.__tablename__] = self._insert_mim()
         inserts[ncbi.NcbiGenePubmed.__tablename__] = self._insert_pubmeds()
         inserts[ncbi.NcbiGeneOrtholog.__tablename__] = self._insert_orthologs()
         inserts.update(self._insert_neighbors())
