@@ -226,6 +226,7 @@ def get_edge_by_annotation() -> list:
 
 
 def get_edge_rids():
+    """Get edge OrientDB rids."""
     subject_rid = request.args.get('subject_rid')
     relation_rid = request.args.get('relation_rid')
     object_rid = request.args.get('object_rid')

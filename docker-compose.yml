@@ -2,20 +2,20 @@ services:
     ebel:
         build: .
         restart: always
-        container_name: bikmi_ebel
+        container_name: ebel_ebel
         ports: 
             - 5000:5000
         networks:
-            - bikmi
+            - ebel_network
         depends_on:
             - mysql
             - orientdb
         volumes:
-            - bikmi_ebel_data:/root/.ebel/
+            - ebel_data:/root/.ebel/
     mysql:
         image: mysql:8.0.24
         restart: always
-        container_name: bikmi_mysql
+        container_name: ebel_mysql
         ports:
             - 3606:3606
         environment: 
@@ -24,40 +24,40 @@ services:
             MYSQL_PASSWORD: ebel
             MYSQL_DATABASE: ebel
         networks:
-            - bikmi
+            - ebel_network
         volumes:
-            - bikmi_mysql:/var/lib/mysql
+            - ebel_mysql:/var/lib/mysql
     orientdb:
         image: orientdb:3.2.0
         restart: always
-        container_name: bikmi_orientdb
+        container_name: ebel_orientdb
         environment:
             - ORIENTDB_ROOT_PASSWORD=ebel
         ports:           
             - 2424:2424
             - 2480:2480
         networks:
-            - bikmi    
+            - ebel_network    
         volumes: 
-            - bikmi_orientdb_db:/orientdb/databases
-            - bikmi_orientdb_backup:/orientdb/backup
-            - bikmi_orientdb_config:/orientdb/config
+            - ebel_orientdb_db:/orientdb/databases
+            - ebel_orientdb_backup:/orientdb/backup
+            - ebel_orientdb_config:/orientdb/config
     phpmyadmin:
         image: phpmyadmin:5.1.0
         restart: always
-        container_name: bikmi_phpmyadmin
+        container_name: ebel_phpmyadmin
         ports:
             - 8089:80
         networks:
-            - bikmi
+            - ebel_network
         environment:
             - PMA_ARBITRARY=1
 networks:
-    bikmi:
+    ebel_network:
         driver: bridge
 volumes:
-    bikmi_orientdb_db:
-    bikmi_orientdb_backup:
-    bikmi_mysql:
-    bikmi_orientdb_config:
-    bikmi_ebel_data:
+    ebel_orientdb_db:
+    ebel_orientdb_backup:
+    ebel_mysql:
+    ebel_orientdb_config:
+    ebel_data:

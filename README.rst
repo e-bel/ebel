@@ -33,6 +33,9 @@ for developing and testing new theories and hypotheses.
 Installation |pypi_version| |pypi_license|
 ==========================================
 
+The easiest way to install ebel is to use `docker-compose`. See below instructions to use the docker installation.
+
+
 ``ebel`` can be directly installed from PyPi with pip::
 
     $ pip install ebel
@@ -166,17 +169,17 @@ Make sure you have downloaded/installed and running
 1. `OrientDB`_
 2. MySQL or MariaDB
     a. MySQL
-        - `Windows <https://dev.mysql.com/doc/refman/8.0/en/windows-installation.html>`__
+        - `Windows <https://dev.mysql.com/doc/refman/8.0/en/windows-installation.html>`_
         - `MacOS <https://dev.mysql.com/doc/refman/8.0/en/macos-installation.html>`_
         - Linux
-            - `Ubuntu, Debian, Linux Mint, ... <https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/>`__
+            - `Ubuntu, Debian, Linux Mint, ... <https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/>`_
             - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://dev.mysql.com/doc/refman/8.0/en/linux-installation-yum-repo.html>`_
     b. MariaDB
-        - `Windows <https://mariadb.com/kb/en/installing-mariadb-msi-packages-on-windows/>`__
+        - `Windows <https://mariadb.com/kb/en/installing-mariadb-msi-packages-on-windows/>`_
         - MacOS (`PKG <https://mariadb.com/kb/en/installing-mariadb-server-pkg-packages-on-macos/>`_, `Homebrew <https://mariadb.com/kb/en/installing-mariadb-on-macos-using-homebrew/>`_)
         - Linux
             - `Ubuntu, Debian, Linux Mint, ... <https://mariadb.com/kb/en/yum/>`__
-            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://mariadb.com/kb/en/installing-mariadb-deb-files/>`__
+            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://mariadb.com/kb/en/installing-mariadb-deb-files/>`_
 
 This can be configured as a service in both Windows and Unix systems.
 
@@ -211,6 +214,53 @@ This command can also be given a list of resources to either skip or include dur
 or::
 
     $ ebel enrich -s intact,kegg
+
+
+Docker installation
+===================
+
+Make sure `docker <https://docs.docker.com/get-docker/>`_ and `docker-compose <https://docs.docker.com/compose/install/>`_ are installed.
+
+.. code-block::
+
+    docker-compose up --build -d
+    docker exec -it ebel_ebel ebel settings
+
+Several question will follow. You can accept the default values (just press RETURN) except the following questions:
+
+.. code-block::
+
+    OrientDB server [localhost] ?
+    ebel_orientdb
+    OrientDB root password (to create database and users)
+    ebel
+    MySQL/MariaDB sever name [localhost]
+    ebel_mysql
+    MySQL root password (will be not stored) to create database and user
+    ebel
+
+It's strongly recommended, if you are using ebel in the production environment, to change the
+standard root MySQL and OrientDB passwords in the docker-compose.yml file.
+
+To load example files in container and import.
+
+.. code-block::
+
+    docker exec -it ebel_ebel git clone https://github.com/e-bel/example_json_bel_files.git
+    docker exec -it ebel_ebel ebel ebel import-json example_json_bel_files/phago.json -e
+
+
+To enrich the network:
+
+.. code-block::
+
+    docker exec -it ebel_ebel ebel enrich
+
+Following services are now available:
+
+1. `OrientDB Studio <http://localhost:2480/studio/index.html#/>`_
+2. `e(BE:L) REST server <http://localhost:5000/ui/>`_
+3. `phpMyAdmin <http://localhost:8089>`_
 
 API
 ---
