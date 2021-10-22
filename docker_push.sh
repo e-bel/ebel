@@ -5,7 +5,6 @@ CURRENT_VERSION=`grep "version" setup.cfg | awk '{print$3}'`
 echo "$CURRENT_VERSION"
 
 # shellcheck disable=SC2006
-REPO="cebelin/ebel"
 DOCKER_VERSION_PRESENT=`curl -s -S "https://registry.hub.docker.com/v2/repositories/cebelin/ebel/tags/" | \
   sed -e 's/,/,\n/g' -e 's/\[/\[\n/g' | \
   grep '"name"' | \
