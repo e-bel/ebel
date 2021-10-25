@@ -5,7 +5,7 @@ e(BE:L) is a Python package built for both validating and modeling information e
 This software package serves a comprehensive tool for all of your BEL needs and serves to create enriched knowledge graphs
 for developing and testing new theories and hypotheses.
 
-**e(BE:L)** have implemneted several other knowledge bases to extend the BEL knowledge graph or map identifiers. 
+**e(BE:L)** have implemented several other knowledge bases to extend the BEL knowledge graph or map identifiers.
 
 * `BioGrid <https://thebiogrid.org/>`_
 * `ChEBI <https://www.ebi.ac.uk/chebi/>`_
@@ -169,17 +169,17 @@ Make sure you have downloaded/installed and running
 1. `OrientDB`_
 2. MySQL or MariaDB
     a. MySQL
-        - `Windows <https://dev.mysql.com/doc/refman/8.0/en/windows-installation.html>`_
+        - `Windows <https://dev.mysql.com/doc/refman/8.0/en/windows-installation.html>`__
         - `MacOS <https://dev.mysql.com/doc/refman/8.0/en/macos-installation.html>`_
         - Linux
-            - `Ubuntu, Debian, Linux Mint, ... <https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/>`_
-            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://dev.mysql.com/doc/refman/8.0/en/linux-installation-yum-repo.html>`_
+            - `Ubuntu, Debian, Linux Mint, ... <https://dev.mysql.com/doc/mysql-apt-repo-quick-guide/en/>`__
+            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://dev.mysql.com/doc/refman/8.0/en/linux-installation-yum-repo.html>`__
     b. MariaDB
-        - `Windows <https://mariadb.com/kb/en/installing-mariadb-msi-packages-on-windows/>`_
+        - `Windows <https://mariadb.com/kb/en/installing-mariadb-msi-packages-on-windows/>`__
         - MacOS (`PKG <https://mariadb.com/kb/en/installing-mariadb-server-pkg-packages-on-macos/>`_, `Homebrew <https://mariadb.com/kb/en/installing-mariadb-on-macos-using-homebrew/>`_)
         - Linux
             - `Ubuntu, Debian, Linux Mint, ... <https://mariadb.com/kb/en/yum/>`__
-            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://mariadb.com/kb/en/installing-mariadb-deb-files/>`_
+            - `RedHat, Fedora, CentOS, OpenSUSE, Scientific Linux, ... <https://mariadb.com/kb/en/installing-mariadb-deb-files/>`__
 
 This can be configured as a service in both Windows and Unix systems.
 
