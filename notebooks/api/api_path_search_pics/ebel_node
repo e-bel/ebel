@@ -1,17 +1,17 @@
 digraph {
 	graph [rankdir=LR]
 	node [shape=plaintext]
-	ebel -> location
-	ebel -> reactants
-	ebel -> side_effect
-	ebel -> products
 	ebel -> fragment
-	ebel -> from_location
-	ebel -> drug
-	ebel -> variant
-	ebel -> to_location
+	ebel -> side_effect
+	ebel -> location
 	ebel -> gmod
+	ebel -> reactants
+	ebel -> variant
+	ebel -> from_location
+	ebel -> to_location
+	ebel -> drug
 	ebel -> pmod
 	ebel -> snp
+	ebel -> products
 	drug -> drug_db
 }

@@ -1,29 +1,29 @@
 digraph {
 	graph [rankdir=LR]
 	node [shape=plaintext]
-	bio_act -> degradation
-	bio_act -> reaction
-	bio_act -> cell_secretion
-	bio_act -> translocation
-	bio_act -> activity
-	bio_act -> cell_surface_expression
-	bio_concept -> pathology
-	bio_concept -> biological_process
-	bel -> bio_act
-	bel -> fusion_protein
-	bel -> fusion_gene
-	bel -> bio_concept
-	bel -> bio_list
-	bel -> bio_object
-	bel -> fusion_rna
-	bio_list -> list
-	bio_list -> composite
-	bio_object -> micro_rna
-	bio_object -> abundance
-	bio_object -> complex
-	bio_object -> population
-	bio_object -> genetic_flow
 	genetic_flow -> rna
 	genetic_flow -> gene
 	genetic_flow -> protein
+	bio_object -> population
+	bio_object -> genetic_flow
+	bio_object -> micro_rna
+	bio_object -> abundance
+	bio_object -> complex
+	bio_act -> cell_secretion
+	bio_act -> reaction
+	bio_act -> translocation
+	bio_act -> activity
+	bio_act -> degradation
+	bio_act -> cell_surface_expression
+	bio_list -> composite
+	bio_list -> list
+	bio_concept -> pathology
+	bio_concept -> biological_process
+	bel -> fusion_rna
+	bel -> bio_object
+	bel -> fusion_gene
+	bel -> bio_act
+	bel -> bio_list
+	bel -> fusion_protein
+	bel -> bio_concept
 }

@@ -1,32 +1,32 @@
 digraph {
 	graph [rankdir=LR]
 	node [shape=plaintext]
-	correlative -> association
-	correlative -> negative_correlation
-	correlative -> positive_correlation
-	correlative -> no_correlation
-	deprecated -> analogous_to
-	deprecated -> biomarker_for
-	deprecated -> prognostic_biomarker_for
-	genomic -> translated_to
-	genomic -> transcribed_to
-	compiler -> translocates
 	compiler -> has_product
+	compiler -> translocates
 	compiler -> reactant_in
 	compiler -> includes
 	compiler -> has_modification
 	compiler -> has_variant
 	compiler -> acts_in
-	bel_relation -> correlative
-	bel_relation -> deprecated
-	bel_relation -> genomic
 	bel_relation -> compiler
+	bel_relation -> correlative
 	bel_relation -> causal
-	causal -> regulates
-	causal -> causes_no_change
+	bel_relation -> genomic
+	bel_relation -> deprecated
+	correlative -> association
+	correlative -> negative_correlation
+	correlative -> positive_correlation
+	correlative -> no_correlation
 	causal -> increases
+	causal -> decreases
+	causal -> causes_no_change
+	causal -> regulates
 	causal -> directly_decreases
 	causal -> rate_limiting_step_of
-	causal -> decreases
 	causal -> directly_increases
+	genomic -> transcribed_to
+	genomic -> translated_to
+	deprecated -> analogous_to
+	deprecated -> prognostic_biomarker_for
+	deprecated -> biomarker_for
 }
