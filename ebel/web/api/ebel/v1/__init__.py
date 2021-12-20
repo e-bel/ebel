@@ -9,7 +9,7 @@ from typing import Dict, Type
 from typing import List
 
 from flask import request
-from sqlalchemy import inspect
+from sqlalchemy import inspect, not_
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.orm.decl_api import DeclarativeMeta
 from sqlalchemy.orm.query import Query
@@ -20,7 +20,7 @@ from ebel.web.api import RDBMS
 Pagination = namedtuple('Pagination', ['page', 'page_size', 'skip'])
 
 
-class SqlOperator(Enum):
+class OrientDbSqlOperator(Enum):
     """String constant definitions."""
 
     EQUALS = "="
@@ -200,3 +200,40 @@ def _get_terms_from_model_like(form_field: str, sa_column: InstrumentedAttribute
         'pages': pages,
         'results': {x[1]: x[0] for x in query.limit(limit).offset(offset).all()}
     }
+
+
+def add_query_filters(query: Query, columns_params: Dict[str, Dict[str, str]], model: DeclarativeMeta):
+    col_filters = []
+    for column_name, v in columns_params.items():
+        if v.get('how2search') and v.get('value'):
+            value = v['value'].strip()
+            how2search = v['how2search']
+            column = inspect(model).columns[column_name]
+            if how2search in ('exact', 'exact_numeric'):
+                col_filters.append(column == value)
+            elif how2search == 'starts_with':
+                col_filters.append(column.like(value+'%'))
+            elif how2search == 'ends_with':
+                col_filters.append(column.like('%'+value))        
+            elif how2search == 'contains':
+                col_filters.append(column.like('%'+value+'%'))
+            elif how2search == 'greater_than':
+                col_filters.append(column.__gt__(value)) 
+            elif how2search == 'greater_equals_than':
+                col_filters.append(column.__ge__(value)) 
+            elif how2search == 'smaller_than':
+                col_filters.append(column.__lt__(value))
+            elif how2search == 'smaller_equals_than':
+                col_filters.append(column.__le__(value))
+            elif how2search == 'not_equals':
+                col_filters.append(column!=value)                 
+            elif how2search == 'exclude':
+                col_filters.append(not_(column.like(value)))                 
+            elif how2search == 'between':
+                found_2_values = re.search("(?P<value_1>[+-]?\d+(\.\d+)?).*?[-,;:/].*?(?P<value_2>[+-]?\d+(\.\d+)?)", value)
+                if found_2_values:
+                    values = sorted(found_2_values.groupdict().values(), reverse=True)
+                    col_filters.append(column.between(*values))
+                
+        query = query.filter(*col_filters)
+    return query

@@ -6523,6 +6523,111 @@ paths:
   # Expression Atlas
   ########################################################################################################################
 
+
+  /api/v1/expression_atlas/expression_atlas:
+    post: 
+      operationId: ebel.web.api.ebel.v1.expression_atlas.get_expression_atlas
+      tags:
+        - Expression Atlas
+      summary: Get tables by all columns in all tables.
+      description: Get tables by all columns in all tables.
+      responses:
+        '201':
+          description: Created
+      requestBody: 
+        required: true
+        content:
+          application/json: 
+            schema: 
+              type: object
+              properties:
+                experiment:
+                  type: object
+                  properties:
+                    name:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                        value:
+                          type: string
+                    title:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                        value:
+                          type: string
+                group_comparison:
+                  type: object
+                  properties:                
+                    group_comparison:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                        value:
+                          type: string
+                    name:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                        value:
+                          type: string
+
+
+  /api/v1/expression_atlas/comparison_groups_by_edge_rid:
+    get:
+      operationId: ebel.web.api.ebel.v1.expression_atlas.get_comparison_groups_by_edge_rid
+      tags:
+        - Expression Atlas
+      summary: Get experiments, comparion groups and foldchanges by edge rid.
+      description: Get experiments, comparion groups and foldchanges by edge rid.
+      parameters:
+        - name: edge_rid
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Return results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+
+
+  /api/v1/expression_atlas/comparison_groups_by_genes:
+    get:
+      operationId: ebel.web.api.ebel.v1.expression_atlas.get_comparison_groups_by_genes
+      tags:
+        - Expression Atlas
+      summary: Get experiments, comparion groups and foldchanges by 2 genes.
+      description: Get experiments, comparion groups and foldchanges by 2 genes.
+      parameters:
+        - name: gene_symbol_1
+          in: query
+          schema:
+            type: string
+        - name: gene_symbol_2
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Return results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+
+
   /api/v1/expression_atlas/experiment:
     get:
       operationId: ebel.web.api.ebel.v1.expression_atlas.get_expriment
@@ -7434,13 +7539,115 @@ paths:
                       type: object
 
 
+
+  /api/v1/bel/namespaces:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_namespaces
+      tags:
+        - BEL
+      summary: Get ordered list of namespaces.
+      description: Get ordered list of namespaces.      
+      responses:
+        '200':
+          description: Namespaces.
+          content:
+              application/json:
+                schema:
+                    type: array
+                    items:
+                      type: object
+
+  /api/v1/bel/node_classes:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_node_classes
+      tags:
+        - BEL
+      summary: Get ordered list of node classes.
+      description: Get ordered list of node classes.      
+      responses:
+        '200':
+          description: node classes count.
+          content:
+              application/json:
+                schema:
+                    type: array
+                    items:
+                      type: object                      
+
+  /api/v1/bel/node_class_bel_name_ns:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_node_class_bel_name_ns
+      tags:
+        - BEL
+      summary: Get node class count,namespace count, suggested BEL list and suggested name list by class, namespace, BEL and name.
+      description: Get node class count,namespace count, suggested BEL list and suggested name list by class, namespace, BEL and name.
+      parameters:
+        - name: bel
+          in: query
+          schema:
+            type: string
+        - name: how_bel
+          in: query
+          schema:
+            type: string
+            enum: [exact,case_insensitive,starts_with,ends_with,contains]           
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: how_name
+          in: query
+          schema:
+            type: string
+            enum: [exact,case_insensitive,starts_with,ends_with,contains]           
+        - name: namespace
+          in: query
+          schema:
+            type: string
+        - name: node_class
+          in: query
+          schema:
+            type: string          
+      responses:
+        '200':
+          description: node params for form
+          content:
+              application/json:
+                schema:
+                    type: array
+                    items:
+                      type: object
+
+  /api/v1/bel/bel_relations_by_pmid:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_bel_relations_by_pmid
+      tags:
+        - BEL
+      summary: Get BEL edge by PMID
+      description: Get BEL edge by PMID
+      parameters:
+        - name: pmid
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: BEL edges by pmid
+          content:
+              application/json:
+                schema:
+                    type: array
+                    items:
+                      type: object
+
+
   /api/v1/bel/pmids:
     get:
       operationId: ebel.web.api.ebel.v1.bel.get_pmids
       tags:
         - BEL
       summary: All PubMed IDs connected to BEL relations.
-      description: All PubMed IDs connected to BEL relations.
+      description: All PubMed IDs connected to BEL relations.      
       responses:
         '200':
           description: Documents.
@@ -7450,6 +7657,109 @@ paths:
                     type: array
                     items:
                       type: integer
+
+
+  /api/v1/bel/abstract_by_pmid:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_abstract_by_pmid
+      tags:
+        - BEL
+      summary: Get Medline abstract by PMID.
+      description: Get Medline abstract by PMID.
+      parameters:
+        - name: pmid
+          in: query
+          required: true
+          schema:
+            type: integer      
+      responses:
+        '200':
+          description: Documents.
+          content:
+              application/json:
+                schema:
+                    type: string
+
+  /api/v1/bel/mesh_terms_statistics_by_node_rid:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_mesh_terms_statistics_by_node_rid
+      tags:
+        - BEL
+      summary: Get statistics on MeSH terms for incomming, outgoing or both edge types.
+      description: Get statistics on MeSH terms for incomming, outgoing or both edge types.
+      parameters:
+        - name: node_rid
+          in: query
+          required: true
+          schema:
+            type: string      
+        - name: direction
+          in: query
+          required: true
+          schema:
+            type: string
+            default: both
+            enum: [in,out,both]
+        - name: limit
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Documents.
+          content:
+              application/json:
+                schema:
+                    type: string
+
+  /api/v1/bel/edge_statistics_by_rid:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_edge_statistics_by_rid
+      tags:
+        - BEL
+      summary: Get statistics on incomming, outgoing or both edge types.
+      description: Get statistics on incomming, outgoing or both edge types.
+      parameters:
+        - name: rid
+          in: query
+          required: true
+          schema:
+            type: string      
+        - name: direction
+          in: query
+          required: true
+          schema:
+            type: string
+            default: both
+            enum: [in,out,both]
+      responses:
+        '200':
+          description: Documents.
+          content:
+              application/json:
+                schema:
+                    type: string
+
+  /api/v1/bel/citation_by_pmid:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_citation_by_pmid
+      tags:
+        - BEL
+      summary: Get citation from BEL graph by PMID.
+      description: Get citation from BEL graph by PMID.
+      parameters:
+        - name: pmid
+          in: query
+          required: true
+          schema:
+            type: integer      
+      responses:
+        '200':
+          description: Documents.
+          content:
+              application/json:
+                schema:
+                    type: object
 
   /api/v1/bel/get_edge_rids:
     get:
@@ -7541,9 +7851,25 @@ paths:
           content:
               application/json:
                 schema:
-                    type: array
-                    items:
-                      type: object
+                    type: object
+
+  /api/v1/all_node_types:
+    get:
+      operationId: ebel.web.api.ebel.v1.bel.get_all_node_types
+      tags:
+        - BEL
+        - e(BE:L)
+      summary: Get all child nodes, abstract status of childs, parents path, number of entries, abstract status for all BEL node types 
+      description: Get all child nodes, abstract status of childs, parents path, number of entries, abstract status for all BEL node types
+      responses:
+        '200':
+          description: Documents.
+          content:
+              application/json:
+                schema:
+                    type: object
+
+  
 
   /api/v1/bel/node_types:
     get:
@@ -7799,6 +8125,23 @@ paths:
           in: query
           schema:
             type: string
+        - name: start_how_node_name
+          in: query
+          schema:
+            type: string
+            enum: ['exact', 'case_insensitive', 'contains', 'starts_with', 'ends_with']
+            default: 'starts_with'
+        - name: start_bel
+          description: "BEL of a start node."
+          in: query
+          schema:
+            type: string
+        - name: start_how_bel
+          in: query
+          schema:
+            type: string
+            enum: ['exact', 'case_insensitive', 'contains', 'starts_with', 'ends_with']
+            default: 'contains'
         - name: connecting_relation
           description: "Connecting relation types over all edges in the path."
           in: query
@@ -7841,6 +8184,23 @@ paths:
           in: query
           schema:
             type: string
+        - name: end_how_node_name
+          in: query
+          schema:
+            type: string
+            enum: ['exact', 'case_insensitive', 'contains', 'starts_with', 'ends_with']
+            default: 'starts_with'
+        - name: end_bel
+          description: "BEL of a end node."
+          in: query
+          schema:
+            type: string
+        - name: end_how_bel
+          in: query
+          schema:
+            type: string
+            enum: ['exact', 'case_insensitive', 'contains', 'starts_with', 'ends_with']
+            default: 'contains'
         - name: only_gene_related_nodes_on_path
           description: "Only gene realted nodes like gene, rna or protein on pathway"
           in: query
@@ -7923,6 +8283,22 @@ paths:
           in: query
           schema:
             type: string
+        - name: start_how_node_name
+          in: query
+          schema:
+            type: string
+            enum: ['exact', 'case_insensitive', 'contains', 'starts_with', 'ends_with']
+            default: 'starts_with'
+        - name: start_bel
+          in: query
+          schema:
+            type: string
+        - name: start_how_bel
+          in: query
+          schema:
+            type: string
+            enum: ['exact', 'case_insensitive', 'contains', 'starts_with', 'ends_with']
+            default: 'contains'
         - name: connecting_relation
           in: query
           schema:
@@ -7960,6 +8336,22 @@ paths:
           in: query
           schema:
             type: string
+        - name: end_how_node_name
+          in: query
+          schema:
+            type: string
+            enum: ['exact', 'case_insensitive', 'contains', 'starts_with', 'ends_with']
+            default: 'starts_with'
+        - name: end_bel
+          in: query
+          schema:
+            type: string
+        - name: end_how_bel
+          in: query
+          schema:
+            type: string
+            enum: ['exact', 'case_insensitive', 'contains', 'starts_with', 'ends_with']
+            default: 'contains'
         - name: only_gene_related_nodes_on_path
           description: Only gene realted nodes like gene, rna or protein on pathway
           in: query

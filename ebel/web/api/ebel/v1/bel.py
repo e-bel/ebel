@@ -1,9 +1,11 @@
 """Generic BEL relation API methods."""
 import re
 import cgi
-from collections import namedtuple, defaultdict
-from copy import deepcopy
+import requests
+import xmltodict
 from enum import Enum
+from collections import namedtuple, defaultdict, Counter
+from copy import deepcopy
 from math import ceil
 from typing import List, Optional, Dict, Set, NamedTuple, Any, Union, Tuple
 
@@ -12,7 +14,7 @@ from graphviz import Digraph
 
 from ebel import Bel
 from ebel.manager.orientdb.odb_structure import get_columns, get_node_view_labels
-from ebel.web.api.ebel.v1 import _get_pagination, DataType, SqlOperator
+from ebel.web.api.ebel.v1 import _get_pagination, DataType, OrientDbSqlOperator
 
 PathLengthDict = Dict[int, List[Dict[str, list]]]
 PathLength = int
@@ -22,6 +24,15 @@ Rid = str
 RidList = List[str]
 EdgePathsByLength = Dict[PathLength, RidList]
 ErrorMessage = Dict[str, str]
+
+class EnumExtension(Enum):
+    @classmethod
+    def has_value(cls, value):
+        return any([x.value==value for x in cls])
+    
+    @classmethod
+    def has_name(cls, name):
+        return any([x.name==name for x in cls])
 
 BELishEdge = namedtuple('Edge', ['name', 'direction', 'params_str'])
 
@@ -57,7 +68,7 @@ class Column:
     def __init__(self,
                  form_name: str,
                  column: str,
-                 sql_operator: SqlOperator = SqlOperator.EQUALS,
+                 sql_operator: OrientDbSqlOperator = OrientDbSqlOperator.EQUALS,
                  data_type: DataType = DataType.STRING,
                  value: str = None,
                  show_in_results: bool = True,
@@ -98,28 +109,28 @@ bel_relation_default_columns: List[Column] = [
     Column('subject_rid', 'out.@rid'),
     Column('subject_node_class', 'out.@class'),
     Column('subject_namespace', 'out.namespace'),
-    Column('subject_name', 'out.name', SqlOperator.LIKE),
-    Column('subject_bel', 'out.bel', SqlOperator.LIKE),
-    Column('subject_gene_symbol_involved_in', 'out.involved_genes', SqlOperator.IN, DataType.LIST_STRING),
-    Column('subject_other_involved_in', 'out.involved_other', SqlOperator.IN, DataType.LIST_STRING),
+    Column('subject_name', 'out.name', OrientDbSqlOperator.LIKE),
+    Column('subject_bel', 'out.bel', OrientDbSqlOperator.LIKE),
+    Column('subject_gene_symbol_involved_in', 'out.involved_genes', OrientDbSqlOperator.IN, DataType.LIST_STRING),
+    Column('subject_other_involved_in', 'out.involved_other', OrientDbSqlOperator.IN, DataType.LIST_STRING),
     Column('relation_rid', '@rid'),
     Column('relation', '@class'),
-    Column('evidence', 'evidence', SqlOperator.LIKE),
-    Column('citation_full_journal_name', 'citation.full_journal_name', SqlOperator.LIKE),
+    Column('evidence', 'evidence', OrientDbSqlOperator.LIKE),
+    Column('citation_full_journal_name', 'citation.full_journal_name', OrientDbSqlOperator.LIKE),
     Column('citation_pub_date', 'citation.pub_date'),
     Column('citation_pub_year', 'citation.pub_year'),
-    Column('citation_last_author', 'citation.last_author', SqlOperator.LIKE),
+    Column('citation_last_author', 'citation.last_author', OrientDbSqlOperator.LIKE),
     Column('citation_type', 'citation.type'),
-    Column('author_in_author_list', 'citation.author_list', SqlOperator.IN, DataType.LIST_STRING),
-    Column('title', 'citation.title', SqlOperator.LIKE),
+    Column('author_in_author_list', 'citation.author_list', OrientDbSqlOperator.IN, DataType.LIST_STRING),
+    Column('title', 'citation.title', OrientDbSqlOperator.LIKE),
     Column('doi', 'citation.doi'),
     Column('object_rid', 'in.@rid'),
     Column('object_node_class', 'in.@class'),
     Column('object_namespace', 'in.namespace'),
-    Column('object_name', 'in.name', SqlOperator.LIKE),
-    Column('object_bel', 'in.bel', SqlOperator.LIKE),
-    Column('object_gene_symbol_involved_in', 'in.involved_genes', SqlOperator.IN, DataType.LIST_STRING),
-    Column('object_other_involved_in', 'in.involved_other', SqlOperator.IN, DataType.LIST_STRING),
+    Column('object_name', 'in.name', OrientDbSqlOperator.LIKE),
+    Column('object_bel', 'in.bel', OrientDbSqlOperator.LIKE),
+    Column('object_gene_symbol_involved_in', 'in.involved_genes', OrientDbSqlOperator.IN, DataType.LIST_STRING),
+    Column('object_other_involved_in', 'in.involved_other', OrientDbSqlOperator.IN, DataType.LIST_STRING),
 ]
 
 Pagination = namedtuple('Pagination', ['page', 'page_size', 'skip'])
@@ -153,7 +164,7 @@ class Query:
         for col in self.columns:
             if col.value:
                 if col.column.endswith('@rid'):
-                    if  "," in col.value:
+                    if "," in col.value:
                         rids = [x.strip() for x in col.value.split(",") if re.search(r"^#\d+:\d+$", x.strip())]
                         rids_str = "[" + ','.join(rids) + "]"
                         wheres.append(f"{col.column} in {rids_str}")
@@ -192,15 +203,19 @@ class Query:
         sql = "SELECT count(*) FROM " + self.odb_class + self.where
         return self.ebel.query_get_dict(sql)[0]['count']
 
-    def get_result(self):
+    def get_result(self, pagination: Optional[Pagination] = None):
         """Return total number of results."""
-        p = self.get_pagination()
-        if not (p.page and p.page_size):
-            return {'error': "Please add page and page_size to your method."}
+        if pagination:
+            p = pagination
+        else:
+            p = self.get_pagination()
+            if not (p.page and p.page_size):
+                return {'error': "Please add page and page_size to your method."}
 
         number_of_results = self.get_number_of_results()
         pages = ceil(number_of_results / p.page_size)
         sql_paginated = self.sql + f" skip {p.skip} limit {p.page_size}"
+        # print(sql_paginated)
 
         return {
             'page': p.page,
@@ -211,14 +226,170 @@ class Query:
         }
 
 
+def _get_where_by_how(column: str, value: str, how_to_search: str):
+    how_to_search = how_to_search if SearchTpye.has_value(how_to_search) else SearchTpye.EXACT.value
+    value_by_how = {
+        SearchTpye.EXACT.value: f" = '{value}'",
+        SearchTpye.CONTAINS.value: f" like '%{value}%'",
+        SearchTpye.CASE_SENSITIVE.value: f" like '{value}'",
+        SearchTpye.STARTS_WITH.value: f" like '{value}%'",
+        SearchTpye.ENDS_WITH.value: f" like '%{value}'",
+        SearchTpye.GREATER_THAN.value: f" > {value}",
+        SearchTpye.GREATER_OR_EQUALS_THAN.value: f" >= {value}",
+        SearchTpye.SMALLER_THAN.value: f" < {value}",
+        SearchTpye.SMALLER_OR_EQUALS_THAN.value: f" <= {value}",
+    }
+    return column + value_by_how[how_to_search]
+
+
+def get_node_class_bel_name_ns():
+    default_args = ('bel', 'node_name', 'namespace', 'node_class', 'how_bel', 'how_name')
+    args = {x: '' for x in default_args}
+    filtered_request_args = {k: v for k, v in request.args.items() if k in default_args}
+    args.update(filtered_request_args)
+    namespaces = _get_node_namespace_list(**args)
+    node_classes = _get_node_class_list(**args)
+    suggested_node_names = _get_suggested_node_names(**args)
+    suggested_bels = _get_suggested_bels(**args)
+    return {
+        'namespaces': namespaces,
+        'node_classes': node_classes,
+        'suggested_node_names': suggested_node_names,
+        'suggested_bels': suggested_bels
+    }
+
+
+def _get_suggested_bels(bel: str, node_name: str, node_class: str, namespace: str, how_name: str, how_bel: str):
+    node_class = node_class if node_class else 'bel'
+    sql = f"Select bel from {node_class}"
+    where = []
+
+    if bel:
+        where.append(_get_where_by_how(column='bel', value=bel, how_to_search=how_bel))
+
+    if namespace:
+        where.append(f"namespace = '{namespace}'")
+
+    if node_name:
+        where.append(_get_where_by_how('name', node_name, how_name))
+
+    if where:
+        sql += " where " + ' and '.join(where)
+
+    sql += " order by bel limit 30"
+    print(sql)
+    return [y for y in [x.oRecordData.get('bel') for x in Bel().execute(sql)] if y is not None]
+
+
+def _get_suggested_node_names(bel: str, node_name: str, node_class: str, namespace: str, how_name: str, how_bel: str):
+    node_class = node_class if node_class else 'bel'
+
+    sql = f"Select name from {node_class} where "
+    where = []
+    where.append(_get_where_by_how(column='name', value=node_name, how_to_search=how_name))
+
+    if namespace:
+        where.append(f"namespace = '{namespace}'")
+
+    if bel:
+        where.append(_get_where_by_how('bel', bel, how_bel))
+
+    sql += ' and '.join(where) + " group by name order by name limit 30"
+    # print(sql)
+    return [x.oRecordData['name'] for x in Bel().execute(sql)]
+
+
+def _get_node_namespace_list(bel: str, node_name: str, namespace: str, node_class: str, how_name: str, how_bel: str):
+    """Get first names from BEL nodes (by namespace and node_class)"""
+    if not namespace:
+        node_class = node_class if node_class else 'bel'
+        sql = f"Select namespace from {node_class} where namespace is not null "
+        if node_name:
+            sql += " and " + _get_where_by_how(column='name',
+                                               value=node_name,
+                                               how_to_search=how_name)
+        if bel:
+            sql += " and " + _get_where_by_how(column='bel',
+                                               value=bel,
+                                               how_to_search=how_bel)
+        sql += " group by namespace order by namespace"
+        # print(sql)
+        return [x.oRecordData['namespace'] for x in Bel().execute(sql)]
+    else:
+        return [namespace]
+
+
+def _get_node_class_list(bel: str, node_name: str, node_class: str, namespace: str, how_name: str, how_bel):
+    if not node_class:
+        sql = f"Select @class.asString() as node_class from bel"
+        where = []
+        if node_name or namespace or bel:
+            if node_name:
+                where.append(_get_where_by_how(column='name',
+                                               value=node_name,
+                                               how_to_search=how_name))
+            if namespace:
+                where.append(f"namespace = '{namespace}'")
+            if bel:
+                where.append(_get_where_by_how(column='bel',
+                                               value=bel,
+                                               how_to_search=how_bel))
+            sql += " where " + ' and '.join(where)
+        sql += " group by @class order by @class"
+        # print(sql)
+        return [x.oRecordData['node_class'] for x in Bel().execute(sql)]
+    else:
+        return [node_class]
+
+
+def get_namespaces():
+    """Get ordered list of namespaces"""
+    sql = "Select distinct(namespace) as namespace from bel where namespace is not null order by namespace"
+    print(sql)
+    return [x.oRecordData['namespace'] for x in Bel().execute(sql)]
+
+
+def get_node_classes():
+    """Get ordered list of node classes"""
+    sql = "Select distinct(@class) as node_class from bel order by node_class"
+    print(sql)
+    return [x.oRecordData['node_class'] for x in Bel().execute(sql)]
+
+
+def get_bel_relations_by_pmid():
+    columns: List[Column] = [
+        Column('subject_rid', 'out.@rid'),
+        Column('subject_node_class', 'out.@class'),
+        Column('subject_namespace', 'out.namespace'),
+        Column('subject_name', 'out.name', OrientDbSqlOperator.LIKE),
+        Column('subject_bel', 'out.bel', OrientDbSqlOperator.LIKE),
+        Column('subject_gene_symbol_involved_in', 'out.involved_genes', OrientDbSqlOperator.IN, DataType.LIST_STRING),
+        Column('subject_other_involved_in', 'out.involved_other', OrientDbSqlOperator.IN, DataType.LIST_STRING),
+        Column('relation_rid', '@rid'),
+        Column('relation', '@class'),
+        Column('evidence', 'evidence', OrientDbSqlOperator.LIKE),
+        Column('object_rid', 'in.@rid'),
+        Column('object_node_class', 'in.@class'),
+        Column('object_namespace', 'in.namespace'),
+        Column('object_name', 'in.name', OrientDbSqlOperator.LIKE),
+        Column('object_bel', 'in.bel', OrientDbSqlOperator.LIKE),
+        Column('object_gene_symbol_involved_in', 'in.involved_genes', OrientDbSqlOperator.IN, DataType.LIST_STRING),
+        Column('object_other_involved_in', 'in.involved_other', OrientDbSqlOperator.IN, DataType.LIST_STRING),
+    ]
+    column_pmid = Column('pmid', 'pmid', data_type=DataType.INTEGER, value=request.args.get('pmid'))
+    columns.append(column_pmid)
+    sql_builder = Query('bel_relation', columns)
+    return sql_builder.get_result(Pagination(1, 1000, 0))
+
+
 def get_edge_by_annotation() -> list:
     """Return list of edges with a given annotation."""
     columns = deepcopy(bel_relation_default_columns)
     annotation_key = request.args.get('annotation_key')
     annotation_term = request.args.get('annotation_term')
     if annotation_key and annotation_term:
-        column = Column('annotation_key', f"annotation['{annotation_key}']", 
-                        sql_operator=SqlOperator.IN, value=annotation_term, switch_where_terms=True)
+        column = Column('annotation_key', f"annotation['{annotation_key}']",
+                        sql_operator=OrientDbSqlOperator.IN, value=annotation_term, switch_where_terms=True)
         columns.append(column)
 
     sql_builder = Query('bel_relation', columns)
@@ -248,12 +419,26 @@ def get_annotation_keys():
     return [x.oRecordData for x in Bel().execute(sql)]
 
 
+def get_mesh_terms_statistics_by_node_rid():
+    rid = request.args.get('node_rid')
+    direction = request.args.get('direction')
+    limit = request.args.get('limit')
+    sql = f"Select list(annotation.mesh) as mesh_terms from (traverse {direction}E() FROM {rid} MAXDEPTH 1) where @rid!={rid} and annotation.mesh is not null"
+    res = Bel().query_get_dict(sql)
+    if 'mesh_terms' in res[0]:
+        res_dict = Counter(res[0]['mesh_terms'])
+        mesh_counter_list = [{'mesh_term': x[0], 'count':x[1]}
+                             for x in sorted(res_dict.items(), key=lambda item: item[1], reverse=True)]
+        return mesh_counter_list[:int(limit)] if limit else mesh_counter_list
+    return []
+
+
 def get_annotation_terms():
     annotation_key = request.args.get('annotation_key')
     if annotation_key:
         sql = "Select value as annotation_term, count(*) as number_of_edges from " \
-          f"(Select expand(annotation['{annotation_key}']) as mesh from bel_relation " \
-          "where annotation.mesh is not null) group by value order by number_of_edges desc"
+            f"(Select expand(annotation['{annotation_key}']) as mesh from bel_relation " \
+            "where annotation.mesh is not null) group by value order by number_of_edges desc"
         return [x.oRecordData for x in Bel().execute(sql)]
 
 
@@ -321,6 +506,14 @@ def _get_rid() -> Optional[str]:
             return rid
 
 
+def get_edge_statistics_by_rid():
+    rid = request.args.get('rid')
+    direction = request.args.get('direction', 'both')  # in, out or both
+    sql = "Select @class, count(*) from (traverse {dir}E() FROM {rid} MAXDEPTH 1) where @rid!={rid} group by @class"
+    res = Bel().query_get_dict(sql.format(dir=direction, rid=rid))
+    return res
+
+
 def get_by_rid() -> Optional[str]:
     """Return BEL node by rid."""
     result_dict = {}
@@ -343,18 +536,18 @@ def get_adjacent_nodes_by_rid() -> list:
     rid = _get_rid()
     relation = request.args.get('relation', 'bel_relation')
     sql_temp = "Select '{d}' as direction, @rid.asString() as edge_rid, @class.asString() " \
-                "as edge_class, {d}.@rid.asString() as node_rid, {d}.@class.asString()as node_class , " \
-                "{d}.bel as bel, {d}.name as name, {d}.namespace as namespace, {d}.involved_genes as "\
-                f"involved_genes, {{d}}.involved_other as involved_other from {relation} " \
-                f"where {{od}}.@rid = {rid}"
+        "as edge_class, {d}.@rid.asString() as node_rid, {d}.@class.asString()as node_class , " \
+        "{d}.bel as bel, {d}.name as name, {d}.namespace as namespace, {d}.involved_genes as "\
+        f"involved_genes, {{d}}.involved_other as involved_other from {relation} " \
+        f"where {{od}}.@rid = {rid}"
 
     direction = request.args.get('direction', 'both')
     if rid:
         sql_in = sql_temp.format(d='in', od='out')
         sql_out = sql_temp.format(d='out', od='in')
-        if direction=='in':
+        if direction == 'in':
             sql = sql_in
-        elif direction=='out':
+        elif direction == 'out':
             sql = sql_out
         else:
             sql = f"select expand($c) let $a = ({sql_in}), $b = ({sql_out}), $c = unionAll( $a, $b )"
@@ -367,6 +560,22 @@ def get_number_of_edges() -> int:
     relation = request.args.get('relation', 'E')
     r = b.execute(f"Select count(*) as number_of_edges from {relation} limit 1")
     return r[0].oRecordData['number_of_edges']
+
+
+def get_citation_by_pmid() -> dict:
+    """Return the number of edges."""
+    b = Bel()
+    pmid = request.args.get('pmid')
+    r = b.execute(f"Select citation from bel_relation where pmid = {pmid} limit 1")
+    return r[0].oRecordData['citation']
+
+
+def get_abstract_by_pmid():
+    pmid = request.args.get('pmid')
+    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=XML&rettype=abstract"
+    r = requests.get(url.format(pmid=pmid))
+    d = xmltodict.parse(r.text)
+    return d['PubmedArticleSet']['PubmedArticle']['MedlineCitation']['Article']['Abstract']['AbstractText']
 
 
 def get_number_of_nodes() -> int:
@@ -393,13 +602,23 @@ def get_pure_rid() -> Optional[str]:
         return b.execute(sql)[0].oRecordData['rid']
 
 
-class Position(Enum):
+class Position(EnumExtension):
     """Why is there a class for defining constants."""
 
     FIRST = "first"
     LAST = "last"
     INSIDE = "inside"
 
+class SearchTpye(EnumExtension):
+    EXACT = 'exact'
+    CONTAINS = 'contains'
+    CASE_SENSITIVE = 'case_insensitive'
+    STARTS_WITH = 'starts_with'
+    ENDS_WITH = 'ends_with'
+    GREATER_THAN = 'greater_than'
+    GREATER_OR_EQUALS_THAN = 'greater_or_equals_than'
+    SMALLER_THAN = 'smaller_than'
+    SMALLER_OR_EQUALS_THAN = 'smaller_or_equals_than'
 
 class MatchEdge:
     """Class to construct the edge portions of a MATCH query."""
@@ -470,13 +689,19 @@ class MatchNode:
         self.position: Optional[Position] = None
         self.node_class: Optional[str] = None
         self.namespace: Optional[str] = None
+        self.bel: Optional[str] = None
         self.gene_path: bool = False
+        self.how_name = None
+        self.how_bel = None
 
     def set_outside(self,
                     position: Position,
                     name: Optional[str] = None,
                     node_class: Optional[str] = None,
-                    namespace: Optional[str] = None):
+                    namespace: Optional[str] = None,
+                    bel: Optional[str] = None,
+                    how_name: Optional[str] = SearchTpye.EXACT.value,
+                    how_bel: Optional[str] = SearchTpye.EXACT.value):
         """Assign attributes to the "outside" position."""
         self.position = position
         if name:
@@ -485,6 +710,15 @@ class MatchNode:
             self.node_class = node_class
         if namespace:
             self.namespace = namespace
+        if bel:
+            self.bel = bel
+        if how_name:
+            self.how_name = how_name if SearchTpye.has_value(how_name) else SearchTpye.EXACT.value
+            print("how_name:", how_name, self.how_name)
+        if how_bel:
+            self.how_bel = how_bel if SearchTpye.has_value(how_bel) else SearchTpye.EXACT.value
+            print("how_bel:", how_bel, self.how_bel)
+
 
     def set_inside(self, gene_path: bool, node_class: None):
         """Assign attributes to the "inside" position."""
@@ -494,8 +728,10 @@ class MatchNode:
 
     def get_node(self, alias_number: int) -> str:
         """Return node based on alias number."""
+        print(f"hows: \n\tposition{self.position} \n\thow_name: {self.how_name}, \n\thow_bel: {self.how_bel}")
         namespace = f"namespace='{self.namespace}'"
-        name = f"name = '{self.name}'"
+        name = _get_where_by_how('name', self.name, self.how_name)
+        bel = _get_where_by_how('bel', self.bel, self.how_bel)
         name_involved = f"('{self.name}' in involved_genes OR '{self.name}' in involved_other)"
         involved_genes = "involved_genes.size()>0"
         not_like_node = "$matched.n{}!=$currentMatch"
@@ -504,16 +740,19 @@ class MatchNode:
         where_str = ''
 
         if self.position in (Position.FIRST, Position.LAST):
-
+            where_first_last = []
+            if self.bel:
+                where_first_last.append(bel)
             if self.namespace and not self.name:
-                where_str = namespace
+                where_first_last.append(namespace)
             elif self.name and not self.namespace:
                 if self.node_class in ['gene', 'rna', 'protein']:
-                    where_str = name
+                    where_first_last.append(name)
                 else:
-                    where_str = name_involved
+                    where_first_last.append(name_involved)
             elif self.name and self.namespace:
-                where_str = f'{name} AND {namespace}'
+                where_first_last.append(f'{name} AND {namespace}')
+            where_str = " AND ".join(where_first_last)
 
         if self.position == Position.LAST:
             where_inside_list.append(not_like_node.format(1))
@@ -536,7 +775,7 @@ class MatchNode:
         return node_class
 
 
-class GraphType(Enum):
+class GraphType(EnumExtension):
     """Not sure why there is a class for defining constants."""
 
     NODES = 'nodes'
@@ -559,10 +798,16 @@ class PathQuery:
                  end_name: str,
                  min_length: int,
                  max_length: int,
+                 start_how_name: Optional[str] = None,
+                 end_how_name: Optional[str] = None,
                  start_class: Optional[str] = None,
                  end_class: Optional[str] = None,
                  start_ns: Optional[str] = None,
                  end_ns: Optional[str] = None,
+                 start_bel: Optional[str] = None,
+                 start_how_bel: Optional[str] = None,
+                 end_bel: Optional[str] = None,
+                 end_how_bel: Optional[str] = None,
                  gene_path: bool = False,
                  edge_class: Optional[str] = None,
                  multiple_edge_classes: Optional[str] = None,
@@ -595,15 +840,23 @@ class PathQuery:
         self.max_unique_edges = 1000
         self.nodes = [MatchNode() for _ in range(self.max_length + 1)]
 
-        self.nodes[0].set_outside(position=Position.FIRST,
-                                  name=start_name,
-                                  node_class=start_class,
-                                  namespace=start_ns)
+        self.nodes[0].set_outside(
+            position=Position.FIRST,
+            name=start_name,
+            node_class=start_class,
+            namespace=start_ns,
+            bel=start_bel,
+            how_name=start_how_name,
+            how_bel=start_how_bel)
 
-        self.nodes[-1].set_outside(position=Position.LAST,
-                                   name=end_name,
-                                   node_class=end_class,
-                                   namespace=end_ns)
+        self.nodes[-1].set_outside(
+            position=Position.LAST,
+            name=end_name,
+            node_class=end_class,
+            namespace=end_ns,
+            bel=end_bel,
+            how_name=end_how_name,
+            how_bel=end_how_bel)
 
         self.edges = [MatchEdge(self.edge_class,
                                 self.multiple_edge_classes,
@@ -776,6 +1029,7 @@ class PathQuery:
 
         for number_of_edges in range(self.min_length, self.max_length + 1):
             query_str = self.get_query_str(number_of_edges)
+            print(query_str)
             paths: List[Dict[str, Any]] = [x.oRecordData for x in self.execute(query_str)]
 
             if len(paths) > self.max_paths:
@@ -851,10 +1105,16 @@ def _get_path_query() -> Union[PathQuery, ErrorMessage]:
     """
     start_name = request.args.get('start_node_name')
     end_name = request.args.get('end_node_name')
+    start_how_name = request.args.get('start_how_node_name')
+    end_how_name = request.args.get('end_how_node_name')
     start_class = request.args.get('start_node_class', 'bel')
-    end_class = request.args.get('end_node_class')
+    end_class = request.args.get('end_node_class', 'bel')
     start_ns = request.args.get('start_node_namespace')
     end_ns = request.args.get('end_node_namespace')
+    start_bel = request.args.get('start_bel')
+    start_how_bel = request.args.get('start_how_bel')
+    end_bel = request.args.get('end_bel')
+    end_how_bel = request.args.get('end_how_bel')
     edge_class = request.args.get('connecting_relation')
     multiple_edge_classes = request.args.get('multiple_connecting_relations', '')
     inside_node_class = request.args.get('connecting_node_class')
@@ -878,27 +1138,35 @@ def _get_path_query() -> Union[PathQuery, ErrorMessage]:
         end_class = 'bel'
         max_length = 1
 
-    path_query = PathQuery(start_name=start_name,
-                           end_name=end_name,
-                           min_length=min_length,
-                           max_length=max_length,
-                           start_class=start_class,
-                           end_class=end_class,
-                           start_ns=start_ns,
-                           end_ns=end_ns,
-                           gene_path=gene_path,
-                           edge_class=edge_class,
-                           multiple_edge_classes=multiple_edge_classes,
-                           inside_node_class=inside_node_class,
-                           mesh_term=mesh_term,
-                           pmids=pmid,
-                           belish=belish,
-                           limit=limit)
+    path_query = PathQuery(
+        start_name=start_name,
+        end_name=end_name,
+        min_length=min_length,
+        max_length=max_length,
+        start_how_name=start_how_name,
+        end_how_name=end_how_name,
+        start_class=start_class,
+        end_class=end_class,
+        start_ns=start_ns,
+        end_ns=end_ns,
+        start_bel=start_bel,
+        start_how_bel=start_how_bel,
+        end_bel=end_bel,
+        end_how_bel=end_how_bel,
+        gene_path=gene_path,
+        edge_class=edge_class,
+        multiple_edge_classes=multiple_edge_classes,
+        inside_node_class=inside_node_class,
+        mesh_term=mesh_term,
+        pmids=pmid,
+        belish=belish,
+        limit=limit)
     return path_query
 
 
 def get_paths() -> Union[dict, PathQuery]:
     """Return paths found for query."""
+    print('get_paths:\n\n', request.args)
     path_query = _get_path_query()
     if isinstance(path_query, PathQuery):
         paths = path_query.get_paths()
@@ -1067,7 +1335,7 @@ def get_class_info_by_name():
     return results.get(request.args.get('name'))
 
 
-def get_class_infos_by_parent_name(childs_of):
+def get_class_infos_by_parent_name(childs_of) -> dict:
     """Get node or edge class information as DOT."""
     results = get_class_infos()
     return {k: v for k, v in results.items() if childs_of in v['parents_path']}
@@ -1088,6 +1356,12 @@ def _get_class_info_as_dot(get_class_method):
 def get_bel_node_types():
     """Return BEL nodes and their metadata."""
     return get_class_infos_by_parent_name('bel')
+
+def get_all_node_types():
+    """Return BEL nodes and their metadata."""
+    bel_node_types = get_class_infos_by_parent_name('bel')
+    bel_node_types.update(get_class_infos_by_parent_name('ebel'))
+    return bel_node_types
 
 
 def get_bel_node_types_as_dot():
@@ -1125,6 +1399,8 @@ def get_ebel_relation_types_as_dot():
     return _get_class_info_as_dot(get_ebel_relation_types)
 
 # ApiResult = namedtuple('ApiResult', ['results', 'number_of_results', 'page', 'pages','page_size'])
+
+
 def get_documents():
     """Return a list of documents that were imported to compile BEL graph."""
     sql = """Select
@@ -1154,4 +1430,3 @@ def get_pmids():
           " from bel_relation " \
           "where pmid!=0 group by pmid order by number_of_edges desc"
     return [x.oRecordData for x in Bel().execute(sql)]
-

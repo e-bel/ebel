@@ -8,7 +8,7 @@ from typing import List, Union
 from flask import request
 
 from ebel import Bel
-from ebel.web.api.ebel.v1 import SqlOperator, DataType
+from ebel.web.api.ebel.v1 import OrientDbSqlOperator, DataType
 
 SQL_MATCH_TEMPLATE = """
     match {{class:drug, as:drug{drug}}}
@@ -26,7 +26,7 @@ class Column:
                  odb_class: str,
                  form_name: str,
                  column: str,
-                 sql_operator: SqlOperator = SqlOperator.EQUALS,
+                 sql_operator: OrientDbSqlOperator = OrientDbSqlOperator.EQUALS,
                  data_type: DataType = DataType.STRING):
         """Init method."""
         self.odb_class = odb_class
@@ -41,8 +41,8 @@ class Column:
         """Get the value of a given search term."""
         if value is not None and value.strip():
             self.value = value.strip()
-            if '%' not in self.value and self.sql_operator == SqlOperator.LIKE:
-                self.sql_operator = SqlOperator.EQUALS
+            if '%' not in self.value and self.sql_operator == OrientDbSqlOperator.LIKE:
+                self.sql_operator = OrientDbSqlOperator.EQUALS
 
 
 Pagination = namedtuple('Pagination', ['page', 'page_size', 'skip'])
@@ -138,38 +138,38 @@ class Query:
 def get_drug2pmod() -> dict:
     """Create a table of relations and information fulfilling the algorithm."""
     columns: List[Column] = [
-        Column('drug', 'drug__cas_number', 'cas_number', SqlOperator.LIKE),
-        Column('drug', 'drug__description', 'description', SqlOperator.LIKE),
-        Column('drug', 'drug__drugbank_id', 'drugbank_id', SqlOperator.LIKE),
-        Column('drug', 'drug__indication', 'indication', SqlOperator.LIKE),
-        Column('drug', 'drug__label', 'label', SqlOperator.LIKE),
-        Column('drug', 'drug__mechanism_of_action', 'mechanism_of_action', SqlOperator.LIKE),
-        Column('drug', 'drug__metabolism', 'metabolism', SqlOperator.LIKE),
-        Column('drug', 'drug__pharmacodynamics', 'pharmacodynamics', SqlOperator.LIKE),
-        Column('drug', 'drug__toxicity', 'toxicity', SqlOperator.LIKE),
-        Column('has_drug_target', 'has_drug_target__action', 'action', SqlOperator.LIKE),
-        Column('has_drug_target', 'has_drug_target__known_action', 'known_action', SqlOperator.LIKE),
-        Column('drug_target', 'drug_target__name', 'name', SqlOperator.LIKE),
-        Column('drug_target', 'drug_target__bel', 'bel', SqlOperator.LIKE),
-        Column('drug_target', 'drug_target__label', 'label', SqlOperator.LIKE),
-        Column('drug_target', 'drug_target__uniprot', 'uniprot', SqlOperator.LIKE),
-        Column('drug_target', 'drug_target__reactome_pathways', 'reactome_pathways', SqlOperator.IN,
+        Column('drug', 'drug__cas_number', 'cas_number', OrientDbSqlOperator.LIKE),
+        Column('drug', 'drug__description', 'description', OrientDbSqlOperator.LIKE),
+        Column('drug', 'drug__drugbank_id', 'drugbank_id', OrientDbSqlOperator.LIKE),
+        Column('drug', 'drug__indication', 'indication', OrientDbSqlOperator.LIKE),
+        Column('drug', 'drug__label', 'label', OrientDbSqlOperator.LIKE),
+        Column('drug', 'drug__mechanism_of_action', 'mechanism_of_action', OrientDbSqlOperator.LIKE),
+        Column('drug', 'drug__metabolism', 'metabolism', OrientDbSqlOperator.LIKE),
+        Column('drug', 'drug__pharmacodynamics', 'pharmacodynamics', OrientDbSqlOperator.LIKE),
+        Column('drug', 'drug__toxicity', 'toxicity', OrientDbSqlOperator.LIKE),
+        Column('has_drug_target', 'has_drug_target__action', 'action', OrientDbSqlOperator.LIKE),
+        Column('has_drug_target', 'has_drug_target__known_action', 'known_action', OrientDbSqlOperator.LIKE),
+        Column('drug_target', 'drug_target__name', 'name', OrientDbSqlOperator.LIKE),
+        Column('drug_target', 'drug_target__bel', 'bel', OrientDbSqlOperator.LIKE),
+        Column('drug_target', 'drug_target__label', 'label', OrientDbSqlOperator.LIKE),
+        Column('drug_target', 'drug_target__uniprot', 'uniprot', OrientDbSqlOperator.LIKE),
+        Column('drug_target', 'drug_target__reactome_pathways', 'reactome_pathways', OrientDbSqlOperator.IN,
                DataType.LIST_STRING),
-        Column('drug_target_to_target', 'drug_target_to_target__relation', '@class', SqlOperator.EQUALS),
-        Column('drug_target_to_target', 'drug_target_to_target__evidence', 'evidence', SqlOperator.LIKE),
-        Column('drug_target_to_target', 'drug_target_to_target__pmid', 'pmid', SqlOperator.LIKE),
-        Column('drug_target_to_target', 'drug_target_to_target__citation', 'citation', SqlOperator.LIKE),
-        Column('target', 'target__name', 'name', SqlOperator.LIKE),
-        Column('target', 'target__bel', 'bel', SqlOperator.LIKE),
-        Column('target', 'target__label', 'label', SqlOperator.LIKE),
-        Column('target', 'target__uniprot', 'uniprot', SqlOperator.LIKE),
-        Column('target', 'target__reactome_pathways', 'reactome_pathways', SqlOperator.IN, DataType.LIST_STRING),
-        Column('pmod', 'pmod__amino_acid', 'amino_acid', SqlOperator.LIKE),
-        Column('pmod', 'pmod__name', 'name', SqlOperator.LIKE),
-        Column('pmod', 'pmod__namespace', 'namespace', SqlOperator.LIKE),
-        Column('pmod', 'pmod__position', 'position', SqlOperator.LIKE),
-        Column('pmod', 'pmod__type', 'type', SqlOperator.LIKE),
-        Column('pmod', 'pmod__bel', 'bel', SqlOperator.LIKE)
+        Column('drug_target_to_target', 'drug_target_to_target__relation', '@class', OrientDbSqlOperator.EQUALS),
+        Column('drug_target_to_target', 'drug_target_to_target__evidence', 'evidence', OrientDbSqlOperator.LIKE),
+        Column('drug_target_to_target', 'drug_target_to_target__pmid', 'pmid', OrientDbSqlOperator.LIKE),
+        Column('drug_target_to_target', 'drug_target_to_target__citation', 'citation', OrientDbSqlOperator.LIKE),
+        Column('target', 'target__name', 'name', OrientDbSqlOperator.LIKE),
+        Column('target', 'target__bel', 'bel', OrientDbSqlOperator.LIKE),
+        Column('target', 'target__label', 'label', OrientDbSqlOperator.LIKE),
+        Column('target', 'target__uniprot', 'uniprot', OrientDbSqlOperator.LIKE),
+        Column('target', 'target__reactome_pathways', 'reactome_pathways', OrientDbSqlOperator.IN, DataType.LIST_STRING),
+        Column('pmod', 'pmod__amino_acid', 'amino_acid', OrientDbSqlOperator.LIKE),
+        Column('pmod', 'pmod__name', 'name', OrientDbSqlOperator.LIKE),
+        Column('pmod', 'pmod__namespace', 'namespace', OrientDbSqlOperator.LIKE),
+        Column('pmod', 'pmod__position', 'position', OrientDbSqlOperator.LIKE),
+        Column('pmod', 'pmod__type', 'type', OrientDbSqlOperator.LIKE),
+        Column('pmod', 'pmod__bel', 'bel', OrientDbSqlOperator.LIKE)
     ]
 
     for column in columns:
