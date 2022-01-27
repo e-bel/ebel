@@ -1,0 +1,1958 @@
+@prefix biopax:  <http://www.biopax.org/release/biopax-level3.owl#> .
+@prefix cito:    <http://purl.org/spar/cito/> .
+@prefix dc:      <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix freq:    <http://purl.org/cld/freq/> .
+@prefix gpml:    <http://vocabularies.wikipathways.org/gpml#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix pav:     <http://purl.org/pav/> .
+@prefix prov:    <http://www.w3.org/ns/prov#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix void:    <http://rdfs.org/ns/void#> .
+@prefix wp:      <http://vocabularies.wikipathways.org/wp#> .
+@prefix wprdf:   <http://rdf.wikipathways.org/> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+
+<https://identifiers.org/ncbigene/4722>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFS3" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4722> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4722" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000213619> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4722> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFS3> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/G3V194> , <https://identifiers.org/uniprot/E9PS48> , <https://identifiers.org/uniprot/E9PJE7> , <https://identifiers.org/uniprot/O75489> , <https://identifiers.org/uniprot/E9PKL8> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e2a> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4722> .
+
+<https://identifiers.org/ncbigene/7388>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "UQCRH" ;
+        dc:identifier       <https://identifiers.org/ncbigene/7388> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "7388" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000173660> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/7388> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UQCRH> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A0A087WTF2> , <https://identifiers.org/uniprot/A0A087X2B9> , <https://identifiers.org/uniprot/P07919> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c54> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/7388> .
+
+<https://identifiers.org/ncbigene/4701>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFA7" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4701> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4701" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000267855> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4701> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA7> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/M0R0N0> , <https://identifiers.org/uniprot/O95182> , <https://identifiers.org/uniprot/M0R1K9> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ec6> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4701> .
+
+<https://identifiers.org/ncbigene/4509>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ATP8" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4509> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4509" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000228253> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4509> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-ATP8> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P03928> , <https://identifiers.org/uniprot/U5YV54> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b2b> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4509> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/ad726>
+        rdf:type          wp:Catalysis , wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/ad726> ;
+        wp:participants   <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/fee15> ;
+        wp:source         <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:target         <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/fee15> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/ComplexBinding/fdc14>
+        rdf:type          wp:ComplexBinding , wp:Interaction , wp:Binding ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/fdc14> ;
+        wp:participants   <https://identifiers.org/ncbigene/4728> , <https://identifiers.org/ncbigene/4724> , <https://identifiers.org/ncbigene/4698> , <https://identifiers.org/ncbigene/4717> , <https://identifiers.org/ncbigene/4694> , <https://identifiers.org/ncbigene/4716> , <https://identifiers.org/ncbigene/4722> , <https://identifiers.org/ncbigene/4701> , <https://identifiers.org/ncbigene/4713> , <https://identifiers.org/ncbigene/4709> , <https://identifiers.org/ncbigene/4731> , <https://identifiers.org/ncbigene/4705> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/ncbigene/4706> , <https://identifiers.org/ncbigene/4711> , <https://identifiers.org/ncbigene/4538> , <https://identifiers.org/ncbigene/4539> , <https://identifiers.org/ncbigene/4726> , <https://identifiers.org/ncbigene/4536> , <https://identifiers.org/ncbigene/4719> , <https://identifiers.org/ncbigene/4696> , <https://identifiers.org/ncbigene/4702> , <https://identifiers.org/ncbigene/55967> , <https://identifiers.org/ncbigene/4720> , <https://identifiers.org/ncbigene/4715> , <https://identifiers.org/ncbigene/4729> , <https://identifiers.org/ncbigene/4700> , <https://identifiers.org/ncbigene/4708> , <https://identifiers.org/ncbigene/4541> , <https://identifiers.org/ncbigene/4710> , <https://identifiers.org/ncbigene/4537> , <https://identifiers.org/ncbigene/4725> , <https://identifiers.org/ncbigene/4535> , <https://identifiers.org/ncbigene/4704> , <https://identifiers.org/ncbigene/4718> , <https://identifiers.org/ncbigene/4695> , <https://identifiers.org/ncbigene/4723> , <https://identifiers.org/ncbigene/374291> , <https://identifiers.org/ncbigene/4714> , <https://identifiers.org/ncbigene/4707> , <https://identifiers.org/ncbigene/4712> , <https://identifiers.org/ncbigene/4540> .
+
+<https://identifiers.org/pubmed/23746447>
+        rdf:type            wp:PublicationReference ;
+        dc:source           "PubMed" ;
+        dcterms:identifier  "23746447" ;
+        dcterms:isPartOf    <https://identifiers.org/ncbigene/4697> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/pubmed/23746447> .
+
+<https://identifiers.org/ncbigene/4538>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ND4" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4538> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4538" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198886> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4538> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-ND4> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/H9EC08> , <https://identifiers.org/uniprot/P03905> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ec9> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4538> .
+
+<https://identifiers.org/ncbigene/4709>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFB3" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4709> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4709" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000119013> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4709> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB3> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/C9JKQ2> , <https://identifiers.org/uniprot/A0A024R413> , <https://identifiers.org/uniprot/O43676> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c88> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4709> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/d057a>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/d057a> ;
+        wp:participants   <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:source         <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:target         <https://identifiers.org/chebi/CHEBI:15378> .
+
+<https://identifiers.org/ncbigene/515>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5F1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/515> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "515" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000116459> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/515> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5F1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q5QNZ2> , <https://identifiers.org/uniprot/P24539> , <https://identifiers.org/uniprot/Q08ET0> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f59> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/515> .
+
+<https://identifiers.org/kegg.compound/C00042>
+        rdf:type            wp:DataNode , wp:Metabolite ;
+        rdfs:label          "Succinate" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/KDYFGRWQOYBRFD-UHFFFAOYSA-N> ;
+        dc:identifier       <https://identifiers.org/kegg.compound/C00042> ;
+        dc:source           "KEGG Compound" ;
+        dcterms:identifier  "C00042" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/fa8bc> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:15741> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/1078> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0000254> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/KDYFGRWQOYBRFD-UHFFFAOYSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C00042> ;
+        wp:bdbLipidMaps     <https://identifiers.org/lipidmaps/LMFA01170043> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID1738118> , <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID1110> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q213050> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ac151> ;
+        foaf:page           <http://www.genome.jp/dbget-bin/www_bget?cpd:C00042> .
+
+<https://identifiers.org/hmdb/HMDB0002012>
+        rdf:type            wp:Metabolite , wp:DataNode ;
+        rdfs:label          "Ubiquinone" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/SOECUQMRSRVZQQ-UHFFFAOYSA-N> ;
+        dc:identifier       <https://identifiers.org/hmdb/HMDB0002012> ;
+        dc:source           "HMDB" ;
+        dcterms:identifier  "HMDB0002012" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f713d> , <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b0e4a> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b92fd> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:46234> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/4307> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0002012> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/SOECUQMRSRVZQQ-UHFFFAOYSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C00399> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID4462> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q27097877> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ff5> ;
+        foaf:page           <http://www.hmdb.ca/metabolites/HMDB0002012> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/a4aef>
+        rdf:type          wp:Catalysis , wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/a4aef> ;
+        wp:participants   <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c243a> ;
+        wp:source         <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:target         <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c243a> .
+
+<https://identifiers.org/ncbigene/1346>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX7A1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1346> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1346" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000161281> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1346> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX7A1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/K7ER11> , <https://identifiers.org/uniprot/U3KQH8> , <https://identifiers.org/uniprot/Q6FGI7> , <https://identifiers.org/uniprot/P24310> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/bbf> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1346> .
+
+<https://identifiers.org/ncbigene/4717>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFC1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4717> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4717" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000109390> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4717> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFC1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O43677> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a80> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4717> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b92fd>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/b92fd> ;
+        wp:participants   <https://identifiers.org/hmdb/HMDB0002012> , <https://identifiers.org/kegg.compound/C05359> ;
+        wp:source         <https://identifiers.org/kegg.compound/C05359> ;
+        wp:target         <https://identifiers.org/hmdb/HMDB0002012> .
+
+<https://identifiers.org/ncbigene/6390>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "SDHB" ;
+        dc:identifier       <https://identifiers.org/ncbigene/6390> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "6390" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000117118> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/6390> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SDHB> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A0A087WWT1> , <https://identifiers.org/uniprot/P21912> , <https://identifiers.org/uniprot/A0A087WXX8> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b62> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/6390> .
+
+<https://identifiers.org/ncbigene/29796>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "UCRC" ;
+        dc:identifier       <https://identifiers.org/ncbigene/29796> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "29796" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000184076> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/29796> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UQCR10> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q9UDW1> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a39> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/29796> .
+
+<https://identifiers.org/ncbigene/9481>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "SLC25A27" ;
+        dc:identifier       <https://identifiers.org/ncbigene/9481> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "9481" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000153291> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/9481> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SLC25A27> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q5VTS8> , <https://identifiers.org/uniprot/O95847> , <https://identifiers.org/uniprot/S4R300> , <https://identifiers.org/uniprot/S4R3J2> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/bab> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/9481> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c4d38>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/c57d3> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/c4d38> ;
+        wp:participants   <https://identifiers.org/hmdb/HMDB0001377> , <https://identifiers.org/hmdb/HMDB0002111> , <https://identifiers.org/kegg.compound/C00524> ;
+        wp:source         <https://identifiers.org/kegg.compound/C00524> , <https://identifiers.org/hmdb/HMDB0001377> ;
+        wp:target         <https://identifiers.org/hmdb/HMDB0002111> .
+
+<https://identifiers.org/ncbigene/10975>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "UQCR" ;
+        dc:identifier       <https://identifiers.org/ncbigene/10975> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "10975" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000127540> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/10975> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UQCR11> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O14957> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ad3> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/10975> .
+
+<https://identifiers.org/ncbigene/4725>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFS5" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4725> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4725" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000168653> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4725> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFS5> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O43920> , <https://identifiers.org/uniprot/Q6IBA0> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b39> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4725> .
+
+<https://identifiers.org/ncbigene/4704>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFA9" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4704> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4704" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000139180> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4704> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA9> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/F5GY40> , <https://identifiers.org/uniprot/Q16795> , <https://identifiers.org/uniprot/F5H0J3> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c5a> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4704> .
+
+<https://identifiers.org/ncbigene/4512>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4512> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4512" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198804> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4512> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-CO1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/U5YWV7> , <https://identifiers.org/uniprot/P00395> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b76> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4512> .
+
+<https://identifiers.org/ncbigene/4696>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFA3" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4696> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4696" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000170906> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4696> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA3> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A8MUI2> , <https://identifiers.org/uniprot/H7C2R1> , <https://identifiers.org/uniprot/H7C0D7> , <https://identifiers.org/uniprot/S4R3I5> , <https://identifiers.org/uniprot/S4R3T6> , <https://identifiers.org/uniprot/O95167> , <https://identifiers.org/uniprot/A8MYJ8> , <https://identifiers.org/uniprot/F2Z2C6> , <https://identifiers.org/uniprot/A8MVM8> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ae1> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4696> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b2b00>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/b2b00> ;
+        wp:participants   <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:source         <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:target         <https://identifiers.org/chebi/CHEBI:15378> .
+
+<https://identifiers.org/kegg.compound/C00016>
+        rdf:type            wp:DataNode , wp:Metabolite ;
+        rdfs:label          "FAD" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/VWWQXMAJTJZDQX-UYBVJOGSSA-N> ;
+        dc:identifier       <https://identifiers.org/kegg.compound/C00016> ;
+        dc:source           "KEGG Compound" ;
+        dcterms:identifier  "C00016" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/cdee2> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b17ae> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:16238> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/559059> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0001248> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/VWWQXMAJTJZDQX-UYBVJOGSSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C00016> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID643975> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q28746> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c57d6> ;
+        foaf:page           <http://www.genome.jp/dbget-bin/www_bget?cpd:C00016> .
+
+<https://identifiers.org/ncbigene/4541>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ND6" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4541> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4541" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198695> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4541> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-ND6> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/U5Z977> , <https://identifiers.org/uniprot/P03923> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/cac> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4541> .
+
+<https://identifiers.org/ncbigene/4712>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFB6" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4712> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4712" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000165264> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4712> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB6> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O95139> , <https://identifiers.org/uniprot/A0A087WZX2> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a11> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4712> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/ComplexBinding/ad4b9>
+        rdf:type          wp:Binding , wp:ComplexBinding , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/ad4b9> ;
+        wp:participants   <https://identifiers.org/uniprot/O60397> , <https://identifiers.org/ncbigene/4512> , <https://identifiers.org/ncbigene/1345> , <https://identifiers.org/ncbigene/1351> , <https://identifiers.org/ncbigene/1347> , <https://identifiers.org/ncbigene/9167> , <https://identifiers.org/ncbigene/4514> , <https://identifiers.org/ncbigene/4697> , <https://identifiers.org/ncbigene/1337> , <https://identifiers.org/ncbigene/9377> , <https://identifiers.org/ncbigene/1350> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <https://identifiers.org/ncbigene/1349> , <https://identifiers.org/ncbigene/1327> , <https://identifiers.org/ncbigene/1340> , <https://identifiers.org/ncbigene/4513> , <https://identifiers.org/ncbigene/1339> , <https://identifiers.org/ncbigene/1329> , <https://identifiers.org/ncbigene/1346> .
+
+<https://identifiers.org/wikipathways/WP111_r117097>
+        rdf:type               skos:Collection , wp:Pathway ;
+        dc:identifier          <https://identifiers.org/wikipathways/WP111> ;
+        dc:source              "WikiPathways" ;
+        dc:title               "Electron transport chain: OXPHOS system in mitochondria"@en ;
+        dcterms:description    "An electron transport chain(ETC) couples a chemical reaction between an electron donor (such as NADH) and an electron acceptor (such as O2) to the transfer of H+ ions across a membrane, through a set of mediating biochemical reactions. These H+ ions are used to produce adenosine triphosphate (ATP), the main energy intermediate in living organisms, as they move back across the membrane. \nIn mitochondria, it is the conversion of oxygen to water, NADH to NAD+ and succinate to fumarate that drives the transfer of H+ ions.\nSource: Wikipedia ([[wikipedia:Electron_transport_chain]])\n\nProteins on this pathway have targeted assays available via the [https://assays.cancer.gov/available_assays?wp_id=WP111 CPTAC Assay Portal]" ;
+        dcterms:identifier     "WP111" ;
+        dcterms:references     <https://identifiers.org/pubmed/30030361> ;
+        cito:cites             <https://identifiers.org/pubmed/30030361> , <https://identifiers.org/pubmed/23746447> , <https://identifiers.org/pubmed/22902835> ;
+        wp:isAbout             <http://rdf.wikipathways.org/Pathway/WP111_r117097> ;
+        wp:ontologyTag         <http://purl.obolibrary.org/obo/PW_0000034> , <http://purl.obolibrary.org/obo/PW_0000002> , wp:Curation:AnalysisCollection ;
+        wp:organism            <http://purl.obolibrary.org/obo/NCBITaxon_9606> ;
+        wp:organismName        "Homo sapiens" ;
+        wp:pathwayOntologyTag  <http://purl.obolibrary.org/obo/PW_0000002> , <http://purl.obolibrary.org/obo/PW_0000034> ;
+        foaf:page              <http://www.wikipathways.org/instance/WP111_r117097> .
+
+<https://identifiers.org/ncbigene/539>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5O" ;
+        dc:identifier       <https://identifiers.org/ncbigene/539> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "539" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/e62a1> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000241837> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/539> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5O> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/H7C239> , <https://identifiers.org/uniprot/P48047> , <https://identifiers.org/uniprot/H7C086> , <https://identifiers.org/uniprot/H7C068> , <https://identifiers.org/uniprot/H7C2P9> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a5c> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/539> .
+
+<https://identifiers.org/ncbigene/518>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5G3" ;
+        dc:identifier       <https://identifiers.org/ncbigene/518> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "518" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000154518> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/518> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5G3> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P48201> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e79> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/518> .
+
+<https://identifiers.org/kegg.compound/C00003>
+        rdf:type            wp:Metabolite , wp:DataNode ;
+        rdfs:label          "NAD+" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/BAWFJGJZGIEFAR-NNYOXOHSSA-N> ;
+        dc:identifier       <https://identifiers.org/kegg.compound/C00003> ;
+        dc:source           "KEGG Compound" ;
+        dcterms:identifier  "C00003" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/id86f308da> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:44215> , <https://identifiers.org/chebi/CHEBI:15846> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/5682> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0000902> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/BAWFJGJZGIEFAR-NNYOXOHSSA-O> , <https://identifiers.org/inchikey/BAWFJGJZGIEFAR-NNYOXOHSSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C00003> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID5892> , <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID5893> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q26987253> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/cb8fe> ;
+        foaf:page           <http://www.genome.jp/dbget-bin/www_bget?cpd:C00003> .
+
+<https://identifiers.org/ncbigene/1349>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX7B" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1349> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1349" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000131174> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1349> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX7B> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P24311> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/d07> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1349> .
+
+<https://identifiers.org/ncbigene/4720>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFS2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4720> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4720" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000158864> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4720> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFS2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O75306> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ee7> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4720> .
+
+<https://identifiers.org/hmdb/HMDB0001377>
+        rdf:type            wp:DataNode , wp:Metabolite ;
+        rdfs:label          "O2" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/MYMOFIZGZYHOMD-UHFFFAOYSA-N> ;
+        dc:identifier       <https://identifiers.org/hmdb/HMDB0001377> ;
+        dc:source           "HMDB" ;
+        dcterms:identifier  "HMDB0001377" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c4d38> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:15379> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/952> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0001377> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/MYMOFIZGZYHOMD-UHFFFAOYSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C00007> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID977> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q5203615> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a5e7d> ;
+        foaf:page           <http://www.hmdb.ca/metabolites/HMDB0001377> .
+
+<https://identifiers.org/ncbigene/7386>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "UQCRFS1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/7386> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "7386" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000169021> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/7386> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UQCRFS1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P47985> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b00> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/7386> .
+
+<https://identifiers.org/ncbigene/9016>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "SLC25A14" ;
+        dc:identifier       <https://identifiers.org/ncbigene/9016> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "9016" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000102078> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/9016> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SLC25A14> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/F6SL11> , <https://identifiers.org/uniprot/Q5JY88> , <https://identifiers.org/uniprot/O95258> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ae2> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/9016> .
+
+<https://identifiers.org/ncbigene/4728>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFS8" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4728> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4728" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000110717> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4728> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFS8> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/E9PPW7> , <https://identifiers.org/uniprot/F8W9K7> , <https://identifiers.org/uniprot/E9PKH6> , <https://identifiers.org/uniprot/E9PN51> , <https://identifiers.org/uniprot/E9PML5> , <https://identifiers.org/uniprot/E9PJY7> , <https://identifiers.org/uniprot/Q08E91> , <https://identifiers.org/uniprot/H0YCB2> , <https://identifiers.org/uniprot/O00217> , <https://identifiers.org/uniprot/H0YDT4> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fcb> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4728> .
+
+<https://identifiers.org/ncbigene/4536>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ND2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4536> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4536" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198763> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4536> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-ND2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P03891> , <https://identifiers.org/uniprot/Q7GXY9> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/cf6> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4536> .
+
+<https://identifiers.org/ncbigene/4707>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFB1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4707> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4707" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000183648> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4707> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O75438> , <https://identifiers.org/uniprot/A0A024R6G6> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c12> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4707> .
+
+<https://identifiers.org/ncbigene/7352>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "UCP3" ;
+        dc:identifier       <https://identifiers.org/ncbigene/7352> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "7352" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000175564> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/7352> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UCP3> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A0A0S2Z4G5> , <https://identifiers.org/uniprot/P55916> , <https://identifiers.org/uniprot/F5H3N5> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c2d> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/7352> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/eb56f>
+        rdf:type          wp:Catalysis , wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/eb56f> ;
+        wp:participants   <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/e62a1> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f52f4> ;
+        wp:source         <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/e62a1> ;
+        wp:target         <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f52f4> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b3d7d>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/b3d7d> ;
+        wp:participants   <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:source         <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:target         <https://identifiers.org/chebi/CHEBI:15378> .
+
+<https://identifiers.org/ncbigene/513>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ATP5D" ;
+        dc:identifier       <https://identifiers.org/ncbigene/513> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "513" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/cb58a> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000099624> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/513> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5D> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P30049> , <https://identifiers.org/uniprot/A0A087WTL3> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f0d> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/513> .
+
+<https://identifiers.org/ncbigene/292>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "SLC25A5" ;
+        dc:identifier       <https://identifiers.org/ncbigene/292> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "292" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000005022> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/292> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SLC25A5> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P05141> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a1d> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/292> .
+
+<https://identifiers.org/kegg.compound/C00524>
+        rdf:type            wp:DataNode , wp:Metabolite ;
+        rdfs:label          "Cytochrome C" ;
+        dc:identifier       <https://identifiers.org/kegg.compound/C00524> ;
+        dc:source           "KEGG Compound" ;
+        dcterms:identifier  "C00524" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c4d38> , <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f713d> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:18070> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C02416> , <https://identifiers.org/kegg.compound/C00524> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q5201348> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fc1c2> ;
+        foaf:page           <http://www.genome.jp/dbget-bin/www_bget?cpd:C00524> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b17ae>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/a0b32> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/b17ae> ;
+        wp:participants   <https://identifiers.org/kegg.compound/C01352> , <https://identifiers.org/kegg.compound/C05359> , <https://identifiers.org/kegg.compound/C00016> ;
+        wp:source         <https://identifiers.org/kegg.compound/C01352> ;
+        wp:target         <https://identifiers.org/kegg.compound/C05359> , <https://identifiers.org/kegg.compound/C00016> .
+
+<https://identifiers.org/ncbigene/4715>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFB9" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4715> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4715" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000147684> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4715> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB9> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q9Y6M9> , <https://identifiers.org/uniprot/E7EWZ0> , <https://identifiers.org/uniprot/E9PH64> , <https://identifiers.org/uniprot/E9PF49> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/af8> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4715> .
+
+<https://identifiers.org/ncbigene/7381>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "UQCRB" ;
+        dc:identifier       <https://identifiers.org/ncbigene/7381> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "7381" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000156467> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/7381> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UQCRB> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/E5RHG9> , <https://identifiers.org/uniprot/P14927> , <https://identifiers.org/uniprot/E5RIT7> , <https://identifiers.org/uniprot/B7Z2R2> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/d72> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/7381> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/id86f308da>
+        rdf:type          wp:Interaction , wp:DirectedInteraction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/dbdc8> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/id86f308da> ;
+        wp:participants   <https://identifiers.org/kegg.compound/C00004> , <https://identifiers.org/kegg.compound/C05359> , <https://identifiers.org/kegg.compound/C00003> ;
+        wp:source         <https://identifiers.org/kegg.compound/C00004> ;
+        wp:target         <https://identifiers.org/kegg.compound/C05359> , <https://identifiers.org/kegg.compound/C00003> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f52f4>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/da1d5> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/f52f4> ;
+        wp:participants   <https://identifiers.org/kegg.compound/C00002> , <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:source         <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:target         <https://identifiers.org/chebi/CHEBI:15378> , <https://identifiers.org/kegg.compound/C00002> .
+
+<https://identifiers.org/ncbigene/521>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5I" ;
+        dc:identifier       <https://identifiers.org/ncbigene/521> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "521" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000169020> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/521> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5I> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P56385> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a12> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/521> .
+
+<https://identifiers.org/ncbigene/374291>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFS7" ;
+        dc:identifier       <https://identifiers.org/ncbigene/374291> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "374291" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000115286> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/374291> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFS7> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/F5GXJ1> , <https://identifiers.org/uniprot/K7ENU3> , <https://identifiers.org/uniprot/F5H5N1> , <https://identifiers.org/uniprot/Q7LD69> , <https://identifiers.org/uniprot/F5H736> , <https://identifiers.org/uniprot/O75251> , <https://identifiers.org/uniprot/A0A087WXF6> , <https://identifiers.org/uniprot/A0A087WTI3> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b8b> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/374291> .
+
+<https://identifiers.org/wikipathways/WP4324>
+        rdf:type            wp:Pathway , wp:DataNode ;
+        rdfs:label          "Assembly PW Complex 1" ;
+        dc:identifier       <https://identifiers.org/wikipathways/WP4324> ;
+        dc:source           "WikiPathways" ;
+        dcterms:identifier  "WP4324" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/d6aa8> ;
+        foaf:page           <https://www.wikipathways.org/instance/WP4324> .
+
+<https://identifiers.org/ncbigene/10063>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX17" ;
+        dc:identifier       <https://identifiers.org/ncbigene/10063> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "10063" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000138495> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/10063> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX17> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/H7C5P5> , <https://identifiers.org/uniprot/H7C4E5> , <https://identifiers.org/uniprot/C9J8T6> , <https://identifiers.org/uniprot/Q14061> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f19> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/10063> .
+
+<https://identifiers.org/ncbigene/4723>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFV1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4723> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4723" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000167792> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4723> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFV1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/E9PPE0> , <https://identifiers.org/uniprot/E9PJL9> , <https://identifiers.org/uniprot/B4DE93> , <https://identifiers.org/uniprot/E9PPD6> , <https://identifiers.org/uniprot/E9PPR0> , <https://identifiers.org/uniprot/E9PLC6> , <https://identifiers.org/uniprot/E9PQP1> , <https://identifiers.org/uniprot/G3V0I5> , <https://identifiers.org/uniprot/P49821> , <https://identifiers.org/uniprot/H0YD04> , <https://identifiers.org/uniprot/E5KNH5> , <https://identifiers.org/uniprot/H0YE81> , <https://identifiers.org/uniprot/E9PMX3> , <https://identifiers.org/uniprot/E9PPS5> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e6c> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4723> .
+
+<https://identifiers.org/ncbigene/4702>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFA8" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4702> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4702" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000119421> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4702> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA8> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P51970> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a9b> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4702> .
+
+<https://identifiers.org/ncbigene/4694>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFA1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4694> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4694" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000125356> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4694> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q6IBB5> , <https://identifiers.org/uniprot/O15239> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/df1> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4694> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f0372>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/f0372> ;
+        wp:participants   <https://identifiers.org/kegg.compound/C00004> , <https://identifiers.org/wikipathways/WP78> ;
+        wp:source         <https://identifiers.org/wikipathways/WP78> ;
+        wp:target         <https://identifiers.org/kegg.compound/C00004> .
+
+<https://identifiers.org/ncbigene/10476>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ATP5H" ;
+        dc:identifier       <https://identifiers.org/ncbigene/10476> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "10476" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000167863> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/10476> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5H> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/F5H608> , <https://identifiers.org/uniprot/O75947> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ecb> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/10476> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/ComplexBinding/c0500>
+        rdf:type          wp:ComplexBinding , wp:Binding , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/c0500> ;
+        wp:participants   <https://identifiers.org/ncbigene/4509> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> , <https://identifiers.org/ncbigene/9551> , <https://identifiers.org/ncbigene/10632> , <https://identifiers.org/ncbigene/517> , <https://identifiers.org/ncbigene/521> , <https://identifiers.org/ncbigene/27109> , <https://identifiers.org/ncbigene/518> , <https://identifiers.org/ncbigene/515> , <https://identifiers.org/ncbigene/4508> , <https://identifiers.org/ncbigene/516> , <https://identifiers.org/ncbigene/93974> , <https://identifiers.org/ncbigene/10476> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c243a>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/c243a> ;
+        wp:participants   <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:source         <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:target         <https://identifiers.org/chebi/CHEBI:15378> .
+
+<https://identifiers.org/ncbigene/4731>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFV3" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4731> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4731" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000160194> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4731> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFV3> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P56181> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f95> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4731> .
+
+<https://identifiers.org/ncbigene/4710>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFB4" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4710> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4710" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000065518> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4710> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB4> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O95168> , <https://identifiers.org/uniprot/C9JXQ9> , <https://identifiers.org/uniprot/F2Z3P9> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c9a> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4710> .
+
+<https://identifiers.org/ncbigene/1339>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "COX6A2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1339> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1339" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000156885> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1339> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX6A2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q02221> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e7f> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1339> .
+
+<https://identifiers.org/ncbigene/4539>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ND4L" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4539> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4539" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000212907> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4539> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-ND4L> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q7GXZ4> , <https://identifiers.org/uniprot/P03901> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b21> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4539> .
+
+<https://identifiers.org/ncbigene/516>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ATP5G1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/516> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "516" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000159199> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/516> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5G1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/E7EQ97> , <https://identifiers.org/uniprot/E7EPU7> , <https://identifiers.org/uniprot/D6R9H7> , <https://identifiers.org/uniprot/Q6FIH7> , <https://identifiers.org/uniprot/I3L0Y5> , <https://identifiers.org/uniprot/P05496> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c96> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/516> .
+
+<https://identifiers.org/ncbigene/6341>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "SCO1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/6341> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "6341" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000133028> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/6341> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SCO1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/J3QR42> , <https://identifiers.org/uniprot/J3QL56> , <https://identifiers.org/uniprot/O75880> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/db2> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/6341> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14>
+        rdf:type          wp:DataNode , wp:Complex ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/ad726> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/cfb2a> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/fdc14> ;
+        wp:participants   <https://identifiers.org/ncbigene/4724> , <https://identifiers.org/ncbigene/4698> , <https://identifiers.org/ncbigene/4540> , <https://identifiers.org/ncbigene/4731> , <https://identifiers.org/ncbigene/4694> , <https://identifiers.org/ncbigene/4716> , <https://identifiers.org/ncbigene/4707> , <https://identifiers.org/ncbigene/4700> , <https://identifiers.org/ncbigene/4713> , <https://identifiers.org/ncbigene/4538> , <https://identifiers.org/ncbigene/4726> , <https://identifiers.org/ncbigene/4717> , <https://identifiers.org/ncbigene/4710> , <https://identifiers.org/ncbigene/4535> , <https://identifiers.org/ncbigene/4723> , <https://identifiers.org/ncbigene/4720> , <https://identifiers.org/ncbigene/4696> , <https://identifiers.org/ncbigene/4709> , <https://identifiers.org/ncbigene/4702> , <https://identifiers.org/ncbigene/4715> , <https://identifiers.org/ncbigene/4706> , <https://identifiers.org/ncbigene/4719> , <https://identifiers.org/ncbigene/4537> , <https://identifiers.org/ncbigene/4712> , <https://identifiers.org/ncbigene/4725> , <https://identifiers.org/ncbigene/4705> , <https://identifiers.org/ncbigene/4729> , <https://identifiers.org/ncbigene/374291> , <https://identifiers.org/ncbigene/4722> , <https://identifiers.org/ncbigene/4541> , <https://identifiers.org/ncbigene/4695> , <https://identifiers.org/ncbigene/4704> , <https://identifiers.org/ncbigene/4728> , <https://identifiers.org/ncbigene/55967> , <https://identifiers.org/ncbigene/4708> , <https://identifiers.org/ncbigene/4701> , <https://identifiers.org/ncbigene/4714> , <https://identifiers.org/ncbigene/4539> , <https://identifiers.org/ncbigene/4718> , <https://identifiers.org/ncbigene/4711> , <https://identifiers.org/ncbigene/4536> .
+
+<https://identifiers.org/ncbigene/1347>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "COX7A2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1347> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1347" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000112695> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1347> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX7A2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/D6RGV5> , <https://identifiers.org/uniprot/D6RIE3> , <https://identifiers.org/uniprot/D6RA35> , <https://identifiers.org/uniprot/H0Y8S6> , <https://identifiers.org/uniprot/D6R9C3> , <https://identifiers.org/uniprot/H0UI06> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c9f> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1347> .
+
+<https://identifiers.org/ncbigene/4718>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFC2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4718> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4718" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000151366> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4718> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFC2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/E9PM14> , <https://identifiers.org/uniprot/A0A024R5K6> , <https://identifiers.org/uniprot/O95298> , <https://identifiers.org/uniprot/E9PRJ5> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ecf> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4718> .
+
+<https://identifiers.org/ncbigene/7384>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "UQCRC1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/7384> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "7384" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000010256> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/7384> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UQCRC1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P31930> , <https://identifiers.org/uniprot/F8WER5> , <https://identifiers.org/uniprot/F8WEF1> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e02> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/7384> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/e62a1>
+        rdf:type          wp:Complex , wp:DataNode ;
+        dcterms:isPartOf  <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/eb56f> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/e62a1> ;
+        wp:participants   <https://identifiers.org/ncbigene/539> , <https://identifiers.org/ncbigene/522> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/ComplexBinding/e62a1>
+        rdf:type          wp:ComplexBinding , wp:Binding , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/e62a1> ;
+        wp:participants   <https://identifiers.org/ncbigene/539> , <https://identifiers.org/ncbigene/522> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/e62a1> .
+
+<https://identifiers.org/ncbigene/55967>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "DAP13" ;
+        dc:identifier       <https://identifiers.org/ncbigene/55967> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "55967" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000184752> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/55967> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA12> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/F8VRD8> , <https://identifiers.org/uniprot/Q9UI09> , <https://identifiers.org/uniprot/F8VXI1> , <https://identifiers.org/uniprot/H0YID5> , <https://identifiers.org/uniprot/H0YIT1> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/d9a> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/55967> .
+
+<https://identifiers.org/ncbigene/6391>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "SDHC" ;
+        dc:identifier       <https://identifiers.org/ncbigene/6391> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "6391" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000143252> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/6391> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SDHC> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q99643> , <https://identifiers.org/uniprot/A0A087WZU7> , <https://identifiers.org/uniprot/A0A0S2Z4C9> , <https://identifiers.org/uniprot/D6RBX6> , <https://identifiers.org/uniprot/A0A0S2Z4B7> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e70> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/6391> .
+
+<https://identifiers.org/ncbigene/1355>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "COX15" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1355> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1355" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000014919> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1355> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX15> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q7KZN9> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a31> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1355> .
+
+<https://identifiers.org/ncbigene/4726>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFS6" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4726> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4726" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000145494> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4726> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFS6> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/D6RBT3> , <https://identifiers.org/uniprot/O75380> , <https://identifiers.org/uniprot/Q6IBC4> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/aff> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4726> .
+
+<https://identifiers.org/ncbigene/4705>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFA10" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4705> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4705" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000130414> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4705> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA10> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/C9J6X0> , <https://identifiers.org/uniprot/H7C1Y7> , <https://identifiers.org/uniprot/A0A087WXC5> , <https://identifiers.org/uniprot/A0A024R4B3> , <https://identifiers.org/uniprot/O95299> , <https://identifiers.org/uniprot/Q8N1B9> , <https://identifiers.org/uniprot/H7C2W5> , <https://identifiers.org/uniprot/F8WEH0> , <https://identifiers.org/uniprot/H7C2X4> , <https://identifiers.org/uniprot/E7ESZ7> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fa1> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4705> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/cb58a>
+        rdf:type          wp:Complex , wp:DataNode ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/cb58a> ;
+        wp:participants   <https://identifiers.org/ncbigene/513> , <https://identifiers.org/ncbigene/509> , <https://identifiers.org/ncbigene/514> , <https://identifiers.org/ncbigene/506> , <https://identifiers.org/ncbigene/498> .
+
+<https://identifiers.org/ncbigene/4513>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "COX2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4513> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4513" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198712> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4513> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-CO2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/U5Z487> , <https://identifiers.org/uniprot/P00403> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/af3> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4513> .
+
+<https://identifiers.org/ncbigene/4697>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFA4" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4697> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4697" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        dcterms:references  <https://identifiers.org/pubmed/22902835> , <https://identifiers.org/pubmed/23746447> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000189043> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4697> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA4> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O00483> , <https://identifiers.org/uniprot/A0A024R9Z0> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f27> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4697> .
+
+<https://identifiers.org/ncbigene/7350>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "UCP1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/7350> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "7350" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000109424> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/7350> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UCP1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P25874> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fe1> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/7350> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/ComplexBinding/cb58a>
+        rdf:type          wp:Interaction , wp:ComplexBinding , wp:Binding ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/cb58a> ;
+        wp:participants   <https://identifiers.org/ncbigene/514> , <https://identifiers.org/ncbigene/498> , <https://identifiers.org/ncbigene/513> , <https://identifiers.org/ncbigene/506> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/cb58a> , <https://identifiers.org/ncbigene/509> .
+
+<https://identifiers.org/ncbigene/27109>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ATP5S" ;
+        dc:identifier       <https://identifiers.org/ncbigene/27109> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "27109" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000125375> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/27109> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5S> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q99766> , <https://identifiers.org/uniprot/G3V446> , <https://identifiers.org/uniprot/Q8WXQ4> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/cb0> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/27109> .
+
+<https://identifiers.org/pubmed/22902835>
+        rdf:type            wp:PublicationReference ;
+        dc:source           "PubMed" ;
+        dcterms:identifier  "22902835" ;
+        dcterms:isPartOf    <https://identifiers.org/ncbigene/4697> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/pubmed/22902835> .
+
+<https://identifiers.org/ncbigene/9377>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "COX5A" ;
+        dc:identifier       <https://identifiers.org/ncbigene/9377> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "9377" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000178741> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/9377> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX5A> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P20674> , <https://identifiers.org/uniprot/H3BRI0> , <https://identifiers.org/uniprot/H3BNX8> , <https://identifiers.org/uniprot/H3BRM5> , <https://identifiers.org/uniprot/H3BV69> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b40> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/9377> .
+
+<https://identifiers.org/ncbigene/4713>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFB7" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4713> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4713" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000099795> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4713> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB7> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P17568> , <https://identifiers.org/uniprot/M0R3B8> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/df0> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4713> .
+
+<https://identifiers.org/kegg.compound/C01352>
+        rdf:type            wp:Metabolite , wp:DataNode ;
+        rdfs:label          "FADH2" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/YPZRHBJKEMOYQH-UYBVJOGSSA-N> ;
+        dc:identifier       <https://identifiers.org/kegg.compound/C01352> ;
+        dc:source           "KEGG Compound" ;
+        dcterms:identifier  "C01352" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/cdee2> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b17ae> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:17877> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/393487> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0001197> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/YPZRHBJKEMOYQH-UYBVJOGSSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C01352> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID446013> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q27102690> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b7f21> ;
+        foaf:page           <http://www.genome.jp/dbget-bin/www_bget?cpd:C01352> .
+
+<https://identifiers.org/kegg.compound/C00004>
+        rdf:type            wp:Metabolite , wp:DataNode ;
+        rdfs:label          "NADH" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/BOPGDPNILDQYTO-NNYOXOHSSA-N> ;
+        dc:identifier       <https://identifiers.org/kegg.compound/C00004> ;
+        dc:source           "KEGG Compound" ;
+        dcterms:identifier  "C00004" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/id86f308da> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f0372> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:16908> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/903> , <https://identifiers.org/chemspider/388299> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0001487> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/BOPGDPNILDQYTO-NNYOXOHSSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C00004> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID439153> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q26987453> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fe495> ;
+        foaf:page           <http://www.genome.jp/dbget-bin/www_bget?cpd:C00004> .
+
+<https://identifiers.org/ncbigene/1350>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "COX7C" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1350> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1350" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000127184> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1350> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX7C> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/D6R9Z7> , <https://identifiers.org/uniprot/P15954> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f02> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1350> .
+
+<https://identifiers.org/ncbigene/1329>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "COX5B" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1329> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1329" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000135940> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1329> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX5B> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P10606> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e04> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1329> .
+
+<https://identifiers.org/ncbigene/4700>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFA6" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4700> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4700" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000184983> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4700> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA6> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A0A0C4DGS0> , <https://identifiers.org/uniprot/R4GN43> , <https://identifiers.org/uniprot/P56556> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/af0> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4700> .
+
+<https://identifiers.org/ncbigene/4508>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP6" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4508> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4508" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198899> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4508> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-ATP6> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q0ZFE3> , <https://identifiers.org/uniprot/P00846> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e17> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4508> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9>
+        rdf:type          wp:DataNode , wp:Complex ;
+        dcterms:isPartOf  <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/feb3f> , <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/a4aef> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/ad4b9> ;
+        wp:participants   <https://identifiers.org/ncbigene/4512> , <https://identifiers.org/ncbigene/1346> , <https://identifiers.org/ncbigene/1349> , <https://identifiers.org/ncbigene/9377> , <https://identifiers.org/ncbigene/1350> , <https://identifiers.org/ncbigene/4514> , <https://identifiers.org/uniprot/O60397> , <https://identifiers.org/ncbigene/1337> , <https://identifiers.org/ncbigene/1340> , <https://identifiers.org/ncbigene/1345> , <https://identifiers.org/ncbigene/4697> , <https://identifiers.org/ncbigene/1327> , <https://identifiers.org/ncbigene/4513> , <https://identifiers.org/ncbigene/1329> , <https://identifiers.org/ncbigene/1339> , <https://identifiers.org/ncbigene/1347> , <https://identifiers.org/ncbigene/9167> , <https://identifiers.org/ncbigene/1351> .
+
+<https://identifiers.org/ncbigene/506>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5B" ;
+        dc:identifier       <https://identifiers.org/ncbigene/506> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "506" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/cb58a> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000110955> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/506> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5B> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/V9HW31> , <https://identifiers.org/uniprot/H0YI37> , <https://identifiers.org/uniprot/H0YH81> , <https://identifiers.org/uniprot/F8W079> , <https://identifiers.org/uniprot/P06576> , <https://identifiers.org/uniprot/F8W0P7> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a92> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/506> .
+
+<https://identifiers.org/ncbigene/498>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ATP5A1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/498> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "498" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/cb58a> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000152234> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/498> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5A1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/K7EM08> , <https://identifiers.org/uniprot/A0A0A0MTS3> , <https://identifiers.org/uniprot/K7EK77> , <https://identifiers.org/uniprot/K7EQH4> , <https://identifiers.org/uniprot/V9HW26> , <https://identifiers.org/uniprot/K7EJP1> , <https://identifiers.org/uniprot/K7EKV9> , <https://identifiers.org/uniprot/K7ERX7> , <https://identifiers.org/uniprot/P25705> , <https://identifiers.org/uniprot/K7ESA0> , <https://identifiers.org/uniprot/K7ENJ4> , <https://identifiers.org/uniprot/K7EQU6> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a0b> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/498> .
+
+<https://identifiers.org/chebi/CHEBI:15378>
+        rdf:type            wp:Metabolite , wp:DataNode ;
+        rdfs:label          "H+" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/GPRLSGONYQIRFK-UHFFFAOYSA-N> ;
+        dc:identifier       <https://identifiers.org/chebi/CHEBI:15378> ;
+        dc:source           "ChEBI" ;
+        dcterms:identifier  "CHEBI:15378" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b3d7d> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c243a> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f52f4> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/fee15> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/d057a> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b2b00> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/1010> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0059597> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/GPRLSGONYQIRFK-UHFFFAOYSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C00080> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID1038> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q506710> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/bc4f2> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e8583> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a7810> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c5b31> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e0eb0> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/bde98> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/cabec> ;
+        foaf:page           <http://www.ebi.ac.uk/chebi/searchId.do?chebiId=CHEBI:15378> .
+
+<https://identifiers.org/ncbigene/4729>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFV2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4729> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4729" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000178127> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4729> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFV2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/E7EPT4> , <https://identifiers.org/uniprot/J3QS34> , <https://identifiers.org/uniprot/J3KRB4> , <https://identifiers.org/uniprot/P19404> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ae6> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4729> .
+
+<https://identifiers.org/ncbigene/1337>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX6A1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1337> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1337" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000111775> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1337> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX6A1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/H6SG15> , <https://identifiers.org/uniprot/P12074> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b9c> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1337> .
+
+<https://identifiers.org/ncbigene/4537>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ND3" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4537> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4537" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198840> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4537> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-ND3> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q7GXZ5> , <https://identifiers.org/uniprot/P03897> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fca> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4537> .
+
+<https://identifiers.org/ncbigene/4708>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFB2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4708> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4708" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000090266> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4708> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/F8WCJ6> , <https://identifiers.org/uniprot/H7C5B8> , <https://identifiers.org/uniprot/O95178> , <https://identifiers.org/uniprot/C9IZW8> , <https://identifiers.org/uniprot/C9JXM4> , <https://identifiers.org/uniprot/A4D1T5> , <https://identifiers.org/uniprot/C9JRV4> , <https://identifiers.org/uniprot/C9IZZ2> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ed3> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4708> .
+
+<https://identifiers.org/ncbigene/514>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5E" ;
+        dc:identifier       <https://identifiers.org/ncbigene/514> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "514" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/cb58a> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000124172> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/514> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5E> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P56381> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f6d> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/514> .
+
+<https://identifiers.org/ncbigene/10632>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5L" ;
+        dc:identifier       <https://identifiers.org/ncbigene/10632> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "10632" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000167283> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/10632> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5L> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O75964> , <https://identifiers.org/uniprot/E9PN17> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/c04> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/10632> .
+
+<https://identifiers.org/ncbigene/293>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "SLC25A6" ;
+        dc:identifier       <https://identifiers.org/ncbigene/293> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "293" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000169100> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/293> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SLC25A6> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q6I9V5> , <https://identifiers.org/uniprot/P12236> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/bea> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/293> .
+
+<https://identifiers.org/wikipathways/WP111>
+        pav:hasVersion  <https://identifiers.org/wikipathways/WP111_r117097> .
+
+<https://identifiers.org/ncbigene/9551>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5J2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/9551> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "9551" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000241468> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/9551> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5J2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/E5RKA0> , <https://identifiers.org/uniprot/P56134> , <https://identifiers.org/uniprot/C9JU26> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a4e> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/9551> .
+
+<https://identifiers.org/ncbigene/1345>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX6C" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1345> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1345" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000164919> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1345> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX6C> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P09669> , <https://identifiers.org/uniprot/A0A024R9B7> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a4c> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1345> .
+
+<https://identifiers.org/ncbigene/4716>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFB10" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4716> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4716" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000140990> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4716> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB10> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O96000> , <https://identifiers.org/uniprot/A8K761> , <https://identifiers.org/uniprot/H3BV16> , <https://identifiers.org/uniprot/H3BPJ9> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f15> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4716> .
+
+<https://identifiers.org/ncbigene/9167>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX7A2L" ;
+        dc:identifier       <https://identifiers.org/ncbigene/9167> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "9167" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000115944> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/9167> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX7A2L> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O14548> , <https://identifiers.org/uniprot/H0YBD2> , <https://identifiers.org/uniprot/Q6FGA0> , <https://identifiers.org/uniprot/E5RJZ1> , <https://identifiers.org/uniprot/E5RFH8> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b87> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/9167> .
+
+<https://identifiers.org/hmdb/HMDB0002111>
+        rdf:type            wp:Metabolite , wp:DataNode ;
+        rdfs:label          "H2O" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/XLYOFNOQVPJJNP-UHFFFAOYSA-N> ;
+        dc:identifier       <https://identifiers.org/hmdb/HMDB0002111> ;
+        dc:source           "HMDB" ;
+        dcterms:identifier  "HMDB0002111" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c4d38> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:15377> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/937> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0002111> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/XLYOFNOQVPJJNP-UHFFFAOYSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C00001> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID962> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q283> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ccb20> ;
+        foaf:page           <http://www.hmdb.ca/metabolites/HMDB0002111> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/fee15>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/fee15> ;
+        wp:participants   <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:source         <https://identifiers.org/chebi/CHEBI:15378> ;
+        wp:target         <https://identifiers.org/chebi/CHEBI:15378> .
+
+<https://identifiers.org/ncbigene/6389>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "SDHA" ;
+        dc:identifier       <https://identifiers.org/ncbigene/6389> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "6389" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000073578> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/6389> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SDHA> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A0A087X1I3> , <https://identifiers.org/uniprot/H0Y8X1> , <https://identifiers.org/uniprot/D6REB7> , <https://identifiers.org/uniprot/A0A024QZ30> , <https://identifiers.org/uniprot/H0Y8S2> , <https://identifiers.org/uniprot/D6RFM5> , <https://identifiers.org/uniprot/P31040> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/cc7> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/6389> .
+
+<https://identifiers.org/ncbigene/522>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5J" ;
+        dc:identifier       <https://identifiers.org/ncbigene/522> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "522" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/e62a1> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000154723> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/522> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5J> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A8MUH2> , <https://identifiers.org/uniprot/P18859> , <https://identifiers.org/uniprot/Q6IB54> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b61> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/522> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f713d>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/f713d> ;
+        wp:participants   <https://identifiers.org/kegg.compound/C00524> , <https://identifiers.org/hmdb/HMDB0002012> ;
+        wp:source         <https://identifiers.org/hmdb/HMDB0002012> ;
+        wp:target         <https://identifiers.org/kegg.compound/C00524> .
+
+<https://identifiers.org/ncbigene/1353>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "COX11" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1353> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1353" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000166260> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1353> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX11> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/B4DI26> , <https://identifiers.org/uniprot/I3L4E7> , <https://identifiers.org/uniprot/Q9Y6N1> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b59> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1353> .
+
+<https://identifiers.org/ncbigene/4724>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFS4" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4724> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4724" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000164258> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4724> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFS4> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/D6R916> , <https://identifiers.org/uniprot/O43181> , <https://identifiers.org/uniprot/D6REP1> , <https://identifiers.org/uniprot/H0Y9M8> , <https://identifiers.org/uniprot/A0A0S2Z433> , <https://identifiers.org/uniprot/D6RI09> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/bbb> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4724> .
+
+<https://identifiers.org/ncbigene/4695>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFA2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4695> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4695" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000131495> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4695> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O43678> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b0c> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4695> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/fa8bc>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/fa8bc> ;
+        wp:participants   <https://identifiers.org/kegg.compound/C05359> , <https://identifiers.org/kegg.compound/C00042> ;
+        wp:source         <https://identifiers.org/kegg.compound/C00042> ;
+        wp:target         <https://identifiers.org/kegg.compound/C05359> .
+
+<https://identifiers.org/ncbigene/509>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ATP5C1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/509> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "509" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/cb58a> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000165629> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/509> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5C1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P36542> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f76> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/509> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b0e4a>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/b0e4a> ;
+        wp:participants   <https://identifiers.org/hmdb/HMDB0002012> , <https://identifiers.org/kegg.compound/C05359> ;
+        wp:source         <https://identifiers.org/kegg.compound/C05359> ;
+        wp:target         <https://identifiers.org/hmdb/HMDB0002012> .
+
+<https://identifiers.org/ncbigene/1340>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX6B1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1340> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1340" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000126267> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1340> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX6B1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P14854> , <https://identifiers.org/uniprot/K7EQD3> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a35> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1340> .
+
+<https://identifiers.org/ncbigene/4540>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ND5" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4540> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4540" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198786> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4540> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-ND5> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/U5ZC31> , <https://identifiers.org/uniprot/P03915> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/d89> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4540> .
+
+<https://identifiers.org/ncbigene/4711>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFB5" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4711> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4711" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000136521> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4711> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB5> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/F8WDD2> , <https://identifiers.org/uniprot/A0A087WYD0> , <https://identifiers.org/uniprot/F8WDZ2> , <https://identifiers.org/uniprot/H0Y886> , <https://identifiers.org/uniprot/H7C568> , <https://identifiers.org/uniprot/O43674> , <https://identifiers.org/uniprot/E7EWP0> , <https://identifiers.org/uniprot/H7C5C1> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e03> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4711> .
+
+<https://identifiers.org/ncbigene/4519>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "CYTB" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4519> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4519" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198727> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4519> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-CYB> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q0ZFD6> , <https://identifiers.org/uniprot/P00156> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fd2> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4519> .
+
+<https://identifiers.org/ncbigene/517>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ATP5G2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/517> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "517" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000135390> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/517> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATP5G2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/Q06055> , <https://identifiers.org/uniprot/F8W041> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a6e> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/517> .
+
+<https://identifiers.org/pubmed/30030361>
+        rdf:type            wp:PublicationReference ;
+        dc:source           "PubMed" ;
+        dcterms:identifier  "30030361" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/pubmed/30030361> .
+
+<https://identifiers.org/wikipathways/WP78>
+        rdf:type            wp:Pathway , wp:DataNode ;
+        rdfs:label          "TCA Cycle" ;
+        dc:identifier       <https://identifiers.org/wikipathways/WP78> ;
+        dc:source           "WikiPathways" ;
+        dcterms:identifier  "WP78" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f0372> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/bb20c> ;
+        foaf:page           <https://www.wikipathways.org/instance/WP78> .
+
+<https://identifiers.org/kegg.compound/C00002>
+        rdf:type            wp:Metabolite , wp:DataNode ;
+        rdfs:label          "ATP" ;
+        rdfs:seeAlso        <https://identifiers.org/inchikey/ZKHQWZAMYRWXGA-KQYNXXCUSA-N> ;
+        dc:identifier       <https://identifiers.org/kegg.compound/C00002> ;
+        dc:source           "KEGG Compound" ;
+        dcterms:identifier  "C00002" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/f52f4> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:15422> ;
+        wp:bdbChemspider    <https://identifiers.org/chemspider/5742> ;
+        wp:bdbHmdb          <https://identifiers.org/hmdb/HMDB0000538> ;
+        wp:bdbInChIKey      <https://identifiers.org/inchikey/ZKHQWZAMYRWXGA-KQYNXXCUSA-N> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C00002> ;
+        wp:bdbPubChem       <http://rdf.ncbi.nlm.nih.gov/pubchem/compound/CID5957> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q80863> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/a9cb9> ;
+        foaf:page           <http://www.genome.jp/dbget-bin/www_bget?cpd:C00002> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500>
+        rdf:type          wp:Complex , wp:DataNode ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Group/c0500> ;
+        wp:participants   <https://identifiers.org/ncbigene/518> , <https://identifiers.org/ncbigene/10476> , <https://identifiers.org/ncbigene/4508> , <https://identifiers.org/ncbigene/27109> , <https://identifiers.org/ncbigene/515> , <https://identifiers.org/ncbigene/9551> , <https://identifiers.org/ncbigene/521> , <https://identifiers.org/ncbigene/4509> , <https://identifiers.org/ncbigene/517> , <https://identifiers.org/ncbigene/516> , <https://identifiers.org/ncbigene/93974> , <https://identifiers.org/ncbigene/10632> .
+
+<https://identifiers.org/ncbigene/1327>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX4I1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1327> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1327" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000131143> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1327> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX4I1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/H3BN72> , <https://identifiers.org/uniprot/H3BPR4> , <https://identifiers.org/uniprot/Q86WV2> , <https://identifiers.org/uniprot/H3BPG0> , <https://identifiers.org/uniprot/P13073> , <https://identifiers.org/uniprot/H3BNV9> , <https://identifiers.org/uniprot/H3BNI5> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/bc3> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1327> .
+
+<https://identifiers.org/ncbigene/4719>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFS1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4719> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4719" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000023228> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4719> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFS1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/F8WDL5> , <https://identifiers.org/uniprot/E5KRK5> , <https://identifiers.org/uniprot/P28331> , <https://identifiers.org/uniprot/C9JPQ5> , <https://identifiers.org/uniprot/B4DJ81> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/eb4> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4719> .
+
+<https://identifiers.org/ncbigene/7385>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "UQCRC2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/7385> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "7385" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000140740> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/7385> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UQCRC2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/H3BSJ9> , <https://identifiers.org/uniprot/H3BP04> , <https://identifiers.org/uniprot/P22695> , <https://identifiers.org/uniprot/A0A087WVZ4> , <https://identifiers.org/uniprot/H3BUE4> , <https://identifiers.org/uniprot/H3BUI9> , <https://identifiers.org/uniprot/H3BRG4> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b41> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/7385> .
+
+<https://identifiers.org/ncbigene/6392>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "SDHD" ;
+        dc:identifier       <https://identifiers.org/ncbigene/6392> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "6392" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000204370> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/6392> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SDHD> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O14521> , <https://identifiers.org/uniprot/E9PK73> , <https://identifiers.org/uniprot/A0A0S2Z4H7> , <https://identifiers.org/uniprot/A0A0S2Z4J3> , <https://identifiers.org/uniprot/A0A1W2PNY0> , <https://identifiers.org/uniprot/G3V173> , <https://identifiers.org/uniprot/H0YD41> , <https://identifiers.org/uniprot/H0YD96> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/dbb> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/6392> .
+
+<https://identifiers.org/uniprot/O60397>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "COX7A3" ;
+        dc:identifier       <https://identifiers.org/uniprot/O60397> ;
+        dc:source           "Uniprot-TrEMBL" ;
+        dcterms:identifier  "O60397" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O60397> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/bd7> ;
+        foaf:page           <http://www.uniprot.org/uniprot/O60397> .
+
+<https://identifiers.org/kegg.compound/C05359>
+        rdf:type            wp:Metabolite , wp:DataNode ;
+        rdfs:label          "e-" ;
+        dc:identifier       <https://identifiers.org/kegg.compound/C05359> ;
+        dc:source           "KEGG Compound" ;
+        dcterms:identifier  "C05359" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b0e4a> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/fa8bc> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/id86f308da> , <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b92fd> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/b17ae> ;
+        wp:bdbChEBI         <https://identifiers.org/chebi/CHEBI:10545> ;
+        wp:bdbKeggCompound  <https://identifiers.org/kegg.compound/C05359> ;
+        wp:bdbWikidata      <http://www.wikidata.org/entity/Q2225> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/b29c4> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f43a7> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fa065> ;
+        foaf:page           <http://www.genome.jp/dbget-bin/www_bget?cpd:C05359> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/cfb2a>
+        rdf:type          wp:Catalysis , wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/cfb2a> ;
+        wp:participants   <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/id86f308da> ;
+        wp:source         <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:target         <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/id86f308da> .
+
+<https://identifiers.org/ncbigene/6834>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "SURF1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/6834> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "6834" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000148290> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/6834> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SURF1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A0A087WYS9> , <https://identifiers.org/uniprot/E5KRX5> , <https://identifiers.org/uniprot/Q15526> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ea9> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/6834> .
+
+<https://identifiers.org/ncbigene/4535>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "ND1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4535> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4535" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198888> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4535> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-ND1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/U5Z754> , <https://identifiers.org/uniprot/P03886> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e4e> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4535> .
+
+<https://identifiers.org/ncbigene/4706>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "NDUFAB1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4706> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4706" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000004779> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4706> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFAB1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/H3BNE8> , <https://identifiers.org/uniprot/H3BNK3> , <https://identifiers.org/uniprot/I3L505> , <https://identifiers.org/uniprot/O14561> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/d03> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4706> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/cdee2>
+        rdf:type          wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/cdee2> ;
+        wp:participants   <https://identifiers.org/kegg.compound/C01352> , <https://identifiers.org/kegg.compound/C00016> ;
+        wp:source         <https://identifiers.org/kegg.compound/C00016> ;
+        wp:target         <https://identifiers.org/kegg.compound/C01352> .
+
+<https://identifiers.org/ncbigene/4514>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX3" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4514> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4514" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000198938> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4514> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/MT-CO3> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P00414> , <https://identifiers.org/uniprot/Q7GIM7> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e25> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4514> .
+
+<https://identifiers.org/ncbigene/4698>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFA5" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4698> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4698" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000128609> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4698> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFA5> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/H7BYD0> , <https://identifiers.org/uniprot/A0A087WXR5> , <https://identifiers.org/uniprot/F8WAS3> , <https://identifiers.org/uniprot/C9IZN5> , <https://identifiers.org/uniprot/A0A087X1G1> , <https://identifiers.org/uniprot/A0A024R745> , <https://identifiers.org/uniprot/Q16718> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/f50> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4698> .
+
+<https://identifiers.org/ncbigene/7351>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "UCP2" ;
+        dc:identifier       <https://identifiers.org/ncbigene/7351> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "7351" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000175567> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/7351> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UCP2> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P55851> , <https://identifiers.org/uniprot/F5GX45> , <https://identifiers.org/uniprot/H0YFQ0> , <https://identifiers.org/uniprot/F5H312> , <https://identifiers.org/uniprot/A0A024R5N5> , <https://identifiers.org/uniprot/H0YFR8> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fc5> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/7351> .
+
+<http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/feb3f>
+        rdf:type          wp:Catalysis , wp:DirectedInteraction , wp:Interaction ;
+        dcterms:isPartOf  <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:isAbout        <http://rdf.wikipathways.org/Pathway/WP111_r117097/Interaction/feb3f> ;
+        wp:participants   <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c4d38> ;
+        wp:source         <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> ;
+        wp:target         <http://rdf.wikipathways.org/Pathway/WP111_r117097/WP/Interaction/c4d38> .
+
+<https://identifiers.org/ncbigene/291>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "SLC25A4" ;
+        dc:identifier       <https://identifiers.org/ncbigene/291> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "291" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000151729> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/291> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/SLC25A4> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A0A0S2Z3H3> , <https://identifiers.org/uniprot/V9GYG0> , <https://identifiers.org/uniprot/P12235> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/d6c> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/291> .
+
+<https://identifiers.org/ncbigene/4714>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "NDUFB8" ;
+        dc:identifier       <https://identifiers.org/ncbigene/4714> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "4714" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/fdc14> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000166136> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/4714> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/NDUFB8> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O95169> , <https://identifiers.org/uniprot/E9PIZ8> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/fcd> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/4714> .
+
+<https://identifiers.org/ncbigene/93974>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "ATPIF1" ;
+        dc:identifier       <https://identifiers.org/ncbigene/93974> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "93974" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/c0500> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000130770> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/93974> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/ATPIF1> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/A0A0B4J230> , <https://identifiers.org/uniprot/Q9UII2> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/ded> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/93974> .
+
+<https://identifiers.org/ncbigene/27089>
+        rdf:type            wp:DataNode , wp:GeneProduct ;
+        rdfs:label          "QP-C" ;
+        dc:identifier       <https://identifiers.org/ncbigene/27089> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "27089" ;
+        dcterms:isPartOf    <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000164405> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/27089> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/UQCRQ> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/O14949> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/d5d> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/27089> .
+
+<https://identifiers.org/ncbigene/1351>
+        rdf:type            wp:GeneProduct , wp:DataNode ;
+        rdfs:label          "COX8A" ;
+        dc:identifier       <https://identifiers.org/ncbigene/1351> ;
+        dc:source           "Entrez Gene" ;
+        dcterms:identifier  "1351" ;
+        dcterms:isPartOf    <http://rdf.wikipathways.org/Pathway/WP111_r117097/Complex/ad4b9> , <https://identifiers.org/wikipathways/WP111_r117097> ;
+        wp:bdbEnsembl       <https://identifiers.org/ensembl/ENSG00000176340> ;
+        wp:bdbEntrezGene    <https://identifiers.org/ncbigene/1351> ;
+        wp:bdbHgncSymbol    <https://identifiers.org/hgnc.symbol/COX8A> ;
+        wp:bdbUniprot       <https://identifiers.org/uniprot/P10176> , <https://identifiers.org/uniprot/Q53XN1> ;
+        wp:isAbout          <http://rdf.wikipathways.org/Pathway/WP111_r117097/DataNode/e3d> ;
+        foaf:page           <http://www.ncbi.nlm.nih.gov/gene/1351> .

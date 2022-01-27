@@ -15,16 +15,13 @@ graph LR;
 
 ### Node Schema in Parsed `ttl` Files
 ```mermaid
-graph TD;
+graph LR;
     Node --> DataNode;
     DataNode --> Metabolite;
     DataNode --> Complex;
     DataNode --> Protein;
     DataNode --> Rna;
     DataNode --> GeneProduct;
-    DataNode --> Catalysis;
-    DataNode --> Stimulation;
-    DataNode --> TranscriptionTranslation;
     Node --> Pathway;
     Node --> PublicationReference;
 ```

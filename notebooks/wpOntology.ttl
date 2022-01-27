@@ -1,0 +1,266 @@
+@prefix dc: <http://purl.org/dc/terms/> .
+@prefix efo: <http://www.ebi.ac.uk/efo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix wp: <http://vocabularies.wikipathways.org/wp#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+wp:Binding a owl:Class ;
+    rdfs:label "Binding"@en ;
+    rdfs:comment "A binding interaction between two physical entities resulting in the formation of an explicit complex that is reversible without an external factor (e.g. protein complexes)."@en ;
+    rdfs:subClassOf wp:DirectedInteraction ;
+    skos:inScheme wp: .
+
+wp:Catalysis a owl:Class ;
+    rdfs:label "Catalysis"@en ;
+    rdfs:comment "A process where  a chemical reaction is enhanced by the action of a catalyst."@en ;
+    rdfs:subClassOf wp:DirectedInteraction ;
+    skos:inScheme wp: .
+
+wp:Complex a owl:Class ;
+    rdfs:label "Complex"@en ;
+    rdfs:comment """A physically bound combination of two or more
+biological entities."""@en ;
+    rdfs:subClassOf wp:DataNode ;
+    skos:inScheme wp: .
+
+wp:ComplexBinding a owl:Class ;
+    rdfs:label "ComplexBinding"@en ;
+    rdfs:comment "A binding interaction that specifically leads to the formation of a complex."@en ;
+    rdfs:subClassOf wp:DirectedInteraction ;
+    skos:inScheme wp: .
+
+wp:Conversion a owl:Class ;
+    rdfs:label "Conversion"@en ;
+    rdfs:comment """A process in which a biological entity gets
+converted into another entity. This could be a metabolic conversion where
+compound gets chemical modified."""@en ;
+    rdfs:subClassOf wp:DirectedInteraction ;
+    skos:inScheme wp: .
+
+wp:Inhibition a owl:Class ;
+    rdfs:label "Inhibition"@en ;
+    rdfs:comment "A process in which one biological entity  restrains, blocks, or suppresses another biological entity or interaction."@en ;
+    rdfs:subClassOf wp:DirectedInteraction ;
+    skos:inScheme wp: .
+
+wp:Pathway a owl:Class ;
+    rdfs:label "Pathway"@en ;
+    rdfs:comment "A biological process representing a set of interactions and relationships among genes, proteins, metabolites, and other factors in the context of cellular compartments, tissues and organisms."@en ;
+    skos:inScheme wp: .
+
+wp:Protein a owl:Class ;
+    rdfs:label "Protein"@en ;
+    rdfs:comment "A biomolecular polymer of amino acids, translated from mRNA."@en ;
+    rdfs:subClassOf wp:DataNode ;
+    skos:inScheme wp: .
+
+wp:PublicationReference a owl:Class ;
+    rdfs:label "PublicationReference"@en ;
+    rdfs:comment "A reference to a published article, book or other citable material. Most commonly a primary literature reference that is indexed by PubMed."@en ;
+    skos:inScheme wp: .
+
+wp:Rna a owl:Class ;
+    rdfs:label "Rna"@en ;
+    rdfs:comment "A biomolecular polymer of ribonucleic acids, transcibed from DNA."@en ;
+    rdfs:subClassOf wp:DataNode ;
+    skos:inScheme wp: .
+
+wp:Stimulation a owl:Class ;
+    rdfs:label "Stimulation"@en ;
+    rdfs:comment "An interaction in which the source entity enhances the raate or extent of another reaction or entity."@en ;
+    rdfs:subClassOf wp:DirectedInteraction ;
+    skos:inScheme wp: .
+
+wp:TranscriptionTranslation a owl:Class ;
+    rdfs:label "Transcription Translation"@en ;
+    rdfs:comment "An interaction in which the source entity regulates or influences in the transcription or translation of a target entity. Also referred to as a Template Reaction."@en ;
+    rdfs:subClassOf wp:DirectedInteraction ;
+    skos:inScheme wp: .
+
+wp:bdbChEBI a owl:ObjectProperty ;
+    rdfs:label "BridgeDb ChEBI link"@en ;
+    rdfs:comment "A variable URL to the ChEBI data source."@en ;
+    rdfs:range wp:Metabolite,
+        rdfs:Resource ;
+    skos:inScheme wp: .
+
+wp:bdbChemspider a owl:ObjectProperty ;
+    rdfs:label "BridgeDb ChemSpider link"@en ;
+    rdfs:comment "A variable URL to the Chemspider data source."@en ;
+    rdfs:range wp:Metabolite,
+        rdfs:Resource ;
+    skos:inScheme wp: .
+
+wp:bdbEnsembl a owl:ObjectProperty ;
+    rdfs:label "BridgeDb Ensembl link"@en ;
+    rdfs:comment "A variable URL to the Ensembl data source."@en ;
+    rdfs:range rdfs:Resource ;
+    skos:inScheme wp: .
+
+wp:bdbEntrezGene a owl:ObjectProperty ;
+    rdfs:label "BridgeDb Entrez Gene link"@en ;
+    rdfs:comment "A variable URL to the NCBI Gene data source."@en ;
+    rdfs:range rdfs:Resource ;
+    skos:inScheme wp: .
+
+wp:bdbHgncSymbol a owl:ObjectProperty ;
+    rdfs:label "BridgeDb HGNC link"@en ;
+    rdfs:comment "A variable URL to the HUGO Gene Nomenclature Committee (HGNC) data source."@en ;
+    rdfs:range rdfs:Resource ;
+    skos:inScheme wp: .
+
+wp:bdbHmdb a owl:ObjectProperty ;
+    rdfs:label "BridgeDb HMDB link"@en ;
+    rdfs:comment "A variable URL to the Human Metabolome Database (HMDB) data source."@en ;
+    rdfs:range wp:Metabolite,
+        rdfs:Resource ;
+    skos:inScheme wp: .
+
+wp:bdbPubChem a owl:ObjectProperty ;
+    rdfs:label "BridgeDb PubChem link"@en ;
+    rdfs:comment "A variable URL to the PubChem data source (Compound identifiers)."@en ;
+    rdfs:range wp:Metabolite,
+        rdfs:Resource ;
+    skos:inScheme wp: .
+
+wp:bdbUniprot a owl:ObjectProperty ;
+    rdfs:label "BridgeDb UniProt link"@en ;
+    rdfs:comment "A variable URL to the UniProt data source."@en ;
+    rdfs:range rdfs:Resource ;
+    skos:inScheme wp: .
+
+wp:celltypeOntologyTag a owl:ObjectProperty ;
+    rdfs:label "cell type ontology tag"@en ;
+    rdfs:comment """A term from the Cell Type ontology available on the
+NCBO's BioPortal (http://bioportal.bioontology.org/ontologies/CL)."""@en ;
+    rdfs:domain void:Pathway ;
+    rdfs:range rdfs:Resource ;
+    rdfs:subClassOf wp:ontologyTag ;
+    skos:inScheme wp: .
+
+wp:diseaseOntologyTag a owl:ObjectProperty ;
+    rdfs:label "disease ontology tag"@en ;
+    rdfs:comment "A term from the Human Disease Ontology available on the NCBO's BioPortal (http://bioportal.bioontology.org/ontologies/DOID)."@en ;
+    rdfs:domain void:Pathway ;
+    rdfs:range rdfs:Resource ;
+    rdfs:subClassOf wp:ontologyTag ;
+    skos:inScheme wp: .
+
+wp:isAbout a owl:DatatypeProperty ;
+    rdfs:label "is about"@en ;
+    rdfs:comment "It is the link between the biological entity and the gpml entity. Used in cases of interactions, complexes and groups."@en ;
+    skos:inScheme wp: .
+
+wp:organismName a owl:DatatypeProperty ;
+    rdfs:label "organism name"@en ;
+    rdfs:comment "Latin name of the organsm in which this pathway takes place."@en ;
+    rdfs:domain void:Pathway ;
+    rdfs:range xsd:string ;
+    skos:inScheme wp: .
+
+wp:pathwayOntologyTag a owl:ObjectProperty ;
+    rdfs:label "pathway ontology tag"@en ;
+    rdfs:comment "A term from the Pathway Ontology ontology available at NCBO's BioPortal (http://bioportal.bioontology.org/ontologies/PW)."@en ;
+    rdfs:domain void:Pathway ;
+    rdfs:range rdfs:Resource ;
+    rdfs:subClassOf wp:ontologyTag ;
+    skos:inScheme wp: .
+
+wp:source a owl:ObjectProperty ;
+    rdfs:label "source"@en ;
+    rdfs:comment "The beginning terminus of an interaction."@en ;
+    rdfs:domain wp:DirectedInteraction ;
+    rdfs:range wp:DataNode ;
+    rdfs:subClassOf wp:participants ;
+    skos:inScheme wp: .
+
+wp:target a owl:ObjectProperty ;
+    rdfs:label "target"@en ;
+    rdfs:comment "The ending terminus of an interaction."@en ;
+    rdfs:domain wp:DirectedInteraction ;
+    rdfs:subClassOf wp:participants ;
+    skos:inScheme wp: .
+
+<http://vocabularies.wikipathways.org/wpTypes#> a owl:Ontology ;
+    dc:contributor "Alexander Pico"@en,
+        "Andra Waagmeester"@en,
+        "Anwesha Bohler"@en,
+        "Egon Willighagen"@en,
+        "Martina Kutmon"@en,
+        "Ryan Miller"@en,
+        "Susan Coort"@en .
+
+<http://www.biopax.org/release/biopax-level3.owl#Dna> rdfs:subClassOf wp:GeneProduct .
+
+<http://www.biopax.org/release/biopax-level3.owl#Gene> rdfs:subClassOf wp:GeneProduct .
+
+<http://www.biopax.org/release/biopax-level3.owl#Protein> rdfs:subClassOf wp:GeneProduct .
+
+<http://www.biopax.org/release/biopax-level3.owl#Rna> rdfs:subClassOf wp:GeneProduct .
+
+<http://www.biopax.org/release/biopax-level3.owl#organism> rdfs:subPropertyOf wp:organism .
+
+wp:Interaction a owl:Class ;
+    rdfs:label "Interaction"@en ;
+    rdfs:comment "Defines the biochemical relationship between biological entities."@en ;
+    skos:inScheme wp: .
+
+wp:organism a owl:DatatypeProperty ;
+    rdfs:label "organism"@en ;
+    rdfs:comment "The scientific name (e.g., Homo sapiens) of the species being described by the pathway."@en ;
+    rdfs:domain void:Pathway ;
+    rdfs:range rdfs:Class ;
+    skos:inScheme wp: .
+
+wp:participants a owl:ObjectProperty ;
+    rdfs:label "participants"@en ;
+    skos:inScheme wp: .
+
+wp:ontologyTag a owl:ObjectProperty ;
+    rdfs:label "ontology tag"@en ;
+    rdfs:comment "A term from an ontology or controlled vocabulary."@en ;
+    rdfs:domain void:Pathway ;
+    rdfs:range xsd:string ;
+    skos:inScheme wp: .
+
+wp:GeneProduct a owl:Class ;
+    rdfs:label "GeneProduct"@en ;
+    rdfs:comment """An entity representing any product of a given gene,
+including DNA, RNA and Protein. This is the most generic representation of a
+gene-based biomolecule and is useful when more than one representation might be
+useful in the given context."""@en ;
+    rdfs:subClassOf wp:DataNode ;
+    skos:inScheme wp: .
+
+wp:Metabolite a owl:Class ;
+    rdfs:label "Metabolite"@en ;
+    rdfs:comment """Any chemical compound taking part in a pathway.
+Unlike true metabolites, this
+node is also used for compounds which are not the product or substrate of a
+metabolic conversion."""@en ;
+    rdfs:subClassOf wp:DataNode ;
+    skos:inScheme wp: .
+
+wp:DataNode a owl:Class ;
+    rdfs:label "DataNode"@en ;
+    rdfs:comment "Superclass; deprecated; do not use."@en ;
+    skos:inScheme wp: .
+
+wp:DirectedInteraction a owl:Class ;
+    rdfs:label "DirectedInteraction"@en ;
+    rdfs:comment "Defines a biochemical relationship from a source biological entity to a target biological entity."@en ;
+    rdfs:subClassOf wp:Interaction ;
+    skos:inScheme wp: .
+
+wp: a owl:Ontology,
+        skos:ConceptScheme ;
+    rdfs:label "WikiPathways WP Ontology"@en ;
+    rdfs:seeAlso <http://www.wikipathways.org/> ;
+    owl:versionIRI <http://www.w3.org/2012/pyRdfa/extract?uri=http://vocabularies.wikipathways.org/wp#> .
+
+

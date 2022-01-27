@@ -28,6 +28,7 @@ SIDER = 'sider'
 STITCH = 'stitch'
 STRINGDB = 'stringdb'
 UNIPROT = 'uniprot'
+WIKIPATHWAYS = 'wikipathways'
 
 # Data Types
 NODES = 'nodes'
