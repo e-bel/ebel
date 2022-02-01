@@ -31,7 +31,7 @@ Base = declarative_base()
 logger = logging.getLogger(__name__)
 
 
-def reset_tables(engine: sqlalchemy.engine.Engine, force_new_db: bool) -> None:
+def reset_tables(engine: sqlalchemy.engine.Engine, force_new_db: bool = False) -> None:
     """Drop all tables in database.
 
     Parameters

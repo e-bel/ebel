@@ -36,7 +36,7 @@ STRING_NAMES = "https://stringdb-static.org/download/protein.info.v11.0/9606.pro
 BIOGRID = "https://downloads.thebiogrid.org/Download/BioGRID/Release-Archive/\
 BIOGRID-4.3.194/BIOGRID-ALL-4.3.194.tab3.zip"
 BIND = "https://www.bindingdb.org/bind/downloads/BindingDB_All_2018m7.tsv.zip"
-WIKIPATHWAYS = "http://data.wikipathways.org/20180710/gpml/wikipathways-20180710-gpml-Homo_sapiens.zip"
+WIKIPATHWAYS = "https://wikipathways-data.wmcloud.org/current/rdf/"
 
 # https://www.ebi.ac.uk/gwas/docs/fileheaders
 GWAS_CATALOG = "https://www.ebi.ac.uk/gwas/api/search/downloads/full"

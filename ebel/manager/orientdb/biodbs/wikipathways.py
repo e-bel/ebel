@@ -1,26 +1,48 @@
 """WikiPathways module. Depends on HGNC and KEGG."""
-
+import os
 import warnings
 import pandas as pd
 import rdflib
+import requests
 
 from tqdm import tqdm
 from pathlib import Path
 from rdflib import Graph
 from typing import Dict
+from zipfile import ZipFile
 from pyorient import OrientDB
 
-from ebel.constants import RID
+from ebel.constants import RID, DATA_DIR
 from ebel.tools import get_file_path
-from ebel.manager.orientdb.biodbs.hgnc import Hgnc
 from ebel.manager.orientdb.constants import WIKIPATHWAYS
 from ebel.manager.orientdb import odb_meta, urls, odb_structure
-
-from ebel.manager.rdbms.models import wikipathways
+from ebel.manager.rdbms.models.wikipathways import Node, Interaction, PublicationReference, Base, Pathway
+from ebel.manager.models import reset_tables
 
 
 warnings.filterwarnings("ignore", 'This pattern has match groups')
 
+NODES = "nodes"
+INTERACTIONS = "interactions"
+PUBREFS = "pubrefs"
+PATHWAYS = "pathways"
+
+# WikiPathway Type Mapper
+wp_mapper = {
+    # Nodes
+    "Metabolite": "abundance",
+    "Complex": "complex",
+    "Protein": "protein",
+    "Rna": "rna",
+    "GeneProduct": "gene",
+    # Interactions
+    "TranscriptionTranslation": "increases",
+    "Stimulation": "increases",
+    "Catalysis": "increases",
+    "Inhibition": "decreases",
+    "Conversion": "increases",
+    "DirectedInteraction": "association"
+}
 
 class WikiPathways(odb_meta.Graph):
     """Pathway Commons."""
@@ -30,15 +52,16 @@ class WikiPathways(odb_meta.Graph):
         self.client = client
         self.biodb_name = WIKIPATHWAYS
         self.url = urls.WIKIPATHWAYS
-        self.urls = {self.biodb_name: self.url}
-        self.file_path = get_file_path(self.url, self.biodb_name)
+        self.urls = {self.biodb_name: self.__get_current_data_download_path()}
+        self.file_path = get_file_path(self.urls[self.biodb_name], self.biodb_name)
 
-        super().__init__(generics=odb_structure.wikipathways_generics,
-                         edges=odb_structure.wikipathways_edges,
-                         tables_base=pc.Base,
-                         urls=self.urls,
-                         biodb_name=self.biodb_name)
-        self.hgnc = Hgnc(self.client)
+        super().__init__(
+            # generics=odb_structure.wikipathways_generics,
+            # edges=odb_structure.wikipathways_edges,
+            urls=self.urls,
+            biodb_name=self.biodb_name,
+            tables_base=Base,
+        )
 
     def __repr__(self) -> str:
         """Represent WikiPathways Integration as string."""
@@ -54,34 +77,126 @@ class WikiPathways(odb_meta.Graph):
         """Checks if RS number (without prefix RS) exists in BEL graph."""
         return self.entry_exists(self.biodb_name, rs_number=rs_number)
 
-    def insert_data(self) -> Dict[str, int]:
-        """Insert data in generic OrientDB class."""
-        pass
+    def __get_current_data_download_path(self):
+        """Read the WikiPathways Data website and get file names for current data dumps."""
+        current_files_df = pd.read_html(self.url)[0]
+        for file_name in current_files_df.Filename:
+            if file_name.endswith("-rdf-wp.zip"):
+                return self.url + file_name
 
     @staticmethod
-    def parse_nodes(wikipathway: rdflib.Graph) -> dict:
-        """Parse nodes in the wikipathway graph."""
-        # ";" can be used when same subj/pred/obj used - https://www.stardog.com/tutorials/sparql#ordering-results
-        q = """
-            SELECT ?ttl_id ?type ?label ?id_source ?identifier
+    def parse_pubrefs(wikipathway: rdflib.Graph) -> dict:
+        """Parse and import PublicationReference data from graph."""
+        pubref_query = """
+        SELECT ?id ?data_source ?data_source_id ?link
             WHERE {
-                ?ttl_id rdf:type wp:DataNode ;
-                    rdfs:label ?label ;
-                    dc:source ?id_source ;
-                    dcterms:identifier ?identifier ;
+                ?id rdf:type wp:PublicationReference ;
                     rdf:type ?type .
+                    ?id foaf:page ?link .
+                    ?id dc:source ?data_source .
+                    ?id dcterms:identifier ?data_source_id .
             }
         """
 
-        nodes = dict()
-        for match in wikipathway.query(q):
+        pubrefs = dict()
+        for match in wikipathway.query(pubref_query):
             result_dict = {key: str(val) for key, val in match.asdict().items()}
-            result_dict["type"] = match.type.split("#")[1]
+            pubrefs[result_dict.pop("id")] = result_dict
 
-            # rdf type comes after #, don't need "DataNode" since it's a duplicate
+        return pubrefs
 
-            if result_dict["type"] == "DataNode":
-                continue
+    @staticmethod
+    def parse_pathways(wikipathway: rdflib.Graph) -> dict:
+        """Parse and import Pathway data from graph."""
+        pathway_query = """
+        SELECT ?id ?data_source ?data_source_id ?link
+            WHERE {
+                ?id rdf:type wp:PublicationReference ;
+                    rdf:type ?type .
+                    ?id foaf:page ?link .
+                    ?id dc:source ?data_source .
+                    ?id dcterms:identifier ?data_source_id .
+            }
+        """
+
+        pubrefs = dict()
+        for match in wikipathway.query(pubref_query):
+            result_dict = {key: str(val) for key, val in match.asdict().items()}
+            pubrefs[result_dict.pop("id")] = result_dict
+
+        return pubrefs
+
+    def insert_data(self) -> Dict[str, int]:
+        """Insert data in generic OrientDB class."""
+        db_dir = Path(DATA_DIR, self.biodb_name)
+        ttl_dir = db_dir.joinpath("wp", "Human")
+
+        if not ttl_dir.is_dir() or not any(ttl_dir.iterdir()):  # If folder is empty
+            with ZipFile(self.file_path) as zf:
+                for file_name in zf.namelist():
+                    if file_name.startswith("wp/Human"):
+                        zf.extract(member=file_name, path=db_dir)
+
+        entries = {NODES: dict(), INTERACTIONS: dict(), PUBREFS: dict(), PATHWAYS: dict()}
+        for ttl_file in tqdm(ttl_dir.iterdir(), desc="Parsing WikiPathway files", total=len(os.listdir(str(ttl_dir)))):
+            graph = Graph()
+            wp = graph.parse(ttl_file)
+            # nodes = {**nodes, **self.collect_nodes(wikipathway=wp)}
+            # interactions = self.collect_interactions(wikipathway=wp)
+            entries[PUBREFS] = {**entries["pubrefs"], **self.parse_pubrefs(wikipathway=wp)}
+
+
+    def collect_nodes(self, wikipathway: rdflib.Graph) -> dict:
+        """Query and parse nodes."""
+        noncomplex_node_query = """
+            SELECT ?ttl_id (GROUP_CONCAT(?type;SEPARATOR=",") AS ?types) ?label ?id_source ?identifier
+            WHERE {
+                ?ttl_id rdf:type wp:DataNode ;
+                    rdf:type ?type .
+                    ?ttl_id rdfs:label ?label .
+                    ?ttl_id dc:source ?id_source .
+                    ?ttl_id dcterms:identifier ?identifier .
+            }
+            GROUP BY ?ttl_id
+        """
+
+        complex_node_query = """
+            SELECT ?ttl_id (GROUP_CONCAT(?type;SEPARATOR=",") AS ?types) (GROUP_CONCAT(?ps ;SEPARATOR=",") AS ?participants)
+            WHERE {
+                ?ttl_id rdf:type wp:Complex ;
+                    rdf:type ?type ;
+                    wp:participants ?ps .
+            }
+            GROUP BY ?ttl_id
+        """
+
+        noncomplex_nodes = self.parse_nodes(wikipathway=wikipathway, query=noncomplex_node_query)
+        complex_nodes = self.parse_nodes(wikipathway=wikipathway, query=complex_node_query)
+        nodes = {**noncomplex_nodes, **complex_nodes}
+        return nodes
+
+    @staticmethod
+    def parse_nodes(wikipathway: rdflib.Graph, query: str) -> dict:
+        """Parse nodes in the wikipathway graph."""
+        nodes = dict()
+        query_results = wikipathway.query(query)
+        for match in query_results:
+            result_dict = {key: str(val) for key, val in match.asdict().items()}
+            node_types = {int_type.split("#")[1] for int_type in result_dict.pop("types").split(",")}
+
+            # don't need "DataNode" since it's a duplicate
+            node_types.remove('DataNode')
+
+            # Defensive code
+            if len(node_types) != 1:  # Should only be one node type
+                # TODO: AOP nodes only have "DataNode" - handle
+                raise ValueError(f"Too many node types: {node_types}")
+
+            # Parse participants of wp:Complex nodes if present, Reactome complexes sometimes don't have participants
+            if "Complex" in node_types and "participants" in result_dict:
+                result_dict["participants"] = set(result_dict["participants"].split(","))
+
+            result_dict["type"] = list(node_types)[0]
 
             ttl_id = result_dict.pop("ttl_id")
             nodes[ttl_id] = result_dict
@@ -89,5 +204,47 @@ class WikiPathways(odb_meta.Graph):
         return nodes
 
     @staticmethod
-    def parse_interactions(wikipathway: rdflib.Graph, nodes: dict) -> dict:
+    def collect_interactions(wikipathway: rdflib.Graph) -> dict:
         """Parse interactions in the wikipathway graph."""
+        # Get and parse edges
+        # ";" can be used when same subj/pred/obj used - https://www.stardog.com/tutorials/sparql#ordering-results
+        # OPTIONAL is used for ComplexBinding interactions - they don't have source/target
+        int_q = """
+            SELECT ?ttl_id (GROUP_CONCAT(?type;SEPARATOR=",") AS ?types) ?source ?target ?identifier (GROUP_CONCAT(?ps ;SEPARATOR=",") AS ?participants)
+            WHERE {
+                ?ttl_id rdf:type wp:Interaction ;
+                    wp:participants ?ps ;
+                    rdf:type ?type .
+                OPTIONAL {
+                    ?ttl_id wp:source ?source .
+                    ?ttl_id wp:target ?target .
+                }
+            }
+            GROUP BY ?ttl_id
+        """
+
+        interactions = dict()
+        for match in wikipathway.query(int_q):
+            result_dict = {key: str(val) for key, val in match.asdict().items()}
+            result_dict["types"] = {int_type.split("#")[1] for int_type in result_dict["types"].split(",")}
+            result_dict["participants"] = set(result_dict["participants"].split(","))
+
+            # don't need "Interaction"
+            result_dict["types"].remove("Interaction")
+
+            # Binding always with ComplexBinding so keep only ComplexBinding
+            if "ComplexBinding" in result_dict["types"]:
+                result_dict["types"] = {"ComplexBinding"}
+
+            ttl_id = result_dict.pop("ttl_id")
+            interactions[ttl_id] = result_dict
+
+        return interactions
+
+    def update_interactions(self) -> int:
+        pass
+
+if __name__ == "__main__":
+    wp = WikiPathways()
+    reset_tables(engine=wp.engine, force_new_db=False)
+    wp.insert_data()
