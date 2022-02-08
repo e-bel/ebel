@@ -149,7 +149,7 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
 
     new_content = content
 
-    for regex_pattern in re.findall(r'\n((SET\s+(DOCUMENT\s+Description|Evidence|SupportingText)'
+    for regex_pattern in re.findall(r'\n((SET\s+(DOCUMENT\s+Description|Evidence|SupportingText|Support)'
                                     r'\s*=\s*)"(((?<=\\)"|[^"])+)"\s*\n*)',
                                     content):
         if regex_pattern[2].startswith("DOCUMENT"):
