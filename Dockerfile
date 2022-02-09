@@ -1,28 +1,27 @@
 # Dockerfile for e(BE:L)
-FROM ubuntu:20.10
+FROM python:3.9-slim
 LABEL maintainer="Christian.Ebeling@gmail.com"
 
-RUN apt-get update; DEBIAN_FRONTEND="noninteractive" apt-get install -y --no-install-recommends \
-    git python3 python3-pip mysql-client; \
-    rm -rf /var/lib/apt/lists/*;
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends git nano \
+    && pip install --upgrade pip \
+    && rm -rf /var/lib/apt/lists/*;
 
 WORKDIR /root/app
-
-# flask server
-EXPOSE 5000
-
-
 COPY requirements.txt .
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 RUN git clone https://github.com/orientechnologies/pyorient.git
-RUN pip3 install ./pyorient
+RUN pip install ./pyorient
 RUN rm -rf ./pyorient && mkdir -p /root/.ebel
 # COPY ./docs/files/example_config.ini /root/.ebel/config.ini
-
 
 # Install e(BE:L)
 VOLUME ["/root/.ebel"]
 COPY . .
-RUN pip3 install .
+RUN pip install .
 WORKDIR /root/bel_projects
+
+# flask server
+EXPOSE 5000
+
 CMD ["ebel", "serve"]
