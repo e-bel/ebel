@@ -1,6 +1,5 @@
 """String constants for the OrientDB submodule."""
 
-
 # Databases
 BIOGRID = 'biogrid'
 CHEBI = 'chebi'
@@ -33,3 +32,6 @@ WIKIPATHWAYS = 'wikipathways'
 # Data Types
 NODES = 'nodes'
 EDGES = 'edges'
+
+# String keys
+PARTICIPANTS = "participants"

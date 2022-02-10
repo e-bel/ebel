@@ -1,7 +1,7 @@
 """WikiPathways RDBMS model definition."""
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, BigInteger, Table, ForeignKey
+from sqlalchemy import Column, String, Table, ForeignKey, Text, Integer
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -10,29 +10,29 @@ Base = declarative_base()
 node_pathway_association = Table(
     'node_pathway_association',
     Base.metadata,
-    Column('pathway_id', String(25), ForeignKey('wikipathways_pathway.id'), primary_key=True),
-    Column('node_id', String(25), ForeignKey('wikipathways_node.id'), primary_key=True)
+    Column('pathway_id', String(100), ForeignKey('wikipathways_pathway.id'), primary_key=True),
+    Column('node_id', String(100), ForeignKey('wikipathways_node.id'), primary_key=True)
 )
 
 interaction_pubref_association = Table(
     'interaction_pubref_association',
     Base.metadata,
-    Column('pubref_id', String(25), ForeignKey('wikipathways_pub_ref.id'), primary_key=True),
-    Column('interaction_id', String(25), ForeignKey('wikipathways_interaction.id'), primary_key=True)
+    Column('pubref_id', String(100), ForeignKey('wikipathways_pub_ref.id'), primary_key=True),
+    Column('interaction_id', String(100), ForeignKey('wikipathways_interaction.id'), primary_key=True)
 )
 
 interaction_participants = Table(
     'interaction_participants',
     Base.metadata,
-    Column('node_id', String(25), ForeignKey('wikipathways_node.id'), primary_key=True),
-    Column('interaction_id', String(25), ForeignKey('wikipathways_interaction.id'), primary_key=True)
+    Column('node_id', String(100), ForeignKey('wikipathways_node.id'), primary_key=True),
+    Column('interaction_id', String(100), ForeignKey('wikipathways_interaction.id'), primary_key=True)
 )
 
 interaction_pathway_association = Table(
     'interaction_pathway_association',
     Base.metadata,
-    Column('node_id', String(25), ForeignKey('wikipathways_pathway.id'), primary_key=True),
-    Column('interaction_id', String(25), ForeignKey('wikipathways_interaction.id'), primary_key=True)
+    Column('node_id', String(100), ForeignKey('wikipathways_pathway.id'), primary_key=True),
+    Column('interaction_id', String(100), ForeignKey('wikipathways_interaction.id'), primary_key=True)
 )
 
 
@@ -43,7 +43,7 @@ class Node(Base):
     id = Column(String(255), primary_key=True, index=True)
 
     type = Column(String(25))
-    label = Column(String(25))
+    label = Column(String(255))
     data_source = Column(String(50), index=True)
     data_source_id = Column(String(50))
 
@@ -54,6 +54,8 @@ class Node(Base):
 
     # Complexes
     complexes = relationship("Interaction", secondary=interaction_participants, back_populates="participants",)
+    # complex_id = Column(String(100), ForeignKey("wikipathways_node.id"))
+    # participants = relationship("Node")
 
 
 class Interaction(Base):
@@ -61,10 +63,7 @@ class Interaction(Base):
     __tablename__ = 'wikipathways_interaction'
 
     id = Column(String(255), primary_key=True, index=True)
-
-    data_source = Column(String(50), index=True)
-    data_source_id = Column(String(50))
-    link = Column(String(255))
+    type = Column(String(25))
 
     # Interaction source/target nodes
     source_id = Column(String(255), ForeignKey(Node.id))
@@ -93,7 +92,7 @@ class Pathway(Base):
     label = Column(String(25))
     data_source = Column(String(50), index=True)
     data_source_id = Column(String(50))
-    description = Column(String(255))
+    description = Column(Text)
     organism = Column(String(100))
 
     nodes = relationship(Node, secondary=node_pathway_association, back_populates="pathways")

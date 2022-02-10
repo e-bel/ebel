@@ -45,7 +45,10 @@ def reset_tables(engine: sqlalchemy.engine.Engine, force_new_db: bool = False) -
         create_database(engine.url)
 
     if force_new_db:
+        logger.warning("Dropping all database tables!")
         Base.metadata.drop_all(bind=engine)
+
+    logger.info("Creating database tables")
     Base.metadata.create_all(bind=engine, checkfirst=True)
 
 
