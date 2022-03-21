@@ -206,8 +206,10 @@ def add_query_filters(query: Query, columns_params: Dict[str, Dict[str, str]], m
     col_filters = []
     for column_name, v in columns_params.items():
         if v.get('how2search') and v.get('value'):
-            value = v['value'].strip()
             how2search = v['how2search']
+            print(how2search)
+            value = v['value'].strip() if isinstance(v['value'], str) else v['value']
+            
             column = inspect(model).columns[column_name]
             if how2search in ('exact', 'exact_numeric'):
                 col_filters.append(column == value)
@@ -235,5 +237,5 @@ def add_query_filters(query: Query, columns_params: Dict[str, Dict[str, str]], m
                     values = sorted(found_2_values.groupdict().values(), reverse=True)
                     col_filters.append(column.between(*values))
                 
-        query = query.filter(*col_filters)
+    query = query.filter(*col_filters)
     return query

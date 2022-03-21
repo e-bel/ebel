@@ -6206,6 +6206,193 @@ paths:
                 type: object
 
 
+  /api/v1/uniprot/uniprot_advanced:
+    post:
+      operationId: ebel.web.api.ebel.v1.uniprot.get_uniprot_advanced
+      tags:
+        - UniProt
+      summary: Get uniprot results
+      description: Get uniprot results
+      responses:
+        '201':
+          description: Created
+      requestBody: 
+        required: true
+        content:
+          application/json: 
+            schema: 
+              type: object
+              properties:                
+                uniprot:
+                  type: object
+                  properties:
+                    accession:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: P20138
+                    name:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: CC33_HUMAN
+                    recommended_name:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: Myeloid cell surface antigen CD33
+                    taxid:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          example: 9606
+                uniprot_function:
+                  type: object
+                  properties:
+                    description:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: starts_with
+                        value:
+                          type: string
+                          example: Sialic-acid-binding
+                uniprot_gene:
+                  type: object
+                  properties:
+                    name:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: SIGLEC3
+                uniprot_gene_symbol:
+                  type: object
+                  properties:
+                    symbol:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: CD33 
+                uniprot_keyword:
+                  type: object
+                  properties:
+                    keyword_name:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: Lectin 
+                uniprot_organism:
+                  type: object
+                  properties:
+                    taxid:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          example: 9606
+                    scientific_name:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: Homo sapiens
+                uniprot_host:
+                  type: object
+                  properties:
+                    taxid:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          example: 9606
+                    scientific_name:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: ""
+                uniprot_subcellular_location:
+                  type: object
+                  properties:
+                    name:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: Peroxisome
+                uniprot_xref:                                                           
+                  type: object
+                  properties:
+                    db:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: EMBL
+                    identifier:
+                      type: object
+                      properties:
+                        how2search:
+                          type: string
+                          example: exact
+                        value:
+                          type: string
+                          example: AK304810
+                page_size:
+                  type: integer
+                  default: 10
+                  maximum: 100
+                  minimum: 1
+                  example: 1
+                page:
+                  type: integer
+                  default: 1
+                  example: 1
+
   /api/v1/uniprot:
     get:
       operationId: ebel.web.api.ebel.v1.uniprot.get_uniprot

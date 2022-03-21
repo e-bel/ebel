@@ -1,10 +1,52 @@
 """UniProt API methods."""
 from flask import request
-
+import json
+from . import add_query_filters
 from ebel import Bel
 from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import uniprot
 from ebel.web.api.ebel.v1 import _get_paginated_query_result, _get_terms_from_model_starts_with
+
+model_by_tablename = {x.__tablename__: x for x in uniprot.Base.__subclasses__()}
+nm_tables = {
+    'uniprot_keyword': uniprot.uniprot__uniprot_keyword,
+    'uniprot_host': uniprot.uniprot__uniprot_host,
+    'uniprot_xref': uniprot.uniprot__uniprot_xref,
+    'uniprot_subcellular_location': uniprot.uniprot__uniprot_subcellular_location
+}
+
+
+def get_uniprot_advanced():
+    data = json.loads(request.data)
+    up = uniprot.Uniprot
+    return_columns = (
+        up.accession,
+        up.name,
+        uniprot.Function.description,
+        up.recommended_name,
+        uniprot.GeneSymbol.symbol,
+        uniprot.Organism.scientific_name
+    )
+    query = RDBMS.get_session().query(up).outerjoin(uniprot.Function).outerjoin(uniprot.GeneSymbol).outerjoin(uniprot.Organism)
+    already_joined_models = (up, uniprot.Function, uniprot.GeneSymbol, uniprot.Organism)
+
+    for table, columns in data.items():
+    
+        if table not in ('page', 'page_size', 'number_of_results'):
+            model = model_by_tablename.get(table)
+            values_exists = any([x.get('value') for x in columns.values()])
+            if model and model not in already_joined_models and values_exists:
+    
+                if table in nm_tables:
+                    query = query.outerjoin(nm_tables[table])
+    
+                query = query.outerjoin(model)
+            if values_exists:
+                query = add_query_filters(query, columns, model)
+    
+    query = query.with_entities(*return_columns)
+    query = query.group_by(up.id)
+    return _get_paginated_query_result(query, return_dict=True, print_sql=True)
 
 
 def get_uniprot():
