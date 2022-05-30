@@ -519,29 +519,30 @@ class Bel(Graph):
         results = self.execute(sql_rids)
         updated_involved_genes = 0
         updated_involved_other = 0
-        
-        for r in tqdm(results, desc="Add e(BE:L) nodes"):
-            rid = r.oRecordData[RID]
-            sql = f"""Update {rid} set involved_genes =
-                (Select name from (
-                    traverse out('has__reactants',
-                                 'has__products',
-                                 'has__protein',
-                                 'has__composite',
-                                 'has__complex',
-                                 'has__gene',
-                                 'has__rna') from {rid}) where @class in ['protein','rna','gene'])"""
-            updated_involved_genes += self.execute(sql)[0]
 
-            sql = f"""Update {rid} set involved_other =
-                (Select name from (traverse out('has__abundance',
-                     'has__reactants',
-                     'has__products',
-                     'has__composite',
-                     'has__complex') from {rid})
-                     where @class not in ['protein','gene','rna']
-                     and name is not null)"""
-            updated_involved_other += self.execute(sql)[0]
+        if results:
+            for r in tqdm(results, desc=f"Update node constituents for {node_class}"):
+                rid = r.oRecordData[RID]
+                sql = f"""Update {rid} set involved_genes =
+                    (Select name from (
+                        traverse out('has__reactants',
+                                     'has__products',
+                                     'has__protein',
+                                     'has__composite',
+                                     'has__complex',
+                                     'has__gene',
+                                     'has__rna') from {rid}) where @class in ['protein','rna','gene'])"""
+                updated_involved_genes += self.execute(sql)[0]
+
+                sql = f"""Update {rid} set involved_other =
+                    (Select name from (traverse out('has__abundance',
+                         'has__reactants',
+                         'has__products',
+                         'has__composite',
+                         'has__complex') from {rid})
+                         where @class not in ['protein','gene','rna']
+                         and name is not null)"""
+                updated_involved_other += self.execute(sql)[0]
         return {'updated_involved_genes': updated_involved_genes, 'updated_involved_other': updated_involved_other}
 
     def _update_involved(self) -> Dict[str, int]:

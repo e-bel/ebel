@@ -147,7 +147,6 @@ def import_json(json_file_path: str,
     type
         returns True if imported.
     """
-    print("Start import JSON BEL file(s).")
     # if one of the parameters is not None it will overwrite the default values from the configfile
     Graph.set_configuration(name=odb_name,
                             user=odb_user,

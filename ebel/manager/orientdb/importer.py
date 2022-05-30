@@ -234,7 +234,7 @@ class _BelImporter:
         citation_ref = ""
         citation_type = ""
 
-        for e in tqdm(statements_and_sets, desc="Insert BEL Statements and Sets"):
+        for e in tqdm(statements_and_sets, desc="Insert BEL Statements"):
 
             dtype, data = tuple(e.items())[0]
 
