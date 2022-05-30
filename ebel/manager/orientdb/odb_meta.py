@@ -11,6 +11,7 @@ from abc import abstractmethod
 from collections import defaultdict, OrderedDict
 from http.client import RemoteDisconnected
 from shutil import copyfileobj
+from types import GeneratorType
 from typing import List, Iterable, Dict, Union, Tuple, Set, Optional
 from urllib.request import urlopen, Request
 
@@ -975,12 +976,7 @@ class Graph(abc.ABC):
 
     def update_document_info(self):
         """Update document metadata."""
-        try:
-            self.update_pmids()
-
-        except:
-            logger.error('Unable to update PMID information.')
-
+        self.update_pmids()
         self.update_pmcids()
 
     def update_pmcids(self) -> int:
@@ -1021,10 +1017,6 @@ class Graph(abc.ABC):
 
     def update_pmids(self, edge_name='bel_relation'):
         """Update PMID metadata for all edges of the specified edge_name."""
-        sql_template = "Update {} set citation = {} where pmid = {}"
-
-        sql_update_mesh_terms = "Update {} set annotation.mesh = {} where pmid = {}"
-        sql_update_mesh_substances = "Update {} set annotation.substances = {} where pmid = {}"
 
         sql_missing_citations = """Select distinct(pmid)
                                     as pmid from {}
@@ -1040,94 +1032,125 @@ class Graph(abc.ABC):
         # length of PMID around 8-9 digits: 150*10=1500 + url with 103 => ~1600
         # max length of url = 2,083
         if pmids:
-            nameset = {'LastName', 'Initials'}
             chunk_size = 150
             total = len(pmids) // chunk_size + 1
 
-            for pmid_chunk in tqdm(chunks(pmids, size=chunk_size), total=total,
-                                   desc=f"Update PMID citations in {edge_name}"):
-                start_time = time.time()
-                url = default_urls.MESH_NCBI + ",".join([str(x) for x in pmid_chunk])
-                xml_pubmed = requests.get(url)
-                parsed_data = xmltodict.parse(xml_pubmed.text)
+            for pmid_chunk in tqdm(
+                    chunks(pmids, size=chunk_size),
+                    total=total,
+                    desc=f"Update PMID citations in {edge_name}"
+            ):
+                try:
+                    updated += self._query_ncbi(pmid_chunk, edge_name)
 
-                if 'PubmedArticleSet' in parsed_data:
-                    medline_citations = parsed_data['PubmedArticleSet']['PubmedArticle']
+                except KeyError as e:
+                    logger.error(f"KeyError occurred during parsing. See logs for full description.")
+                    logger.info(e)
 
-                    if isinstance(medline_citations, OrderedDict):
-                        medline_citations = [medline_citations, ]
+        return updated
 
-                    for medlineCitation in medline_citations:
-                        data = {'type': "PubMed"}
-                        mc = medlineCitation['MedlineCitation']
-                        data['ref'] = mc['PMID']['#text']
-                        authors = mc['Article']['AuthorList']['Author']
-                        author_list = []
+    def _query_ncbi(self, pmid_chunk: GeneratorType, edge_name: str):
+        """Query NCBI for publication metadata."""
+        sql_template = "Update {} set citation = {} where pmid = {}"
 
-                        if isinstance(authors, OrderedDict):
-                            authors = [authors]
+        sql_update_mesh_terms = "Update {} set annotation.mesh = {} where pmid = {}"
+        sql_update_mesh_substances = "Update {} set annotation.substances = {} where pmid = {}"
 
-                        for author in authors:
-                            if isinstance(author, OrderedDict) and nameset.issubset(author.keys()):
-                                author_list.append(author['LastName'] + " " + author['Initials'])
+        nameset = {'LastName', 'Initials'}
 
-                        data['author_list'] = author_list
+        start_time = time.time()
+        url = default_urls.MESH_NCBI + ",".join([str(x) for x in pmid_chunk])
+        xml_pubmed = requests.get(url)
+        parsed_data = xmltodict.parse(xml_pubmed.text)
 
-                        if author_list:
-                            data['last_author'] = author_list[-1]
+        updated = 0
+        if 'PubmedArticleSet' in parsed_data:
+            medline_citations = parsed_data['PubmedArticleSet']['PubmedArticle']
 
-                        data['full_journal_name'] = mc['Article']['Journal']['Title']
+            if isinstance(medline_citations, OrderedDict):
+                medline_citations = [medline_citations, ]
 
-                        article_date = mc.get('DateCompleted', mc.get('DateRevised'))
-                        if article_date:
-                            ad = article_date.values()
-                            data['pub_date'] = '-'.join(ad)
-                            data['pub_year'] = int(list(ad)[0])
+            for medlineCitation in medline_citations:
+                mc = medlineCitation['MedlineCitation']
+                data = {'type': "PubMed", 'ref': mc['PMID']['#text']}
+                article = mc['Article']
 
-                        data['title'] = mc['Article']['ArticleTitle']
+                # Authors
+                author_list = []
+                if 'AuthorList' in article:  # Authors not always listed
+                    authors = article['AuthorList']['Author']
 
-                        if 'ELocationID' in mc['Article']:
-                            eids = mc['Article']['ELocationID']
+                    if isinstance(authors, OrderedDict):
+                        authors = [authors]
 
-                            if isinstance(eids, OrderedDict):
-                                eids = [mc['Article']['ELocationID']]
+                    for author in authors:
+                        if isinstance(author, OrderedDict) and nameset.issubset(author.keys()):
+                            author_list.append(author['LastName'] + " " + author['Initials'])
 
-                            for eid in eids:
-                                if eid.get('@EIdType') == 'doi':
-                                    data['doi'] = eid['#text']
+                data['author_list'] = author_list
 
-                        meshs = []
-                        if 'MeshHeadingList' in mc:
-                            for mesh in mc['MeshHeadingList']['MeshHeading']:
-                                m = mesh['DescriptorName']
-                                meshs.append(m['#text'])
+                if author_list:
+                    data['last_author'] = author_list[-1]
 
-                        substances = []
-                        if 'ChemicalList' in mc:
-                            chemicals = mc['ChemicalList']['Chemical']
-                            if isinstance(chemicals, OrderedDict):
-                                chemicals = [chemicals]
-                            for chemical in chemicals:
-                                substances.append(chemical['NameOfSubstance']['#text'])
+                # Journal
+                data['full_journal_name'] = mc['Article']['Journal']['Title']
 
-                        data_json = json.dumps(data)
-                        sql = sql_template.format(edge_name, data_json, data['ref'])
-                        self.execute(sql)
+                # Article Date
+                article_date = mc.get('DateCompleted', mc.get('DateRevised'))
+                if article_date:
+                    ad = article_date.values()
+                    data['pub_date'] = '-'.join(ad)
+                    data['pub_year'] = int(list(ad)[0])
 
-                        if meshs:
-                            content_mesh = json.dumps(meshs)
-                            sql_m = sql_update_mesh_terms.format(edge_name, content_mesh, data['ref'])
-                            self.execute(sql_m)
+                # Title
+                data['title'] = mc['Article']['ArticleTitle']
 
-                        if substances:
-                            content_substances = json.dumps(substances)
-                            sql_s = sql_update_mesh_substances.format(edge_name, content_substances, data['ref'])
-                            self.execute(sql_s)
+                # DOI
+                if 'ELocationID' in mc['Article']:
+                    eids = mc['Article']['ELocationID']
 
-                        updated += 1
-                # don't make NCBI angry
-                if (time.time() - start_time) < 1:
-                    time.sleep(1)
+                    if isinstance(eids, OrderedDict):
+                        eids = [mc['Article']['ELocationID']]
+
+                    for eid in eids:
+                        if eid.get('@EIdType') == 'doi':
+                            data['doi'] = eid['#text']
+
+                # MeSH Headings
+                meshs = []
+                if 'MeshHeadingList' in mc:
+                    for mesh in mc['MeshHeadingList']['MeshHeading']:
+                        m = mesh['DescriptorName']
+                        meshs.append(m['#text'])
+
+                # Associated chemicals
+                substances = []
+                if 'ChemicalList' in mc:
+                    chemicals = mc['ChemicalList']['Chemical']
+                    if isinstance(chemicals, OrderedDict):
+                        chemicals = [chemicals]
+                    for chemical in chemicals:
+                        substances.append(chemical['NameOfSubstance']['#text'])
+
+                data_json = json.dumps(data)
+                sql = sql_template.format(edge_name, data_json, data['ref'])
+                self.execute(sql)
+
+                if meshs:
+                    content_mesh = json.dumps(meshs)
+                    sql_m = sql_update_mesh_terms.format(edge_name, content_mesh, data['ref'])
+                    self.execute(sql_m)
+
+                if substances:
+                    content_substances = json.dumps(substances)
+                    sql_s = sql_update_mesh_substances.format(edge_name, content_substances, data['ref'])
+                    self.execute(sql_s)
+
+                updated += 1
+        # don't make NCBI angry
+        if (time.time() - start_time) < 1:
+            time.sleep(1)
+
         return updated
 
     @staticmethod
