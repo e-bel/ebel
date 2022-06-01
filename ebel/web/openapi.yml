@@ -66,6 +66,8 @@ info:
 
 tags:
   - name: BEL
+  - name: BEL Validation
+    description: Validate BEL files
   - name: e(BE:L)
   - name: e(BE:L) algorithm
   - name: BioGRID
@@ -154,6 +156,41 @@ tags:
       url: https://www.uniprot.org/
 
 paths:
+
+  ########################################################################################################################
+  # BEL Validation
+  ########################################################################################################################
+
+  /api/v1/bel/validate/:
+    post:
+      operationId: ebel.web.api.ebel.v1.bel.validate_uploaded_bel_file
+      tags:
+        - BEL Validation
+      summary: Validate a BEL file
+      description: Checks a BEL file and either returns an Excel file with errors or a JSON file for importing
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Return results
+          content:
+            # JSON if successful
+            application/json:
+              schema:
+                type: object
+            # Excel file if errors
+            application/vnd.ms-excel:
+              schema:
+                type: string
+                format: binary
+
 
   ########################################################################################################################
   # BioGRID

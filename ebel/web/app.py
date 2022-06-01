@@ -7,10 +7,10 @@ from flask_cors import CORS
 application = connexion.FlaskApp(__name__)
 application.add_api('openapi.yml')
 
-CORS(application.app)
+CORS(application.app, expose_headers=["Content-Disposition"])
 
 
-def run(host: str = '0.0.0.0', port: int = 5000, debug_mode: bool = True, open_browser: bool = True):
+def run(host: str = '0.0.0.0', port: int = 5000, debug_mode: bool = True, open_browser: bool = False):
     """Run the API server.
 
     Parameters

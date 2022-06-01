@@ -1,4 +1,6 @@
 """Generic BEL relation API methods."""
+import io
+import json
 import re
 import cgi
 import requests
@@ -7,12 +9,14 @@ from enum import Enum
 from collections import namedtuple, defaultdict, Counter
 from copy import deepcopy
 from math import ceil
+from pathlib import Path
 from typing import List, Optional, Dict, Set, NamedTuple, Any, Union, Tuple
 
-from flask import request
+from flask import request, make_response, send_from_directory, send_file
 from graphviz import Digraph
 
 from ebel import Bel
+from ebel.validate import validate_bel_file
 from ebel.manager.orientdb.odb_structure import get_columns, get_node_view_labels
 from ebel.web.api.ebel.v1 import _get_pagination, DataType, OrientDbSqlOperator
 
@@ -60,6 +64,44 @@ node_colours = {
     'drug_db': "yellow1",
     'biological_process': "snow"
 }
+
+
+def validate_uploaded_bel_file(file):
+    """Validate the uploaded BEL file and return either the excel or JSON file."""
+    filename = file.filename
+    error_report_file = f"{filename}.errors.xlsx"
+    json_file = f"{filename}.json"
+
+    with open(filename, "wb") as tmpf:
+        tmpf.write(file.read())
+
+    validate_bel_file(filename, reports=error_report_file)
+
+    if Path(error_report_file).is_file():
+        # Read data into memory so we can delete file after
+        return_data = io.BytesIO()
+        with open(error_report_file, "rb") as errorf:
+            return_data.write(errorf.read())
+
+        return_data.seek(0)  # (after writing, cursor will be at last byte, so move it to start)
+
+        response = send_file(
+            return_data,
+            as_attachment=True,
+            mimetype='application/vnd.ms-excel',
+            attachment_filename=error_report_file,
+        )
+
+        Path(error_report_file).unlink()
+
+    else:  # Successful JSON
+        with open(json_file, "r") as jf:
+            response = json.load(jf)
+        Path(json_file).unlink()
+
+    Path(filename).unlink()
+
+    return response
 
 
 class Column:
