@@ -35,7 +35,6 @@ def main():
 # TODO(@ceb): SQLAlchemy connection string #prio1
 @main.command()
 @click.argument('bel_script_path')
-@click.option('-f', '--force_new_db', is_flag=True, default=False, help='force recreation of new database')
 @click.option('-l', '--line_by_line', is_flag=True, default=False, help='check script line by line')
 @click.option('-r', '--reports', default=None,
               help='path(s) to report file(s) seperated by comma with suffix (.md, .txt, .csv, .tsv, .json, .html)')
@@ -45,13 +44,14 @@ def main():
 # @click.option('-c', '--cytoscape', is_flag=True, default=False, help='creates cytoscape file')
 @click.option('-s', '--sqlalchemy_connection_str', default=None, help="SQLAlchmy connection string")
 @click.option('-j', '--json_file', is_flag=True, help="Create json file")
-def validate(bel_script_path: str, force_new_db: bool, line_by_line: bool, reports: str,
+@click.option('-f', '--force_json', is_flag=True, default=False, help="Force the creation of a JSON file")
+def validate(bel_script_path: str, line_by_line: bool, reports: str,
              bel_version: str, tree: bool, sqlalchemy_connection_str: str,
-             json_file: bool):
+             json_file: bool, force_json: bool):
     """Validate a BEL file using the defined grammar."""
-    validate_bel_file(bel_script_path=bel_script_path, force_new_db=force_new_db, line_by_line=line_by_line,
-                      reports=reports, bel_version=bel_version, tree=tree,
-                      sqlalchemy_connection_str=sqlalchemy_connection_str, json_file=json_file)
+    validate_bel_file(bel_script_path=bel_script_path, line_by_line=line_by_line, reports=reports,
+                      bel_version=bel_version, tree=tree, sqlalchemy_connection_str=sqlalchemy_connection_str,
+                      json_file=json_file, force_json=force_json)
 
 
 @main.command()
