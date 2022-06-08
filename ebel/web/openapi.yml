@@ -168,6 +168,19 @@ paths:
         - BEL Validation
       summary: Validate a BEL file
       description: Checks a BEL file and either returns an Excel file with errors or a JSON file for importing
+      parameters:
+        - in: query
+          name: errorOutput
+          schema:
+            type: string
+            default: download
+          description: Can either be "download" (downloads error report as excel), "json" (results as table in JSON), or "html" to return error report table directly as html
+        - in: query
+          name: forceJson
+          schema:
+            type: boolean
+            default: false
+          description: If True, compiles JSON file even if there are errors
       requestBody:
         content:
           multipart/form-data:
@@ -184,8 +197,10 @@ paths:
             # JSON if successful
             application/json:
               schema:
-                type: object
-            # Excel file if errors
+                oneOf:
+                  - type: object
+                  - type: array
+            # Excel file if errors and download selected
             application/vnd.ms-excel:
               schema:
                 type: string

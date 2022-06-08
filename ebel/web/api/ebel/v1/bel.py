@@ -5,6 +5,8 @@ import re
 import cgi
 import requests
 import xmltodict
+import pandas as pd
+
 from enum import Enum
 from collections import namedtuple, defaultdict, Counter
 from copy import deepcopy
@@ -66,8 +68,15 @@ node_colours = {
 }
 
 
-def validate_uploaded_bel_file(file):
-    """Validate the uploaded BEL file and return either the excel or JSON file."""
+def validate_uploaded_bel_file(file, errorOutput: str = "download", forceJson: bool = False):
+    """Validate the uploaded BEL file and return either the excel or JSON file.
+
+    errorOutput : str
+        Can either be "download" (downloads error report as excel), "json" (results as table in JSON), or "html" to
+        return error report table directly as html
+    forceJson : bool
+        If True, compiles JSON file even if there are errors
+    """
     filename = file.filename
     error_report_file = f"{filename}.errors.xlsx"
     json_file = f"{filename}.json"
@@ -75,28 +84,44 @@ def validate_uploaded_bel_file(file):
     with open(filename, "wb") as tmpf:
         tmpf.write(file.read())
 
-    validate_bel_file(filename, reports=error_report_file)
+    validate_bel_file(filename, reports=error_report_file, force_json=forceJson)
 
-    if Path(error_report_file).is_file():
-        # Read data into memory so we can delete file after
-        return_data = io.BytesIO()
-        with open(error_report_file, "rb") as errorf:
-            return_data.write(errorf.read())
+    if Path(error_report_file).is_file() and not forceJson:
+        if errorOutput == "download":
+            # Read data into memory so we can delete file after
+            return_data = io.BytesIO()
+            with open(error_report_file, "rb") as errorf:
+                return_data.write(errorf.read())
 
-        return_data.seek(0)  # (after writing, cursor will be at last byte, so move it to start)
+            return_data.seek(0)  # (after writing, cursor will be at last byte, so move it to start)
 
-        response = send_file(
-            return_data,
-            as_attachment=True,
-            mimetype='application/vnd.ms-excel',
-            attachment_filename=error_report_file,
-        )
+            response = send_file(
+                return_data,
+                as_attachment=True,
+                mimetype='application/vnd.ms-excel',
+                attachment_filename=error_report_file,
+            )
+
+        elif errorOutput == "json":
+            error_df = pd.read_excel(error_report_file, index_col=[0])
+            # content = error_df.to_json(orient='records')
+            content = error_df.to_dict(orient='records')
+            response = {"type": "error-report", "format": "json", "content": content}
+
+        elif errorOutput == "html":
+            error_df = pd.read_excel(error_report_file, index_col=[0])
+            content = error_df.to_html()
+            response = {"type": "error-report", "format": "html", "content": content}
+
+        else:
+            raise ValueError(f"errorOutput must be either 'download', 'json', or 'html', not {errorOutput}")
 
         Path(error_report_file).unlink()
 
     else:  # Successful JSON
         with open(json_file, "r") as jf:
-            response = json.load(jf)
+            content = json.load(jf)
+            response = {"type": "success-report", "format": "json", "content": content}
         Path(json_file).unlink()
 
     Path(filename).unlink()
