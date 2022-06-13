@@ -21,7 +21,7 @@ info:
 
     __e(BE:L)__ uses several data resources to extend a [BEL (Biological Expression Language)](https://language.bel.bio/) knowledge graph. 
     The content is restricted to the parts needed to extend the graph. Not all content e(BE:L) knowledge base includes is available 
-    as API method. Please contact [Christian Ebeling](mailto:Christian.Ebeling@scai.fraunhofer.de?subject=eBEL_integration) or the e(BE:L) developer TEAM, if you want to integrate new functions or implemnet it in our project.
+    as API method. Please contact [Christian Ebeling](mailto:Christian.Ebeling@scai.fraunhofer.de?subject=eBEL_integration) or the e(BE:L) developer TEAM, if you want to integrate new functions or implement it in our project.
 
     Following database are integrated in the BEL knowledge extension process:
 
