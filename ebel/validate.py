@@ -7,6 +7,7 @@ import logging
 
 from typing import Iterable, Union, Optional
 from textwrap import fill
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -18,7 +19,7 @@ from ebel.parser import check_bel_script_line_by_line, check_bel_script, bel_to_
 logger = logging.getLogger(__name__)
 
 
-def validate_bel_file(bel_script_path: str,
+def validate_bel_file(bel_script_path: Union[str, Path],
                       force_new_db: bool = False,
                       line_by_line: bool = False,
                       reports: Union[Iterable[str], str] = None,
@@ -69,12 +70,6 @@ def validate_bel_file(bel_script_path: str,
 
     """
     validation_results = dict()
-
-    if bel_script_path.startswith('"') and bel_script_path.endswith('"'):
-        bel_script_path = bel_script_path[1:-1]
-
-    if reports and reports.startswith('"') and reports.endswith('"'):
-        reports = reports[1:-1]
 
     if line_by_line:
         # TODO: This is perhaps not working
