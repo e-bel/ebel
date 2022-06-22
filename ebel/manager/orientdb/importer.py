@@ -121,6 +121,10 @@ class _BelImporter:
         with open(self.file_path) as fd:
             bel_python_object = json.load(fd, object_pairs_hook=OrderedDict)
 
+        if not bel_python_object:  # May be empty JSON
+            logger.warning(f"{self.file_path} is empty")
+            return False, 0
+
         parts = self.get_json_parts(bel_python_object)
         exists_before, document_id = self.insert_bel_header(parts.document, parts.definitions)
 
