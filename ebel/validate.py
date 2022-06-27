@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 import ebel.database
+from ebel.errors import BelSyntaxError
 from ebel.parser import check_bel_script_line_by_line, check_bel_script, bel_to_json
 
 
@@ -101,12 +102,26 @@ def validate_bel_file(bel_script_path: Union[str, Path],
             )
 
             if json_file:
-                if not result['errors'] or force_json:
+                if result["errors"]:
+                    if force_json:  # Check for syntax errors
+                        bel_syntax_error_present = result['errors'] and any(
+                            [type(error_type) == BelSyntaxError for error_type in result["errors"]]
+                        )
+                        if bel_syntax_error_present:
+                            logger.error("Cannot force JSON file due to syntax errors. Please check the BEL file.")
+
+                        else:
+                            json_file = _write_odb_json(bel_path=bel_file, results=result, bel_version=bel_version)
+                            validation_results[bel_file]['json'] = json_file
+
+                    else:
+                        logger.error("Unable to create JSON file due to grammar/syntax errors in BEL file")
+
+                else:  # No errors so everything is fine
                     json_file = _write_odb_json(bel_path=bel_file, results=result, bel_version=bel_version)
                     validation_results[bel_file]['json'] = json_file
 
             if tree:
-
                 if result['errors']:
                     logger.error("Tree can not be printed because errors still exists\n")
 
