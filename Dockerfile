@@ -10,9 +10,7 @@ RUN apt-get update \
 WORKDIR /root/app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-RUN git clone https://github.com/orientechnologies/pyorient.git
-RUN pip install ./pyorient
-RUN rm -rf ./pyorient && mkdir -p /root/.ebel
+RUN mkdir -p /root/.ebel
 # COPY ./docs/files/example_config.ini /root/.ebel/config.ini
 
 # Install e(BE:L)

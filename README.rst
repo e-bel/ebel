@@ -44,18 +44,6 @@ But we want to encourage you to use the latest development version which can be 
 
     $ pip install git+https://github.com/e-bel/ebel
 
-Installing pyorient
--------------------
-The current `pyorient driver <https://github.com/orientechnologies/pyorient/>`_ must be installed directly from GitHub
-at the moment since the PyPI package is in the process of being transferred. Therefore, to make sure e(BE:L) works, please
-install this library directly using::
-
-    $ pip install git+https://github.com/orientechnologies/pyorient/
-
-or it can also be installed using the ``requirements.txt`` file if you cloned the repository::
-
-    $ pip install -r requirements.txt
-
 Package Requirements
 ====================
 

@@ -18,3 +18,4 @@ connexion[swagger-ui]==2.7.0
 cryptography==3.4.7
 openpyxl==3.0.7
 graphviz
+pyorientdb
