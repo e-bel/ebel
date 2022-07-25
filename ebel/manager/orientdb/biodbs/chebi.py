@@ -53,7 +53,7 @@ class Chebi(odb_meta.Graph):
         inserted = {}
 
         file_path_compound = tools.get_file_path(urls.CHEBI_COMPOUND, self.biodb_name)
-        df_compounds = pd.read_csv(file_path_compound, sep="\t", low_memory=False, error_bad_lines=False)
+        df_compounds = pd.read_csv(file_path_compound, sep="\t", low_memory=False, on_bad_lines='skip')
         df_compound_ids = df_compounds[['ID']]
         del df_compounds
 
@@ -63,7 +63,7 @@ class Chebi(odb_meta.Graph):
             seperator = "\t" if re.search(r'.*\.tsv(\.gz)?$', file_path) else ","
             encoding = "ISO-8859-1" if table_name == 'chebi_reference' else None
 
-            dfs = pd.read_csv(file_path, sep=seperator, encoding=encoding, low_memory=False, error_bad_lines=False,
+            dfs = pd.read_csv(file_path, sep=seperator, encoding=encoding, low_memory=False, on_bad_lines='skip',
                               chunksize=100000)
             inserted[table_name] = 0
             for df in tqdm(dfs, desc=f'Import {table_name}'):
