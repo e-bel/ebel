@@ -7,7 +7,7 @@ from . import cache
 
 from .manager.orientdb.biodbs.bel import Bel
 
-__version__ = '1.0.13'
+__version__ = '1.0.14'
 
 __title__ = 'e(BE:L)'
 __description__ = 'Validation and extension of biomedical knowledge graphs'
