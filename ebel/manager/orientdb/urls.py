@@ -13,7 +13,7 @@ UNIPROT_HGNC = "https://www.genenames.org/cgi-bin/download/custom?col=gd_hgnc_id
                "status=Approved&status=Entry%20Withdrawn&hgnc_dbtag=on&order_by=gd_app_sym_sort&" \
                "format=text&submit=submit"
 UNIPROT_MGI = "http://www.informatics.jax.org/downloads/reports/MRK_SwissProt.rpt"
-UNIPROT_RGD = "ftp://ftp.rgd.mcw.edu/pub/data_release/GENES_RAT.txt"
+UNIPROT_RGD = "https://download.rgd.mcw.edu/data_release/GENES_RAT.txt"
 UNIPROT_FLYBASE = "ftp://ftp.flybase.org/releases/current/precomputed_files/genes/fbgn_NAseq_Uniprot_fb_2020_04.tsv.gz"
 
 # TODO: Import from Reactome MySQL
