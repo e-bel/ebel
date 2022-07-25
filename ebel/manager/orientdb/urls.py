@@ -27,14 +27,14 @@ INTACT = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact.zip"
 KEGG_PATH_LIST = "http://rest.kegg.jp/list/pathway/hsa"
 # KEGG_PATH_KGML = "http://rest.kegg.jp/get/{}/kgml"
 
-STRING_INTS = "https://stringdb-static.org/download/protein.links.full.v11.0/9606.protein.links.full.v11.0.txt.gz"
-STRING_ACTIONS = "https://stringdb-static.org/download/protein.actions.v11.0/9606.protein.actions.v11.0.txt.gz"
-STRING_NAMES = "https://stringdb-static.org/download/protein.info.v11.0/9606.protein.info.v11.0.txt.gz"
+STRING_INTS = "https://stringdb-static.org/download/protein.links.full.v11.0/9606.protein.links.full.v11.5.txt.gz"
+STRING_ACTIONS = "https://stringdb-static.org/download/protein.actions.v11.0/9606.protein.actions.v11.5.txt.gz"
+STRING_NAMES = "https://stringdb-static.org/download/protein.info.v11.0/9606.protein.info.v11.5.txt.gz"
 
 # BIOGRID = "https://downloads.thebiogrid.org/Download/BioGRID/Release-Archive/" \
 #           "BIOGRID-3.4.163/BIOGRID-ALL-3.4.163.mitab.zip"
 BIOGRID = "https://downloads.thebiogrid.org/Download/BioGRID/Release-Archive/\
-BIOGRID-4.3.194/BIOGRID-ALL-4.3.194.tab3.zip"
+BIOGRID-4.4.211/BIOGRID-ALL-4.4.211.tab3.zip"
 BIND = "https://www.bindingdb.org/bind/downloads/BindingDB_All_2018m7.tsv.zip"
 WIKIPATHWAYS = "http://data.wikipathways.org/20180710/gpml/wikipathways-20180710-gpml-Homo_sapiens.zip"
 
