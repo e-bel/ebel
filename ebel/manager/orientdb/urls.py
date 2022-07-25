@@ -51,7 +51,7 @@ IUPHAR_LIGANDS = "https://www.guidetopharmacology.org/DATA/ligands.csv"
 
 CLINVAR = "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/variant_summary.txt.gz"
 # MIRTARBASE = "http://mirtarbase.cuhk.edu.cn/cache/download/8.0/miRTarBase_MTI.xlsx"
-MIRTARBASE = "https://mirtarbase.cuhk.edu.cn/~miRTarBase/miRTarBase_2019/cache/download/8.0/miRTarBase_MTI.xlsx"
+MIRTARBASE = "https://mirtarbase.cuhk.edu.cn/~miRTarBase/miRTarBase_2022/cache/download/9.0/miRTarBase_MTI.xlsx"
 STITCH = "http://stitch.embl.de/download/protein_chemical.links.transfer.v5.0.tsv.gz"
 ENSEMBL_FASTA_PEP = "ftp://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz"
 
