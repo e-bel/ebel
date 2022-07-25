@@ -12,6 +12,7 @@ from pyorientdb.exceptions import PyOrientCommandException, PyOrientConnectionEx
 
 from ebel.defaults import CONN_STR_DEFAULT
 from ebel.config import write_to_config
+from ebel.constants import TerminalFormatting as TF
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,8 @@ def get_orientdb_client(server: str, port: int, name: str, user: str, password: 
         client.set_session_token(True)
         root_passwd_correct = False
         while not root_passwd_correct:
-            root_password = root_password or getpass('OrientDB root password (to create database and users)\n')
+            odb_root_question = f"{TF.QUESTION}OrientDB root password (to create database and users): {TF.RESET}"
+            root_password = root_password or getpass(odb_root_question)
             try:
                 client.connect('root', root_password)
                 root_passwd_correct = True

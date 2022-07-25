@@ -262,7 +262,7 @@ class DrugBank(odb_meta.Graph):
 
         if not section_exists or not config_exists:
 
-            prompt = "Do you have an approved account with DrugBank [y/n]?\n"
+            prompt = "Do you have an approved account with DrugBank [y/n]: "
             timeout_msg = "No answer was provided. Skipping DrugBank update...\n"
             timeout = 20
             answer = self.get_timed_answer(prompt=prompt, timeout=timeout, timeout_msg=timeout_msg)
