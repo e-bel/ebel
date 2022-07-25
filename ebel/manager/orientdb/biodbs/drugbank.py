@@ -1,6 +1,7 @@
 """DrugBank."""
 
 import os
+import platform
 import re
 import signal
 import getpass
@@ -21,7 +22,7 @@ from configparser import ConfigParser
 from ebel.constants import DATA_DIR, RID
 from ebel.defaults import config_file_path
 from ebel.manager.orientdb.constants import DRUGBANK
-from ebel.tools import write_to_config, get_config_as_dict
+from ebel.config import write_to_config, get_config_as_dict
 from ebel.manager.orientdb import odb_meta, urls, odb_structure
 
 from ebel.manager.rdbms.models import drugbank
@@ -218,18 +219,23 @@ class DrugBank(odb_meta.Graph):
         def timeout_error(*_):
             raise TimeoutError
 
-        # TODO signal.SIGALRM does not work on Windows - need to find alternative
-        signal.signal(signal.SIGALRM, timeout_error)
-        signal.alarm(timeout)
-        try:
+        if platform.system() == "Windows":
             answer = input(prompt)
-            signal.alarm(0)
             return answer
-        except TimeoutError:
-            if timeout_msg:
-                logger.error(f"The following error occurred while contacting the DrugBank website: {timeout_msg}")
-            signal.signal(signal.SIGALRM, signal.SIG_IGN)
-            return None
+
+        else:
+            signal.signal(signal.SIGALRM, timeout_error)
+            signal.alarm(timeout)
+            try:
+                answer = input(prompt)
+                signal.alarm(0)
+                return answer
+
+            except TimeoutError:
+                if timeout_msg:
+                    logger.error(f"The following error occurred while contacting the DrugBank website: {timeout_msg}")
+                signal.signal(signal.SIGALRM, signal.SIG_IGN)
+                return None
 
     def get_user_passwd(self, drugbank_user: str = None, drugbank_password: str = None) -> list:
         """Read username and password from configuration file."""

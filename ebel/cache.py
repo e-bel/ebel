@@ -10,7 +10,8 @@ from typing import Generator, List, Dict, DefaultDict, Set
 
 from ebel import defaults
 from ebel.manager import models
-from ebel.tools import write_to_config, BelRdb
+from ebel.tools import BelRdb
+from ebel.config import write_to_config
 from ebel.warnings import AlsoUsedInOtherNamespace, _Warning
 from ebel.constants import URL, PATTERN, LIST, ALLOWED_TYPES
 from ebel.constants import GRAMMAR_START_NS, GRAMMAR_START_ANNO

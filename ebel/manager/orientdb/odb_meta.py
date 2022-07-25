@@ -30,7 +30,8 @@ import ebel.database
 from ebel.constants import RID, DEFAULT_ODB
 from ebel.manager.orientdb import urls as default_urls
 from ebel.manager.orientdb.odb_structure import OClass, OIndex, OProperty, Edge
-from ebel.tools import get_config_as_dict, BelRdb, get_file_path, chunks, get_standard_name, write_to_config
+from ebel.tools import BelRdb, get_file_path, chunks, get_standard_name
+from ebel.config import write_to_config, get_config_as_dict
 
 type_map_inverse = {v: k for k, v in orient.type_map.items()}
 
@@ -76,15 +77,15 @@ class Graph(abc.ABC):
         self.urls = urls if urls else {}
         self.biodb_name = biodb_name
 
+        # Set the client
+        config_dict = get_config_as_dict()
+
         credentials = {"name": self.odb_name,
                        "user": self.odb_user,
                        "password": self.odb_password,
                        "server": self.odb_server or "localhost",
                        "port": int(self.odb_port or "2424"),
                        "root_password": self._odb_root_password}
-
-        # Set the client
-        config_dict = get_config_as_dict()
 
         # If values are passed
         if all(credentials.values()):
@@ -104,6 +105,7 @@ class Graph(abc.ABC):
         else:
             missing_params = ", ".join({key for key, val in credentials.items() if val is None})
             raise ValueError(f"Please provide initial configuration parameters. Missing parameters: {missing_params}")
+            # logger.error(f"Please provide initial configuration parameters. Missing parameters: {missing_params}")
 
         self.client: OrientDB = self.get_client()
 
@@ -158,69 +160,6 @@ class Graph(abc.ABC):
 
         # Root password should not be written in the config file, but it's possible
         self._odb_root_password = self._odb_root_password or odb_config.get('root_password')
-
-    @classmethod
-    def set_configuration(cls,
-                          name: str = None,
-                          user: str = None,
-                          password: str = None,
-                          server: str = None,
-                          port: Union[str, int] = None,
-                          user_reader: str = None,
-                          user_reader_password: str = None,
-                          root_password: str = None,
-                          kegg_species: str = None,
-                          sqlalchemy_connection_string: str = None,
-                          snp_related_traits: str = None,
-                          drugbank_user: str = None,
-                          drugbank_password: str = None):
-        """Set configuration for OrientDB database."""
-        config = get_config_as_dict()
-
-        # TODO find better spot to initialize section
-        config_odb = config.get(DEFAULT_ODB) if DEFAULT_ODB in config else {}
-
-        cls.odb_name = name or config_odb.get('name')
-        cls.odb_user = user or config_odb.get('user')
-        cls.odb_password = password or config_odb.get('password')
-        cls.odb_server = server or config_odb.get('server')
-        cls.odb_port = port or config_odb.get('port')
-
-        cls.odb_user_reader = user_reader or (config_odb.get('user_reader') if "user_reader" in config_odb else None)
-        cls.odb_user_reader_password = user_reader_password or (
-            config_odb.get('user_reader_password') if "user_reader_password" in config_odb else None
-        )
-
-        odb_class_attribs = {
-            'name': cls.odb_name,
-            'user': cls.odb_user,
-            'password': cls.odb_password,
-            'server': cls.odb_server,
-            'port': cls.odb_port,
-            'user_reader': cls.odb_user_reader,
-            'user_reader_password': cls.odb_user_reader_password
-        }
-
-        for param, value in odb_class_attribs.items():
-            write_to_config(DEFAULT_ODB, param, value)
-
-        if kegg_species:
-            write_to_config('KEGG', 'species', kegg_species)
-
-        if sqlalchemy_connection_string:
-            con_str = f"mysql+pymysql://{sqlalchemy_connection_string}"
-            write_to_config('DATABASE', 'sqlalchemy_connection_string', con_str)
-
-        if snp_related_traits:
-            write_to_config('SNP_RELATED_TRAITS', 'keyword', snp_related_traits)
-
-        if drugbank_user:
-            write_to_config('DRUGBANK', 'user', drugbank_user)
-
-        if drugbank_password:
-            write_to_config('DRUGBANK', 'password', drugbank_password)
-
-        cls._odb_root_password = root_password
 
     def get_client(self) -> OrientDB:
         """Attempts to connect to the OrientDB client. This is currently done by using session tokens."""

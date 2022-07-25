@@ -1,17 +1,19 @@
 """Methods for interfacing with the RDBMS."""
 import getpass
+import logging
 import sys
 from getpass import getpass
-from typing import Optional
+from typing import Optional, Union
 
 import pymysql
 from pyorientdb import OrientDB
 from pyorientdb.exceptions import PyOrientCommandException, PyOrientConnectionException, \
     PyOrientSecurityAccessException
 
-from ebel.cache import logger
 from ebel.defaults import CONN_STR_DEFAULT
-from ebel.tools import write_to_config
+from ebel.config import write_to_config
+
+logger = logging.getLogger(__name__)
 
 
 def orientdb_connection_works(server: str, port: int, name: str, user: str, password: str) -> bool:
@@ -95,6 +97,7 @@ def get_orientdb_client(server: str, port: int, name: str, user: str, password: 
                 else:
                     client.command(
                         f"CREATE USER {user_reader} IDENTIFIED BY {user_reader_password} ROLE admin")
+
     return client
 
 
@@ -149,6 +152,7 @@ def set_mysql_connection(host: str = 'localhost',
                          user: str = 'ebel_user',
                          password: str = 'ebel_passwd',
                          db: str = 'ebel',
+                         port: Union[str, int] = '3306',
                          charset: str = 'utf8mb4'):
     """Set the connection using MySQL Parameters.
 
@@ -162,6 +166,8 @@ def set_mysql_connection(host: str = 'localhost',
         MySQL database password.
     db : str
         MySQL database name.
+    port : Union[str,int]
+        The port of the MySQL database.
     charset : str
         MySQL database charset.
 
@@ -171,7 +177,7 @@ def set_mysql_connection(host: str = 'localhost',
         SQLAlchemy MySQL connection string.
 
     """
-    connection_string = f'mysql+pymysql://{user}:{password}@{host}/{db}?charset={charset}'
+    connection_string = f'mysql+pymysql://{user}:{password}@{host}/{db}:{port}?charset={charset}'
     set_connection(connection_string)
 
     return connection_string

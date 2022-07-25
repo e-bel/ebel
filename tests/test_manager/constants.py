@@ -4,7 +4,7 @@ import pathlib
 
 from ebel import Bel
 from ebel.constants import DEFAULT_ODB
-from ebel.tools import get_config_value
+from ebel.config import get_config_value
 from ebel.manager.orientdb.odb_meta import Graph
 
 

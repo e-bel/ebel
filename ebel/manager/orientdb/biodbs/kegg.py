@@ -11,7 +11,7 @@ from typing import Dict
 from pyorientdb import OrientDB
 
 from ebel.defaults import DATA_DIR
-from ebel.tools import get_config_value
+from ebel.config import get_config_value
 from ebel.manager.orientdb.constants import KEGG
 from ebel.manager.orientdb.biodbs.hgnc import Hgnc
 from ebel.manager.orientdb.odb_defaults import BelPmod

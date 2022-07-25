@@ -3,22 +3,21 @@ import re
 import gzip
 import shutil
 import hashlib
-import logging
 import configparser
 
 import os.path
 
 from types import GeneratorType
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine.base import Engine
-from typing import Iterable, Union, List, Optional
-
-from configparser import RawConfigParser
+from typing import Iterable, Union, List
 
 from ebel import defaults
-from ebel.constants import DATA_DIR
+from ebel.config import write_to_config, get_config_value
 from ebel.defaults import CONN_STR_DEFAULT
+from ebel.constants import DATA_DIR
 
 
 class BelRdb(object):
@@ -43,46 +42,6 @@ class BelRdb(object):
         return BelRdb.__instance
 
 
-def write_to_config(section: str, option: str, value: str) -> None:
-    """Write section, option and value to config file.
-
-    Parameters
-    ----------
-    section : str
-        Section name of configuration file.
-    option : str
-        Option name.
-    value : str
-        Option value.
-    """
-    if value:
-        cfp = defaults.config_file_path
-        config = RawConfigParser()
-
-        if not os.path.exists(cfp):
-            with open(cfp, 'w') as config_file:
-                config[section] = {option: value}
-                config.write(config_file)
-                logging.info(f'Set in configuration file {cfp} in section {section} {option}={value}')
-        else:
-            config.read(cfp)
-            if not config.has_section(section):
-                config.add_section(section)
-            config.set(section, option, value)
-            with open(cfp, 'w') as configfile:
-                config.write(configfile)
-
-
-def get_config_as_dict():
-    """Get ebel configuration as dictionary if config file exists."""
-    cfp = defaults.config_file_path
-    if os.path.exists(cfp):
-        config = RawConfigParser()
-        config.read(cfp)
-        return config._sections
-    return {}
-
-
 def _get_connection_string():
     """Get the sqlalchemy connection string from config file, sets the default string if not there."""
     return get_config_value('DATABASE', 'sqlalchemy_connection_string', CONN_STR_DEFAULT)
@@ -102,41 +61,6 @@ def _get_session_object():
 def get_session():
     """Return session object."""
     return _get_session_object()()
-
-
-def get_config_value(section, option, value=None) -> Optional[str]:
-    """Retrieve value from a given section and option from the config file if it exists.
-
-    Parameters
-    ----------
-    section (str): Configuration section header
-    option (str): Option value within the section
-    value (str): (optional) value to set the option equal to if option doesn't exist
-
-    Returns
-    -------
-    config_value: The value of the specified section and option
-    """
-    cfg = configparser.ConfigParser()
-
-    if os.path.isfile(defaults.config_file_path):
-        cfg.read(defaults.config_file_path)
-
-        if cfg.has_section(section) and cfg.has_option(section=section, option=option):
-            config_value = cfg[section][option]
-
-        elif value is not None:
-            write_to_config(section, option, value)
-            config_value = value
-
-        else:
-            return None
-
-    else:
-        write_to_config(section, option, value)
-        config_value = value
-
-    return config_value
 
 
 def chunks(parsable: Iterable, size: int = 100) -> GeneratorType:
@@ -238,3 +162,5 @@ def get_disease_trait_keywords_from_config(traits: Union[str, list] = None, over
         traits = traits.split(",")
 
     return traits if traits is not None else []
+
+
