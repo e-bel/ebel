@@ -3,6 +3,8 @@ import re
 import sys
 import json
 import logging
+
+import chardet
 import numpy as np
 import pandas as pd
 
@@ -71,7 +73,13 @@ class Hgnc(odb_meta.Graph):
         """Insert HGNC database into RDBMS."""
         logger.info('Insert HGNC database into RDBMS.')
         file_path = get_file_path(self.urls[self.biodb_name], self.biodb_name)
-        df = pd.DataFrame(json.loads(open(file_path, 'r').read())['response']['docs'])
+
+        with open(file_path, "r", encoding="utf8") as hgnc_file:
+            raw_content = hgnc_file.read()
+            string_encode = raw_content.encode("ascii", "ignore")  # Convert unicode chars to ascii
+            hgnc_content = json.loads(string_encode.decode())
+
+        df = pd.DataFrame(hgnc_content['response']['docs'])
 
         self._standardize_dataframe(df)
         columns = ['hgnc_id', 'version', 'bioparadigms_slc', 'cd', 'cosmic', 'date_approved_reserved', 'date_modified',
@@ -122,7 +130,13 @@ class Hgnc(odb_meta.Graph):
         self.execute('Delete from hgnc')
 
         file_path = get_file_path(self.urls[self.biodb_name], self.biodb_name)
-        rows = json.loads(open(file_path, 'r').read().replace(u"\xa0", u" "))['response']['docs']
+
+        with open(file_path, "r", encoding="utf8") as hgnc_file:
+            raw_content = hgnc_file.read()
+            string_encode = raw_content.encode("ascii", "ignore")  # Convert unicode chars to ascii
+            hgnc_content = json.loads(string_encode.decode())
+
+        rows = hgnc_content['response']['docs']
         df = pd.DataFrame(rows)
         df = self._standardize_dataframe(df)
         df.rename(columns={'hgnc_id': 'id'}, inplace=True)
@@ -137,7 +151,8 @@ class Hgnc(odb_meta.Graph):
             try:
                 self.execute(sql)
 
-            except:
+            except Exception as e:
+                print(e)
                 print(sql)
                 sys.exit()
 
