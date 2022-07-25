@@ -1,7 +1,7 @@
 """Protein Atlas module."""
 import pandas as pd
 
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from typing import Dict, Optional
 
 from ebel.tools import get_file_path

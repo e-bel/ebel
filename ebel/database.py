@@ -5,8 +5,8 @@ from getpass import getpass
 from typing import Optional
 
 import pymysql
-from pyorient import OrientDB
-from pyorient.exceptions import PyOrientCommandException, PyOrientConnectionException, \
+from pyorientdb import OrientDB
+from pyorientdb.exceptions import PyOrientCommandException, PyOrientConnectionException, \
     PyOrientSecurityAccessException
 
 from ebel.cache import logger

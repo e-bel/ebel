@@ -20,9 +20,9 @@ import pandas as pd
 import requests
 import sqlalchemy as sqla
 import xmltodict
-from pyorient import OrientDB, orient
-from pyorient.exceptions import PyOrientIndexException, PyOrientCommandException, PyOrientSecurityAccessException
-from pyorient.otypes import OrientRecord
+from pyorientdb import OrientDB, orient
+from pyorientdb.exceptions import PyOrientIndexException, PyOrientCommandException, PyOrientSecurityAccessException
+from pyorientdb.otypes import OrientRecord
 from sqlalchemy.sql.schema import Table
 from tqdm import tqdm
 

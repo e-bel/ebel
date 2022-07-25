@@ -8,7 +8,7 @@ from typing import List, Tuple, Optional
 import pandas as pd
 from pandas.core.frame import DataFrame
 import xmltodict
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from tqdm import tqdm
 
 from ebel.constants import DATA_DIR

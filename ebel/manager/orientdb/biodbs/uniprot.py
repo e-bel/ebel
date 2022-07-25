@@ -6,7 +6,7 @@ import logging
 import pandas as pd
 
 from tqdm import tqdm
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from lxml.etree import iterparse
 from collections import namedtuple
 from typing import List, Dict, Tuple, Union

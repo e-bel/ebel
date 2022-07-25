@@ -2,7 +2,7 @@
 import pandas as pd
 
 from tqdm import tqdm
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from typing import Dict, Optional
 
 from ebel.manager.orientdb.constants import NCBI

@@ -6,7 +6,7 @@ import pandas as pd
 from enum import Enum
 
 from tqdm import tqdm
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from typing import Dict, Tuple
 
 from ebel import tools

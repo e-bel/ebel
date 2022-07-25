@@ -9,7 +9,7 @@ import logging
 from tqdm import tqdm
 from typing import Tuple
 from copy import deepcopy
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from datetime import datetime
 from pathlib import Path
 from git.exc import InvalidGitRepositoryError

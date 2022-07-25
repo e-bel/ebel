@@ -13,7 +13,7 @@ from tqdm import tqdm
 from typing import Dict
 from zipfile import ZipFile
 from datetime import datetime
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from lxml.etree import iterparse
 from collections import namedtuple
 from configparser import ConfigParser

@@ -5,7 +5,7 @@ import pandas as pd
 
 from tqdm import tqdm
 from typing import Dict
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from collections import namedtuple
 
 from ebel.tools import get_file_path

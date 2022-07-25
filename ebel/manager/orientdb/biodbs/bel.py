@@ -5,7 +5,7 @@ import logging
 from tqdm import tqdm
 from collections import namedtuple
 from typing import Iterable, Union, Set, Dict
-from pyorient.exceptions import PyOrientCommandException
+from pyorientdb.exceptions import PyOrientCommandException
 
 from ebel.manager.orientdb.odb_meta import Graph
 from ebel.constants import SPECIES_NAMESPACE, RID

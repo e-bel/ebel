@@ -6,7 +6,7 @@ import pandas as pd
 
 from tqdm import tqdm
 from typing import Dict
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 
 from ebel.constants import RID
 from ebel.manager.orientdb.biodbs.hgnc import Hgnc

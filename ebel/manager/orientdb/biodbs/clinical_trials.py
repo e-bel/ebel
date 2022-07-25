@@ -6,7 +6,7 @@ import pandas as pd
 from tqdm import tqdm
 from lxml import etree
 from zipfile import ZipFile
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from typing import Dict, Optional
 from collections import namedtuple
 

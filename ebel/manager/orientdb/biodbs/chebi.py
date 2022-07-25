@@ -4,7 +4,7 @@ import re
 from typing import Dict
 
 import pandas as pd
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 from tqdm import tqdm
 
 from ebel import tools

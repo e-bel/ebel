@@ -4,7 +4,7 @@ import gzip
 import pandas as pd
 
 from typing import Dict
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 
 from ebel.tools import get_file_path
 from ebel.manager.orientdb import odb_meta, urls

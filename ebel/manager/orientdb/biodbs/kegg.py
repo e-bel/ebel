@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 
 from tqdm import tqdm
 from typing import Dict
-from pyorient import OrientDB
+from pyorientdb import OrientDB
 
 from ebel.defaults import DATA_DIR
 from ebel.tools import get_config_value
