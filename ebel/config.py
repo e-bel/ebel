@@ -253,29 +253,29 @@ def __mysql_setup(old_sa_con_str: str) -> str:
             old_mysql = found_old_mysql.groupdict()
 
     default_mysql_host = old_mysql.get('mysql_host') or 'localhost'
-    mysql_host_question = f"{TF.QUESTION}MySQL/MariaDB sever name{TF.RESET} " \
+    mysql_host_question = f"{TF.QUESTION}MySQL/MariaDB server name{TF.RESET} " \
                           f"{TF.DEFAULT_VALUE}[{default_mysql_host}]: {TF.RESET}"
     mysql_host = input(mysql_host_question) or default_mysql_host
 
+    default_mysql_port = old_mysql.get('mysql_db') or '3306'
+    mysql_port_question = f"{TF.QUESTION}MySQL/MariaDB port{TF.RESET} " \
+                          f"{TF.DEFAULT_VALUE}[{default_mysql_port}]: {TF.RESET}"
+    mysql_port = input(mysql_port_question).strip() or default_mysql_port
+
     default_mysql_user = old_mysql.get('mysql_user') or 'ebel'
-    mysql_user_question = f"{TF.QUESTION}MySQL/MariaDB ebel user{TF.RESET} " \
+    mysql_user_question = f"{TF.QUESTION}MySQL/MariaDB (non-root) user{TF.RESET} " \
                           f"{TF.DEFAULT_VALUE}[{default_mysql_user}]: {TF.RESET}"
     mysql_user = input(mysql_user_question).strip() or default_mysql_user
 
     mysql_random_password = ''.join(random.sample(string.ascii_letters, 12))
-    mysql_passed_question = f"{TF.QUESTION}MySQL/MariaDB ebel database password{TF.RESET} " \
+    mysql_passed_question = f"{TF.QUESTION}MySQL/MariaDB password for user{TF.RESET} " \
                             f"{TF.DEFAULT_VALUE}[{mysql_random_password}]: {TF.RESET}"
     mysql_passwd = getpass(mysql_passed_question).strip() or mysql_random_password
 
     default_mysql_db = old_mysql.get('mysql_db') or 'ebel'
-    mysql_db_question = f"{TF.QUESTION}MySQL ebel database name{TF.RESET} " \
+    mysql_db_question = f"{TF.QUESTION}MySQL/MariaDB database name{TF.RESET} " \
                         f"{TF.DEFAULT_VALUE}[{default_mysql_db}]: {TF.RESET}"
     mysql_db = input(mysql_db_question).strip() or default_mysql_db
-
-    default_mysql_port = old_mysql.get('mysql_db') or '3306'
-    mysql_port_question = f"{TF.QUESTION}MySQL ebel database port{TF.RESET} " \
-                          f"{TF.DEFAULT_VALUE}[{default_mysql_port}]: {TF.RESET}"
-    mysql_port = input(mysql_port_question).strip() or default_mysql_port
 
     db_conn = f"mysql+pymysql://{mysql_user}:{quote(mysql_passwd)}@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
 
