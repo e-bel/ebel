@@ -66,7 +66,7 @@ class Chebi(odb_meta.Graph):
             dfs = pd.read_csv(file_path, sep=seperator, encoding=encoding, low_memory=False, on_bad_lines='skip',
                               chunksize=100000)
             inserted[table_name] = 0
-            for df in tqdm(dfs, desc=f'Import {table_name}'):
+            for df in dfs:
                 df.columns = df.columns.str.lower()
 
                 if table_name == chebi.Inchi.__tablename__:
