@@ -209,6 +209,7 @@ Querying the Graph
 Once the knowledge graph has been created (and optionally enriched), one can use e(BE:L) to query it directly.
 
 .. code-block:: python
+
     from ebel import Bel
     bel = Bel()
 
