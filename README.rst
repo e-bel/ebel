@@ -102,7 +102,7 @@ To test the different components you find `here <https://github.com/e-bel/covid1
 already compiled JSON files.
 
 BEL Validation
---------------
+==============
 
 BEL is a domain-specific language designed to capture biological relationships in a computer- and human-readable format.
 The rules governing BEL statement generation can be quite complex and often mistakes are made during curation.
@@ -126,10 +126,10 @@ path is not specified. Here is an example::
     $ ebel repair /path/to/bel_file.bel -n /path/to/repaired_file.bel
 
 Import Process
---------------
+==============
 
 BEL Modeling - OrientDB
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 BEL files that have passed the validation process can be imported into the
 database individually or *en masse*. During the import process, e(BE:L) automatically creates all of the relevant nodes and edges
@@ -139,7 +139,7 @@ e.g. protein nodes with a respective RNA or gene node with have these automatica
 
 
 Model Enrichment - MySQL
-^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 e(BE:L) goes one step farther when compiling your BEL statements into a knowledge graph by supplementing your new graph model with information derived from several
 publicly available repositories. Data is automatically downloaded from several useful sites including `UniProt`_ ,
@@ -148,7 +148,7 @@ Information from these popular repositories are then linked to the nodes and edg
 useful queries to be made against your data. This data is automatically downloaded, parsed, and imported into a specified SQL database.
 
 Importing - Getting Started
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------
 
 e(BE:L) supports OrientDB as graph database and `MySQL <https://www.mysql.com>`_ and `MariaDB`_ as `RDBMS <https://en.wikipedia.org/wiki/Relational_database>`_
 
@@ -204,6 +204,18 @@ or::
     $ ebel enrich -s intact,kegg
 
 
+Querying the Graph
+==================
+Once the knowledge graph has been created (and optionally enriched), one can use e(BE:L) to query it directly.
+
+.. code-block:: python
+    from ebel import Bel
+    bel = Bel()
+
+    relation_query = "SELECT out.bel as subject, @class as relation, in.bel as object FROM bel_relation"
+    df = bel.query(relation_query)  # Returns results as pandas DataFrame
+    result_list = bel.query()
+
 Docker installation
 ===================
 
@@ -251,7 +263,7 @@ Following services are now available:
 3. `phpMyAdmin <http://localhost:8089>`_
 
 API
----
+===
 Finally, this package comes equipped with a built-in RESTful API using Flask. Users that have a running and populated set of databases
 can also create a running API server which contains several queries for retrieving information from both the network itself, as well
 as the downloaded enrichment information stored in the SQL database.
