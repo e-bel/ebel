@@ -215,7 +215,7 @@ Once the knowledge graph has been created (and optionally enriched), one can use
 
     relation_query = "SELECT out.bel as subject, @class as relation, in.bel as object FROM bel_relation"
     df = bel.query(relation_query)  # Returns results as pandas DataFrame
-    result_list = bel.query(relation_query)  # Returns results as a list of dicts
+    result_list = bel.query_get_dict(relation_query)  # Returns results as a list of dicts
 
 Docker installation
 ===================
