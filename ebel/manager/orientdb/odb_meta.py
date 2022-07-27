@@ -29,7 +29,7 @@ from tqdm import tqdm
 import ebel.database
 from ebel.constants import RID, DEFAULT_ODB
 from ebel.manager.orientdb import urls as default_urls
-from ebel.manager.orientdb.odb_structure import OClass, OIndex, OProperty, Edge
+from ebel.manager.orientdb.odb_structure import OClass, OIndex, OProperty, Edge, Generic, Node
 from ebel.tools import BelRdb, get_file_path, chunks, get_standard_name
 from ebel.config import write_to_config, get_config_as_dict
 
@@ -60,9 +60,9 @@ class Graph(abc.ABC):
     _odb_root_password = None
 
     def __init__(self,
-                 generics: Tuple[OClass] = (),
-                 nodes: Tuple[OClass] = (),
-                 edges: Tuple[OClass] = (),
+                 generics: Tuple[Generic] = (),
+                 nodes: Tuple[Node] = (),
+                 edges: Tuple[Edge] = (),
                  indices: Tuple[OIndex] = (),
                  urls: dict = None,
                  biodb_name: str = '',
