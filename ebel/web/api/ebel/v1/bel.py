@@ -34,12 +34,15 @@ ErrorMessage = Dict[str, str]
 
 class EnumExtension(Enum):
     """Extension enumeration class."""
+
     @classmethod
-    def has_value(cls, value):
+    def has_value(cls, value) -> bool:
+        """Check if value present."""
         return any([x.value == value for x in cls])
 
     @classmethod
-    def has_name(cls, name):
+    def has_name(cls, name) -> bool:
+        """Check if has name."""
         return any([x.name == name for x in cls])
 
 
@@ -691,6 +694,7 @@ class Position(EnumExtension):
 
 class SearchType(EnumExtension):
     """SearchType constants."""
+
     EXACT = 'exact'
     CONTAINS = 'contains'
     CASE_SENSITIVE = 'case_insensitive'

@@ -233,7 +233,7 @@ def add_query_filters(query: Query, columns_params: Dict[str, Dict[str, str]], m
             elif how2search == 'smaller_equals_than':
                 col_filters.append(column.__le__(value))
             elif how2search == 'not_equals':
-                col_filters.append(column!=value)
+                col_filters.append(column != value)
             elif how2search == 'exclude':
                 col_filters.append(not_(column.like(value)))
             elif how2search == 'between':

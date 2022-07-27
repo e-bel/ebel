@@ -128,10 +128,12 @@ NEGATIVE_CORRELATION = 'negative_correlation'
 # Terminal Colors
 class TerminalFormatting:
     """Terminal style definitions."""
+
     RESET = "\033[0m"
 
     class Format:
         """Format style definitions."""
+
         BOLD = "\033[1m"
         ITALIC = "\033[3m"
         UNDERLINED = "\033[4m"
@@ -139,6 +141,7 @@ class TerminalFormatting:
 
     class Fore:
         """Foreground style definitions."""
+
         __temp = "\033[{}m"
         __temp_b = "\033[1;{}m"
         RED = __temp.format(31)
@@ -160,6 +163,7 @@ class TerminalFormatting:
 
     class Back:
         """Back style definitions."""
+
         __temp = "\033[{}m"
         NOTHING = __temp.format(40)
         RED = __temp.format(41)

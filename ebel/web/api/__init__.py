@@ -12,6 +12,7 @@ from ebel.tools import _get_connection_string
 
 class RDBMS:
     """Representation of the RDBMS."""
+
     engine = None
     session = None
 
