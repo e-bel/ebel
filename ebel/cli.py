@@ -8,7 +8,6 @@ import click
 import ebel.database
 from ebel import Bel, web
 from ebel.config import user_config_setup, set_configuration
-from ebel.manager.orientdb.odb_meta import Graph
 from ebel.manager.orientdb.constants import DRUGBANK
 from ebel.validate import validate_bel_file, repair_bel_file
 

@@ -7,7 +7,6 @@ from ebel.constants import DEFAULT_ODB
 from ebel.config import get_config_value
 from ebel.manager.orientdb.odb_meta import Graph
 
-
 # Paths
 VALIDATION_TEST_DIR = pathlib.Path(__file__).parent.absolute()
 TEST_DATA_DIR = os.path.join(VALIDATION_TEST_DIR, "..", "data")
@@ -28,10 +27,13 @@ if ROOT_PWD is None:
     raise ValueError("Need root password to perform tests. Please add 'root_password' to configuration file")
 
 # Configure client
-Graph.set_configuration(name=DB_NAME,
-                        user=USER,
-                        password=PASSWORD,
-                        server=SERVER,
-                        port=PORT,
-                        root_password=ROOT_PWD)
-test_client = Bel()
+config_params = {
+    "db": DB_NAME,
+    "user": USER,
+    "password": PASSWORD,
+    "server": SERVER,
+    "port": PORT,
+    "root_password": ROOT_PWD
+}
+
+test_client = Bel(graph_config=config_params)

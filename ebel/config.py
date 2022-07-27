@@ -31,7 +31,7 @@ def set_configuration(name: str = None,
                       snp_related_traits: str = None,
                       drugbank_user: str = None,
                       drugbank_password: str = None) -> dict:
-    """Set configuration values."""
+    """Set configuration values in the config file."""
     odb_class_attribs = {
         'name': name,
         'user': user,
