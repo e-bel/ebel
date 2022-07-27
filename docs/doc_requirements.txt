@@ -2,4 +2,4 @@ numpydoc
 sphinxcontrib-openapi
 sphinx-click
 mistune==0.8.4
-pyorient @ git+https://github.com/orientechnologies/pyorient.git
+pyorientdb
