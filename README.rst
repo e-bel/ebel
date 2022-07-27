@@ -217,6 +217,24 @@ Once the knowledge graph has been created (and optionally enriched), one can use
     df = bel.query(relation_query)  # Returns results as pandas DataFrame
     result_list = bel.query_get_dict(relation_query)  # Returns results as a list of dicts
 
+To specify a different graph database to connect to than the one in your config file, you can pass connection parameters when initializing the `Bel` class:
+
+.. code-block:: python
+
+    from ebel import Bel
+    config_params = {
+        "db": "my_db",
+        "user": "superdude",
+        "password": "password123",
+        "server": "localhost",  # defaults to localhost if none given
+        "port": "2424",  # defaults to 2424 if none given
+    }
+
+    bel = Bel(graph_config=config_params)
+
+    # To overwrite your default values in the config file
+    bel = Bel(graph_config=config_params, overwrite_config=True)
+
 Docker installation
 ===================
 
