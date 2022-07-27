@@ -127,15 +127,18 @@ NEGATIVE_CORRELATION = 'negative_correlation'
 
 # Terminal Colors
 class TerminalFormatting:
+    """Terminal style definitions."""
     RESET = "\033[0m"
 
     class Format:
+        """Format style definitions."""
         BOLD = "\033[1m"
         ITALIC = "\033[3m"
         UNDERLINED = "\033[4m"
         STRIKETHROUGH = "\033[9m"
 
     class Fore:
+        """Foreground style definitions."""
         __temp = "\033[{}m"
         __temp_b = "\033[1;{}m"
         RED = __temp.format(31)
@@ -156,6 +159,7 @@ class TerminalFormatting:
         GREY_BRIGHT = __temp_b.format(37)
 
     class Back:
+        """Back style definitions."""
         __temp = "\033[{}m"
         NOTHING = __temp.format(40)
         RED = __temp.format(41)
@@ -170,4 +174,3 @@ class TerminalFormatting:
     HEADER = f"{Fore.YELLOW}{Format.BOLD}{Format.UNDERLINED}"
     QUESTION = f"{Fore.GREEN}{Format.ITALIC}"
     DEFAULT_VALUE = f"{Fore.GREEN_BRIGHT}"
-

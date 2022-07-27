@@ -91,7 +91,14 @@ class Bel(Graph):
         nodes = odb_structure.bel_nodes
         edges = odb_structure.bel_edges
         indices = odb_structure.bel_indices
-        super().__init__(generics, nodes, edges, indices, config_params=graph_config, overwrite_config=overwrite_config)
+        super().__init__(
+            generics,
+            nodes,
+            edges,
+            indices,
+            config_params=graph_config,
+            overwrite_config=overwrite_config
+        )
 
     @property
     def protein_atlas(self) -> ProteinAtlas:

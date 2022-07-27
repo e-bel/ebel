@@ -31,14 +31,17 @@ RidList = List[str]
 EdgePathsByLength = Dict[PathLength, RidList]
 ErrorMessage = Dict[str, str]
 
+
 class EnumExtension(Enum):
+    """Extension enumeration class."""
     @classmethod
     def has_value(cls, value):
-        return any([x.value==value for x in cls])
-    
+        return any([x.value == value for x in cls])
+
     @classmethod
     def has_name(cls, name):
-        return any([x.name==name for x in cls])
+        return any([x.name == name for x in cls])
+
 
 BELishEdge = namedtuple('Edge', ['name', 'direction', 'params_str'])
 
@@ -169,7 +172,8 @@ class Column:
         return f"{column} as {self.form_name}"
 
     def __str__(self):
-        return f"<Column: form_name={self.form_name}; column={self.column}; sql_operator={self.sql_operator}; data_type={self.data_type}>"
+        return f"""<Column: form_name={self.form_name};
+        column={self.column}; sql_operator={self.sql_operator}; data_type={self.data_type}>"""
 
 
 bel_relation_default_columns: List[Column] = [
@@ -294,22 +298,23 @@ class Query:
 
 
 def _get_where_by_how(column: str, value: str, how_to_search: str):
-    how_to_search = how_to_search if SearchTpye.has_value(how_to_search) else SearchTpye.EXACT.value
+    how_to_search = how_to_search if SearchType.has_value(how_to_search) else SearchType.EXACT.value
     value_by_how = {
-        SearchTpye.EXACT.value: f" = '{value}'",
-        SearchTpye.CONTAINS.value: f" like '%{value}%'",
-        SearchTpye.CASE_SENSITIVE.value: f" like '{value}'",
-        SearchTpye.STARTS_WITH.value: f" like '{value}%'",
-        SearchTpye.ENDS_WITH.value: f" like '%{value}'",
-        SearchTpye.GREATER_THAN.value: f" > {value}",
-        SearchTpye.GREATER_OR_EQUALS_THAN.value: f" >= {value}",
-        SearchTpye.SMALLER_THAN.value: f" < {value}",
-        SearchTpye.SMALLER_OR_EQUALS_THAN.value: f" <= {value}",
+        SearchType.EXACT.value: f" = '{value}'",
+        SearchType.CONTAINS.value: f" like '%{value}%'",
+        SearchType.CASE_SENSITIVE.value: f" like '{value}'",
+        SearchType.STARTS_WITH.value: f" like '{value}%'",
+        SearchType.ENDS_WITH.value: f" like '%{value}'",
+        SearchType.GREATER_THAN.value: f" > {value}",
+        SearchType.GREATER_OR_EQUALS_THAN.value: f" >= {value}",
+        SearchType.SMALLER_THAN.value: f" < {value}",
+        SearchType.SMALLER_OR_EQUALS_THAN.value: f" <= {value}",
     }
     return column + value_by_how[how_to_search]
 
 
 def get_node_class_bel_name_ns():
+    """Return node class, BEL name, and namespace."""
     default_args = ('bel', 'node_name', 'namespace', 'node_class', 'how_bel', 'how_name')
     args = {x: '' for x in default_args}
     filtered_request_args = {k: v for k, v in request.args.items() if k in default_args}
@@ -362,12 +367,12 @@ def _get_suggested_node_names(bel: str, node_name: str, node_class: str, namespa
         where.append(_get_where_by_how('bel', bel, how_bel))
 
     sql += ' and '.join(where) + " group by name order by name limit 30"
-    # print(sql)
+
     return [x.oRecordData['name'] for x in Bel().execute(sql)]
 
 
 def _get_node_namespace_list(bel: str, node_name: str, namespace: str, node_class: str, how_name: str, how_bel: str):
-    """Get first names from BEL nodes (by namespace and node_class)"""
+    """Get first names from BEL nodes (by namespace and node_class)."""
     if not namespace:
         node_class = node_class if node_class else 'bel'
         sql = f"Select namespace from {node_class} where namespace is not null "
@@ -388,7 +393,7 @@ def _get_node_namespace_list(bel: str, node_name: str, namespace: str, node_clas
 
 def _get_node_class_list(bel: str, node_name: str, node_class: str, namespace: str, how_name: str, how_bel):
     if not node_class:
-        sql = f"Select @class.asString() as node_class from bel"
+        sql = "Select @class.asString() as node_class from bel"
         where = []
         if node_name or namespace or bel:
             if node_name:
@@ -410,20 +415,21 @@ def _get_node_class_list(bel: str, node_name: str, node_class: str, namespace: s
 
 
 def get_namespaces():
-    """Get ordered list of namespaces"""
+    """Get ordered list of namespaces."""
     sql = "Select distinct(namespace) as namespace from bel where namespace is not null order by namespace"
     print(sql)
     return [x.oRecordData['namespace'] for x in Bel().execute(sql)]
 
 
 def get_node_classes():
-    """Get ordered list of node classes"""
+    """Get ordered list of node classes."""
     sql = "Select distinct(@class) as node_class from bel order by node_class"
     print(sql)
     return [x.oRecordData['node_class'] for x in Bel().execute(sql)]
 
 
 def get_bel_relations_by_pmid():
+    """Return BEL relations by PMID."""
     columns: List[Column] = [
         Column('subject_rid', 'out.@rid'),
         Column('subject_node_class', 'out.@class'),
@@ -480,17 +486,20 @@ def get_edge_rids():
 
 
 def get_annotation_keys():
-    sql = """Select value as annotation_key, count(*) as number_of_edges from 
-          (Select expand(annotation.keys()) as mesh from bel_relation 
+    """Return annotation keys."""
+    sql = """Select value as annotation_key, count(*) as number_of_edges from
+          (Select expand(annotation.keys()) as mesh from bel_relation
           where annotation.mesh is not null) group by value order by number_of_edges desc"""
     return [x.oRecordData for x in Bel().execute(sql)]
 
 
 def get_mesh_terms_statistics_by_node_rid():
+    """Return MeSH term stats by node rID."""
     rid = request.args.get('node_rid')
     direction = request.args.get('direction')
     limit = request.args.get('limit')
-    sql = f"Select list(annotation.mesh) as mesh_terms from (traverse {direction}E() FROM {rid} MAXDEPTH 1) where @rid!={rid} and annotation.mesh is not null"
+    sql = f"""Select list(annotation.mesh) as mesh_terms FROM
+    (traverse {direction}E() FROM {rid} MAXDEPTH 1) where @rid!={rid} and annotation.mesh is not null"""
     res = Bel().query_get_dict(sql)
     if 'mesh_terms' in res[0]:
         res_dict = Counter(res[0]['mesh_terms'])
@@ -501,6 +510,7 @@ def get_mesh_terms_statistics_by_node_rid():
 
 
 def get_annotation_terms():
+    """Get the annotation terms."""
     annotation_key = request.args.get('annotation_key')
     if annotation_key:
         sql = "Select value as annotation_term, count(*) as number_of_edges from " \
@@ -574,6 +584,7 @@ def _get_rid() -> Optional[str]:
 
 
 def get_edge_statistics_by_rid():
+    """Return edge statistics for given rID."""
     rid = request.args.get('rid')
     direction = request.args.get('direction', 'both')  # in, out or both
     sql = "Select @class, count(*) from (traverse {dir}E() FROM {rid} MAXDEPTH 1) where @rid!={rid} group by @class"
@@ -638,6 +649,7 @@ def get_citation_by_pmid() -> dict:
 
 
 def get_abstract_by_pmid():
+    """Return abstract by PMID."""
     pmid = request.args.get('pmid')
     url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=XML&rettype=abstract"
     r = requests.get(url.format(pmid=pmid))
@@ -676,7 +688,9 @@ class Position(EnumExtension):
     LAST = "last"
     INSIDE = "inside"
 
-class SearchTpye(EnumExtension):
+
+class SearchType(EnumExtension):
+    """SearchType constants."""
     EXACT = 'exact'
     CONTAINS = 'contains'
     CASE_SENSITIVE = 'case_insensitive'
@@ -686,6 +700,7 @@ class SearchTpye(EnumExtension):
     GREATER_OR_EQUALS_THAN = 'greater_or_equals_than'
     SMALLER_THAN = 'smaller_than'
     SMALLER_OR_EQUALS_THAN = 'smaller_or_equals_than'
+
 
 class MatchEdge:
     """Class to construct the edge portions of a MATCH query."""
@@ -767,8 +782,8 @@ class MatchNode:
                     node_class: Optional[str] = None,
                     namespace: Optional[str] = None,
                     bel: Optional[str] = None,
-                    how_name: Optional[str] = SearchTpye.EXACT.value,
-                    how_bel: Optional[str] = SearchTpye.EXACT.value):
+                    how_name: Optional[str] = SearchType.EXACT.value,
+                    how_bel: Optional[str] = SearchType.EXACT.value):
         """Assign attributes to the "outside" position."""
         self.position = position
         if name:
@@ -780,12 +795,11 @@ class MatchNode:
         if bel:
             self.bel = bel
         if how_name:
-            self.how_name = how_name if SearchTpye.has_value(how_name) else SearchTpye.EXACT.value
+            self.how_name = how_name if SearchType.has_value(how_name) else SearchType.EXACT.value
             print("how_name:", how_name, self.how_name)
         if how_bel:
-            self.how_bel = how_bel if SearchTpye.has_value(how_bel) else SearchTpye.EXACT.value
+            self.how_bel = how_bel if SearchType.has_value(how_bel) else SearchType.EXACT.value
             print("how_bel:", how_bel, self.how_bel)
-
 
     def set_inside(self, gene_path: bool, node_class: None):
         """Assign attributes to the "inside" position."""
@@ -1028,7 +1042,8 @@ class PathQuery:
             '<-': {'one_class': ".inE(){{class:{},as:e{}{}}}.outV()", 'multi_class': ".inE({}){{as:e{}{}}}.outV()"},
         }
         re_node_in_box = re.compile(
-            r'^\[\s*(?P<class_name>\w+)(?P<params>(\s+\w+(\.\w+)?(!=|=|>|<|~|\*)(\d+|\d+\.\d+|[\w%]+|"[^"]+"))*)\s*\]$')
+            r'^\[\s*(?P<class_name>\w+)(?P<params>(\s+\w+(\.\w+)?(!=|=|>|<|~|\*)(\d+|\d+\.\d+|[\w%]+|"[^"]+"))*)\s*\]$'
+        )
 
         match_str = 'match '
         for i in range(len(node_strings)):
@@ -1424,6 +1439,7 @@ def get_bel_node_types():
     """Return BEL nodes and their metadata."""
     return get_class_infos_by_parent_name('bel')
 
+
 def get_all_node_types():
     """Return BEL nodes and their metadata."""
     bel_node_types = get_class_infos_by_parent_name('bel')
@@ -1476,7 +1492,7 @@ def get_documents():
         contact_info,
         version,
         licence,
-        date.uploaded as uploaded, 
+        date.uploaded as uploaded,
         copyright,
         keywords.label as keywords,
         file.last_modified as file_last_modified,

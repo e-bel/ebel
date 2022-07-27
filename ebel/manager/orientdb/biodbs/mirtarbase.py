@@ -35,7 +35,8 @@ class MirTarBase(odb_meta.Graph):
 
     def insert_data(self) -> Dict[str, int]:
         """Insert mirtarbase data into database."""
-        # TODO Fix download error - ssl.SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:997)
+        # TODO Fix download error -
+        #  ssl.SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:997)
         df = pd.read_excel(self.file_path)
         df.columns = self._standardize_column_names(df.columns)
         df.index += 1

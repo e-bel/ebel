@@ -962,7 +962,6 @@ class Graph(abc.ABC):
 
     def update_pmids(self, edge_name='bel_relation'):
         """Update PMID metadata for all edges of the specified edge_name."""
-
         sql_missing_citations = """Select distinct(pmid)
                                     as pmid from {}
                                     where
@@ -989,7 +988,7 @@ class Graph(abc.ABC):
                     updated += self._query_ncbi(pmid_chunk, edge_name)
 
                 except KeyError as e:
-                    logger.error(f"KeyError occurred during parsing. See logs for full description.")
+                    logger.error("KeyError occurred during parsing. See logs for full description.")
                     logger.info(e)
 
         return updated

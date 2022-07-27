@@ -233,6 +233,7 @@ class GeneGroupName(Base):
         return self.name
 
     def as_dict(self):
+        """Return obj as dict."""
         return object_as_dict(self)
 
 

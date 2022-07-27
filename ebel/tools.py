@@ -162,5 +162,3 @@ def get_disease_trait_keywords_from_config(traits: Union[str, list] = None, over
         traits = traits.split(",")
 
     return traits if traits is not None else []
-
-

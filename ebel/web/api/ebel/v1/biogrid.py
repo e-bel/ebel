@@ -135,7 +135,11 @@ def get_biogrid_by_pmid() -> List[dict]:
         List[dict]: List[BioGrid entry]
     """
     pmid = request.args.get('pmid')
-    publication_id = RDBMS.get_session().query(Publication.id).filter_by(source='PUBMED', source_identifier=pmid).first()[0]
+    publication_id = RDBMS.get_session().query(
+        Publication.id
+    ).filter_by(
+        source='PUBMED', source_identifier=pmid
+    ).first()[0]
     biogrid_entry = RDBMS.get_session().query(Biogrid).filter_by(publication_id=publication_id).all()
     return [x.as_dict() for x in biogrid_entry]
 
@@ -224,7 +228,11 @@ def get_biogrid() -> dict:
         query = query.filter_by(experimental_system_id=experimental_system_id)
 
     if req.modification:
-        modification_id = RDBMS.get_session().query(Modification.id).filter_by(modification=req.modification).first()[0]
+        modification_id = RDBMS.get_session().query(
+            Modification.id
+        ).filter_by(
+            modification=req.modification
+        ).first()[0]
         query = query.filter_by(modification_id=modification_id)
 
     if req.source:

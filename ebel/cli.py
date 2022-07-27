@@ -50,6 +50,7 @@ def validate(bel_script_path: str, line_by_line: bool, reports: str,
 @click.option('-n', '--new_file_path', default=None,
               help='Path to write repaired file to. If none passed, will overwrite original file.')
 def repair(bel_script_path: str, new_file_path: str):
+    """Repair the BEL file for common delimiters and line separations."""
     repair_bel_file(bel_script_path, new_file_path)
 
 

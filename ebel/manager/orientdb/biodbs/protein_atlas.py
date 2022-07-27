@@ -122,12 +122,13 @@ class ProteinAtlas(odb_meta.Graph):
         return self.__insert_table(protein_atlas.ProteinAtlasRnaMouseBrainAllen)
 
     def get_tissues_by_ensembl_id(self, ensembl_gene_id):
+        """Return tissues for a given ensembl ID."""
         level_exixs = protein_atlas.ProteinAtlasNormalTissue.level.in_(['Medium', 'High', 'Low'])
         columns = (
-            protein_atlas.ProteinAtlasNormalTissue.tissue, 
-            protein_atlas.ProteinAtlasNormalTissue.cell_type, 
+            protein_atlas.ProteinAtlasNormalTissue.tissue,
+            protein_atlas.ProteinAtlasNormalTissue.cell_type,
             protein_atlas.ProteinAtlasNormalTissue.level
-            )
+        )
         data = [x for x in self.session.query(*columns).filter(level_exixs).filter_by(gene=ensembl_gene_id,
                                                                                       reliability='Approved')]
         tissues = {}
@@ -144,19 +145,19 @@ class ProteinAtlas(odb_meta.Graph):
     def update_interactions(self) -> int:
         """Update edges with Protein Atlas metadata (human)."""
         # TODO: implement also for other species
-        match = """Select 
-                @rid.asString() as rid, 
+        match = """Select
+                @rid.asString() as rid,
                 hgnc.@rid.asString() as hgnc_id,
                 hgnc.ensembl_gene_id as ensembl_gene_id,
                 namespace,
                 name,
                 uniprot,
                 label
-            from protein 
-            where 
-                pure=true and 
-                namespace='HGNC' and 
-                both('bel_relation').size()>=1 and 
+            from protein
+            where
+                pure=true and
+                namespace='HGNC' and
+                both('bel_relation').size()>=1 and
                 hgnc.ensembl_gene_id IS NOT NULL"""
 
         rid_ensembl_gene_ids = {x.oRecordData['ensembl_gene_id']: x for x in self.execute(match)}
@@ -187,9 +188,11 @@ class ProteinAtlas(odb_meta.Graph):
                 location_bel = f'loc({ns_location}:"{tissue}")'
                 bel = f'p({ns}:"{name}",{location_bel})'
                 value_dict_located.update(bel=bel)
-                protein_located_rid = self.get_create_rid(class_name='protein',
-                                                  value_dict=value_dict_located,
-                                                  check_for='bel')
+                protein_located_rid = self.get_create_rid(
+                    class_name='protein',
+                    value_dict=value_dict_located,
+                    check_for='bel'
+                )
 
                 self.create_edge(class_name='has_located_protein',
                                  from_rid=pure_protein['rid'],
@@ -200,9 +203,11 @@ class ProteinAtlas(odb_meta.Graph):
                     location_rid = location_rid_cache[location_bel]
                 else:
                     location_rid = self.get_create_rid(class_name='location',
-                                                       value_dict={'namespace': ns_location, 
-                                                                   'name': tissue, 
-                                                                   'bel': location_bel},
+                                                       value_dict={
+                                                           'namespace': ns_location,
+                                                           'name': tissue,
+                                                           'bel': location_bel
+                                                       },
                                                        check_for='bel')
                     location_rid_cache[location_bel] = location_rid
 

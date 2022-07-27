@@ -116,24 +116,24 @@ def _get_comparison_groups_by_genes(gene_1, gene_2):
         'experiment_identifier',
         'is_positive_correlated'
     ]
-    sql = f"""Select 
-        a.log2foldchange, 
-        b.log2foldchange, 
-        gc.name, 
-        e.title, 
-        e.name, 
-        if(((a.log2foldchange>0 and b.log2foldchange>0) or (a.log2foldchange<0 and b.log2foldchange<0)),1,0) 
-    from (Select 
-            group_comparison_id, 
-            log2foldchange 
-        from 
-            expression_atlas_foldchange where gene_name = '{gene_1}') a 
-    inner join (Select 
-            group_comparison_id, 
-            log2foldchange 
-        from expression_atlas_foldchange where gene_name = '{gene_2}') b 
-    using(group_comparison_id) 
-    inner join expression_atlas_group_comparison gc on (gc.id=group_comparison_id) 
+    sql = f"""Select
+        a.log2foldchange,
+        b.log2foldchange,
+        gc.name,
+        e.title,
+        e.name,
+        if(((a.log2foldchange>0 and b.log2foldchange>0) or (a.log2foldchange<0 and b.log2foldchange<0)),1,0)
+    from (Select
+            group_comparison_id,
+            log2foldchange
+        from
+            expression_atlas_foldchange where gene_name = '{gene_1}') a
+    inner join (Select
+            group_comparison_id,
+            log2foldchange
+        from expression_atlas_foldchange where gene_name = '{gene_2}') b
+    using(group_comparison_id)
+    inner join expression_atlas_group_comparison gc on (gc.id=group_comparison_id)
     inner join expression_atlas_experiment e on (e.id = gc.experiment_id)
     order by (a.log2foldchange + b.log2foldchange) desc"""
     with Bel().engine.connect() as con:
@@ -141,8 +141,9 @@ def _get_comparison_groups_by_genes(gene_1, gene_2):
 
 
 def get_comparison_groups_by_edge_rid():
+    """Use edge rIDs to get different groups to compare."""
     rid = request.args.get('edge_rid')
-    res = Bel().query_get_dict(f"""Select 
+    res = Bel().query_get_dict(f"""Select
                                     in.name as name_in,
                                     in.namespace as ns_in,
                                     out.name as name_out,
@@ -178,6 +179,7 @@ def get_comparison_groups_by_edge_rid():
 
 
 def get_expression_atlas():
+    """Get EA results."""
     columns = [
         Experiment.name,
         GroupComparison.name,
@@ -201,13 +203,13 @@ def get_expression_atlas():
     limit = int(data['page_size']) if data.get('page_size') else 10
     page = int(data['page']) if data.get('page') else 1
     count = query.count()
-    query = query.limit(limit).offset(limit * (page-1))
+    query = query.limit(limit).offset(limit * (page - 1))
 
     print(query.statement.compile(compile_kwargs={"literal_binds": True}))
     column_names = [f"{x.parent.class_.__tablename__}.{x.name}" for x in [inspect(c) for c in columns]]
     return {
         'page': page,
-        'pages': math.ceil(count/limit),
+        'pages': math.ceil(count / limit),
         'count': count,
         'page_size': limit,
         'column_names': column_names,

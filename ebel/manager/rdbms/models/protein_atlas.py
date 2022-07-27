@@ -147,7 +147,9 @@ class ProteinAtlasRnaMouseBrainAllen(Base):
 
     def as_dict(self):
         """Convert object values to dictionary."""
-        return {'gene': self.gene,
-                'gene_name': self.gene_name,
-                'brain_region': self.brain_region,
-                'expression_energy': self.expression_energy}
+        return {
+            'gene': self.gene,
+            'gene_name': self.gene_name,
+            'brain_region': self.brain_region,
+            'expression_energy': self.expression_energy
+        }

@@ -37,7 +37,11 @@ def get_compound_name_by_name_starts_with(name: str):
     dict
         Names and CHEBI IDs.
     """
-    query = RDBMS.get_session().query(chebi.Compound.id, chebi.Compound.name).filter(chebi.Compound.name.like(f"{name}%"))
+    query = RDBMS.get_session().query(
+        chebi.Compound.id, chebi.Compound.name
+    ).filter(
+        chebi.Compound.name.like(f"{name}%")
+    )
     return {x.name: x.id for x in query.all()}
 
 
@@ -78,7 +82,9 @@ def get_compound_by_other_db_accession(accession_number: str, db_name: str = Non
         query_filter.append(chebi.DatabaseAccession.type == db_name)
     chebi_ids_rs = RDBMS.get_session().query(chebi.DatabaseAccession.compound_id).filter(*query_filter).all()
     chebi_ids = {x[0] for x in chebi_ids_rs}
-    return [x.as_dict() for x in RDBMS.get_session().query(chebi.Compound).filter(chebi.Compound.id.in_(chebi_ids)).all()]
+    return [
+        x.as_dict() for x in RDBMS.get_session().query(chebi.Compound).filter(chebi.Compound.id.in_(chebi_ids)).all()
+    ]
 
 
 def get_compound_reference():
@@ -126,7 +132,7 @@ def get_bel_chebi_ids():
     paras = {k: v for k, v in dict(request.args.copy()).items() if k in ['namespace', 'name', 'chebi']}
     if paras:
         query += " AND " + ' AND '.join([f"{k} like '{v.strip()}'" for k, v in paras.items()])
-    
+
     print(query)
     return {
         'page': p.page,

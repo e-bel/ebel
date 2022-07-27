@@ -11,17 +11,20 @@ from ebel.tools import _get_connection_string
 
 
 class RDBMS:
+    """Representation of the RDBMS."""
     engine = None
     session = None
 
     @staticmethod
     def get_engine():
+        """Return the RDBMS engine."""
         if not RDBMS.engine:
             RDBMS.engine = create_engine(_get_connection_string())
         return RDBMS.engine
 
     @staticmethod
     def get_session():
+        """Return the RDBMS session."""
         if not RDBMS.session:
             engine = RDBMS.get_engine()
             if not database_exists(engine.url):

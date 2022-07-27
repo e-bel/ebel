@@ -32,7 +32,6 @@ def set_configuration(name: str = None,
                       drugbank_user: str = None,
                       drugbank_password: str = None) -> dict:
     """Set configuration values."""
-
     odb_class_attribs = {
         'name': name,
         'user': user,
@@ -141,7 +140,7 @@ def user_config_setup(config_exists: bool = True) -> dict:
 
     old_configs_odb = old_configs.get(DEFAULT_ODB, {})
     orientdb_configs = {
-        'name': (f"OrientDB database name (created if not exists)",
+        'name': ("OrientDB database name (created if not exists)",
                  old_configs_odb.get('name', 'ebel'), r'^[A-Za-z]\w{2,}$', False, True),
         'user': ("OrientDB user (admin) name (created if not exists)",
                  old_configs_odb.get('user', 'ebel_user'), r'^[A-Za-z]\w{2,}$', False, True),
@@ -216,11 +215,11 @@ def __user_orientdb_setup():
 
 def __user_rdbms_setup(prev_conn: str) -> str:
     """The initial setup process for the RDBMS."""
-    db_choice = input("""e(BE:L) requires some basic information in order to begin importing data and building a 
-Knowledge Graph. The nodes and edges compiled from BEL statements are imported into OrientDB while the information 
+    db_choice = input("""e(BE:L) requires some basic information in order to begin importing data and building a
+Knowledge Graph. The nodes and edges compiled from BEL statements are imported into OrientDB while the information
 parsed from external repositories is stored in a more traditional relational database and uses either SQLite or MySQL.
 
-While SQLite is easier to set up and does not require installing additional software, MySQL is the recommended 
+While SQLite is easier to set up and does not require installing additional software, MySQL is the recommended
 option due to the amount of information that will be imported.
 
 MySQL/SQLite [MySQL]: """) or "mysql"
@@ -235,12 +234,12 @@ MySQL/SQLite [MySQL]: """) or "mysql"
     else:  # MySQL
         db_conn = __mysql_setup(prev_conn)
 
-    print(f"Database set. Connection string can be changed using `ebel set_connection` or `ebel set_mysql`")
+    print("Database set. Connection string can be changed using `ebel set_connection` or `ebel set_mysql`")
     return db_conn
 
 
 def __mysql_setup(old_sa_con_str: str) -> str:
-    """Set up the MySQL/MariaDB connection and return the conenction string"""
+    """Set up the MySQL/MariaDB connection and return the conenction string."""
     print(f"\n{TF.HEADER}MySQL/MariaDB settings{TF.RESET}")
 
     old_mysql = {}
@@ -270,36 +269,36 @@ def __mysql_setup(old_sa_con_str: str) -> str:
     mysql_random_password = ''.join(random.sample(string.ascii_letters, 12))
     mysql_passed_question = f"{TF.QUESTION}MySQL/MariaDB password for user{TF.RESET} " \
                             f"{TF.DEFAULT_VALUE}[{mysql_random_password}]: {TF.RESET}"
-    mysql_passwd = getpass(mysql_passed_question).strip() or mysql_random_password
+    mysql_pwd = getpass(mysql_passed_question).strip() or mysql_random_password
 
     default_mysql_db = old_mysql.get('mysql_db') or 'ebel'
     mysql_db_question = f"{TF.QUESTION}MySQL/MariaDB database name{TF.RESET} " \
                         f"{TF.DEFAULT_VALUE}[{default_mysql_db}]: {TF.RESET}"
     mysql_db = input(mysql_db_question).strip() or default_mysql_db
 
-    db_conn = f"mysql+pymysql://{mysql_user}:{quote(mysql_passwd)}@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
+    db_conn = f"mysql+pymysql://{mysql_user}:{quote(mysql_pwd)}@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
 
     try:
-        pymysql.connect(host=mysql_host, user=mysql_user, password=mysql_passwd, db=mysql_db)
+        pymysql.connect(host=mysql_host, user=mysql_user, password=mysql_pwd, db=mysql_db)
 
     except pymysql.err.OperationalError:
         mysql_root_passwd = getpass(f"{TF.QUESTION}MySQL root password (will be not stored) "
                                     f"to create database and user: {TF.RESET}")
         print(mysql_host, 'root', mysql_root_passwd)
         cursor = pymysql.connect(host=mysql_host, user='root', password=mysql_root_passwd).cursor()
-        db_exists = cursor.execute(f"show databases like %s", mysql_db)
+        db_exists = cursor.execute("show databases like %s", mysql_db)
         if not db_exists:
             cursor.execute(f"CREATE DATABASE {mysql_db} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci")
         else:
             print(f"Database {mysql_db} already exists.")
 
-        user_exists = cursor.execute(f"Select 1 from mysql.user where User=%s", mysql_user)
+        user_exists = cursor.execute("Select 1 from mysql.user where User=%s", mysql_user)
 
         if user_exists:
             print("USer already exists, will be recreated")
             cursor.execute(f"DROP USER '{mysql_user}'@'%'")
             cursor.execute("FLUSH PRIVILEGES")
-        sql = f"CREATE USER '{mysql_user}'@'%' IDENTIFIED BY '{mysql_passwd}'"
+        sql = f"CREATE USER '{mysql_user}'@'%' IDENTIFIED BY '{mysql_pwd}'"
         print(sql)
         cursor.execute(sql)
         cursor.execute("FLUSH PRIVILEGES")

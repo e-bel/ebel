@@ -17,6 +17,7 @@ nm_tables = {
 
 
 def get_uniprot_advanced():
+    """Get uniprot results using advanced joins."""
     data = json.loads(request.data)
     up = uniprot.Uniprot
     return_columns = (
@@ -27,23 +28,29 @@ def get_uniprot_advanced():
         uniprot.GeneSymbol.symbol,
         uniprot.Organism.scientific_name
     )
-    query = RDBMS.get_session().query(up).outerjoin(uniprot.Function).outerjoin(uniprot.GeneSymbol).outerjoin(uniprot.Organism)
+    query = RDBMS.get_session().query(up).outerjoin(
+        uniprot.Function
+    ).outerjoin(
+        uniprot.GeneSymbol
+    ).outerjoin(
+        uniprot.Organism
+    )
     already_joined_models = (up, uniprot.Function, uniprot.GeneSymbol, uniprot.Organism)
 
     for table, columns in data.items():
-    
+
         if table not in ('page', 'page_size', 'number_of_results'):
             model = model_by_tablename.get(table)
             values_exists = any([x.get('value') for x in columns.values()])
             if model and model not in already_joined_models and values_exists:
-    
+
                 if table in nm_tables:
                     query = query.outerjoin(nm_tables[table])
-    
+
                 query = query.outerjoin(model)
             if values_exists:
                 query = add_query_filters(query, columns, model)
-    
+
     query = query.with_entities(*return_columns)
     query = query.group_by(up.id)
     return _get_paginated_query_result(query, return_dict=True, print_sql=True)

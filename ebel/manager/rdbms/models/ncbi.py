@@ -30,6 +30,7 @@ class NcbiGeneInfo(Base):
     gene_ids_left = relationship("NcbiGeneOnLeft", foreign_keys='NcbiGeneOnLeft.gene_id', back_populates="gene")
     gene_ids_overlapping = relationship("NcbiGeneOverlapping", foreign_keys='NcbiGeneOverlapping.gene_id',
                                         back_populates="gene")
+
     def as_dict(self):
         """Convert object values to dictionary."""
         rdict = object_as_dict(self, ['description_id'])

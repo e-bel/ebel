@@ -163,7 +163,9 @@ def get_drug2pmod() -> dict:
         Column('target', 'target__bel', 'bel', OrientDbSqlOperator.LIKE),
         Column('target', 'target__label', 'label', OrientDbSqlOperator.LIKE),
         Column('target', 'target__uniprot', 'uniprot', OrientDbSqlOperator.LIKE),
-        Column('target', 'target__reactome_pathways', 'reactome_pathways', OrientDbSqlOperator.IN, DataType.LIST_STRING),
+        Column(
+            'target', 'target__reactome_pathways', 'reactome_pathways', OrientDbSqlOperator.IN, DataType.LIST_STRING
+        ),
         Column('pmod', 'pmod__amino_acid', 'amino_acid', OrientDbSqlOperator.LIKE),
         Column('pmod', 'pmod__name', 'name', OrientDbSqlOperator.LIKE),
         Column('pmod', 'pmod__namespace', 'namespace', OrientDbSqlOperator.LIKE),

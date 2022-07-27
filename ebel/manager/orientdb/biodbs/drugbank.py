@@ -369,7 +369,8 @@ class DrugBank(odb_meta.Graph):
 
         inserted = 0
 
-        sql = "Select @rid.asString() as rid, uniprot from protein where pure=true and uniprot IS NOT NULL AND namespace = 'HGNC'"
+        sql = """Select @rid.asString() as rid, uniprot FROM protein
+        WHERE pure=true and uniprot IS NOT NULL AND namespace = 'HGNC'"""
         for row in tqdm(self.execute(sql), desc=f"Update {self.biodb_name.upper()} interaction."):
             r = row.oRecordData
             protein_rid, uniprot = r['rid'], r['uniprot']

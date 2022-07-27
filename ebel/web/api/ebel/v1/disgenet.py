@@ -85,7 +85,7 @@ def get_ebel_has_snp_disgenet():
     where.update({k: v for k, v in request.args.items() if k in edge_properties})
 
     sql = f"""SELECT
-        @rid.asString() as rid, 
+        @rid.asString() as rid,
         @class as relation,
         in.rs_number as snp_rs_number,
         in.@rid.asString() as snp_rid,
