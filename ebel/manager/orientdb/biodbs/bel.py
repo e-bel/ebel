@@ -4,7 +4,7 @@ import logging
 
 from tqdm import tqdm
 from collections import namedtuple
-from typing import Iterable, Union, Set, Dict
+from typing import Iterable, Union, Set, Dict, Optional
 from pyorientdb.exceptions import PyOrientCommandException
 
 from ebel.manager.orientdb.odb_meta import Graph
@@ -67,13 +67,31 @@ class Bel(Graph):
     __ncbi = None
     __protein_atlas = None
 
-    def __init__(self):
-        """Init method for Bel class."""
+    def __init__(self, graph_config: Optional[dict] = None, overwrite_config: bool = False):
+        """Interface for OrientDB database.
+
+        Bel objects allow the user to interact with the different modules in OrientDB and execute queries.
+
+        Parameters
+        ----------
+        graph_config : Optional[dict]
+            If passed, uses the defined parameters for connecting to OrientDB. The dictionary should take the form:
+            {
+                "user": <ODB username>,
+                "password": <ODB password>,
+                "db": <ODB database name>,
+                "server": <Server ODB is running on (defaults to 'localhost')>,
+                "port": <Port ODB is running on (defaults to '2424')
+            }
+        overwrite_config : bool
+            Default False. If True, and graph configuration parameters are passed, overwrites the default values in the
+            configuration file with the passed values.
+        """
         generics = odb_structure.bel_generics
         nodes = odb_structure.bel_nodes
         edges = odb_structure.bel_edges
         indices = odb_structure.bel_indices
-        Graph.__init__(self, generics, nodes, edges, indices)
+        super().__init__(generics, nodes, edges, indices, config_params=graph_config, overwrite_config=overwrite_config)
 
     @property
     def protein_atlas(self) -> ProteinAtlas:

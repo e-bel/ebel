@@ -49,24 +49,18 @@ class ExceptionClassNotExists(Exception):
 class Graph(abc.ABC):
     """Generic parent class for BioDBs."""
 
-    odb_name = None
-    odb_user = None
-    odb_password = None
-    odb_server = None
-    odb_port = None
-    odb_user_reader = None
-    odb_user_reader_password = None
-    # Root password should not be set, but can be
-    _odb_root_password = None
-
-    def __init__(self,
-                 generics: Tuple[Generic] = (),
-                 nodes: Tuple[Node] = (),
-                 edges: Tuple[Edge] = (),
-                 indices: Tuple[OIndex] = (),
-                 urls: dict = None,
-                 biodb_name: str = '',
-                 tables_base=None):
+    def __init__(
+            self,
+            generics: Tuple[Generic] = (),
+            nodes: Tuple[Node] = (),
+            edges: Tuple[Edge] = (),
+            indices: Tuple[OIndex] = (),
+            urls: dict = None,
+            biodb_name: str = '',
+            tables_base=None,
+            config_params: Optional[dict] = None,
+            overwrite_config: bool = False,
+    ):
         """Init method."""
         self.generic_classes: Tuple[OClass] = generics
         self.node_classes: Tuple[OClass] = nodes
@@ -77,22 +71,34 @@ class Graph(abc.ABC):
         self.urls = urls if urls else {}
         self.biodb_name = biodb_name
 
+        self.odb_db_name = config_params['db'] if config_params and 'db' in config_params else None
+        self.odb_user = config_params['user'] if config_params and 'user' in config_params else None
+        self.odb_password = config_params['password'] if config_params and 'password' in config_params else None
+        self.odb_server = config_params['server'] if config_params and 'server' in config_params else 'localhost'
+        self.odb_port = config_params['port'] if config_params and 'port' in config_params else '2424'
+        self.odb_user_reader = None
+        self.odb_user_reader_password = None
+        # Root password should not be set, but can be
+        self._odb_root_password = None
+
         # Set the client
         config_dict = get_config_as_dict()
 
-        credentials = {"name": self.odb_name,
-                       "user": self.odb_user,
-                       "password": self.odb_password,
-                       "server": self.odb_server or "localhost",
-                       "port": int(self.odb_port or "2424"),
-                       "root_password": self._odb_root_password}
+        credentials = {
+            "name": self.odb_db_name,
+            "user": self.odb_user,
+            "password": self.odb_password,
+            "server": self.odb_server,
+            "port": int(self.odb_port),
+            "root_password": self._odb_root_password
+        }
 
         # If values are passed
         if all(credentials.values()):
             #  If there is no "DEFAULT_ODB" section in the configuration file, then write these values to it
             if DEFAULT_ODB not in config_dict:
                 for option, value in credentials.items():
-                    if "root" not in option:  # Don't want to write root to config file
+                    if "root" not in option and overwrite_config:  # Don't want to write root to config file
                         write_to_config(section=DEFAULT_ODB, option=option, value=value)
 
             self.set_configuration_parameters()
@@ -150,7 +156,7 @@ class Graph(abc.ABC):
         """Set configuration for OrientDB database client instance using configuration file or passed params."""
         odb_config = get_config_as_dict().get(DEFAULT_ODB)
 
-        self.odb_name = self.odb_name or odb_config.get('name')
+        self.odb_db_name = self.odb_db_name or odb_config.get('name')
         self.odb_user = self.odb_user or odb_config.get('user')
         self.odb_password = self.odb_password or odb_config.get('password')
         self.odb_server = self.odb_server or odb_config.get('server')
@@ -163,7 +169,7 @@ class Graph(abc.ABC):
 
     def get_client(self) -> OrientDB:
         """Attempts to connect to the OrientDB client. This is currently done by using session tokens."""
-        client = ebel.database.get_orientdb_client(self.odb_server, self.odb_port, self.odb_name, self.odb_user,
+        client = ebel.database.get_orientdb_client(self.odb_server, self.odb_port, self.odb_db_name, self.odb_user,
                                                    self.odb_password, self._odb_root_password, self.odb_user_reader,
                                                    self.odb_user_reader_password)
 
@@ -933,7 +939,7 @@ class Graph(abc.ABC):
             for pmid_sublist in chunks(pmids_with_missing_pmc, size=200):
                 pmid_string = ','.join([str(x) for x in pmid_sublist])
                 url_filled = default_urls.PMID_NCBI.format(pmid_string)
-    
+
                 api_query_response = requests.get(url_filled)
                 pmcids_json = json.loads(api_query_response.text)
 
