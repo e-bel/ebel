@@ -239,25 +239,35 @@ def _write_report(reports: Union[Iterable[str], str], result: dict, report_type:
 
     for report in reports:
         if report.endswith('.csv'):
-            df.to_csv(report)
+            df.to_csv(report, index=False)
 
         if report.endswith('.xls'):
-            df.to_excel(report)
+            try:
+                df.to_excel(report, index=False)
+
+            except ValueError:
+                logger.warning("Max Excel sheet size exceeded. Writing to CSV instead.")
+                df.to_csv(report, index=False)
 
         if report.endswith('.xlsx'):
-            df.to_excel(report, engine='xlsxwriter')
+            try:
+                df.to_excel(report, engine='xlsxwriter', index=False)
+
+            except ValueError:
+                logger.warning("Max Excel sheet size exceeded. Writing to CSV instead.")
+                df.to_csv(report, index=False)
 
         if report.endswith('.tsv'):
-            df.to_csv(report, sep='\t')
+            df.to_csv(report, sep='\t', index=False)
 
         if report.endswith('.json'):
-            df.to_json(report)
+            df.to_json(report, index=False)
 
         if report.endswith('.txt'):
-            open(report, "w").write(df.to_string())
+            open(report, "w").write(df.to_string(index=False))
 
         if report.endswith('.html'):
-            df.to_html(report)
+            df.to_html(report, index=False)
 
         if report.endswith('.md'):
             cols = df.columns
