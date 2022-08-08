@@ -35,6 +35,7 @@ def get_orientdb_client(server: str, port: int, name: str, user: str, password: 
                         root_password: Optional[str] = None, user_reader: Optional[str] = None,
                         user_reader_password: Optional[str] = None) -> OrientDB:
     """Attempts to connect to the OrientDB client. This is currently done by using session tokens."""
+    # TODO PyOrientStorageException occurs with newer ODB versions
     client = OrientDB(server, port)
 
     # First try connect as admin user if this fails connect root_user from config,
