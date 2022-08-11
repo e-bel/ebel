@@ -13,7 +13,7 @@ from ebel.manager.orientdb.importer import _BelImporter
 from ebel.manager.orientdb import odb_meta, odb_structure
 from ebel.manager.orientdb.odb_defaults import bel_func_short
 from ebel.manager.orientdb.constants import DRUGBANK, EXPRESSION_ATLAS, HGNC, CHEBI, ENSEMBL, GWAS_CATALOG, CLINVAR, \
-    UNIPROT, REACTOME, STRINGDB, INTACT, BIOGRID, MIRTARBASE, PATHWAY_COMMONS, DISGENET, KEGG, IUPHAR, OFFSIDES, \
+    UNIPROT, REACTOME, STRINGDB, INTACT, BIOGRID, MIRTARBASE, PATHWAY_COMMONS, DISGENET, KEGG, IUPHAR, NSIDES, \
     CLINICAL_TRIALS, PROTEIN_ATLAS, NCBI
 
 from ebel.manager.orientdb.biodbs.hgnc import Hgnc
@@ -21,6 +21,7 @@ from ebel.manager.orientdb.biodbs.kegg import Kegg
 from ebel.manager.orientdb.biodbs.ncbi import Ncbi
 from ebel.manager.orientdb.biodbs.chebi import Chebi
 from ebel.manager.orientdb.biodbs.intact import IntAct
+from ebel.manager.orientdb.biodbs.nsides import Nsides
 from ebel.manager.orientdb.biodbs.iuphar import Iuphar
 from ebel.manager.orientdb.biodbs.clinvar import ClinVar
 from ebel.manager.orientdb.biodbs.uniprot import UniProt
@@ -30,7 +31,6 @@ from ebel.manager.orientdb.biodbs.disgenet import DisGeNet
 from ebel.manager.orientdb.biodbs.reactome import Reactome
 from ebel.manager.orientdb.biodbs.stringdb import StringDb
 from ebel.manager.orientdb.biodbs.drugbank import DrugBank
-from ebel.manager.orientdb.biodbs.offsides import Offsides
 from ebel.manager.orientdb.biodbs.mirtarbase import MirTarBase
 from ebel.manager.orientdb.biodbs.gwas_catalog import GwasCatalog
 from ebel.manager.orientdb.biodbs.protein_atlas import ProteinAtlas
@@ -63,7 +63,7 @@ class Bel(Graph):
     __ensembl = None
     __iuphar = None
     __chebi = None
-    __offsides = None
+    __nsides = None
     __ncbi = None
     __protein_atlas = None
 
@@ -241,11 +241,11 @@ class Bel(Graph):
         return self.__chebi
 
     @property
-    def offsides(self) -> Offsides:
-        """Create an OFFSIDES object."""
-        if not isinstance(self.__offsides, Offsides):
-            self.__offsides = Offsides()
-        return self.__offsides
+    def nsides(self) -> Nsides:
+        """Create an NSIDES object."""
+        if not isinstance(self.__nsides, Nsides):
+            self.__nsides = Nsides()
+        return self.__nsides
 
     def import_json(self,
                     input_path: Union[str, Iterable[str]],
@@ -368,7 +368,7 @@ class Bel(Graph):
             KEGG: self.kegg,
             DRUGBANK: self.drugbank,
             IUPHAR: self.iuphar,
-            OFFSIDES: self.offsides,
+            NSIDES: self.nsides,
             CLINICAL_TRIALS: self.clinical_trials,
             PROTEIN_ATLAS: self.protein_atlas,
             NCBI: self.ncbi,

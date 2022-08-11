@@ -1,18 +1,18 @@
-"""OffSIDES API methods."""
+"""nSIDES API methods."""
 
 from flask import request
 
-from ebel.manager.rdbms.models.offsides import Offsides
+from ebel.manager.rdbms.models.nsides import Nsides
 from ebel.web.api.ebel.v1 import _get_data, _get_paginated_ebel_query_result
 
 
-def get_offsides():
-    """Get generic OffSIDES entry."""
-    return _get_data(Offsides)
+def get_nsides():
+    """Get generic NSIDES entry."""
+    return _get_data(Nsides)
 
 
 def get_ebel_relation():
-    """Get OFFSIDES related eBEL relations."""
+    """Get NSIDES related eBEL relations."""
     conf = {
         'drugbank_id': "out.drugbank_id",
         'drug_label': "out.label",

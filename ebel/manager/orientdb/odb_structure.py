@@ -838,7 +838,7 @@ kegg_edges: Tuple[Edge, ...] = (
 )
 
 ##############################################################################
-# OffSides definitions
+# NSides definitions
 ##############################################################################
 
 side_effect = Node('side_effect', (ebel,), props=(
@@ -846,11 +846,11 @@ side_effect = Node('side_effect', (ebel,), props=(
     OProperty('condition_meddra_id', ODataType.STRING, node_view_sub_label=True),
 ))
 
-offsides_nodes: Tuple[Node, ...] = (
+nsides_nodes: Tuple[Node, ...] = (
     side_effect,
 )
 
-offsides_edges: Tuple[Edge] = (
+nsides_edges: Tuple[Edge] = (
     Edge('has_side_effect', (ebel_relation,), props=(
         OProperty('prr', ODataType.FLOAT),
         OProperty('mean_reporting_frequency', ODataType.FLOAT),
@@ -868,7 +868,7 @@ nodes: Tuple[Node, ...] = (bel_nodes
                            + reactome_nodes
                            + clinvar_nodes
                            + disgenet_nodes
-                           + offsides_nodes)
+                           + nsides_nodes)
 
 edges: Tuple[Edge, ...] = (bel_edges
                            + intact_edges
@@ -882,7 +882,7 @@ edges: Tuple[Edge, ...] = (bel_edges
                            + clinvar_edges
                            + disgenet_edges
                            + kegg_edges
-                           + offsides_edges)
+                           + nsides_edges)
 
 nodes_and_edges: Tuple[OClass, ...] = nodes + edges
 

@@ -7,6 +7,7 @@ import os
 import random
 import socket
 import time
+
 from abc import abstractmethod
 from collections import defaultdict, OrderedDict
 from http.client import RemoteDisconnected
@@ -18,16 +19,20 @@ from urllib.request import urlopen, Request
 import numpy as np
 import pandas as pd
 import requests
-import sqlalchemy as sqla
 import xmltodict
+import sqlalchemy as sqla
+from sqlalchemy.sql.schema import Table
+from sqlalchemy_utils import database_exists, create_database
+
 from pyorientdb import OrientDB, orient
 from pyorientdb.exceptions import PyOrientIndexException, PyOrientCommandException, PyOrientSecurityAccessException
 from pyorientdb.otypes import OrientRecord
-from sqlalchemy.sql.schema import Table
+
 from tqdm import tqdm
 
 import ebel.database
 from ebel.constants import RID, DEFAULT_ODB
+from ebel.cache import set_mysql_interactive
 from ebel.manager.orientdb import urls as default_urls
 from ebel.manager.orientdb.odb_structure import OClass, OIndex, OProperty, Edge, Generic, Node
 from ebel.tools import BelRdb, get_file_path, chunks, get_standard_name
@@ -81,6 +86,25 @@ class Graph(abc.ABC):
         # Root password should not be set, but can be
         self._odb_root_password = None
 
+        self.__config_params_check(overwrite_config)
+        self.client: OrientDB = self.get_client()
+
+        self.create_all_classes()
+        self.cluster_ids = {}
+
+        rdb = BelRdb()
+        self.engine = rdb.engine
+        self.session = rdb.session
+
+        if not database_exists(self.engine.url):
+            if str(self.engine.url).startswith("mysql"):
+                set_mysql_interactive()
+
+            else:
+                create_database(self.engine.url)
+
+    def __config_params_check(self, overwrite_config: bool = False):
+        """Go through passed/available configuration params."""
         # Set the client
         config_dict = get_config_as_dict()
 
@@ -112,15 +136,6 @@ class Graph(abc.ABC):
             missing_params = ", ".join({key for key, val in credentials.items() if val is None})
             raise ValueError(f"Please provide initial configuration parameters. Missing parameters: {missing_params}")
             # logger.error(f"Please provide initial configuration parameters. Missing parameters: {missing_params}")
-
-        self.client: OrientDB = self.get_client()
-
-        self.create_all_classes()
-        self.cluster_ids = {}
-
-        rdb = BelRdb()
-        self.engine = rdb.engine
-        self.session = rdb.session
 
     def execute(self, command_str: str) -> List[OrientRecord]:
         """Execute a command directly in the OrientDB server.
@@ -201,8 +216,10 @@ class Graph(abc.ABC):
         logger.info(f"Clear generics for {self.biodb_name}")
         if self.generic_classes:
             self.clear_generics()
+
         if self.tables_base:
             self.recreate_tables()
+
         try:
             inserted = self.insert_data()
             logger.info(f"Successfully inserted data for {self.biodb_name}")

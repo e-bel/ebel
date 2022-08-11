@@ -5,7 +5,7 @@ import requests
 
 from ..constants import test_client
 from ebel.manager.orientdb.constants import DRUGBANK, HGNC, CHEBI, ENSEMBL, GWAS_CATALOG, CLINVAR, UNIPROT, REACTOME, \
-    STRINGDB, INTACT, BIOGRID, MIRTARBASE, PATHWAY_COMMONS, DISGENET, KEGG, IUPHAR, OFFSIDES, CLINICAL_TRIALS, \
+    STRINGDB, INTACT, BIOGRID, MIRTARBASE, PATHWAY_COMMONS, DISGENET, KEGG, IUPHAR, NSIDES, CLINICAL_TRIALS, \
     PROTEIN_ATLAS, NCBI
 
 bel = test_client
@@ -62,7 +62,7 @@ class TestUrls:
             KEGG: bel.kegg,
             DRUGBANK: bel.drugbank,
             IUPHAR: bel.iuphar,
-            OFFSIDES: bel.offsides,
+            NSIDES: bel.nsides,
             CLINICAL_TRIALS: bel.clinical_trials,
             PROTEIN_ATLAS: bel.protein_atlas,
             NCBI: bel.ncbi,

@@ -93,8 +93,8 @@ class TestEnrich:
         assert isinstance(updated, int)
         assert updated == 3
 
-    def test_offsides_enrich(self):
-        updated = bel.offsides.update_bel()
+    def test_nsides_enrich(self):
+        updated = bel.nsides.update_bel()
         assert isinstance(updated, int)
         assert updated == 297
 

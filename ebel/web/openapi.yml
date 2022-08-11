@@ -40,7 +40,7 @@ info:
     12. [KEGG](#/KEGG) (genomes, biological pathways, diseases, drugs, and chemical substances) [&#128279;](https://www.genome.jp/kegg/)
     13. [miRTarBase](#/miRTarBase) (experimentally validated microRNA-target interactions) [&#128279;](http://mirtarbase.cuhk.edu.cn/php/index.php)
     14. [NCBI Gene](#/NCBI%20Gene) NCBI Gene data
-    15. [Offsides](#/Offsides) (Drug side effects) [&#128279;](http://tatonettilab.org/offsides/)
+    15. [NSIDES](#/NSIDES) (Drug side effects) [&#128279;](https://nsides.io/)
     16. [Pathway Commons](#/Pathway%20Commons) (public pathway and interactions databases) [&#128279;](https://www.pathwaycommons.org/)
     17. [Human Protein Atlas](#/Protein%20Atlas) (protein expression database) [&#128279;](https://www.proteinatlas.org/)
     18. [Reactome](#/Reactome) (biological pathways) [&#128279;](https://reactome.org/)
@@ -130,10 +130,10 @@ tags:
     description: Infos on genes from NCBI
     externalDocs:
       url: https://www.ncbi.nlm.nih.gov/gene
-  - name: Offsides
+  - name: NSIDES
     description: Drug side effects
     externalDocs:
-      url: http://tatonettilab.org/offsides/
+      url: https://nsides.io/
   - name: Pathway Commons 
     description: public pathway and interactions databases
     externalDocs:
@@ -4981,17 +4981,17 @@ paths:
                 type: object
 
   ########################################################################################################################
-  # OffSides
+  # NSIDES
   ########################################################################################################################
 
-  /api/v1/offsides/ebel/relation:
+  /api/v1/nsides/ebel/relation:
     get:
-      operationId: ebel.web.api.ebel.v1.offsides.get_ebel_relation
+      operationId: ebel.web.api.ebel.v1.nsides.get_ebel_relation
       tags:
-        - Offsides
+        - NSIDES
         - e(BE:L)
-      summary: Offsides entries
-      description: Offsides entries
+      summary: NSIDES entries
+      description: NSIDES entries
       parameters:
         - name: drugbank_id
           description: DrugBank ID
@@ -5043,19 +5043,19 @@ paths:
             example: 1              
       responses:
         200:
-          description: List of Offsides entries
+          description: List of NSIDES entries
           content:
             application/json:
               schema:
                 type: object 
 
-  /api/v1/offsides:
+  /api/v1/nsides:
     get:
-      operationId: ebel.web.api.ebel.v1.offsides.get_offsides
+      operationId: ebel.web.api.ebel.v1.nsides.get_nsides
       tags:
-        - Offsides
-      summary: Offsides entries
-      description: Offsides entries
+        - NSIDES
+      summary: NSIDES entries
+      description: NSIDES entries
       parameters:
         - name: drug_rxnorn_id
           description: RxNorm CUI (RxCUI) of each drug
@@ -5141,7 +5141,7 @@ paths:
             example: 1              
       responses:
         200:
-          description: List of Offsides entries
+          description: List of NSIDES entries
           content:
             application/json:
               schema:

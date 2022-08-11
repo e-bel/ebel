@@ -39,12 +39,13 @@ def set_mysql_interactive() -> tuple:
 
     if root_pwd:
         root_host = getpass.getpass(prompt='IP or name mysql server [localhost]:') or 'localhost'
-        conn = pymysql.connect(root_host, 'root', root_pwd)
+        conn = pymysql.connect(host=root_host, user="root", password=root_pwd)
         c = conn.cursor()
         db_exists = c.execute("show databases like '{}'".format(db))
 
         if not db_exists:
             c.execute("CREATE DATABASE {} CHARACTER SET utf8 COLLATE utf8_bin".format(db))
+
         else:
             logger.warning(f"Database '{db}' already exists!")
 

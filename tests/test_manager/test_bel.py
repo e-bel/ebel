@@ -42,7 +42,7 @@ class TestBel:
         assert hasattr(bel, 'ensembl')
         assert hasattr(bel, 'iuphar')
         assert hasattr(bel, 'chebi')
-        assert hasattr(bel, 'offsides')
+        assert hasattr(bel, 'nsides')
         assert hasattr(bel, 'ncbi')
         assert hasattr(bel, 'protein_atlas')
 
