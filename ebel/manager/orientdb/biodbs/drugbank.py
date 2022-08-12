@@ -189,16 +189,18 @@ class DrugBank(odb_meta.Graph):
 
                     # TODO: implement reactions, ... (check xsd/xml)
 
-                drugbank_instance = drugbank.Drugbank(references=references,
-                                                      synonyms=synonyms,
-                                                      targets=targets,
-                                                      external_identifiers=external_identifiers,
-                                                      product_names=product_names,
-                                                      drug_interactions=drug_interactions,
-                                                      statuses=statuses,
-                                                      patents=patents,
-                                                      pathways=pathways,
-                                                      **drug)
+                drugbank_instance = drugbank.Drugbank(
+                    references=references,
+                    synonyms=synonyms,
+                    targets=targets,
+                    external_identifiers=external_identifiers,
+                    product_names=product_names,
+                    drug_interactions=drug_interactions,
+                    statuses=statuses,
+                    patents=patents,
+                    pathways=pathways,
+                    **drug
+                )
                 self.session.add(drugbank_instance)
                 # insert in chunks of ...
                 if drug_index % 100 == 0:
@@ -351,7 +353,8 @@ class DrugBank(odb_meta.Graph):
         rows = self.execute("Select drugbank_id, @rid.asString() as rid  from drug")
         return {x.oRecordData['drugbank_id']: x.oRecordData[RID] for x in rows}
 
-    def _replace_new_lines(self, input_string: str) -> str:
+    @staticmethod
+    def _replace_new_lines(input_string: str) -> str:
         if input_string and input_string.strip():
             return input_string.strip().replace('\r\n', '<br>').replace('\n', '<br>')
         return input_string
