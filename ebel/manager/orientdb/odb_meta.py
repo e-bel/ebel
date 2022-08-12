@@ -955,7 +955,7 @@ class Graph(abc.ABC):
             id_dict = dict()
             for pmid_sublist in chunks(pmids_with_missing_pmc, size=200):
                 pmid_string = ','.join([str(x) for x in pmid_sublist])
-                url_filled = default_urls.PMID_NCBI.format(pmid_string)
+                url_filled = default_urls.NCBI_PMID.format(pmid_string)
 
                 api_query_response = requests.get(url_filled)
                 pmcids_json = json.loads(api_query_response.text)
@@ -1020,7 +1020,7 @@ class Graph(abc.ABC):
         nameset = {'LastName', 'Initials'}
 
         start_time = time.time()
-        url = default_urls.MESH_NCBI + ",".join([str(x) for x in pmid_chunk])
+        url = default_urls.NCBI_MESH + ",".join([str(x) for x in pmid_chunk])
         xml_pubmed = requests.get(url)
         parsed_data = xmltodict.parse(xml_pubmed.text)
 
