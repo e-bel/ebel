@@ -16,7 +16,7 @@ from ebel.manager.orientdb import odb_meta, urls, odb_structure
 from ebel.manager.rdbms.models import nsides
 
 logger = logging.getLogger(__name__)
-
+pd.options.mode.chained_assignment = None
 
 class Nsides(odb_meta.Graph):
     """Drug side effects and drug-drug interactions were mined from publicly available data.
@@ -90,7 +90,7 @@ class Nsides(odb_meta.Graph):
         combined_df.to_sql(
             nsides.Nsides.__tablename__,
             self.engine,
-            if_exists='append',
+            if_exists='replace',
             chunksize=10000
         )
         return {self.biodb_name: combined_df.shape[0]}
@@ -109,14 +109,15 @@ class Nsides(odb_meta.Graph):
 
         df.rename(columns={  # Rename columns to match OFFSIDES
             "rxnorm_ids": "drug_rxnorn_id",
-            "concept_name": "drug_concept_name",
+            "concept_name": "condition_concept_name",
             "meddra_id": "condition_meddra_id",
-            "ingredients": "condition_concept_name",
+            "ingredients": "drug_concept_name",
         }, inplace=True)
 
         # Keep rows with only 1 ingredient/drug
-        pruned_df = df[df.condition_concept_name.apply(lambda x: len(x.split(",")) == 1)]
-        pruned_df.loc[:, "source"] = "onsides"
+        single_value_mask = df['drug_concept_name'].apply(lambda x: len(x.split(",")) == 1)
+        pruned_df = df.loc[single_value_mask]
+        pruned_df["source"] = "onsides"
         return pruned_df
 
     def update_bel(self) -> int:
