@@ -854,7 +854,7 @@ nsides_edges: Tuple[Edge] = (
     Edge('has_side_effect', (ebel_relation,), props=(
         OProperty('prr', ODataType.FLOAT),
         OProperty('mean_reporting_frequency', ODataType.FLOAT),
-    ), in_out=(side_effect, drug_db)),
+    ), in_out=(side_effect, drug)),
 )
 
 ##############################################################################

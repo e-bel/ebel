@@ -148,8 +148,8 @@ class Nsides(odb_meta.Graph):
             o.mean_reporting_frequency
         """
 
-        drugbank_ids = self.query_class('drug', columns=['drugbank_id'])
-        drugbank_id_rids = {d['drugbank_id']: d[RID] for d in drugbank_ids}
+        drugbank_ids = self.query_class('drug', columns=['db_id'])
+        drugbank_id_rids = {d['db_id']: d[RID] for d in drugbank_ids}
 
         side_effects = self.query_class('side_effect', columns=['condition_meddra_id'])
         side_effect_rids = {d['condition_meddra_id']: d[RID] for d in side_effects}
