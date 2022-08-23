@@ -1,16 +1,6 @@
 # See: https://docs.readthedocs.io/en/latest/yaml-config.html
 version: 2
 
-formats:
-  - epub
-  - pdf
-
-python:
-  version: "3.7"
-  install:
-    - requirements: docs/doc_requirements.txt
-    - method: pip
-      path: .
-      extra_requirements:
-        - docs
-  system_packages: true
+mkdocs:
+  configuration: mkdocs.yml
+  fail_on_warning: false

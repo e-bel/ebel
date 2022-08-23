@@ -1,5 +1,0 @@
-numpydoc
-sphinxcontrib-openapi
-sphinx-click
-mistune
-pyorientdb
