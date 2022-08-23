@@ -1,5 +1,5 @@
 numpydoc
 sphinxcontrib-openapi
 sphinx-click
-mistune==0.8.4
+mistune
 pyorientdb
