@@ -6,11 +6,5 @@ cache: pip
 services:
   - docker
 
-# Install docker push README plugin
-before_install:
-  - curl -L -o docker-pushrm https://github.com/christian-korneck/docker-pushrm/releases/download/v1.9.0/docker-pushrm_linux_amd64
-  - mv docker-pushrm $HOME/.docker/cli-plugins/docker-pushrm
-  - chmod +x $HOME/.docker/cli-plugins/docker-pushrm
-
 # Run docker_push script
 script: sh docker_push.sh

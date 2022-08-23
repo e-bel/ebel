@@ -20,5 +20,5 @@ then
   docker build . -t cebelin/ebel:latest -t cebelin/ebel:"$CURRENT_VERSION"
   docker image push cebelin/ebel:latest
   docker image push cebelin/ebel:"$CURRENT_VERSION"
-  docker pushrm cebelin/ebel
+#  docker pushrm cebelin/ebel
 fi
