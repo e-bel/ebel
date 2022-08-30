@@ -8,6 +8,9 @@ repo_url: https://github.com/e-bel/ebel
 
 theme: readthedocs
 
+extra:
+    version: 1.0.18
+
 nav:
     - Home: index.md
 #    - Getting Started: ../README.rst
