@@ -1339,7 +1339,7 @@ class Graph(abc.ABC):
             return 0
         else:
             class_name = class_name if class_name is not None else 'V'
-            return self.execute(f"Delete VERTEX {class_name} where both().size() = 0")[0]
+            return self.execute(f"Delete VERTEX {class_name} where both.size() = 0")[0]
 
     def get_pure_symbol_rids_dict_in_bel_context(self, class_name='protein', namespace='HGNC') -> Dict[str, str]:
         """Return dictionary with HGNC names as key and OrientDB @rid as value.
