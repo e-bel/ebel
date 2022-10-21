@@ -238,51 +238,55 @@ def _write_report(reports: Union[Iterable[str], str], result: dict, report_type:
         reports = reports.split(",")
 
     for report in reports:
-        if report.endswith('.csv'):
-            df.to_csv(report, index=False)
-
-        if report.endswith('.xls'):
-            try:
-                df.to_excel(report, index=False)
-
-            except ValueError:
-                logger.warning("Max Excel sheet size exceeded. Writing to CSV instead.")
+        try:
+            if report.endswith('.csv'):
                 df.to_csv(report, index=False)
 
-        if report.endswith('.xlsx'):
-            try:
-                df.to_excel(report, engine='xlsxwriter', index=False)
+            if report.endswith('.xls'):
+                try:
+                    df.to_excel(report, index=False)
 
-            except ValueError:
-                logger.warning("Max Excel sheet size exceeded. Writing to CSV instead.")
-                df.to_csv(report, index=False)
+                except ValueError:
+                    logger.warning("Max Excel sheet size exceeded. Writing to CSV instead.")
+                    df.to_csv(report, index=False)
 
-        if report.endswith('.tsv'):
-            df.to_csv(report, sep='\t', index=False)
+            if report.endswith('.xlsx'):
+                try:
+                    df.to_excel(report, engine='xlsxwriter', index=False)
 
-        if report.endswith('.json'):
-            df.to_json(report, index=False)
+                except ValueError:
+                    logger.warning("Max Excel sheet size exceeded. Writing to CSV instead.")
+                    df.to_csv(report, index=False)
 
-        if report.endswith('.txt'):
-            open(report, "w").write(df.to_string(index=False))
+            if report.endswith('.tsv'):
+                df.to_csv(report, sep='\t', index=False)
 
-        if report.endswith('.html'):
-            df.to_html(report, index=False)
+            if report.endswith('.json'):
+                df.to_json(report, index=False)
 
-        if report.endswith('.md'):
-            cols = df.columns
-            df2 = pd.DataFrame([['---', ] * len(cols)], columns=cols)
+            if report.endswith('.txt'):
+                open(report, "w").write(df.to_string(index=False))
 
-            if df.hint.dtype == np.str:
-                df.hint = df.hint.str.replace(r'\|', '&#124;')
+            if report.endswith('.html'):
+                df.to_html(report, index=False)
 
-            if df.entry.dtype == np.str:
-                df.entry = df.entry.str.replace(r'\|', '&#124;')
+            if report.endswith('.md'):
+                cols = df.columns
+                df2 = pd.DataFrame([['---', ] * len(cols)], columns=cols)
 
-            df.url = [("[url](" + str(x) + ")" if not pd.isna(x) else '') for x in df.url]
-            url_template = "[%s](" + report.split(".bel.")[0] + ".bel?expanded=true&viewer=simple#L%s)"
-            df.line_number = [url_template % (x, x) for x in df.line_number]
-            df3 = pd.concat([df2, df])
-            df3.to_csv(report, sep="|", index=False, quoting=csv.QUOTE_NONE, escapechar="\\")
+                if df.hint.dtype == np.str:
+                    df.hint = df.hint.str.replace(r'\|', '&#124;')
+
+                if df.entry.dtype == np.str:
+                    df.entry = df.entry.str.replace(r'\|', '&#124;')
+
+                df.url = [("[url](" + str(x) + ")" if not pd.isna(x) else '') for x in df.url]
+                url_template = "[%s](" + report.split(".bel.")[0] + ".bel?expanded=true&viewer=simple#L%s)"
+                df.line_number = [url_template % (x, x) for x in df.line_number]
+                df3 = pd.concat([df2, df])
+                df3.to_csv(report, sep="|", index=False, quoting=csv.QUOTE_NONE, escapechar="\\")
+
+        except PermissionError:
+            logger.error("Previous version of error report is still open and cannot be overwritten. Unable to update.")
 
     return reports
