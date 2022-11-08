@@ -37,7 +37,7 @@ STRING_NAMES = "https://stringdb-static.org/download/protein.info.v11.0/9606.pro
 
 # Pathway DBs #
 KEGG_PATH_LIST = "http://rest.kegg.jp/list/pathway/hsa"
-PATHWAY_COMMONS = "https://www.pathwaycommons.org/archives/PC2/v12/PathwayCommons12.Detailed.hgnc.txt.gz"
+PATHWAY_COMMONS = "https://www.pathwaycommons.org/archives/PC2/v13/PathwayCommons13.Detailed.hgnc.txt.gz"
 REACTOME = "https://reactome.org/download/current/UniProt2Reactome.txt"
 # TODO: Import from Reactome MySQL
 # REACTOME MySQL has a strange database structure and no controlled vocabulary, reactions are not classified
