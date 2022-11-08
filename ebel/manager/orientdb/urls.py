@@ -26,8 +26,7 @@ GWAS_CATALOG = "https://www.ebi.ac.uk/gwas/api/search/downloads/full"
 
 # PPIs #
 BIND = "https://www.bindingdb.org/bind/downloads/BindingDB_All_2018m7.tsv.zip"
-BIOGRID = "https://downloads.thebiogrid.org/Download/BioGRID/Release-Archive/\
-BIOGRID-4.4.211/BIOGRID-ALL-4.4.211.tab3.zip"
+BIOGRID = "https://downloads.thebiogrid.org/Download/BioGRID/Release-Archive/BIOGRID-4.4.215/BIOGRID-ALL-4.4.215.tab3.zip"
 INTACT = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact.zip"
 STITCH = "http://stitch.embl.de/download/protein_chemical.links.transfer.v5.0.tsv.gz"
 
