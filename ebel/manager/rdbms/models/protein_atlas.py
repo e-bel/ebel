@@ -76,14 +76,14 @@ class ProteinAtlasRnaTissueConsensus(Base):
     gene = Column(String(100), index=True)
     gene_name = Column(String(100), index=True)
     tissue = Column(String(100), index=True)
-    nx = Column(Numeric(8, 1))
+    n_tpm = Column(Numeric(8, 1))
 
     def as_dict(self):
         """Convert object values to dictionary."""
         return {'gene': self.gene,
                 'gene_name': self.gene_name,
                 'tissue': self.tissue,
-                'nx': self.nx}
+                'n_tpm': self.nx}
 
 
 class ProteinAtlasRnaBrainGtex(Base):
@@ -97,7 +97,7 @@ class ProteinAtlasRnaBrainGtex(Base):
     brain_region = Column(String(100), index=True)
     tpm = Column(Numeric(8, 1))
     p_tpm = Column(Numeric(8, 1))
-    nx = Column(Numeric(8, 1))
+    n_tpm = Column(Numeric(8, 1))
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -107,7 +107,7 @@ class ProteinAtlasRnaBrainGtex(Base):
             'brain_region': self.brain_region,
             'tpm': self.tpm,
             'p_tpm': self.p_tpm,
-            'nx': self.nx
+            'n_tpm': self.nx
         }
 
 
@@ -122,7 +122,7 @@ class ProteinAtlasRnaBrainFantom(Base):
     brain_region = Column(String(100))
     tags_per_million = Column(String(100))
     scaled_tags_per_million = Column(String(100))
-    nx = Column(String(100))
+    n_tpm = Column(String(100))
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -131,7 +131,7 @@ class ProteinAtlasRnaBrainFantom(Base):
                 'brain_region': self.brain_region,
                 'tags_per_million': self.tags_per_million,
                 'scaled_tags_per_million': self.scaled_tags_per_million,
-                'nx': self.nx}
+                'n_tpm': self.nx}
 
 
 class ProteinAtlasRnaMouseBrainAllen(Base):
