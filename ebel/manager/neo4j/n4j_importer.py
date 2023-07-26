@@ -9,17 +9,15 @@ from tqdm import tqdm
 
 from ebel.manager.constants import normalized_pmod, bel_func_short, NODES, EDGES
 from ebel.manager.neo4j.n4j_structure import node_map, edge_map
-from ebel.manager.neo4j.n4j_meta import Neo4j, Node, Edge
+from ebel.manager.neo4j.n4j_meta import Neo4jClient, Node, Edge
 
 logger = logging.getLogger(__name__)
-
-n4j = Neo4j(uri="bolt://localhost:7687", user="neo4j", password="password")
 
 
 class Neo4jImporter:
     """Importer for Neo4j."""
 
-    def __init__(self, file_path, n4j_client: Neo4j = None):
+    def __init__(self, file_path, n4j_client: Neo4jClient = None):
         """Insert statements and sets from BEL JSON file."""
         self.client = n4j_client
         self.file_path = file_path
@@ -31,9 +29,9 @@ class Neo4jImporter:
 
     def get_node_cache(self):
         """Get all nodes in the database."""
-        cypher = "MATCH (n) RETURN ID(n) AS node_id, labels(n) as labels, n.bel as bel"
+        cypher = "MATCH (n) RETURN ID(n) AS node_id, n.bel as bel"
         nodes = self.client.execute(cypher)
-        node_cache = {(n["bel"], ":".join(sorted(n["labels"]))): n["node_id"] for n in nodes}
+        node_cache = {n["bel"]: n["node_id"] for n in nodes}
         return node_cache
 
     def get_relation_cache(self):
@@ -42,7 +40,7 @@ class Neo4jImporter:
 
         cypher = """MATCH ()-[r]-() RETURN 
 ID(startNode(r)) as subject_id, ID(endNode(r)) as object_id, 
-TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence, r.annotation as annotation"""
+TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence"""
 
         rels = self.client.execute(cypher)
         for entry in rels:
@@ -52,7 +50,7 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence, r.annotation as an
 
         return rel_cache
 
-    def insert(self) -> int:
+    def insert(self) -> tuple[bool, int]:
         """Insert JSON file into Neo4j."""
         with open(self.file_path) as fd:
             bel_python_object = json.load(fd)
@@ -63,9 +61,9 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence, r.annotation as an
 
         document, definitions, stmts_and_sets = bel_python_object
 
-        inserted = self.insert_statements_and_sets(stmts_and_sets['statements_and_sets'])
+        add_edges = self.insert_statements_and_sets(stmts_and_sets['statements_and_sets'])
 
-        return inserted
+        return bool(add_edges), add_edges
 
     def insert_statements_and_sets(self, statements_and_sets: dict) -> int:
         """Insert statement and sets."""
@@ -75,6 +73,8 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence, r.annotation as an
         pmid = 0
         citation_ref = ""
         citation_type = ""
+
+        new_edges = 0
 
         for e in tqdm(statements_and_sets, desc="Insert BEL Statements"):
 
@@ -93,6 +93,7 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence, r.annotation as an
 
                         if citation['type'].lower() == "pubmed" and re.search(r'^\d+$', citation_ref):
                             pmid = citation_ref
+
                         else:
                             pmid = 0
 
@@ -119,51 +120,40 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence, r.annotation as an
                     relation = data[1]['relation']
                     neo4j_relation_class = edge_map[relation]
 
-                    self.insert_bel_edge(annotation, citation, citation_ref, citation_type, evidence, object_id, pmid,
-                                         neo4j_relation_class, subject_id, subj_class, obj_class)
+                    new_edges += self.insert_bel_edge(annotation, citation, evidence, pmid, neo4j_relation_class,
+                                                      subject_id, object_id)
 
-        return len(statements_and_sets)
+        return new_edges
 
     @staticmethod
-    def format_prop(prop_name: str, prop: dict) -> str:
+    def format_prop(prop_name: str, prop: dict) -> dict:
         """Format property dictionary to be Neo4j compliant."""
-        formatted_prop = ""
+        formatted_props = {}
         if prop:
             for key, value in prop.items():
                 suffix = "".join([stem.capitalize() for stem in key.split("_")])  # foo_bar -> FooBar
 
                 if value:
-                    if isinstance(value, str):
-                        new_add = f'{prop_name}{suffix}: "{value}"'
-
-                    elif isinstance(value, set):
-                        new_add = f"{prop_name}{suffix}: {list(value)}"
+                    if isinstance(value, set):
+                        formatted_props[f'{prop_name}{suffix}'] = list(value)
 
                     else:
-                        new_add = f"{prop_name}{suffix}: {value}"
+                        formatted_props[f'{prop_name}{suffix}'] = value
 
-                    if formatted_prop:
-                        formatted_prop += f", {new_add}"
-
-                    else:  # If empty, don't add ", "
-                        formatted_prop += new_add
-
-        return formatted_prop
+        return formatted_props
 
     def insert_bel_edge(
             self,
             annotation: dict,
             citation: dict,
-            citation_ref: str,
-            citation_type: str,
             evidence: str,
-            object_id: int,
             pmid: int,
             relation: str,
             subject_id: int,
-            subject_class: str,
-            object_class: str,
-    ):
+            object_id: int,
+    ) -> int:
+        """Insert BEL edge into Neo4j graph"""
+        inserted = 0
 
         form_anno = self.format_prop(prop_name="annotation", prop=annotation)
         form_citation = self.format_prop(prop_name="citation", prop=citation)
@@ -174,27 +164,24 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence, r.annotation as an
 
         # Need to clean the properties
         evidence = evidence.replace('\n', ' ')
-        citation_ref = citation_ref if citation_ref else None
-        citation_type = citation_type if citation_type else None
 
-        edge_profile = (relation, subject_id, object_id, citation_type, citation_ref, evidence, anno_json)
+        edge_profile = (subject_id, object_id, relation, evidence)
         edge_exists = True if edge_profile in self._cache[EDGES] else False
 
-        edge_props = f'pmid: {pmid}, evidence: "{evidence}"'
-        if form_citation:
-            edge_props += f", {form_citation}"
-
-        if form_anno:
-            edge_props += f", {form_anno}"
+        # edge_props = f'pmid: {pmid}, evidence: "{evidence}"'
+        edge_props = {'pmid': pmid, 'evidence': evidence}
+        edge_props.update(form_citation)
+        edge_props.update(form_anno)
 
         if not edge_exists:
-            cypher = f"""MATCH (subj:{subject_class}), (obj:{object_class}) 
-WHERE id(subj) = {subject_id} AND id(obj) = {object_id}
-CREATE (subj)-[r:{relation} {{{edge_props}}}]->(obj) 
-RETURN id(r) as rel_id"""
+            new_edge = Edge(labels=relation, props=edge_props)
+            record = self.client.merge_edge_by_node_ids(subj_id=subject_id, rel=new_edge, obj_id=object_id)
 
-            record = self.client.execute(cypher)
+            # record = self.client.execute(cypher)
             self._cache[EDGES][edge_profile] = record[0]["rel_id"]
+            inserted += 1
+
+        return inserted
 
     @staticmethod
     def is_function(obj) -> bool:
@@ -208,8 +195,8 @@ RETURN id(r) as rel_id"""
         if isinstance(obj[0], dict) and 'function' in obj[0]:
             node_class = obj[0]['function']['name']
             neo4j_class = node_map[node_class]
-            if (bel, neo4j_class) in self._cache[NODES]:
-                node_id = self._cache[NODES][(bel, neo4j_class)]
+            if bel in self._cache[NODES]:
+                node_id = self._cache[NODES][bel]
 
         return neo4j_class, node_id
 
@@ -219,9 +206,9 @@ RETURN id(r) as rel_id"""
 
         node_labels = set(node_class.split(":"))
         new_node = Node(labels=node_labels, props=params)
-        new_node_id = self.client.create_node(new_node)
+        new_node_id = self.client.merge_node(new_node)
 
-        self._cache[NODES][(bel, node_class)] = new_node_id
+        self._cache[NODES][bel] = new_node_id
         return new_node_id
 
     def get_node_id(self, obj: list) -> tuple[str, str, int]:
@@ -260,10 +247,8 @@ WHERE id(startNode(r)) = {node_id} AND id(endNode(r)) = {child_node_id} RETURN r
 
             exists = self.client.execute(cypher)
             if not exists:
-                new_edge_cypher = f"""MATCH (subj:{neo4j_class}), (obj:{child_neo4j_class}) 
-WHERE id(subj) = {node_id} AND id(obj) = {child_node_id}
-CREATE (subj)-[r:HAS__{child_class.upper()}]->(obj) RETURN r"""
-                self.client.execute(new_edge_cypher)
+                new_edge = Edge(labels=f"HAS__{child_class.upper()}")
+                self.client.merge_edge_by_node_ids(subj_id=node_id, rel=new_edge, obj_id=child_node_id)
 
         return node_class, neo4j_class, node_id
 
@@ -329,9 +314,3 @@ CREATE (subj)-[r:HAS__{child_class.upper()}]->(obj) RETURN r"""
                 params.append(self.get_bel(element, function_name))
 
         return self.get_bel_string(params, parent_function)
-
-
-if __name__ == "__main__":
-    n4j.delete_everything()
-    a = Neo4jImporter(file_path="F:\\scai_git\\bms\\alzheimers.bel.json", n4j_client=n4j)
-    a.insert()
