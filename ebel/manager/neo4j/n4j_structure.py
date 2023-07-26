@@ -1,4 +1,11 @@
-"""Neo4j node and edge structure. Nodes can be given multiple labels, but not edges."""
+"""Neo4j node and edge structure.
+
+These maps are for maintaining backwards compatibility, it allows the eBEL JSONs to be parsed and imported.
+
+NOTE: Nodes can be given multiple labels, but not edges."""
+
+
+ABSTRACT_LABELS = ("BioConcept", "GeneticFlow")
 
 node_map = {
     "abundance": "Abundance",
@@ -10,7 +17,7 @@ node_map = {
     "composite": "Composite",
     "degradation": "Degradation",
     "fragment": "Fragment",
-    "from_location": "FromLocation:Location",
+    "from_location": "FromLocation",
     "fusion": "Fusion",
     "gene": "Gene:GeneticFlow",
     "gmod": "Gmod",
@@ -26,7 +33,7 @@ node_map = {
     "reactants": "Reactants",
     "reaction": "Reaction",
     "rna": "GeneticFlow:Rna",
-    "to_location": "Location:ToLocation",
+    "to_location": "ToLocation",
     "translocation": "Translocation",
     "variant": "Variant"
 }

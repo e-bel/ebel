@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 from neo4j import GraphDatabase
 
-
 Relationship = namedtuple("Relationship", ["subj_id", "edge_id", "obj_id"])
 
 
@@ -30,13 +29,14 @@ def get_cypher_props(props: Optional[dict]):
     if props:
         for k, v in props.items():
             if (isinstance(v, (str, int, list)) and v) or (
-                isinstance(v, float) and not np.isnan(v)
+                    isinstance(v, float) and not np.isnan(v)
             ):
                 cypher_str = f"`{k}`: " + json.dumps(v)
                 props_array.append(cypher_str)
         if props_array:
             props_str = "{" + ", ".join(props_array) + "}"
     return props_str
+
 
 class GraphElement:
     def __init__(self, labels: Union[str, set[str]], props: Optional[dict] = None):
@@ -79,7 +79,8 @@ class Edge(GraphElement):
     def __init__(self, labels: str, props: Optional[dict] = None):
         super().__init__(labels, props)
 
-class Neo4j:
+
+class Neo4jClient:
 
     def __init__(self, uri: str, user: str, password: str, database: Optional[str] = None):
         """Initialize connection to Neo4j database. Defaults to "neo4j" if no database given."""
@@ -139,8 +140,16 @@ class Neo4j:
             MERGE (subject:{subj.cypher_labels} {subj.cypher_props})
             MERGE (object:{obj.cypher_labels} {obj.cypher_props})
             MERGE (subject)-[relation:{rel.cypher_labels} {rel.cypher_props}]->(object)
-            RETURN subject, relation, object"""
+            RETURN subject, relation, object, id(relation) as rel_id"""
         return self.session.run(cypher)
+
+    def merge_edge_by_node_ids(self, subj_id: int, rel: Edge, obj_id: int):
+        """MERGE finds or creates a relationship between the nodes."""
+        cypher = f"""MATCH(subj) WHERE ID(subj)={subj_id} WITH subj 
+MATCH (obj) WITH subj, obj WHERE ID(obj)={obj_id} 
+MERGE (subj)-[relation:{rel.cypher_labels} {rel.cypher_props}]->(obj)
+RETURN subj, relation, obj, id(relation) as rel_id"""
+        return self.execute(cypher)
 
     def delete_edges_by_class(self, edge: Edge) -> int:
         """Delete edges by Edge class."""
@@ -297,15 +306,16 @@ class Neo4j:
         return [x['relationshipType'] for x in self.execute("CALL db.relationshipTypes")]
 
     def create_node_index(
-        self, label: str, prop_name: str, index_name: Optional[str] = None
+            self, label: str, prop_name: str, index_name: Optional[str] = None
     ):
+        """Create an index for a given node label on a specific property."""
         if index_name is None:
             index_name = f"ix_{label}__{prop_name}"
         cypher = f"CREATE INDEX {index_name} IF NOT EXISTS FOR (p:{label}) ON (p.{prop_name})"
         return self.session.run(cypher)
 
     def create_edge_index(
-        self, label: str, prop_name: str, index_name: Optional[str] = None
+            self, label: str, prop_name: str, index_name: Optional[str] = None
     ):
         if index_name is None:
             index_name = f"ix_{label}__{prop_name}"
@@ -317,7 +327,7 @@ class Neo4j:
         return self.session.run(cypher)
 
     def create_unique_constraint(
-        self, label: str, prop_name: str, constraint_name: Optional[str] = None
+            self, label: str, prop_name: str, constraint_name: Optional[str] = None
     ):
         if constraint_name is None:
             constraint_name = f"uid_{label}__{prop_name}"
@@ -325,7 +335,7 @@ class Neo4j:
         return self.session.run(cypher)
 
     def delete_unique_constraint(
-        self, label, prop_name, constraint_name: Optional[str] = None
+            self, label, prop_name, constraint_name: Optional[str] = None
     ):
         if constraint_name is None:
             constraint_name = f"uid_{label}__{prop_name}"
