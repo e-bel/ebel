@@ -29,7 +29,7 @@ class Neo4jImporter:
 
     def get_node_cache(self):
         """Get all nodes in the database."""
-        cypher = "MATCH (n) RETURN ID(n) AS node_id, n.bel as bel"
+        cypher = "MATCH (n) RETURN elementId(n) AS node_id, n.bel as bel"
         nodes = self.client.execute(cypher)
         node_cache = {n["bel"]: n["node_id"] for n in nodes}
         return node_cache
@@ -38,9 +38,9 @@ class Neo4jImporter:
         """Get all relations in the database."""
         rel_cache = {}
 
-        cypher = """MATCH ()-[r]-() RETURN 
-ID(startNode(r)) as subject_id, ID(endNode(r)) as object_id, 
-TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence"""
+        cypher = """MATCH ()-[r]->() RETURN 
+elementId(startNode(r)) as subject_id, elementId(endNode(r)) as object_id, 
+TYPE(r) as relation, elementId(r) as rel_id, r.evidence as evidence"""
 
         rels = self.client.execute(cypher)
         for entry in rels:
@@ -57,7 +57,7 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence"""
 
         if not bel_python_object:  # May be empty JSON
             logger.warning(f"{self.file_path} is empty")
-            return 0
+            return False, 0
 
         document, definitions, stmts_and_sets = bel_python_object
 
@@ -149,8 +149,8 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence"""
             evidence: str,
             pmid: int,
             relation: str,
-            subject_id: int,
-            object_id: int,
+            subject_id: str,
+            object_id: str,
     ) -> int:
         """Insert BEL edge into Neo4j graph"""
         inserted = 0
@@ -211,7 +211,7 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence"""
         self._cache[NODES][bel] = new_node_id
         return new_node_id
 
-    def get_node_id(self, obj: list) -> tuple[str, str, int]:
+    def get_node_id(self, obj: list) -> tuple[str, str, str]:
         """Return node id of obj."""
         if not isinstance(obj, list):
             raise TypeError(f"Expecting list, but get {type(obj)} for {obj}")
@@ -243,7 +243,7 @@ TYPE(r) as relation, ID(r) as rel_id, r.evidence as evidence"""
 
         for child_class, child_neo4j_class, child_node_id in inserted_nodes:
             cypher = f"""MATCH ()-[r:HAS__{child_class.upper()}]->() 
-WHERE id(startNode(r)) = {node_id} AND id(endNode(r)) = {child_node_id} RETURN r"""
+WHERE elementId(startNode(r)) = "{node_id}" AND elementId(endNode(r)) = "{child_node_id}" RETURN r"""
 
             exists = self.client.execute(cypher)
             if not exists:
