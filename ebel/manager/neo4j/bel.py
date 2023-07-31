@@ -134,7 +134,7 @@ class Neo4jBel:
         added = 0
         cypher = f"""MATCH (obj:{to_class} {{pure: true}})
 WHERE NOT EXISTS((:{from_class})-[:{edge_name}]->(obj))
-RETURN id(obj) as obj_id, obj.name as obj_name, obj.namespace as obj_namespace"""
+RETURN elementId(obj) as obj_id, obj.name as obj_name, obj.namespace as obj_namespace"""
 
         results = self.client.execute(cypher)
 
@@ -189,8 +189,8 @@ SET n.pure = true RETURN count(n) as num_pure"""
                         'HAS__VARIANT': "HAS_VARIANT_{}",
                         'HAS__LOCATION': "HAS_LOCATED_{}"}
 
-        cypher = f"""MATCH (subj)-[r:{'|'.join(edge_classes.keys())}]-()
-RETURN id(subj) as node_id, labels(subj) as node_classes, subj.name as node_name, subj.namespace as node_ns,
+        cypher = f"""MATCH (subj)-[r:{'|'.join(edge_classes.keys())}]->()
+RETURN elementId(subj) as node_id, labels(subj) as node_classes, subj.name as node_name, subj.namespace as node_ns,
 type(r) as edge_class"""
 
         results = self.client.execute(cypher)
@@ -236,3 +236,11 @@ type(r) as edge_class"""
             created += 1
 
         return created
+
+
+if __name__ == "__main__":
+    n4j = Neo4jClient("bolt://localhost:7687", user="neo4j", password="password")
+    n4j.delete_everything()
+
+    b = Neo4jBel(client=n4j)
+    b.import_json(input_path="F:\\scai_git\\bms\\parkinsons.bel.json",)

@@ -113,7 +113,7 @@ class Neo4jClient:
     def create_node(self, node: Node) -> int:
         """Create a node with label and properties."""
         cypher = (
-            f"CREATE (n:{node.cypher_labels} {node.cypher_props}) return ID(n) as node_id"
+            f"CREATE (n:{node.cypher_labels} {node.cypher_props}) return elementId(n) as node_id"
         )
         return self.execute(cypher)[0]["node_id"]
 
@@ -122,14 +122,14 @@ class Neo4jClient:
         cypher = f"CREATE (subj:{subj.cypher_labels} {subj.cypher_props})"
         cypher += f"-[edge:{edge.cypher_labels} {edge.cypher_props}]->"
         cypher += f"(obj:{obj.cypher_labels} {obj.cypher_props})" ""
-        cypher += " RETURN ID(subj) as subj_id, ID(edge) as edge_id, ID(obj) as obj_id"
+        cypher += " RETURN elementId(subj) as subj_id, elementId(edge) as edge_id, elementId(obj) as obj_id"
         r = self.session.run(cypher).values()[0]
         return Relationship(*r)
 
     def merge_node(self, node: Node):
         """Create a node with given props if it does not exist."""
         cypher = (
-            f"""MERGE (n:{node.cypher_labels} {node.cypher_props}) return ID(n) as id"""
+            f"""MERGE (n:{node.cypher_labels} {node.cypher_props}) return elementId(n) as id"""
         )
 
         return self.execute(cypher)[0]["id"]
@@ -140,15 +140,15 @@ class Neo4jClient:
             MERGE (subject:{subj.cypher_labels} {subj.cypher_props})
             MERGE (object:{obj.cypher_labels} {obj.cypher_props})
             MERGE (subject)-[relation:{rel.cypher_labels} {rel.cypher_props}]->(object)
-            RETURN subject, relation, object, id(relation) as rel_id"""
+            RETURN subject, relation, object, elementId(relation) as rel_id"""
         return self.session.run(cypher)
 
-    def merge_edge_by_node_ids(self, subj_id: int, rel: Edge, obj_id: int):
+    def merge_edge_by_node_ids(self, subj_id: str, rel: Edge, obj_id: str):
         """MERGE finds or creates a relationship between the nodes."""
-        cypher = f"""MATCH(subj) WHERE ID(subj)={subj_id} WITH subj 
-MATCH (obj) WITH subj, obj WHERE ID(obj)={obj_id} 
+        cypher = f"""MATCH (subj),(obj) 
+WHERE elementId(subj)="{subj_id}" and elementId(obj)="{obj_id}" 
 MERGE (subj)-[relation:{rel.cypher_labels} {rel.cypher_props}]->(obj)
-RETURN subj, relation, obj, id(relation) as rel_id"""
+RETURN subj, relation, obj, elementId(relation) as rel_id"""
         return self.execute(cypher)
 
     def delete_edges_by_class(self, edge: Edge) -> int:
@@ -160,7 +160,7 @@ RETURN subj, relation, obj, id(relation) as rel_id"""
     def delete_edge_by_id(self, edge_id: int):
         """Delete an edge by id."""
         cypher = f"""MATCH ()-[r]->()
-            WHERE r.id = {edge_id}
+            WHERE elementId(r) = "{edge_id}"
             DELETE r"""
         return self.session.run(cypher)
 
@@ -189,7 +189,7 @@ RETURN subj, relation, obj, id(relation) as rel_id"""
         This will throw an error if the node is attached
         to more than one relationship."""
         cypher = f"""MATCH (n)-[r]-()
-            WHERE ID(r) = {edge_id} AND ID(n) = {node_id}
+            WHERE elementId(r) = "{edge_id}" AND elementId(n) = "{node_id}"
             DELETE n, r"""
         return self.session.run(cypher)
 
