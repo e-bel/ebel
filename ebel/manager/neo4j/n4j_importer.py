@@ -27,14 +27,14 @@ class Neo4jImporter:
             EDGES: self.get_relation_cache(),
         }
 
-    def get_node_cache(self):
+    def get_node_cache(self) -> dict[str, str]:
         """Get all nodes in the database."""
         cypher = "MATCH (n) RETURN elementId(n) AS node_id, n.bel as bel"
         nodes = self.client.execute(cypher)
         node_cache = {n["bel"]: n["node_id"] for n in nodes}
         return node_cache
 
-    def get_relation_cache(self):
+    def get_relation_cache(self) -> dict[tuple, str]:
         """Get all relations in the database."""
         rel_cache = {}
 
@@ -253,7 +253,7 @@ WHERE elementId(startNode(r)) = "{node_id}" AND elementId(endNode(r)) = "{child_
         return node_class, neo4j_class, node_id
 
     @staticmethod
-    def get_bel_string(params, function_name=None):
+    def get_bel_string(params, function_name=None) -> str:
         """Get BEL formatted string."""
         bels = []
 
@@ -295,7 +295,7 @@ WHERE elementId(startNode(r)) = "{node_id}" AND elementId(endNode(r)) = "{child_
         else:
             return joined_params
 
-    def get_bel(self, obj, parent_function=None):
+    def get_bel(self, obj, parent_function=None) -> str:
         """Return BEL by python object loaded from JSON."""
         params = []
         function_name = None
