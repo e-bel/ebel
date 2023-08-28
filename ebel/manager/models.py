@@ -98,7 +98,7 @@ class Namespace(Base, MasterModel):
     __table_args__ = (Index("idx_url", "url", mysql_length=100),)
 
     url = Column(String(2048), nullable=False)
-    keyword = Column(String(255, collation="utf8_bin"), index=True)
+    keyword = Column(String(255), index=True)
     cacheable = Column(Boolean)
     case_sensitive = Column(Boolean)
 
@@ -111,7 +111,7 @@ class NamespaceEntry(Base, MasterModel):
     __tablename__ = "namespace_entry"
     __table_args__ = (Index("idx_name", "name", mysql_length=100),)
 
-    name = Column(String(2048, collation="utf8_bin"), nullable=True)
+    name = Column(String(2048), nullable=True)
     encoding = Column(String(8), nullable=True)
 
     namespace__id = foreign_key_to('namespace')
@@ -125,7 +125,7 @@ class Annotation(Base, MasterModel):
     __table_args__ = (Index("idx_url2", "url", mysql_length=100),)
 
     url = Column(String(2048), nullable=False)
-    keyword = Column(String(255, collation="utf8_bin"), index=True)
+    keyword = Column(String(255), index=True)
     cacheable = Column(Boolean)
     case_sensitive = Column(Boolean)
 
@@ -138,8 +138,8 @@ class AnnotationEntry(Base, MasterModel):
     __tablename__ = "annotation_entry"
     __table_args__ = (Index("idx_identifier", "identifier", mysql_length=100),)
 
-    name = Column(String(2048, collation="utf8_bin"), nullable=True)
-    identifier = Column(String(255, collation="utf8_bin"), nullable=True)
+    name = Column(String(2048), nullable=True)
+    identifier = Column(String(255), nullable=True)
 
     annotation__id = foreign_key_to('annotation')
     annotation = relationship('Annotation', back_populates="entries")

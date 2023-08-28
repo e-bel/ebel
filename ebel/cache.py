@@ -44,7 +44,7 @@ def set_mysql_interactive() -> tuple:
         db_exists = c.execute("show databases like '{}'".format(db))
 
         if not db_exists:
-            c.execute("CREATE DATABASE {} CHARACTER SET utf8 COLLATE utf8_bin".format(db))
+            c.execute("CREATE DATABASE {} CHARACTER SET utf8".format(db))
 
         else:
             logger.warning(f"Database '{db}' already exists!")

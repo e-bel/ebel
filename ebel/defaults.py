@@ -42,8 +42,8 @@ CONN_STR_TESTS = 'sqlite:///' + SQLITE_TEST_DATABASE_NAME
 # MySQL
 # -----
 CONN_STR_MYSQL_PREFIX = 'mysql+pymysql://ebel:ebel@localhost/'
-CONN_STR_MYSQL = CONN_STR_MYSQL_PREFIX + 'ebel?charset=utf8_bin'
-CONN_STR_MYSQL_TESTS = CONN_STR_MYSQL_PREFIX + 'ebel_test?charset=utf8_bin'
+CONN_STR_MYSQL = CONN_STR_MYSQL_PREFIX + 'ebel?charset=utf8'
+CONN_STR_MYSQL_TESTS = CONN_STR_MYSQL_PREFIX + 'ebel_test?charset=utf8'
 
 ###############################################################################
 # Config

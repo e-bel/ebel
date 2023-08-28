@@ -78,7 +78,7 @@ class FoldChange(Base):
     id = Column(Integer, primary_key=True)
 
     gene_id = Column(String(255))
-    gene_name = Column(String(100, collation="utf8_bin"), index=True)
+    gene_name = Column(String(100), index=True)
     log2foldchange = Column(Float, index=True)
     p_value = Column(Float, index=True)
     t_statistic = Column(Float)

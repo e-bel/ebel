@@ -114,7 +114,7 @@ class Keyword(Base):
 
     __tablename__ = 'clinical_trials_gov_keyword'
     id = Column(Integer, primary_key=True)
-    keyword = Column(String(255, collation='utf8_bin'), index=True)
+    keyword = Column(String(255), index=True)
     trials = relationship(
         "ClinicalTrialGov",
         secondary=ctg_keyword_n2m,
@@ -172,8 +172,8 @@ class Intervention(Base):
 
     __tablename__ = 'clinical_trials_gov_intervention'
     id = Column(Integer, primary_key=True)
-    intervention_type = Column(String(100, collation='utf8_bin'), index=True)
-    intervention_name = Column(String(255, collation='utf8_bin'), index=True)
+    intervention_type = Column(String(100), index=True)
+    intervention_name = Column(String(255), index=True)
     trials = relationship(
         "ClinicalTrialGov",
         secondary=ctg_intervention_n2m,
