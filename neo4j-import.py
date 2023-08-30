@@ -14,6 +14,6 @@ neo = Neo4jClient(uri="bolt://localhost:7687", database="neo4j", user="neo4j", p
 n4jbel = Neo4jBel(client=neo)
 
 
-n4jbel.import_json([gpt3_5_json])
-#n4jbel.import_json([sherpa_json, gpt3_5_json])
+#n4jbel.import_json([gpt3_5_json])
+n4jbel.import_json([sherpa_json, gpt3_5_json])
 print("Done")
