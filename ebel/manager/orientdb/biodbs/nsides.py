@@ -141,7 +141,7 @@ class Nsides(odb_meta.Graph):
             drugbank_external_identifier as dei on (d.id=dei.drugbank_id) inner join
             nsides as o on (dei.identifier=o.drug_rxnorn_id)
         where
-            d.drugbank_id='{}' and resource='RxCUI' 
+            d.drugbank_id='{}' and resource='RxCUI'
             and (mean_reporting_frequency>=0.01 OR mean_reporting_frequency is NULL)
         group by
             o.condition_meddra_id,
