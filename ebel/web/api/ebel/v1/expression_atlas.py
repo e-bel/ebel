@@ -155,7 +155,7 @@ def get_comparison_groups_by_edge_rid():
                                     annotation,
                                     evidence
                                 from {rid}""")
-    if(res):
+    if res:
         has_all_cols = all([(x in res[0]) for x in ['name_in', 'ns_in', 'name_out', 'ns_out']])
         if has_all_cols:
             both_ns_hgnc = res[0]['ns_in'] == 'HGNC' and res[0]['ns_out'] == 'HGNC'

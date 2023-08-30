@@ -79,14 +79,12 @@ class Iuphar(odb_meta.Graph):
                          true_values=['t'],
                          false_values=['f']).replace({np.nan: None})
 
-        # df['pubmed_id'] = df['pubmed_id'].str.split("|")  # Split synonyms
         df.columns = self._standardize_column_names(df.columns)
         df.rename(columns={'target_uni_prot_id': "target_uniprot",
                            'target_ligand_uni_prot_id': "target_ligand_uniprot_id",
                            'target_ligand_pub_chem_sid': "target_ligand_pubchem_sid",
                            'ligand_pub_chem_sid': "ligand_pubchem_sid",
                            'pub_med_id': "pubmed_id"}, inplace=True)
-        #print(df.columns)
         df.index += 1
         df.index.rename('id', inplace=True)
         df.to_sql(iuphar.IupharInteraction.__tablename__, self.engine, if_exists='append')

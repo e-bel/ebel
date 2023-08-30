@@ -506,7 +506,7 @@ def get_mesh_terms_statistics_by_node_rid():
     res = Bel().query_get_dict(sql)
     if 'mesh_terms' in res[0]:
         res_dict = Counter(res[0]['mesh_terms'])
-        mesh_counter_list = [{'mesh_term': x[0], 'count':x[1]}
+        mesh_counter_list = [{'mesh_term': x[0], 'count': x[1]}
                              for x in sorted(res_dict.items(), key=lambda item: item[1], reverse=True)]
         return mesh_counter_list[:int(limit)] if limit else mesh_counter_list
     return []

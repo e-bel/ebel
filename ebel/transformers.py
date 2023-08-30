@@ -663,7 +663,7 @@ class _BelTransformer(Transformer):
     def _get_dict_value(self, n, key_name):
         """Return value of key_name for first dict with key_name."""
         for e in n:
-            if type(e) == dict and key_name in e:
+            if isinstance(e, dict) and key_name in e:
                 return e[key_name]
 
     def __get_token_dict(self, tokens: typing.List[Token]) -> dict:
@@ -675,7 +675,7 @@ class _BelTransformer(Transformer):
 
         If token_name is a list method checks aginst list.
         """
-        token_names = (token_name,) if type(token_name) == str else token_name
+        token_names = (token_name,) if isinstance(token_name, str) else token_name
         for t in tokens:
             if isinstance(t, Token) and t.type in token_names:
                 return t.value
@@ -713,7 +713,7 @@ class _BelTransformer(Transformer):
             elif isinstance(e, dict) and len(e.keys()) == 1:
                 return e[tree_name]
 
-        raise('type not supported or empty list')
+        raise "Type not supported or empty list"
 
     def _get_all_values_by_name(self, tree_or_tokens, token_name):
         n = tree_or_tokens

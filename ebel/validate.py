@@ -105,7 +105,7 @@ def validate_bel_file(bel_script_path: Union[str, Path],
                 if result["errors"]:
                     if force_json:  # Check for syntax errors
                         bel_syntax_error_present = result['errors'] and any(
-                            [type(error_type) == BelSyntaxError for error_type in result["errors"]]
+                            [isinstance(error_type, BelSyntaxError) for error_type in result["errors"]]
                         )
                         if bel_syntax_error_present:
                             logger.error("Cannot force JSON file due to syntax errors. Please check the BEL file.")
