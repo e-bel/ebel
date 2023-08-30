@@ -452,6 +452,14 @@ class _BelTransformer(Transformer):
     def transl_object(self, n):
         return self.object(n)
 
+    def ortho_subject(self, n):
+        """Return orthologous gene subject."""
+        return self.subject(n)
+
+    def ortho_object(self, n):
+        """Return orthologous gene object."""
+        return self.object(n)
+
     def surf(self, n):
         return [self.nt_type('transformation', 'cell_surface_expression'), n]
 
