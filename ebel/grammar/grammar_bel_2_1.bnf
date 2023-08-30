@@ -45,10 +45,10 @@ statement_comment: "//" WORD_WITHOUT_ESCAPED_NEW_LINE*
 WORD_WITHOUT_ESCAPED_NEW_LINE: /([^\\\n\r](?!\\[\n\r]))+/
 
 statement: ( subject
-	     | ( subject relation_basic object )
+         | ( subject relation_basic object )
 	     | ( subject biomarker_relation _molec_process )
 	     | ( pat process_relation _molec_process )
-	     | ( bio_obj orthologous bio_obj )
+	     | ( gene orthologous_relation gene )
 	     | ( _basic_subobj analogous_relation _basic_subobj )
          | ( transc_subject transc_relation transc_object )
          | ( transl_subject transl_relation transl_object )
@@ -63,6 +63,7 @@ nested_relation: relation_basic
 biomarker_relation: biomarker_for | prognostic_biomarker_for
 process_relation: sub_process_of | rate_limiting_step_of
 analogous_relation: analogous_to
+orthologous_relation: orthologous
 
 transc_subject: gene
 transc_object: rna

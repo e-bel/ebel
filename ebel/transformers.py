@@ -317,6 +317,10 @@ class _BelTransformer(Transformer):
         """Return relation."""
         return self._get_rel(n)
 
+    def orthologous_relation(self, n):
+        """Return orthologous relation."""
+        return self._get_rel(n)
+
     def additional_relations(self, n):
         """Return relation."""
         return self._get_rel(n)

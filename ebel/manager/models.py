@@ -398,7 +398,8 @@ class ModelManager:
                          delimiter=delimiter,
                          skip_blank_lines=True,
                          skiprows=header_ends_in_line,
-                         names=['name', second_column]
+                         names=['name', second_column],
+                         encoding_errors="ignore",
                          )
         df[self.name + '__id'] = model_instance.id
         df.set_index(['name', second_column], inplace=True)
