@@ -123,6 +123,9 @@ TYPE(r) as relation, elementId(r) as rel_id, r.evidence as evidence"""
                     new_edges += self.insert_bel_edge(annotation, citation, evidence, pmid, neo4j_relation_class,
                                                       subject_id, object_id)
 
+                else:
+                    logger.warning(f"The following couldn't be imported {data}")
+
         return new_edges
 
     @staticmethod

@@ -426,7 +426,7 @@ class _BelTransformer(Transformer):
 
     def molec_process(self, n):
         """Return molecular process."""
-        return {'molec_process': self._format_sub_obj(n[0])}
+        return {'object': self._format_sub_obj(n[0])}
 
     def act_or_abundance(self, n):
         """Return activity or abundance."""
