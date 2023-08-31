@@ -438,7 +438,7 @@ class _BelTransformer(Transformer):
 
     def pat(self, n):
         """Return object."""
-        return {'pat': self._format_sub_obj(n[0])}
+        return {'subject': self._format_sub_obj(n[0])}
 
     def transc_subject(self, n):
         return self.subject(n)

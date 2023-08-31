@@ -53,6 +53,7 @@ edge_map = {
     "has_member": "HAS_MEMBER",
     "has_members": "HAS_MEMBERS",
     "has_modification": "HAS_MODIFICATION",
+    "includes": "INCLUDES",
     "increases": "INCREASES",
     "is_a": "IS_A",
     "negative_correlation": "NEGATIVE_CORRELATION",
