@@ -45,7 +45,7 @@ class StringDbProtein(Base):
     __tablename__ = "stringdb_protein"
 
     id = Column(Integer, primary_key=True)
-    protein_external_id = Column(String(50), nullable=False, index=True)
+    string_protein_id = Column(String(50), nullable=False, index=True)
     preferred_name = Column(String(50), nullable=False, index=True)
 
     def as_dict(self):
