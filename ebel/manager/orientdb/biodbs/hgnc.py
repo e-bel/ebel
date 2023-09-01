@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 
 from tqdm import tqdm
-from typing import Dict
+from typing import Dict, Optional
 from pyorientdb import OrientDB
 from collections import namedtuple
 
@@ -19,13 +19,13 @@ from ebel.manager.orientdb import odb_meta, urls, odb_structure
 from ebel.manager.rdbms.models import hgnc
 
 logger = logging.getLogger(__name__)
-HgncEntry4Update = namedtuple("HgncEntrySimple", ['hgnc_rid', 'label', 'location', 'symbol', 'suggested_corrections'])
+HgncEntry4Update = namedtuple("HgncEntry4Update", ['hgnc_rid', 'label', 'location', 'symbol', 'suggested_corrections'])
 
 
 class Hgnc(odb_meta.Graph):
     """HGNC class definition."""
 
-    def __init__(self, client: OrientDB = None):
+    def __init__(self, client: Optional[OrientDB] = None):
         """Init HGNC."""
         self.client = client
         self.biodb_name = HGNC
@@ -83,9 +83,9 @@ class Hgnc(odb_meta.Graph):
         self._standardize_dataframe(df)
         columns = ['hgnc_id', 'version', 'bioparadigms_slc', 'cd', 'cosmic', 'date_approved_reserved', 'date_modified',
                    'date_name_changed', 'date_symbol_changed', 'ensembl_gene_id', 'entrez_id', 'homeodb', 'horde_id',
-                   'imgt', 'intermediate_filament_db', 'iuphar', 'lncipedia', 'lncrnadb',
-                   'location', 'location_sortable', 'locus_group', 'locus_type', 'mamit_trnadb', 'merops', 'mirbase',
-                   'name', 'orphanet', 'pseudogene_org', 'snornabase', 'status', 'symbol', 'ucsc_id', 'uuid',
+                   'imgt', 'iuphar', 'lncipedia', 'lncrnadb',
+                   'location', 'location_sortable', 'locus_group', 'locus_type', 'merops', 'mirbase',
+                   'name', 'orphanet', 'snornabase', 'status', 'symbol', 'ucsc_id', 'uuid',
                    'vega_id', 'agr']
 
         df['id'] = pd.to_numeric(df.hgnc_id.str.split(':').str[1])
@@ -181,7 +181,7 @@ class Hgnc(odb_meta.Graph):
         df.to_sql(table_name, self.engine, chunksize=100000, if_exists='append')
         return df.shape[0]
 
-    def get_basic_entry_by_symbol(self, symbol: str) -> HgncEntry4Update:
+    def get_basic_entry_by_symbol(self, symbol: str) -> Optional[HgncEntry4Update]:
         """Return HgncEntry4Update object."""
         sql_name = """Select
                         @rid.asString() as hgnc_rid,

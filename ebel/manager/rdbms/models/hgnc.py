@@ -27,7 +27,6 @@ class Hgnc(Base):
     homeodb = Column(Integer)
     horde_id = Column(String(50))
     imgt = Column(String(50))
-    intermediate_filament_db = Column(String(50))
     iuphar = Column(String(50))
     kznf_gene_catalog = Column(Integer)
     lncipedia = Column(String(50))
@@ -36,12 +35,10 @@ class Hgnc(Base):
     location_sortable = Column(String(100))
     locus_group = Column(String(50))
     locus_type = Column(String(50))
-    mamit_trnadb = Column(Integer)
     merops = Column(String(20))
     mirbase = Column(String(20))
     name = Column(String(255))
     orphanet = Column(Integer)
-    pseudogene_org = Column(String(50))
     snornabase = Column(String(20))
     status = Column(String(50))
     symbol = Column(String(100), index=True)
@@ -86,7 +83,6 @@ class Hgnc(Base):
             'homeodb': self.homeodb,
             'horde_id': self.horde_id,
             'imgt': self.imgt,
-            'intermediate_filament_db': self.intermediate_filament_db,
             'iuphar': self.iuphar,
             'kznf_gene_catalog': self.kznf_gene_catalog,
             'lncipedia': self.lncipedia,
@@ -95,12 +91,10 @@ class Hgnc(Base):
             'location_sortable': self.location_sortable,
             'locus_group': self.locus_group,
             'locus_type': self.locus_type,
-            'mamit_trnadb': self.mamit_trnadb,
             'merops': self.merops,
             'mirbase': self.mirbase,
             'name': self.name,
             'orphanet': self.orphanet,
-            'pseudogene_org': self.pseudogene_org,
             'snornabase': self.snornabase,
             'status': self.status,
             'symbol': self.symbol,
