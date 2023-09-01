@@ -92,7 +92,7 @@ class _BelImporter:
 
         """
         bel_git_id = None
-        absolute_path = Path(self.file_path)
+        absolute_path = Path(self.file_path).absolute()
 
         if self.file_is_in_git_repo(absolute_path):
             repo = git.Repo(absolute_path, search_parent_directories=True)
@@ -103,11 +103,14 @@ class _BelImporter:
                 protocol, user, origin_url = origin_url_found.groups()
 
             repo_path = absolute_path.as_posix()[len(repo.working_dir) + 1:]
-            commits = list(repo.iter_commits(paths=absolute_path))
+            try:
+                commits = list(repo.iter_commits(paths=str(absolute_path)))
 
-            if commits:
-                commit = commits[0]
-                bel_git_id = BEL_GIT_ID(commit.hexsha, repo_path, origin_url)
+                if commits:
+                    commit = commits[0]
+                    bel_git_id = BEL_GIT_ID(commit.hexsha, repo_path, origin_url)
+            except:
+                print('Not able to get commit info')
 
         if not bel_git_id:
             bel_git_id = BEL_GIT_ID('', '', '')
