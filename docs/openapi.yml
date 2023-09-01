@@ -3405,10 +3405,6 @@ paths:
           in: query
           schema:
             type: string
-        - name: intermediate_filament_db
-          in: query
-          schema:
-            type: string
         - name: iuphar
           in: query
           schema:
@@ -3437,10 +3433,6 @@ paths:
           in: query
           schema:
             type: string
-        - name: mamit_trnadb
-          in: query
-          schema:
-            type: string
         - name: merops
           in: query
           schema:
@@ -3454,10 +3446,6 @@ paths:
           schema:
             type: string
         - name: orphanet
-          in: query
-          schema:
-            type: string
-        - name: pseudogene_org
           in: query
           schema:
             type: string
