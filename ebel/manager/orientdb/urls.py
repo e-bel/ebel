@@ -40,7 +40,7 @@ STITCH = "http://stitch.embl.de/download/protein_chemical.links.transfer.v5.0.ts
 
 # String #
 STRING_INTS = "https://stringdb-static.org/download/protein.links.full.v11.5/9606.protein.links.full.v11.5.txt.gz"
-STRING_ACTIONS = "https://stringdb-static.org/download/protein.actions.v11.5/9606.protein.actions.v11.5.txt.gz"
+STRING_ACTIONS = "https://stringdb-static.org/download/protein.actions.v11.0/9606.protein.actions.v11.0.txt.gz"
 STRING_NAMES = "https://stringdb-static.org/download/protein.info.v11.5/9606.protein.info.v11.5.txt.gz"
 
 # Pathway DBs #
