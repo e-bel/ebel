@@ -252,8 +252,8 @@ class Bel(Graph):
                     extend_graph: bool = True,
                     update_from_protein2gene: bool = True,
                     skip_drugbank: bool = False,
-                    drugbank_user: str = None,
-                    drugbank_password: str = None,
+                    drugbank_user: Optional[str] = None,
+                    drugbank_password: Optional[str] = None,
                     include_subfolders: bool = False) -> list:
         """Import BEL JSON file(s) into OrientDB.
 
