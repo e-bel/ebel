@@ -1,16 +1,15 @@
 """DisGeNet."""
 import logging
+from typing import Dict, Optional
+
 import pandas as pd
-
-from tqdm import tqdm
-from typing import Dict
 from pyorientdb import OrientDB
+from tqdm import tqdm
 
+from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import DISGENET
-from ebel.manager.orientdb import odb_meta, urls, odb_structure
-from ebel.tools import get_file_path, get_disease_trait_keywords_from_config
-
 from ebel.manager.rdbms.models import disgenet
+from ebel.tools import get_disease_trait_keywords_from_config, get_file_path
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +17,7 @@ logger = logging.getLogger(__name__)
 class DisGeNet(odb_meta.Graph):
     """DisGeNet (https://www.disgenet.org)."""
 
-    def __init__(self, client: OrientDB = None):
+    def __init__(self, client: Optional[OrientDB] = None):
         """Init DisGeNet."""
         self.client = client
         self.biodb_name = DISGENET
@@ -88,11 +87,11 @@ class DisGeNet(odb_meta.Graph):
     def _insert_disease_names(self) -> int:
         columns_disease = {'diseaseId': 'disease_id', 'diseaseName': 'disease_name'}
 
-        df_gene = pd.read_csv(self.file_path_gene, sep="\t", usecols=columns_disease.keys()) \
+        df_gene = pd.read_csv(self.file_path_gene, sep="\t", usecols=list(columns_disease.keys())) \
             .rename(columns=columns_disease) \
             .drop_duplicates().set_index('disease_id')
 
-        df_variant = pd.read_csv(self.file_path_variant, sep="\t", usecols=columns_disease.keys()) \
+        df_variant = pd.read_csv(self.file_path_variant, sep="\t", usecols=list(columns_disease.keys())) \
             .rename(columns=columns_disease) \
             .drop_duplicates().set_index('disease_id')
 
@@ -102,7 +101,7 @@ class DisGeNet(odb_meta.Graph):
 
     def _insert_gene_symbols(self) -> int:
         columns_gene_symols = {'geneId': "gene_id", 'geneSymbol': "gene_symbol"}
-        df = pd.read_csv(self.file_path_gene, sep="\t", usecols=columns_gene_symols.keys()) \
+        df = pd.read_csv(self.file_path_gene, sep="\t", usecols=list(columns_gene_symols.keys())) \
             .rename(columns=columns_gene_symols) \
             .drop_duplicates().set_index('gene_id')
         df.to_sql(disgenet.DisgenetGeneSymbol.__tablename__, self.engine, if_exists='append')
@@ -125,7 +124,7 @@ class DisGeNet(odb_meta.Graph):
         df.to_sql(disgenet.DisgenetGene.__tablename__, self.engine, if_exists='append')
         return df.shape[0]
 
-    def _insert_variant_disease_pmid_associations(self) -> Dict[str, int]:
+    def _insert_variant_disease_pmid_associations(self) -> int:
         usecols_variant = ['snpId', 'chromosome', 'position', 'diseaseId', 'score', 'pmid', 'source']
         rename_dict = dict(zip(usecols_variant, self._standardize_column_names(usecols_variant)))
         df = pd.read_csv(self.file_path_variant, sep="\t", usecols=usecols_variant) \
