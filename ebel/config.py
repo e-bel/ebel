@@ -18,19 +18,19 @@ from ebel.constants import DEFAULT_ODB, TerminalFormatting as TF
 from ebel.defaults import CONN_STR_DEFAULT, DATABASE_LOCATION
 
 
-def set_configuration(name: str = None,
-                      user: str = None,
-                      password: str = None,
-                      server: str = None,
-                      port: Union[str, int] = None,
-                      user_reader: str = None,
-                      user_reader_password: str = None,
-                      root_password: str = None,
-                      kegg_species: str = None,
-                      sqlalchemy_connection_string: str = None,
-                      snp_related_traits: str = None,
-                      drugbank_user: str = None,
-                      drugbank_password: str = None) -> dict:
+def set_configuration(name: Optional[str] = None,
+                      user: Optional[str] = None,
+                      password: Optional[str] = None,
+                      server: Optional[str] = None,
+                      port: Union[str, int, None] = None,
+                      user_reader: Optional[str] = None,
+                      user_reader_password: Optional[str] = None,
+                      root_password: Optional[str] = None,
+                      kegg_species: Optional[str] = None,
+                      sqlalchemy_connection_string: Optional[str] = None,
+                      snp_related_traits: Optional[str] = None,
+                      drugbank_user: Optional[str] = None,
+                      drugbank_password: Optional[str] = None) -> dict:
     """Set configuration values in the config file."""
     odb_class_attribs = {
         'name': name,
