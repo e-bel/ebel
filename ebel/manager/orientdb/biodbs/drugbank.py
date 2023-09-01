@@ -1,30 +1,29 @@
 """DrugBank."""
 
+import getpass
+import logging
 import os
+import os.path
 import platform
 import re
 import signal
-import getpass
-import os.path
-import logging
-import requests
-
-from time import time
-from tqdm import tqdm
-from typing import Dict
-from zipfile import ZipFile
-from datetime import datetime
-from pyorientdb import OrientDB
-from lxml.etree import iterparse
 from collections import namedtuple
 from configparser import ConfigParser
+from datetime import datetime
+from time import time
+from typing import Dict, Optional
+from zipfile import ZipFile
 
+import requests
+from lxml.etree import iterparse
+from pyorientdb import OrientDB
+from tqdm import tqdm
+
+from ebel.config import get_config_as_dict, write_to_config
 from ebel.constants import DATA_DIR, RID
 from ebel.defaults import config_file_path
+from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import DRUGBANK
-from ebel.config import write_to_config, get_config_as_dict
-from ebel.manager.orientdb import odb_meta, urls, odb_structure
-
 from ebel.manager.rdbms.models import drugbank
 
 ACTIONS = 'actions'
@@ -44,7 +43,7 @@ Xpath = namedtuple('Xpath', ('references', 'synonyms', 'product_names', 'pathway
 class DrugBank(odb_meta.Graph):
     """Drugbank."""
 
-    def __init__(self, client: OrientDB = None):
+    def __init__(self, client: Optional[OrientDB] = None):
         """Drugbank database.
 
         documentation: https://www.drugbank.ca/documentation
@@ -239,7 +238,7 @@ class DrugBank(odb_meta.Graph):
                 signal.signal(signal.SIGALRM, signal.SIG_IGN)
                 return None
 
-    def get_user_passwd(self, drugbank_user: str = None, drugbank_password: str = None) -> list:
+    def get_user_passwd(self, drugbank_user: Optional[str] = None, drugbank_password: Optional[str] = None) -> Optional[list]:
         """Read username and password from configuration file."""
         section_name = "DRUGBANK"
         conf = None
