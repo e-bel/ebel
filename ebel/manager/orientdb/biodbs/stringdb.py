@@ -64,8 +64,8 @@ class StringDb(odb_meta.Graph):
 
         file_path = get_file_path(self.urls[self.table_protein], self.biodb_name)
         df_protein = pd.read_csv(
-            file_path, sep="\t", usecols=["protein_external_id", "preferred_name"]
-        )
+            file_path, sep="\t", usecols=["#string_protein_id", "preferred_name"]
+        ).rename(columns={"#string_protein_id": "string_protein_id"})
 
         # Define column types to improve memory efficiency
         cols = [
@@ -98,14 +98,14 @@ class StringDb(odb_meta.Graph):
         df_link = pd.read_csv(file_path, dtype=col_types, sep=" ")
 
         df = df_link.set_index("protein1").join(
-            df_protein.set_index("protein_external_id"), how="inner"
+            df_protein.set_index("string_protein_id"), how="inner"
         )
         df.reset_index(inplace=True)
         df.rename(
             columns={"index": "protein1", "preferred_name": "symbol1"}, inplace=True
         )
         df = df.set_index("protein2").join(
-            df_protein.set_index("protein_external_id"), how="inner"
+            df_protein.set_index("string_protein_id"), how="inner"
         )
         df.reset_index(inplace=True)
         df.rename(
@@ -122,8 +122,8 @@ class StringDb(odb_meta.Graph):
         """Generates a dictionary of STRINGDB identifiers as keys and HGNC symbols as values."""
         file_path = get_file_path(self.urls[self.table_protein], self.biodb_name)
         df = pd.read_csv(
-            file_path, sep="\t", usecols=["protein_external_id", "preferred_name"]
-        )
+            file_path, sep="\t", usecols=["#string_protein_id", "preferred_name"]
+        ).rename(columns={"#string_protein_id": "string_protein_id"})
         df.index += 1
         df.index.rename("id", inplace=True)
         df.to_sql(self.table_protein, self.engine, if_exists="append")
@@ -135,8 +135,8 @@ class StringDb(odb_meta.Graph):
 
         file_path = get_file_path(self.urls[self.table_protein], self.biodb_name)
         df_protein = pd.read_csv(
-            file_path, sep="\t", usecols=["protein_external_id", "preferred_name"]
-        )
+            file_path, sep="\t", usecols=["#string_protein_id", "preferred_name"]
+        ).rename(columns={"#string_protein_id": "string_protein_id"})
 
         file_path = get_file_path(self.urls[self.table_action], self.biodb_name)
         df_action = pd.read_csv(file_path, sep="\t")
@@ -154,14 +154,14 @@ class StringDb(odb_meta.Graph):
         df_action.replace({np.nan: None}, inplace=True)
 
         df = df_action.set_index("item_id_a").join(
-            df_protein.set_index("protein_external_id"), how="inner"
+            df_protein.set_index("string_protein_id"), how="inner"
         )
         df.reset_index(inplace=True)
         df.rename(
             columns={"index": "item_id_a", "preferred_name": "symbol1"}, inplace=True
         )
         df = df.set_index("item_id_b").join(
-            df_protein.set_index("protein_external_id"), how="inner"
+            df_protein.set_index("string_protein_id"), how="inner"
         )
         df.reset_index(inplace=True)
         df.rename(
