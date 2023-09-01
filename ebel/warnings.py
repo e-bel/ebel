@@ -1,8 +1,10 @@
 """Warning class definitions."""
 from collections import OrderedDict
 
-TEMPLATE = '{error_class}\tkeyword:{keyword}\tentry:{entry}\tline:{line_number}\tcolumn:{column}' \
-           '\turl:{url}\thint:{hint}'
+TEMPLATE = (
+    "{error_class}\tkeyword:{keyword}\tentry:{entry}\tline:{line_number}\tcolumn:{column}"
+    "\turl:{url}\thint:{hint}"
+)
 
 
 class _Warning:
@@ -10,19 +12,23 @@ class _Warning:
 
     def __init__(self):
         self.class_name = self.__class__.__name__
-        self.value_dict = OrderedDict([
-            ("warning_class", self.class_name),
-            ("url", None),
-            ("keyword", None),
-            ("entry", None),
-            ("line_number", None),
-            ("column", None),
-            ("hint", None)
-        ])
+        self.value_dict = OrderedDict(
+            [
+                ("warning_class", self.class_name),
+                ("url", None),
+                ("keyword", None),
+                ("entry", None),
+                ("line_number", None),
+                ("column", None),
+                ("hint", None),
+            ]
+        )
 
     def to_dict(self):
         """Format the properties of error into a dictionary."""
-        raise NotImplementedError('to_dict have to be implemented in {}'.format(self.__class__.__name__))
+        raise NotImplementedError(
+            "to_dict have to be implemented in {}".format(self.__class__.__name__)
+        )
 
     def to_string(self) -> str:
         self.value_dict.update(self.to_dict())
@@ -35,7 +41,9 @@ class _Warning:
 class AlsoUsedInOtherNamespace(_Warning):
     """Error in entry links to a namespace defined in the header but not exists in namespace url."""
 
-    def __init__(self, keyword: str, entry: str, line_number: int, column: int, hint: str):
+    def __init__(
+        self, keyword: str, entry: str, line_number: int, column: int, hint: str
+    ):
         """Initialize warning class.
 
         :param keyword: Error class type.
@@ -60,5 +68,5 @@ class AlsoUsedInOtherNamespace(_Warning):
             "entry": self.entry,
             "line_number": self.line_number,
             "column": self.column,
-            "hint": self.hint
+            "hint": self.hint,
         }

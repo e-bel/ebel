@@ -11,10 +11,12 @@ Base = declarative_base()
 class Nsides(Base):
     """Class definition for the nSIDES table."""
 
-    __tablename__ = 'nsides'
+    __tablename__ = "nsides"
     id = Column(Integer, primary_key=True)
 
-    drug_rxnorn_id = Column(String(20), index=True)  # This has to be a String because of mapping to drugbank ids
+    drug_rxnorn_id = Column(
+        String(20), index=True
+    )  # This has to be a String because of mapping to drugbank ids
     drug_concept_name = Column(String(255), index=True)
 
     source = Column(String(10), index=True)

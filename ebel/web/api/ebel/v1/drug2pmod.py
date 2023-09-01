@@ -22,12 +22,14 @@ SQL_MATCH_TEMPLATE = """
 class Column:
     """Column class."""
 
-    def __init__(self,
-                 odb_class: str,
-                 form_name: str,
-                 column: str,
-                 sql_operator: OrientDbSqlOperator = OrientDbSqlOperator.EQUALS,
-                 data_type: DataType = DataType.STRING):
+    def __init__(
+        self,
+        odb_class: str,
+        form_name: str,
+        column: str,
+        sql_operator: OrientDbSqlOperator = OrientDbSqlOperator.EQUALS,
+        data_type: DataType = DataType.STRING,
+    ):
         """Init method."""
         self.odb_class = odb_class
         self.column = column
@@ -41,11 +43,11 @@ class Column:
         """Get the value of a given search term."""
         if value is not None and value.strip():
             self.value = value.strip()
-            if '%' not in self.value and self.sql_operator == OrientDbSqlOperator.LIKE:
+            if "%" not in self.value and self.sql_operator == OrientDbSqlOperator.LIKE:
                 self.sql_operator = OrientDbSqlOperator.EQUALS
 
 
-Pagination = namedtuple('Pagination', ['page', 'page_size', 'skip'])
+Pagination = namedtuple("Pagination", ["page", "page_size", "skip"])
 
 
 class Query:
@@ -59,10 +61,10 @@ class Query:
 
     def get_pagination(self) -> Pagination:
         """Return the results as a collection of paginations."""
-        page_size = request.args.get('page_size', '10')
+        page_size = request.args.get("page_size", "10")
         page_size = int(page_size) if re.search(r"^\d+$", page_size) else 10
         page_size = 10 if page_size >= 100 else page_size
-        page = request.args.get('page', '1')
+        page = request.args.get("page", "1")
         page = int(page) if re.search(r"^\d+$", page) else 1
         skip = (page - 1) * page_size
         return Pagination(page=page, page_size=page_size, skip=skip)
@@ -73,9 +75,13 @@ class Query:
 
         for col in self.columns:
             if col.value:
-                if col.column.endswith('@rid') and "," in col.value:
-                    rids = [x.strip() for x in col.value.split(",") if re.search(r"^#\d+:\d+$", x.strip())]
-                    rids_str = "[" + ','.join(rids) + "]"
+                if col.column.endswith("@rid") and "," in col.value:
+                    rids = [
+                        x.strip()
+                        for x in col.value.split(",")
+                        if re.search(r"^#\d+:\d+$", x.strip())
+                    ]
+                    rids_str = "[" + ",".join(rids) + "]"
                     wheres[col.odb_class].append(f"{col.column} in {rids_str}")
                 elif col.column != "@class":
                     value = col.value.replace('"', '\\"')
@@ -85,15 +91,25 @@ class Query:
                     else:
                         value = value
 
-                    if col.data_type in [DataType.LIST_STRING, DataType.LIST_NUMBER, DataType.LIST_INTEGER]:
-                        wheres[col.odb_class].append(f'{value} {col.sql_operator.value} {col.column}')
+                    if col.data_type in [
+                        DataType.LIST_STRING,
+                        DataType.LIST_NUMBER,
+                        DataType.LIST_INTEGER,
+                    ]:
+                        wheres[col.odb_class].append(
+                            f"{value} {col.sql_operator.value} {col.column}"
+                        )
                     else:
-                        wheres[col.odb_class].append(f'{col.column} {col.sql_operator.value} {value}')
+                        wheres[col.odb_class].append(
+                            f"{col.column} {col.sql_operator.value} {value}"
+                        )
 
-        wheres_dict = {odb_class: '' for odb_class in {c.odb_class for c in self.columns}}
+        wheres_dict = {
+            odb_class: "" for odb_class in {c.odb_class for c in self.columns}
+        }
         for odb_class, col_queries in wheres.items():
             if col_queries:
-                wheres_dict[odb_class] = ", where:( " + ' AND '.join(col_queries) + " )"
+                wheres_dict[odb_class] = ", where:( " + " AND ".join(col_queries) + " )"
 
         return wheres_dict
 
@@ -105,14 +121,16 @@ class Query:
 
     def get_number_of_results(self) -> int:
         """Count the number of results."""
-        nodes_edges = ', '.join({c.odb_class for c in self.columns})
+        nodes_edges = ", ".join({c.odb_class for c in self.columns})
         sql = f"SELECT count(*) FROM ({self.sql} return {nodes_edges})"
         print(sql)
-        return self.ebel.query_get_dict(sql)[0]['count']
+        return self.ebel.query_get_dict(sql)[0]["count"]
 
     @property
     def __sql4results(self):
-        cols = ', '.join([f"{c.odb_class}.{c.display_column} as {c.form_name}" for c in self.columns])
+        cols = ", ".join(
+            [f"{c.odb_class}.{c.display_column} as {c.form_name}" for c in self.columns]
+        )
         return self.sql + " return " + cols
 
     def get_result(self) -> dict:
@@ -128,50 +146,102 @@ class Query:
             results = [x for x in self.ebel.query_get_dict(sql_paginated)]
 
         return {
-            'page': p.page,
-            'page_size': p.page_size,
-            'number_of_results': number_of_results,
-            'pages': pages,
-            'results': results}
+            "page": p.page,
+            "page_size": p.page_size,
+            "number_of_results": number_of_results,
+            "pages": pages,
+            "results": results,
+        }
 
 
 def get_drug2pmod() -> dict:
     """Create a table of relations and information fulfilling the algorithm."""
     columns: List[Column] = [
-        Column('drug', 'drug__cas_number', 'cas_number', OrientDbSqlOperator.LIKE),
-        Column('drug', 'drug__description', 'description', OrientDbSqlOperator.LIKE),
-        Column('drug', 'drug__drugbank_id', 'drugbank_id', OrientDbSqlOperator.LIKE),
-        Column('drug', 'drug__indication', 'indication', OrientDbSqlOperator.LIKE),
-        Column('drug', 'drug__label', 'label', OrientDbSqlOperator.LIKE),
-        Column('drug', 'drug__mechanism_of_action', 'mechanism_of_action', OrientDbSqlOperator.LIKE),
-        Column('drug', 'drug__metabolism', 'metabolism', OrientDbSqlOperator.LIKE),
-        Column('drug', 'drug__pharmacodynamics', 'pharmacodynamics', OrientDbSqlOperator.LIKE),
-        Column('drug', 'drug__toxicity', 'toxicity', OrientDbSqlOperator.LIKE),
-        Column('has_drug_target', 'has_drug_target__action', 'action', OrientDbSqlOperator.LIKE),
-        Column('has_drug_target', 'has_drug_target__known_action', 'known_action', OrientDbSqlOperator.LIKE),
-        Column('drug_target', 'drug_target__name', 'name', OrientDbSqlOperator.LIKE),
-        Column('drug_target', 'drug_target__bel', 'bel', OrientDbSqlOperator.LIKE),
-        Column('drug_target', 'drug_target__label', 'label', OrientDbSqlOperator.LIKE),
-        Column('drug_target', 'drug_target__uniprot', 'uniprot', OrientDbSqlOperator.LIKE),
-        Column('drug_target', 'drug_target__reactome_pathways', 'reactome_pathways', OrientDbSqlOperator.IN,
-               DataType.LIST_STRING),
-        Column('drug_target_to_target', 'drug_target_to_target__relation', '@class', OrientDbSqlOperator.EQUALS),
-        Column('drug_target_to_target', 'drug_target_to_target__evidence', 'evidence', OrientDbSqlOperator.LIKE),
-        Column('drug_target_to_target', 'drug_target_to_target__pmid', 'pmid', OrientDbSqlOperator.LIKE),
-        Column('drug_target_to_target', 'drug_target_to_target__citation', 'citation', OrientDbSqlOperator.LIKE),
-        Column('target', 'target__name', 'name', OrientDbSqlOperator.LIKE),
-        Column('target', 'target__bel', 'bel', OrientDbSqlOperator.LIKE),
-        Column('target', 'target__label', 'label', OrientDbSqlOperator.LIKE),
-        Column('target', 'target__uniprot', 'uniprot', OrientDbSqlOperator.LIKE),
+        Column("drug", "drug__cas_number", "cas_number", OrientDbSqlOperator.LIKE),
+        Column("drug", "drug__description", "description", OrientDbSqlOperator.LIKE),
+        Column("drug", "drug__drugbank_id", "drugbank_id", OrientDbSqlOperator.LIKE),
+        Column("drug", "drug__indication", "indication", OrientDbSqlOperator.LIKE),
+        Column("drug", "drug__label", "label", OrientDbSqlOperator.LIKE),
         Column(
-            'target', 'target__reactome_pathways', 'reactome_pathways', OrientDbSqlOperator.IN, DataType.LIST_STRING
+            "drug",
+            "drug__mechanism_of_action",
+            "mechanism_of_action",
+            OrientDbSqlOperator.LIKE,
         ),
-        Column('pmod', 'pmod__amino_acid', 'amino_acid', OrientDbSqlOperator.LIKE),
-        Column('pmod', 'pmod__name', 'name', OrientDbSqlOperator.LIKE),
-        Column('pmod', 'pmod__namespace', 'namespace', OrientDbSqlOperator.LIKE),
-        Column('pmod', 'pmod__position', 'position', OrientDbSqlOperator.LIKE),
-        Column('pmod', 'pmod__type', 'type', OrientDbSqlOperator.LIKE),
-        Column('pmod', 'pmod__bel', 'bel', OrientDbSqlOperator.LIKE)
+        Column("drug", "drug__metabolism", "metabolism", OrientDbSqlOperator.LIKE),
+        Column(
+            "drug",
+            "drug__pharmacodynamics",
+            "pharmacodynamics",
+            OrientDbSqlOperator.LIKE,
+        ),
+        Column("drug", "drug__toxicity", "toxicity", OrientDbSqlOperator.LIKE),
+        Column(
+            "has_drug_target",
+            "has_drug_target__action",
+            "action",
+            OrientDbSqlOperator.LIKE,
+        ),
+        Column(
+            "has_drug_target",
+            "has_drug_target__known_action",
+            "known_action",
+            OrientDbSqlOperator.LIKE,
+        ),
+        Column("drug_target", "drug_target__name", "name", OrientDbSqlOperator.LIKE),
+        Column("drug_target", "drug_target__bel", "bel", OrientDbSqlOperator.LIKE),
+        Column("drug_target", "drug_target__label", "label", OrientDbSqlOperator.LIKE),
+        Column(
+            "drug_target", "drug_target__uniprot", "uniprot", OrientDbSqlOperator.LIKE
+        ),
+        Column(
+            "drug_target",
+            "drug_target__reactome_pathways",
+            "reactome_pathways",
+            OrientDbSqlOperator.IN,
+            DataType.LIST_STRING,
+        ),
+        Column(
+            "drug_target_to_target",
+            "drug_target_to_target__relation",
+            "@class",
+            OrientDbSqlOperator.EQUALS,
+        ),
+        Column(
+            "drug_target_to_target",
+            "drug_target_to_target__evidence",
+            "evidence",
+            OrientDbSqlOperator.LIKE,
+        ),
+        Column(
+            "drug_target_to_target",
+            "drug_target_to_target__pmid",
+            "pmid",
+            OrientDbSqlOperator.LIKE,
+        ),
+        Column(
+            "drug_target_to_target",
+            "drug_target_to_target__citation",
+            "citation",
+            OrientDbSqlOperator.LIKE,
+        ),
+        Column("target", "target__name", "name", OrientDbSqlOperator.LIKE),
+        Column("target", "target__bel", "bel", OrientDbSqlOperator.LIKE),
+        Column("target", "target__label", "label", OrientDbSqlOperator.LIKE),
+        Column("target", "target__uniprot", "uniprot", OrientDbSqlOperator.LIKE),
+        Column(
+            "target",
+            "target__reactome_pathways",
+            "reactome_pathways",
+            OrientDbSqlOperator.IN,
+            DataType.LIST_STRING,
+        ),
+        Column("pmod", "pmod__amino_acid", "amino_acid", OrientDbSqlOperator.LIKE),
+        Column("pmod", "pmod__name", "name", OrientDbSqlOperator.LIKE),
+        Column("pmod", "pmod__namespace", "namespace", OrientDbSqlOperator.LIKE),
+        Column("pmod", "pmod__position", "position", OrientDbSqlOperator.LIKE),
+        Column("pmod", "pmod__type", "type", OrientDbSqlOperator.LIKE),
+        Column("pmod", "pmod__bel", "bel", OrientDbSqlOperator.LIKE),
     ]
 
     for column in columns:

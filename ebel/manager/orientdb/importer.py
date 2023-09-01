@@ -20,10 +20,8 @@ from ebel.constants import RID
 from ebel.manager.orientdb.constants import NODES, EDGES
 from .odb_defaults import normalized_pmod, bel_func_short
 
-BEL_GIT_ID = namedtuple('BEL_GIT_ID', ['hexsha', 'repo_path', 'origin_url'])
-JsonParts = namedtuple('JsonParts', ['document',
-                                     'definitions',
-                                     'statements_and_sets'])
+BEL_GIT_ID = namedtuple("BEL_GIT_ID", ["hexsha", "repo_path", "origin_url"])
+JsonParts = namedtuple("JsonParts", ["document", "definitions", "statements_and_sets"])
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +52,10 @@ class _BelImporter:
     def _get_bel_rid_cache(self):
         """Get BEL string OrientDB rid dictionary for all bel nodes."""
         sql = "Select @rid.asString(),@class.asString(),bel from bel"
-        return {(y['bel'], y['class']): y['rid'] for y in [x.oRecordData for x in self.client.command(sql)]}
+        return {
+            (y["bel"], y["class"]): y["rid"]
+            for y in [x.oRecordData for x in self.client.command(sql)]
+        }
 
     def _get_bel_relation_rid_cache(self):
         """Create a dictionary of all bel_relation edges using their properties as keys and RIDs as values."""
@@ -63,14 +64,22 @@ class _BelImporter:
         sql = """SELECT @rid.asString(), out.@rid.asString() as subject_id, in.@rid.asString() as object_id,
         evidence, annotation, citation.type as citation_type, citation.ref as citation_ref,
         @class.asString() as relation FROM bel_relation"""
-        props = ('relation', 'subject_id', 'object_id', 'citation_type', 'citation_ref', 'evidence', 'annotation')
+        props = (
+            "relation",
+            "subject_id",
+            "object_id",
+            "citation_type",
+            "citation_ref",
+            "evidence",
+            "annotation",
+        )
         results = self.client.command(sql)
         for entry in results:
             r = entry.oRecordData
             edge_profile = []
             for prop in props:
                 if prop in r:
-                    if prop == 'annotation':
+                    if prop == "annotation":
                         edge_profile.append(json.dumps(r[prop], sort_keys=True))
                     else:
                         edge_profile.append(r[prop])
@@ -78,7 +87,7 @@ class _BelImporter:
                 else:
                     edge_profile.append(None)
 
-            rel_cache[tuple(edge_profile)] = r['rid']
+            rel_cache[tuple(edge_profile)] = r["rid"]
 
         return rel_cache
 
@@ -96,13 +105,15 @@ class _BelImporter:
 
         if self.file_is_in_git_repo(absolute_path):
             repo = git.Repo(absolute_path, search_parent_directories=True)
-            origin_url_found = re.search("(https?://)([^@]+@)?(.*)", repo.remotes.origin.url)
+            origin_url_found = re.search(
+                "(https?://)([^@]+@)?(.*)", repo.remotes.origin.url
+            )
 
             origin_url = None
             if origin_url_found:
                 protocol, user, origin_url = origin_url_found.groups()
 
-            repo_path = absolute_path.as_posix()[len(repo.working_dir) + 1:]
+            repo_path = absolute_path.as_posix()[len(repo.working_dir) + 1 :]
             try:
                 commits = list(repo.iter_commits(paths=str(absolute_path)))
 
@@ -110,10 +121,10 @@ class _BelImporter:
                     commit = commits[0]
                     bel_git_id = BEL_GIT_ID(commit.hexsha, repo_path, origin_url)
             except:
-                print('Not able to get commit info')
+                print("Not able to get commit info")
 
         if not bel_git_id:
-            bel_git_id = BEL_GIT_ID('', '', '')
+            bel_git_id = BEL_GIT_ID("", "", "")
 
         return bel_git_id
 
@@ -129,56 +140,65 @@ class _BelImporter:
             return False, 0
 
         parts = self.get_json_parts(bel_python_object)
-        exists_before, document_id = self.insert_bel_header(parts.document, parts.definitions)
+        exists_before, document_id = self.insert_bel_header(
+            parts.document, parts.definitions
+        )
 
         if not exists_before:
-            inserted = self.insert_statements_and_sets(parts.statements_and_sets, document_id)
+            inserted = self.insert_statements_and_sets(
+                parts.statements_and_sets, document_id
+            )
 
         return not exists_before, inserted
 
     def insert_bel_header(self, doc_info, defs) -> Tuple[bool, str]:
         """Insert header info (document_info, namespaces and annotations) plus git info)."""
         data = deepcopy(doc_info)
-        data['annotation'] = {}
-        data['namespace'] = {}
+        data["annotation"] = {}
+        data["namespace"] = {}
         for entry in defs:
             anno_or_ns = list(entry.keys())[0]
-            keyword = entry[anno_or_ns]['keyword']
-            del entry[anno_or_ns]['keyword']
+            keyword = entry[anno_or_ns]["keyword"]
+            del entry[anno_or_ns]["keyword"]
             data[anno_or_ns][keyword] = entry[anno_or_ns]
 
-        if 'authors' in data:
-            data['authors'] = [a.strip() for a in data['authors'].split(",")]
+        if "authors" in data:
+            data["authors"] = [a.strip() for a in data["authors"].split(",")]
 
         keyword_flag = False
-        if 'keywords' in data:
+        if "keywords" in data:
             keyword_flag = True
-            data['keywords'] = [k.strip() for k in data['keywords'].split(",")]
+            data["keywords"] = [k.strip() for k in data["keywords"].split(",")]
 
-            keyword_rids = self.get_keyword_rids(keywords=data['keywords'])
-            keyword_linkset = "[" + ",".join(keyword_rids) + "]"  # This feature is a LINKSET
-            del data['keywords']  # TODO get so rids can be in JSON and load - see line 131
+            keyword_rids = self.get_keyword_rids(keywords=data["keywords"])
+            keyword_linkset = (
+                "[" + ",".join(keyword_rids) + "]"
+            )  # This feature is a LINKSET
+            del data[
+                "keywords"
+            ]  # TODO get so rids can be in JSON and load - see line 131
 
-        now = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
-        data['date'] = {'uploaded': now}
+        now = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
+        data["date"] = {"uploaded": now}
         file_stat = os.stat(self.file_path)
-        data['file'] = {
-            'path': self.file_path,
-            'md5': tools.md5(self.file_path),
-            'size': file_stat.st_size,
-            'last_modified': file_stat.st_mtime
+        data["file"] = {
+            "path": self.file_path,
+            "md5": tools.md5(self.file_path),
+            "size": file_stat.st_size,
+            "last_modified": file_stat.st_mtime,
         }
 
         git_info_dict = self.get_git_info()
 
-        data['git_info'] = git_info_dict._asdict()
+        data["git_info"] = git_info_dict._asdict()
 
         net_exists_before = self.network_exists(
-            data['version'],
+            data["version"],
             self.file_path,
-            data['file']['md5'],
-            data['file']['last_modified'],
-            git_info_dict)
+            data["file"]["md5"],
+            data["file"]["last_modified"],
+            git_info_dict,
+        )
 
         if not net_exists_before:
             content = json.dumps(data)
@@ -217,7 +237,9 @@ class _BelImporter:
 
         return keyword_rids
 
-    def network_exists(self, version, file_path, md5, last_modified, git_info_dict) -> bool:
+    def network_exists(
+        self, version, file_path, md5, last_modified, git_info_dict
+    ) -> bool:
         sql = f"""Select 1 from bel_document where
                     version = '{version}' and
                     file.path = '{Path(file_path).as_posix()}' and
@@ -242,7 +264,6 @@ class _BelImporter:
         citation_type = ""
 
         for e in tqdm(statements_and_sets, desc="Insert BEL Statements"):
-
             dtype, data = tuple(e.items())[0]
 
             if dtype == "sets":
@@ -251,12 +272,14 @@ class _BelImporter:
 
                     if key == "citation":
                         citation = dict(value)
-                        citation_type = citation['type'].strip()
-                        citation_ref = citation['ref'].strip()
+                        citation_type = citation["type"].strip()
+                        citation_ref = citation["ref"].strip()
                         evidence = ""
                         annotation = defaultdict(set)
 
-                        if citation['type'].lower() == "pubmed" and re.search(r'^\d+$', citation_ref):
+                        if citation["type"].lower() == "pubmed" and re.search(
+                            r"^\d+$", citation_ref
+                        ):
                             pmid = citation_ref
                         else:
                             pmid = 0
@@ -273,38 +296,68 @@ class _BelImporter:
                             annotation.pop(anno_keyword, None)
 
             elif dtype == "statement" and len(data) >= 1:
+                subject_id = self.get_node_id(data[0]["subject"])[1]
 
-                subject_id = self.get_node_id(data[0]['subject'])[1]
-
-                if len(data) > 1 and 'object' in data[2]:
+                if len(data) > 1 and "object" in data[2]:
                     # TODO: nested statements are missing
 
-                    object_id = self.get_node_id(data[2]['object'])[1]
+                    object_id = self.get_node_id(data[2]["object"])[1]
 
-                    relation = data[1]['relation']
+                    relation = data[1]["relation"]
 
-                    self.insert_bel_edge(annotation, citation, citation_ref, citation_type, evidence, object_id, pmid,
-                                         relation, subject_id, document_id)
+                    self.insert_bel_edge(
+                        annotation,
+                        citation,
+                        citation_ref,
+                        citation_type,
+                        evidence,
+                        object_id,
+                        pmid,
+                        relation,
+                        subject_id,
+                        document_id,
+                    )
 
         return len(statements_and_sets)
 
-    def insert_bel_edge(self, annotation, citation, citation_ref, citation_type, evidence, object_id, pmid, relation,
-                        subject_id, document_id):
+    def insert_bel_edge(
+        self,
+        annotation,
+        citation,
+        citation_ref,
+        citation_type,
+        evidence,
+        object_id,
+        pmid,
+        relation,
+        subject_id,
+        document_id,
+    ):
         # check if relation already exists
         anno = {key: sorted(list(annotation[key])) for key in annotation.keys()}
         anno_json = json.dumps(anno, sort_keys=True)
-        edge_content = {"pmid": pmid,
-                        "citation": citation,
-                        "annotation": anno,
-                        "evidence": evidence,
-                        "document": [document_id]}
+        edge_content = {
+            "pmid": pmid,
+            "citation": citation,
+            "annotation": anno,
+            "evidence": evidence,
+            "document": [document_id],
+        }
 
         # Need to clean the properties
-        evidence = evidence.replace('\n', ' ')
+        evidence = evidence.replace("\n", " ")
         citation_ref = citation_ref if citation_ref else None
         citation_type = citation_type if citation_type else None
 
-        edge_profile = (relation, subject_id, object_id, citation_type, citation_ref, evidence, anno_json)
+        edge_profile = (
+            relation,
+            subject_id,
+            object_id,
+            citation_type,
+            citation_ref,
+            evidence,
+            anno_json,
+        )
         edge_exists = True if edge_profile in _BelImporter._cache[EDGES] else False
 
         if not edge_exists:
@@ -322,9 +375,11 @@ class _BelImporter:
     def get_json_parts(cls, bel_python_object) -> JsonParts:
         """Return the parts document,definitions,statements_and_sets from bel_json as python object."""
         doc, defs, ss = bel_python_object
-        return JsonParts(document=doc['document'],
-                         definitions=defs['definitions'],
-                         statements_and_sets=ss['statements_and_sets'])
+        return JsonParts(
+            document=doc["document"],
+            definitions=defs["definitions"],
+            statements_and_sets=ss["statements_and_sets"],
+        )
 
     @staticmethod
     def get_node_class_rid_from_db(obj, bel: str):
@@ -332,8 +387,8 @@ class _BelImporter:
         rid = None
         node_class = None
 
-        if isinstance(obj[0], OrderedDict) and 'function' in obj[0]:
-            node_class = obj[0]['function']['name']
+        if isinstance(obj[0], OrderedDict) and "function" in obj[0]:
+            node_class = obj[0]["function"]["name"]
             if (bel, node_class) in _BelImporter._cache[NODES]:
                 rid = _BelImporter._cache[NODES][(bel, node_class)]
 
@@ -341,7 +396,7 @@ class _BelImporter:
 
     @staticmethod
     def is_function(obj):
-        return isinstance(obj, OrderedDict) and 'function' in obj
+        return isinstance(obj, OrderedDict) and "function" in obj
 
     def get_node_id(self, obj: list) -> str:
         """Return rid of obj."""
@@ -353,9 +408,9 @@ class _BelImporter:
 
         bel = self.get_bel(obj)
 
-        node_class = obj[0]['function']['name']
+        node_class = obj[0]["function"]["name"]
 
-        if node_class not in ['pmod', 'fragment', 'variant']:
+        if node_class not in ["pmod", "fragment", "variant"]:
             node_class, rid_from_db = self.get_node_class_rid_from_db(obj, bel)
             if rid_from_db:
                 return node_class, rid_from_db
@@ -383,7 +438,7 @@ class _BelImporter:
 
     def insert_bel_node(self, node_class, params, bel):
         """Insert bel node, return rid."""
-        params.update({'bel': bel})
+        params.update({"bel": bel})
         sql_temp = "insert into {} content {}"
         sql = sql_temp.format(node_class, json.dumps(params))
         record = self.client.command(sql)
@@ -399,30 +454,34 @@ class _BelImporter:
             if isinstance(param, str):
                 bels.append(param)
             elif isinstance(param, dict):
-                if set(param.keys()) == {'namespace', 'name'}:
-                    bels.append(param['namespace'] + ':"' + param['name'] + '"')
+                if set(param.keys()) == {"namespace", "name"}:
+                    bels.append(param["namespace"] + ':"' + param["name"] + '"')
 
                 elif function_name == "fragment":
-                    bels.append(','.join(['"' + x + '"' for x in param.values() if x]))
+                    bels.append(",".join(['"' + x + '"' for x in param.values() if x]))
 
                 elif function_name == "activity":
-                    if param['namespace']:
-                        bel_str = param['namespace'] + ':"' + param['name'] + '"'
+                    if param["namespace"]:
+                        bel_str = param["namespace"] + ':"' + param["name"] + '"'
                     else:
-                        bel_str = param['default']
+                        bel_str = param["default"]
                     bels.append("ma(" + bel_str + ")")
 
                 elif function_name == "pmod":
-                    if param['namespace']:
-                        first_part_pmod = param['namespace'] + ':"' + param['name'] + '"'
+                    if param["namespace"]:
+                        first_part_pmod = (
+                            param["namespace"] + ':"' + param["name"] + '"'
+                        )
                     else:
-                        first_part_pmod = normalized_pmod[param['type']]
-                    position = str(param['position']) if param['position'] else None
-                    parts_pmod = [first_part_pmod, param['amino_acid'], position]
+                        first_part_pmod = normalized_pmod[param["type"]]
+                    position = str(param["position"]) if param["position"] else None
+                    parts_pmod = [first_part_pmod, param["amino_acid"], position]
                     bels.append(",".join([x for x in parts_pmod if x]))
 
                 else:
-                    bels.append(','.join(['"' + str(x) + '"' for x in param.values() if x]))
+                    bels.append(
+                        ",".join(['"' + str(x) + '"' for x in param.values() if x])
+                    )
 
         joined_params = ",".join(bels)
 
@@ -438,11 +497,9 @@ class _BelImporter:
         function_name = None
 
         for element in obj:
-
             if isinstance(element, dict):
-
-                if 'function' in element:
-                    function_name = element['function']['name']
+                if "function" in element:
+                    function_name = element["function"]["name"]
 
                 else:
                     params.append(element)

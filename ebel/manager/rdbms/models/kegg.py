@@ -10,7 +10,7 @@ Base = declarative_base()
 class Kegg(Base):
     """Class definition for the kegg table."""
 
-    __tablename__ = 'kegg'
+    __tablename__ = "kegg"
     id = Column(Integer, primary_key=True)
 
     pathway_identifier = Column(String(100))

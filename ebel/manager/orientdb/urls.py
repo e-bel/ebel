@@ -1,16 +1,22 @@
 """URLs to download files."""
 
 # HGNC #
-HGNC_JSON = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/json/hgnc_complete_set.json"
+HGNC_JSON = (
+    "ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/json/hgnc_complete_set.json"
+)
 HGNC_TSV = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/hgnc_complete_set.txt"
-HCOP_GZIP = 'ftp://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_all_hcop_sixteen_column.txt.gz'
+HCOP_GZIP = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_all_hcop_sixteen_column.txt.gz"
 
 # UniProt #
-UNIPROT_SPROT = "ftp://ftp.uniprot.org/pub/databases/uniprot/" \
-                "current_release/knowledgebase/complete/uniprot_sprot.xml.gz"
-UNIPROT_HGNC = "https://www.genenames.org/cgi-bin/download/custom?col=gd_hgnc_id&col=gd_app_sym&col=md_prot_id&" \
-               "status=Approved&status=Entry%20Withdrawn&hgnc_dbtag=on&order_by=gd_app_sym_sort&" \
-               "format=text&submit=submit"
+UNIPROT_SPROT = (
+    "ftp://ftp.uniprot.org/pub/databases/uniprot/"
+    "current_release/knowledgebase/complete/uniprot_sprot.xml.gz"
+)
+UNIPROT_HGNC = (
+    "https://www.genenames.org/cgi-bin/download/custom?col=gd_hgnc_id&col=gd_app_sym&col=md_prot_id&"
+    "status=Approved&status=Entry%20Withdrawn&hgnc_dbtag=on&order_by=gd_app_sym_sort&"
+    "format=text&submit=submit"
+)
 UNIPROT_MGI = "http://www.informatics.jax.org/downloads/reports/MRK_SwissProt.rpt"
 UNIPROT_RGD = "https://download.rgd.mcw.edu/data_release/GENES_RAT.txt"
 UNIPROT_FLYBASE = "ftp://ftp.flybase.org/releases/current/precomputed_files/genes/fbgn_NAseq_Uniprot_fb_2020_04.tsv.gz"
@@ -19,15 +25,16 @@ UNIPROT_FLYBASE = "ftp://ftp.flybase.org/releases/current/precomputed_files/gene
 CLINICAL_TRIALS_GOV = "https://clinicaltrials.gov/AllPublicXML.zip"
 
 # Genetic Variant DBs #
-CLINVAR = "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/variant_summary.txt.gz"
+CLINVAR = (
+    "https://ftp.ncbi.nlm.nih.gov/pub/clinvar/tab_delimited/variant_summary.txt.gz"
+)
 # MIRTARBASE = "http://mirtarbase.cuhk.edu.cn/cache/download/8.0/miRTarBase_MTI.xlsx"
 MIRTARBASE = "https://mirtarbase.cuhk.edu.cn/~miRTarBase/miRTarBase_2022/cache/download/9.0/miRTarBase_MTI.xlsx"
 GWAS_CATALOG = "https://www.ebi.ac.uk/gwas/api/search/downloads/full"
 
 # PPIs #
 BIND = "https://www.bindingdb.org/bind/downloads/BindingDB_All_2018m7.tsv.zip"
-BIOGRID = \
-    "https://downloads.thebiogrid.org/Download/BioGRID/Release-Archive/BIOGRID-4.4.215/BIOGRID-ALL-4.4.215.tab3.zip"
+BIOGRID = "https://downloads.thebiogrid.org/Download/BioGRID/Release-Archive/BIOGRID-4.4.215/BIOGRID-ALL-4.4.215.tab3.zip"
 INTACT = "ftp://ftp.ebi.ac.uk/pub/databases/intact/current/psimitab/intact.zip"
 STITCH = "http://stitch.embl.de/download/protein_chemical.links.transfer.v5.0.tsv.gz"
 
@@ -56,7 +63,9 @@ SIDER_ATC = "http://sideeffects.embl.de/media/download/drug_atc.tsv"
 SIDER_SE = "http://sideeffects.embl.de/media/download/meddra_all_se.tsv.gz"
 
 # Expression Atlas #
-EXPRESSION_ATLAS_BASE = "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/"
+EXPRESSION_ATLAS_BASE = (
+    "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/"
+)
 EXPRESSION_ATLAS_EXPERIMENTS = EXPRESSION_ATLAS_BASE + "atlas-latest-data.tar.gz"
 
 # DisGeNet #
@@ -88,8 +97,10 @@ CHEBI_INCHI = f"{CHEBI_BASE}chebiId_inchi.tsv"
 # CHEBI_COMPOUNDORIGIN = f"{CHEBI_BASE}compound_origins.tsv"
 
 # NCBI #
-NCBI_PMID = "https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=ebel&" \
-            "ids={}&idtype=pmid&versions=no&format=json"
+NCBI_PMID = (
+    "https://www.ncbi.nlm.nih.gov/pmc/utils/idconv/v1.0/?tool=ebel&"
+    "ids={}&idtype=pmid&versions=no&format=json"
+)
 NCBI_MESH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id="
 # NCBI Gene
 NCBI_GENE_INFO = "https://ftp.ncbi.nih.gov/gene/DATA/gene_info.gz"
@@ -101,7 +112,9 @@ NCBI_GENE_2PUBMED = "https://ftp.ncbi.nih.gov/gene/DATA/gene2pubmed.gz"
 NCBI_GENE_ORTHOLOG = "https://ftp.ncbi.nih.gov/gene/DATA/gene_orthologs.gz"
 NCBI_GENE_NEIGHBORS = "https://ftp.ncbi.nih.gov/gene/DATA/gene_neighbors.gz"
 # NCBI MedGen
-NCBI_GENE_MEDGEN_PUBMED = "https://ftp.ncbi.nlm.nih.gov/pub/medgen/medgen_pubmed_lnk.txt.gz"
+NCBI_GENE_MEDGEN_PUBMED = (
+    "https://ftp.ncbi.nlm.nih.gov/pub/medgen/medgen_pubmed_lnk.txt.gz"
+)
 NCBI_GENE_MEDGEN_NAMES = "https://ftp.ncbi.nlm.nih.gov/pub/medgen/NAMES.RRF.gz"
 
 # Protein Atlas #

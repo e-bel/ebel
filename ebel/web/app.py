@@ -5,12 +5,17 @@ import webbrowser
 from flask_cors import CORS
 
 application = connexion.FlaskApp(__name__)
-application.add_api('openapi.yml')
+application.add_api("openapi.yml")
 
 CORS(application.app, expose_headers=["Content-Disposition"])
 
 
-def run(host: str = '0.0.0.0', port: int = 5000, debug_mode: bool = True, open_browser: bool = False):
+def run(
+    host: str = "0.0.0.0",
+    port: int = 5000,
+    debug_mode: bool = True,
+    open_browser: bool = False,
+):
     """Run the API server.
 
     Parameters
@@ -24,12 +29,12 @@ def run(host: str = '0.0.0.0', port: int = 5000, debug_mode: bool = True, open_b
     open_browser: bool
         If True, automatically opens browser to API UI.
     """
-    url = f'http://{host}:{port}/ui'
+    url = f"http://{host}:{port}/ui"
     if open_browser:
         webbrowser.open(url)
-    print(f'Starting web server {url}')
+    print(f"Starting web server {url}")
     application.run(host=host, port=port, debug=debug_mode)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

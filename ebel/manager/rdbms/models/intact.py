@@ -10,7 +10,7 @@ Base = declarative_base()
 class Intact(Base):
     """Class definition for the intact table."""
 
-    __tablename__ = 'intact'
+    __tablename__ = "intact"
     id = Column(Integer, primary_key=True)
     confidence_value = Column(Float, index=True)
     detection_method = Column(String(100), index=True)

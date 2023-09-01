@@ -10,7 +10,7 @@ Base = declarative_base()
 class Mirtarbase(Base):
     """Class definition for the mirtarbase table."""
 
-    __tablename__ = 'mirtarbase'
+    __tablename__ = "mirtarbase"
     id = Column(Integer, primary_key=True)
 
     mi_rtar_base_id = Column(String(20))

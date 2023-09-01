@@ -11,7 +11,7 @@ Base = declarative_base()
 class Hgnc(Base):
     """Class definition for the hgnc table."""
 
-    __tablename__ = 'hgnc'
+    __tablename__ = "hgnc"
     id = Column(Integer, primary_key=True)
     hgnc_id = Column(String(20))
     version = Column(BigInteger)
@@ -69,68 +69,68 @@ class Hgnc(Base):
     def as_dict(self):
         """Convert object values to dictionary."""
         return {
-            'hgnc_id': self.hgnc_id,
-            'version': self.version,
-            'bioparadigms_slc': self.bioparadigms_slc,
-            'cd': self.cd,
-            'cosmic': self.cosmic,
-            'date_approved_reserved': self.date_approved_reserved,
-            'date_modified': self.date_modified,
-            'date_name_changed': self.date_name_changed,
-            'date_symbol_changed': self.date_symbol_changed,
-            'ensembl_gene_id': self.ensembl_gene_id,
-            'entrez_id': self.entrez_id,
-            'homeodb': self.homeodb,
-            'horde_id': self.horde_id,
-            'imgt': self.imgt,
-            'iuphar': self.iuphar,
-            'kznf_gene_catalog': self.kznf_gene_catalog,
-            'lncipedia': self.lncipedia,
-            'lncrnadb': self.lncrnadb,
-            'location': self.location,
-            'location_sortable': self.location_sortable,
-            'locus_group': self.locus_group,
-            'locus_type': self.locus_type,
-            'merops': self.merops,
-            'mirbase': self.mirbase,
-            'name': self.name,
-            'orphanet': self.orphanet,
-            'snornabase': self.snornabase,
-            'status': self.status,
-            'symbol': self.symbol,
-            'ucsc_id': self.ucsc_id,
-            'uuid': self.uuid,
-            'vega_id': self.vega_id,
-            'agr': self.agr,
-            'pre_symbols': [x.prev_symbol for x in self.pre_symbols],
-            'alias_names': [x.alias_name for x in self.alias_names],
-            'alias_symbols': [x.alias_symbol for x in self.alias_symbols],
-            'ccdss': [x.identifier for x in self.ccdss],
-            'enas': [x.identifier for x in self.enas],
-            'enzymes': [x.ec_number for x in self.enzymes],
-            'gene_group_names': [x.name for x in self.gene_group_names],
-            'gene_group_ids': [x.identifier for x in self.gene_group_ids],
-            'uniprots': [x.accession for x in self.uniprots],
-            'rna_centrals': [x.identifier for x in self.rna_centrals],
-            'rgds': [x.identifier for x in self.rgds],
-            'refseqs': [x.accession for x in self.refseqs],
-            'pubmeds': [x.pmid for x in self.pubmeds],
-            'prev_names': [x.prev_name for x in self.prev_names],
-            'omims': [x.identifier for x in self.omims],
-            'mgds': [x.identifier for x in self.mgds],
-            'lsdbs': [x.identifier for x in self.lsdbs]
+            "hgnc_id": self.hgnc_id,
+            "version": self.version,
+            "bioparadigms_slc": self.bioparadigms_slc,
+            "cd": self.cd,
+            "cosmic": self.cosmic,
+            "date_approved_reserved": self.date_approved_reserved,
+            "date_modified": self.date_modified,
+            "date_name_changed": self.date_name_changed,
+            "date_symbol_changed": self.date_symbol_changed,
+            "ensembl_gene_id": self.ensembl_gene_id,
+            "entrez_id": self.entrez_id,
+            "homeodb": self.homeodb,
+            "horde_id": self.horde_id,
+            "imgt": self.imgt,
+            "iuphar": self.iuphar,
+            "kznf_gene_catalog": self.kznf_gene_catalog,
+            "lncipedia": self.lncipedia,
+            "lncrnadb": self.lncrnadb,
+            "location": self.location,
+            "location_sortable": self.location_sortable,
+            "locus_group": self.locus_group,
+            "locus_type": self.locus_type,
+            "merops": self.merops,
+            "mirbase": self.mirbase,
+            "name": self.name,
+            "orphanet": self.orphanet,
+            "snornabase": self.snornabase,
+            "status": self.status,
+            "symbol": self.symbol,
+            "ucsc_id": self.ucsc_id,
+            "uuid": self.uuid,
+            "vega_id": self.vega_id,
+            "agr": self.agr,
+            "pre_symbols": [x.prev_symbol for x in self.pre_symbols],
+            "alias_names": [x.alias_name for x in self.alias_names],
+            "alias_symbols": [x.alias_symbol for x in self.alias_symbols],
+            "ccdss": [x.identifier for x in self.ccdss],
+            "enas": [x.identifier for x in self.enas],
+            "enzymes": [x.ec_number for x in self.enzymes],
+            "gene_group_names": [x.name for x in self.gene_group_names],
+            "gene_group_ids": [x.identifier for x in self.gene_group_ids],
+            "uniprots": [x.accession for x in self.uniprots],
+            "rna_centrals": [x.identifier for x in self.rna_centrals],
+            "rgds": [x.identifier for x in self.rgds],
+            "refseqs": [x.accession for x in self.refseqs],
+            "pubmeds": [x.pmid for x in self.pubmeds],
+            "prev_names": [x.prev_name for x in self.prev_names],
+            "omims": [x.identifier for x in self.omims],
+            "mgds": [x.identifier for x in self.mgds],
+            "lsdbs": [x.identifier for x in self.lsdbs],
         }
 
 
 class PrevSymbol(Base):
     """Class definition for the hgnc_prev_symbol table."""
 
-    __tablename__ = 'hgnc_prev_symbol'
+    __tablename__ = "hgnc_prev_symbol"
     id = Column(Integer, primary_key=True)
 
     prev_symbol = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="pre_symbols")
 
     def __str__(self):
@@ -140,12 +140,12 @@ class PrevSymbol(Base):
 class AliasName(Base):
     """Class definition for the hgnc_alias_name table."""
 
-    __tablename__ = 'hgnc_alias_name'
+    __tablename__ = "hgnc_alias_name"
     id = Column(Integer, primary_key=True)
 
     alias_name = Column(String(255))
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="alias_names")
 
     def __str__(self):
@@ -155,12 +155,12 @@ class AliasName(Base):
 class AliasSymbol(Base):
     """Class definition for the hgnc_alias_symbol table."""
 
-    __tablename__ = 'hgnc_alias_symbol'
+    __tablename__ = "hgnc_alias_symbol"
     id = Column(Integer, primary_key=True)
 
     alias_symbol = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="alias_symbols")
 
     def __str__(self):
@@ -170,12 +170,12 @@ class AliasSymbol(Base):
 class Ccds(Base):
     """Class definition for the hgnc_ccds table."""
 
-    __tablename__ = 'hgnc_ccds'
+    __tablename__ = "hgnc_ccds"
     id = Column(Integer, primary_key=True)
 
     identifier = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="ccdss")
 
     def __str__(self):
@@ -185,12 +185,12 @@ class Ccds(Base):
 class Ena(Base):
     """Class definition for the hgnc_ena table."""
 
-    __tablename__ = 'hgnc_ena'
+    __tablename__ = "hgnc_ena"
     id = Column(Integer, primary_key=True)
 
     identifier = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="enas")
 
     def __str__(self):
@@ -200,12 +200,12 @@ class Ena(Base):
 class Enzyme(Base):
     """Class definition for the hgnc_enzyme table."""
 
-    __tablename__ = 'hgnc_enzyme'
+    __tablename__ = "hgnc_enzyme"
     id = Column(Integer, primary_key=True)
 
     ec_number = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="enzymes")
 
     def __str__(self):
@@ -215,12 +215,12 @@ class Enzyme(Base):
 class GeneGroupName(Base):
     """Class definition for the hgnc_gene_group_name table."""
 
-    __tablename__ = 'hgnc_gene_group_name'
+    __tablename__ = "hgnc_gene_group_name"
     id = Column(Integer, primary_key=True)
 
     name = Column(String(255))
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="gene_group_names")
 
     def __str__(self):
@@ -234,12 +234,12 @@ class GeneGroupName(Base):
 class GeneGroupId(Base):
     """Class definition for the hgnc_gene_group_id table."""
 
-    __tablename__ = 'hgnc_gene_group_id'
+    __tablename__ = "hgnc_gene_group_id"
     id = Column(Integer, primary_key=True)
 
     identifier = Column(Integer)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="gene_group_ids")
 
     def __str__(self):
@@ -249,12 +249,12 @@ class GeneGroupId(Base):
 class UniProt(Base):
     """Class definition for the hgnc_uniprot table."""
 
-    __tablename__ = 'hgnc_uniprot'
+    __tablename__ = "hgnc_uniprot"
     id = Column(Integer, primary_key=True)
 
     accession = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="uniprots")
 
     def __str__(self):
@@ -264,12 +264,12 @@ class UniProt(Base):
 class RnaCentral(Base):
     """Class definition for the hgnc_rna_central table."""
 
-    __tablename__ = 'hgnc_rna_central'
+    __tablename__ = "hgnc_rna_central"
     id = Column(Integer, primary_key=True)
 
     identifier = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="rna_centrals")
 
     def __str__(self):
@@ -279,12 +279,12 @@ class RnaCentral(Base):
 class Rgd(Base):
     """Class definition for the hgnc_rgd table."""
 
-    __tablename__ = 'hgnc_rgd'
+    __tablename__ = "hgnc_rgd"
     id = Column(Integer, primary_key=True)
 
     identifier = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="rgds")
 
     def __str__(self):
@@ -294,12 +294,12 @@ class Rgd(Base):
 class RefSeq(Base):
     """Class definition for the hgnc_refseq table."""
 
-    __tablename__ = 'hgnc_refseq'
+    __tablename__ = "hgnc_refseq"
     id = Column(Integer, primary_key=True)
 
     accession = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="refseqs")
 
     def __str__(self):
@@ -309,12 +309,12 @@ class RefSeq(Base):
 class PubMed(Base):
     """Class definition for the hgnc_pubmed table."""
 
-    __tablename__ = 'hgnc_pubmed'
+    __tablename__ = "hgnc_pubmed"
     id = Column(Integer, primary_key=True)
 
     pmid = Column(Integer, index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="pubmeds")
 
     def __str__(self):
@@ -324,12 +324,12 @@ class PubMed(Base):
 class PrevName(Base):
     """Class definition for the hgnc_prev_name table."""
 
-    __tablename__ = 'hgnc_prev_name'
+    __tablename__ = "hgnc_prev_name"
     id = Column(Integer, primary_key=True)
 
     prev_name = Column(String(255))
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="prev_names")
 
     def __str__(self):
@@ -339,12 +339,12 @@ class PrevName(Base):
 class Omim(Base):
     """Class definition for the hgnc_omim table."""
 
-    __tablename__ = 'hgnc_omim'
+    __tablename__ = "hgnc_omim"
     id = Column(Integer, primary_key=True)
 
     identifier = Column(Integer, index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="omims")
 
     def __str__(self):
@@ -354,12 +354,12 @@ class Omim(Base):
 class Mgd(Base):
     """Class definition for the hgnc_mgd table."""
 
-    __tablename__ = 'hgnc_mgd'
+    __tablename__ = "hgnc_mgd"
     id = Column(Integer, primary_key=True)
 
     identifier = Column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="mgds")
 
     def __str__(self):
@@ -369,12 +369,12 @@ class Mgd(Base):
 class Lsdb(Base):
     """Class definition for the hgnc_lsdb table."""
 
-    __tablename__ = 'hgnc_lsdb'
+    __tablename__ = "hgnc_lsdb"
     id = Column(Integer, primary_key=True)
 
     identifier = Column(Text)
 
-    hgnc_id = Column(Integer, ForeignKey('hgnc.id'))
+    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="lsdbs")
 
     def __str__(self):

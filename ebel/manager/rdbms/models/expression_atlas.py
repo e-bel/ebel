@@ -11,7 +11,7 @@ Base = declarative_base()
 class Experiment(Base):
     """Table definition for experiment."""
 
-    __tablename__ = 'expression_atlas_experiment'
+    __tablename__ = "expression_atlas_experiment"
 
     id = Column(Integer, primary_key=True)
 
@@ -25,23 +25,26 @@ class Experiment(Base):
     def as_dict(self):
         """Convert object values to dictionary."""
         experiment = object_as_dict(self)
-        experiment.update({'idfs': {idf.key_name: idf.value for idf in self.idfs}})
-        gc = [{'groups': x.group_comparison, 'name': x.name, 'id': x.id} for x in self.group_comparisons]
-        experiment.update({'group_comparison': gc})
+        experiment.update({"idfs": {idf.key_name: idf.value for idf in self.idfs}})
+        gc = [
+            {"groups": x.group_comparison, "name": x.name, "id": x.id}
+            for x in self.group_comparisons
+        ]
+        experiment.update({"group_comparison": gc})
         return experiment
 
 
 class Idf(Base):
     """Table definition for IDF."""
 
-    __tablename__ = 'expression_atlas_idf'
+    __tablename__ = "expression_atlas_idf"
 
     id = Column(Integer, primary_key=True)
 
     key_name = Column(Text, nullable=False)
     value = Column(Text, nullable=False)
 
-    experiment_id = Column(Integer, ForeignKey('expression_atlas_experiment.id'))
+    experiment_id = Column(Integer, ForeignKey("expression_atlas_experiment.id"))
     experiment = relationship("Experiment", back_populates="idfs")
 
     def as_dict(self):
@@ -52,11 +55,11 @@ class Idf(Base):
 class GroupComparison(Base):
     """Table definition for group comparison."""
 
-    __tablename__ = 'expression_atlas_group_comparison'
+    __tablename__ = "expression_atlas_group_comparison"
 
     id = Column(Integer, primary_key=True)
 
-    experiment_id = Column(Integer, ForeignKey('expression_atlas_experiment.id'))
+    experiment_id = Column(Integer, ForeignKey("expression_atlas_experiment.id"))
     experiment = relationship("Experiment", back_populates="group_comparisons")
 
     group_comparison = Column(String(100))
@@ -73,7 +76,7 @@ class GroupComparison(Base):
 class FoldChange(Base):
     """Table definition for fold changes."""
 
-    __tablename__ = 'expression_atlas_foldchange'
+    __tablename__ = "expression_atlas_foldchange"
 
     id = Column(Integer, primary_key=True)
 
@@ -83,7 +86,9 @@ class FoldChange(Base):
     p_value = Column(Float, index=True)
     t_statistic = Column(Float)
 
-    group_comparison_id = Column(Integer, ForeignKey('expression_atlas_group_comparison.id'))
+    group_comparison_id = Column(
+        Integer, ForeignKey("expression_atlas_group_comparison.id")
+    )
     group_comparison = relationship("GroupComparison", back_populates="fold_changes")
 
     def as_dict(self):
@@ -94,11 +99,11 @@ class FoldChange(Base):
 class SdrfCondensed(Base):
     """Table definition for SDRF condensed."""
 
-    __tablename__ = 'expression_atlas_sdrf_condensed'
+    __tablename__ = "expression_atlas_sdrf_condensed"
 
     id = Column(Integer, primary_key=True)
 
-    experiment_id = Column(Integer, ForeignKey('expression_atlas_experiment.id'))
+    experiment_id = Column(Integer, ForeignKey("expression_atlas_experiment.id"))
     experiment = relationship("Experiment", back_populates="sdrf_condenseds")
 
     method = Column(String(255))
@@ -116,11 +121,13 @@ class SdrfCondensed(Base):
 class Gsea(Base):
     """Table definition for Genset enrichment table."""
 
-    __tablename__ = 'expression_atlas_gsea'
+    __tablename__ = "expression_atlas_gsea"
 
     id = Column(Integer, primary_key=True)
 
-    group_comparison_id = Column(Integer, ForeignKey('expression_atlas_group_comparison.id'))
+    group_comparison_id = Column(
+        Integer, ForeignKey("expression_atlas_group_comparison.id")
+    )
     group_comparison = relationship("GroupComparison", back_populates="gseas")
 
     term = Column(String(255), index=True)

@@ -24,7 +24,13 @@ from sqlalchemy_utils import create_database, database_exists
 
 from ebel import parser
 from ebel.tools import BelRdb
-from ebel.constants import GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_NS, GRAMMAR_START_ANNO, URL, FILE
+from ebel.constants import (
+    GRAMMAR_NS_ANNO_PATH,
+    GRAMMAR_START_NS,
+    GRAMMAR_START_ANNO,
+    URL,
+    FILE,
+)
 
 
 Base = declarative_base()
@@ -57,7 +63,7 @@ def foreign_key_to(table_name):
     :return: foreign key column
     :rtype: sqlalchemy.Column
     """
-    foreign_column = table_name + '.id'
+    foreign_column = table_name + ".id"
     return Column(Integer, ForeignKey(foreign_column))
 
 
@@ -72,18 +78,18 @@ class MasterModel(object):
         """Return name of class table."""
         return self.__name__.lower()
 
-    __mapper_args__ = {'always_refresh': True}
+    __mapper_args__ = {"always_refresh": True}
 
     id = Column(Integer, primary_key=True)
 
     def _to_dict(self):
         """Protected method for converting values to dictionary."""
         data_dict = self.__dict__.copy()
-        del data_dict['_sa_instance_state']
-        del data_dict['id']
+        del data_dict["_sa_instance_state"]
+        del data_dict["id"]
         for k, v in data_dict.items():
             if isinstance(v, datetime.date):
-                data_dict[k] = data_dict[k].strftime('%Y-%m-%d')
+                data_dict[k] = data_dict[k].strftime("%Y-%m-%d")
         return data_dict
 
     def to_dict(self):
@@ -114,8 +120,8 @@ class NamespaceEntry(Base, MasterModel):
     name = Column(String(2048), nullable=True)
     encoding = Column(String(8), nullable=True)
 
-    namespace__id = foreign_key_to('namespace')
-    namespace = relationship('Namespace', back_populates="entries")
+    namespace__id = foreign_key_to("namespace")
+    namespace = relationship("Namespace", back_populates="entries")
 
 
 class Annotation(Base, MasterModel):
@@ -129,7 +135,9 @@ class Annotation(Base, MasterModel):
     cacheable = Column(Boolean)
     case_sensitive = Column(Boolean)
 
-    entries = relationship("AnnotationEntry", back_populates="annotation", cascade="all, delete-orphan")
+    entries = relationship(
+        "AnnotationEntry", back_populates="annotation", cascade="all, delete-orphan"
+    )
 
 
 class AnnotationEntry(Base, MasterModel):
@@ -141,8 +149,8 @@ class AnnotationEntry(Base, MasterModel):
     name = Column(String(2048), nullable=True)
     identifier = Column(String(255), nullable=True)
 
-    annotation__id = foreign_key_to('annotation')
-    annotation = relationship('Annotation', back_populates="entries")
+    annotation__id = foreign_key_to("annotation")
+    annotation = relationship("Annotation", back_populates="entries")
 
 
 class ModelManager:
@@ -163,8 +171,9 @@ class ModelManager:
 
         self.errors = []
 
-    def get_entries_not_exists(self, keyword: str, url: str,
-                               entry_line_column_list) -> List[Tuple[str, int, int, str]]:
+    def get_entries_not_exists(
+        self, keyword: str, url: str, entry_line_column_list
+    ) -> List[Tuple[str, int, int, str]]:
         """Get entries in namespace or annotation linked to URL for entry_line_column_list(generator).
 
         Parameters
@@ -187,53 +196,76 @@ class ModelManager:
 
         names_not_exists = []
 
-        search_for = self.session.query(self.model.id).filter(self.model.keyword == keyword, self.model.url == url)
+        search_for = self.session.query(self.model.id).filter(
+            self.model.keyword == keyword, self.model.url == url
+        )
 
-        desc = 'Check BEL for {}: '.format(keyword)
+        desc = "Check BEL for {}: ".format(keyword)
 
-        for entry, line, column in tqdm(list(entry_line_column_list), desc=desc, ncols=100):
-
+        for entry, line, column in tqdm(
+            list(entry_line_column_list), desc=desc, ncols=100
+        ):
             if entry in not_exists_cache:
                 hint = not_exists_cache[entry]
                 names_not_exists.append((entry, line, column, hint))
 
             elif (keyword, url, entry) not in exists_cache:
-
-                exists = search_for.join(self.entries_model).filter(self.entries_model.name == entry).count()
+                exists = (
+                    search_for.join(self.entries_model)
+                    .filter(self.entries_model.name == entry)
+                    .count()
+                )
 
                 if exists:
                     exists_cache.update(set([(keyword, url, entry)]))
                 else:
                     hint = ""
-                    alternatives = self.session.query(
-                        self.entries_model.name,
-                        self.model.keyword,
-                        self.model.url
-                    ).join(self.model).filter(self.entries_model.name.like(entry)).all()
+                    alternatives = (
+                        self.session.query(
+                            self.entries_model.name, self.model.keyword, self.model.url
+                        )
+                        .join(self.model)
+                        .filter(self.entries_model.name.like(entry))
+                        .all()
+                    )
 
                     if alternatives:
                         hint = "Did you mean: "
-                        hint += ", ".join([x[1] + ":\"" + x[0] + "\"(" + x[2] + ")" for x in alternatives])
+                        hint += ", ".join(
+                            [
+                                x[1] + ':"' + x[0] + '"(' + x[2] + ")"
+                                for x in alternatives
+                            ]
+                        )
 
                     else:
                         if len(entry) >= 6:
-                            similars = self.session.query(
-                                self.entries_model.name,
-                                self.model.keyword
-                            )\
-                                .join(self.model)\
-                                .filter(self.entries_model.name.like(entry[:-2] + "%"))\
-                                .filter(func.length(self.entries_model.name) < len(entry) + 3)\
-                                .limit(20)\
+                            similars = (
+                                self.session.query(
+                                    self.entries_model.name, self.model.keyword
+                                )
+                                .join(self.model)
+                                .filter(self.entries_model.name.like(entry[:-2] + "%"))
+                                .filter(
+                                    func.length(self.entries_model.name)
+                                    < len(entry) + 3
+                                )
+                                .limit(20)
                                 .all()
+                            )
 
                             if similars:
                                 hint = "Similar: "
-                                hint += ", ".join([x[1] + ":\"" + x[0] + "\"" for x in set(similars)])
+                                hint += ", ".join(
+                                    [x[1] + ':"' + x[0] + '"' for x in set(similars)]
+                                )
 
                     if not hint:
-                        url_query_string = urlencode({'q': entry}, quote_via=quote_plus)
-                        hint = "[OLS suggests](https://www.ebi.ac.uk/ols/search?%s)" % url_query_string
+                        url_query_string = urlencode({"q": entry}, quote_via=quote_plus)
+                        hint = (
+                            "[OLS suggests](https://www.ebi.ac.uk/ols/search?%s)"
+                            % url_query_string
+                        )
 
                     names_not_exists.append((entry, line, column, hint))
                     not_exists_cache[entry] = hint
@@ -262,7 +294,7 @@ class ModelManager:
             r = requests.get(url)
             r.raise_for_status()
 
-            open(path_to_file, 'wb').write(r.content)
+            open(path_to_file, "wb").write(r.content)
 
         except requests.exceptions.HTTPError as ex:
             return False, ex
@@ -271,7 +303,10 @@ class ModelManager:
             return False, ex
 
         except FileNotFoundError as urlex:
-            return False, f"{str(urlex)}\n{url} does not return a valid belns or belanno file"
+            return (
+                False,
+                f"{str(urlex)}\n{url} does not return a valid belns or belanno file",
+            )
 
         return True, path_to_file
 
@@ -292,7 +327,7 @@ class ModelManager:
         """
         header = ""
         ends_in_line = 0
-        with codecs.open(file_path, 'r', encoding="utf-8") as fd:
+        with codecs.open(file_path, "r", encoding="utf-8") as fd:
             for line in fd:
                 ends_in_line += 1
                 if not re.search(r"^[ \t]*(\[Values\])\s*(\r\n|\r|\n)", line):
@@ -322,7 +357,6 @@ class ModelManager:
         path_to_file = None
 
         if doc_type == URL:
-
             downloaded, path_to_file_or_error = self.download_url(url_or_path)
 
             if not downloaded:
@@ -333,17 +367,20 @@ class ModelManager:
                 path_to_file = path_to_file_or_error
 
         elif doc_type == FILE:
-
             path_to_file = url_or_path
 
-        saved, save_error = self.save_in_db(path_to_file=path_to_file, url=url_or_path, keyword=keyword)
+        saved, save_error = self.save_in_db(
+            path_to_file=path_to_file, url=url_or_path, keyword=keyword
+        )
 
         if doc_type == URL:
             os.remove(path_to_file)
 
         return saved, save_error
 
-    def save_in_db(self, path_to_file: str, url: str, keyword: str) -> Tuple[bool, Optional[Exception]]:
+    def save_in_db(
+        self, path_to_file: str, url: str, keyword: str
+    ) -> Tuple[bool, Optional[Exception]]:
         """Save content of namespace or annotation file from URL with keyword in database.
 
         Parameters
@@ -370,43 +407,50 @@ class ModelManager:
         except Exception as e:
             return False, e
 
-        delimiter = parser.first_token_value(tree, 'pr_delimiter_string')
-        case_sensitive = parser.first_token_value(tree, 'pr_case_sensitive_flag')
-        cacheable = parser.first_token_value(tree, 'pr_cacheable_flag')
+        delimiter = parser.first_token_value(tree, "pr_delimiter_string")
+        case_sensitive = parser.first_token_value(tree, "pr_case_sensitive_flag")
+        cacheable = parser.first_token_value(tree, "pr_cacheable_flag")
         is_case_sensitive = False if re.search("no", case_sensitive, re.I) else False
         is_cacheable = False if re.search("no", cacheable, re.I) else True
 
-        keyword_in_anno = parser.first_token_value(tree, 'keyword')
+        keyword_in_anno = parser.first_token_value(tree, "keyword")
         if keyword != keyword_in_anno:
             warning = f"Keyword {keyword} in BEL namespace URL {url} is different from keyword in BEL script"
             logger.warning(warning)
             # ToDo save in Error classes
             self.errors += [warning]
 
-        model_instance = self.model(url=url,
-                                    keyword=keyword,
-                                    cacheable=is_cacheable,
-                                    case_sensitive=is_case_sensitive)
+        model_instance = self.model(
+            url=url,
+            keyword=keyword,
+            cacheable=is_cacheable,
+            case_sensitive=is_case_sensitive,
+        )
         self.session.add(model_instance)
         self.session.commit()
 
-        table_name = self.name + '_entry'
-        second = {'annotation': 'identifier', 'namespace': 'encoding'}
+        table_name = self.name + "_entry"
+        second = {"annotation": "identifier", "namespace": "encoding"}
         second_column = second[self.name]
 
-        df = pd.read_csv(path_to_file,
-                         delimiter=delimiter,
-                         skip_blank_lines=True,
-                         skiprows=header_ends_in_line,
-                         names=['name', second_column],
-                         encoding_errors="ignore",
-                         )
-        df[self.name + '__id'] = model_instance.id
-        df.set_index(['name', second_column], inplace=True)
+        df = pd.read_csv(
+            path_to_file,
+            delimiter=delimiter,
+            skip_blank_lines=True,
+            skiprows=header_ends_in_line,
+            names=["name", second_column],
+            encoding_errors="ignore",
+        )
+        df[self.name + "__id"] = model_instance.id
+        df.set_index(["name", second_column], inplace=True)
 
-        logger.info(f"Import `{keyword}` table '{table_name}' of engine '{self.session.bind.engine}'")
+        logger.info(
+            f"Import `{keyword}` table '{table_name}' of engine '{self.session.bind.engine}'"
+        )
 
-        df.to_sql(table_name, self.session.bind.engine, if_exists="append", chunksize=1000)
+        df.to_sql(
+            table_name, self.session.bind.engine, if_exists="append", chunksize=1000
+        )
         self.session.commit()
         return True, None
 
@@ -427,8 +471,8 @@ class ModelManager:
 
         """
         result = self.session.query(self.model).filter(
-            self.model.keyword == keyword,
-            self.model.url == url)
+            self.model.keyword == keyword, self.model.url == url
+        )
 
         if result.count() == 0:
             exists = False
@@ -449,9 +493,11 @@ class NamespaceManager(ModelManager):
 
     def __int__(self, session_obj):
         """Init method."""
-        super(NamespaceManager, self).__int__(model=Namespace,
-                                              entries_model=NamespaceEntry,
-                                              grammar_start=GRAMMAR_START_NS)
+        super(NamespaceManager, self).__int__(
+            model=Namespace,
+            entries_model=NamespaceEntry,
+            grammar_start=GRAMMAR_START_NS,
+        )
 
 
 class AnnotationManager(ModelManager):
@@ -459,6 +505,8 @@ class AnnotationManager(ModelManager):
 
     def __int__(self, session_obj):
         """Init method."""
-        super(AnnotationManager, self).__int__(model=Annotation,
-                                               entries_model=AnnotationEntry,
-                                               grammar_start=GRAMMAR_START_ANNO)
+        super(AnnotationManager, self).__int__(
+            model=Annotation,
+            entries_model=AnnotationEntry,
+            grammar_start=GRAMMAR_START_ANNO,
+        )

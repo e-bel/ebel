@@ -38,16 +38,25 @@ class RDBMS:
 class OdbRequest:
     """OrientDB class definition for interfacing with the ODB server."""
 
-    def __init__(self, request_query_dict: Dict[str, Dict[str, Dict[str, Union[str, int, bool, float, None]]]]):
+    def __init__(
+        self,
+        request_query_dict: Dict[
+            str, Dict[str, Dict[str, Union[str, int, bool, float, None]]]
+        ],
+    ):
         """Init method."""
         self.__request_query_dict = request_query_dict
         if self.validate():
             self.__odb_classes = request_query_dict
         else:
-            raise TypeError("RequestQuery must be initialized with Dict[str, Dict[str, Dict[str, str]]]")
+            raise TypeError(
+                "RequestQuery must be initialized with Dict[str, Dict[str, Dict[str, str]]]"
+            )
 
     @property
-    def odb_classes(self) -> Dict[str, Dict[str, Dict[str, Union[str, int, bool, float, None]]]]:
+    def odb_classes(
+        self,
+    ) -> Dict[str, Dict[str, Dict[str, Union[str, int, bool, float, None]]]]:
         """Return ODB classes: structure: {'odb_class', {'odb_column': {'option':str, 'value': str}, ...}}}."""
         return self.__odb_classes
 
@@ -55,13 +64,20 @@ class OdbRequest:
         """Check if request_query_dict is correct."""
         validated: bool = False
         if isinstance(self.__request_query_dict, Dict):
-            for odb_class, column_params in self.__request_query_dict.items():  # k=ODB class, v=columns
+            for (
+                odb_class,
+                column_params,
+            ) in self.__request_query_dict.items():  # k=ODB class, v=columns
                 if isinstance(odb_class, str) and isinstance(column_params, Dict):
                     for column_name, value_option_dict in column_params.items():
                         if isinstance(value_option_dict, Dict):
-                            keywords_exists = {'value', 'option'}.issubset(set(value_option_dict.keys()))
-                            value_types_ok = isinstance(value_option_dict['value'],
-                                                        (str, int, bool, float, type(None)))
+                            keywords_exists = {"value", "option"}.issubset(
+                                set(value_option_dict.keys())
+                            )
+                            value_types_ok = isinstance(
+                                value_option_dict["value"],
+                                (str, int, bool, float, type(None)),
+                            )
                             if keywords_exists and value_types_ok:
                                 validated = True
         return validated
@@ -70,7 +86,9 @@ class OdbRequest:
 class TabColSelectSql:
     """Formatter for OrientDb SQL columns Select part."""
 
-    def __init__(self, odbclass_columns_dict, with_rids: bool = True, with_class: bool = True):
+    def __init__(
+        self, odbclass_columns_dict, with_rids: bool = True, with_class: bool = True
+    ):
         """Init method."""
         self.odbclass_columns_dict = odbclass_columns_dict
         self.with_rids = with_rids
@@ -95,8 +113,10 @@ class TabColSelectSql:
             if self.with_class:
                 sql_list.append(sql_class.format(odb_class=odb_class))
             for column in columns:
-                sql_list.append(f"{odb_class}.{column} as {odb_class}__{column.replace('.', '_')}")
-        return ', '.join(sql_list)
+                sql_list.append(
+                    f"{odb_class}.{column} as {odb_class}__{column.replace('.', '_')}"
+                )
+        return ", ".join(sql_list)
 
 
 class ValueOption:
@@ -107,7 +127,9 @@ class ValueOption:
         self.value = value
         self.option = option
 
-    def get_operator_value_sql_string(self, dialect: Union[str, None] = None) -> Union[str, None]:
+    def get_operator_value_sql_string(
+        self, dialect: Union[str, None] = None
+    ) -> Union[str, None]:
         """Get "operator value" part of a WHERE SQL statement.
 
         Option is translated to dialect specific Operator like 'exact' to '='. Value will be escaped.
@@ -128,32 +150,32 @@ class ValueOption:
         """
         if self.value:
             if isinstance(self.value, str):
-                search_value = escape_string(self.value.strip(), 'utf-8')
+                search_value = escape_string(self.value.strip(), "utf-8")
 
             else:
                 search_value = self.value
 
-            if self.option in ['=', 'exact']:
-                operator = '='
+            if self.option in ["=", "exact"]:
+                operator = "="
 
-            elif self.option == 'regular expression':
-                operator = 'RLIKE'
+            elif self.option == "regular expression":
+                operator = "RLIKE"
 
             else:
-                operator = 'LIKE'
+                operator = "LIKE"
 
             option_choices = {
                 "exact": f"'{self.value}'",
                 "contains": f"'%{self.value}%'",
                 "starts with": f"'{self.value}%'",
                 "ends with": f"'{self.value}%'",
-                "regular expression": f"'{self.value}'"
+                "regular expression": f"'{self.value}'",
             }
 
             if self.option in option_choices:
                 search_value = option_choices[self.option]
 
-            elif self.option in ['>', '>=', '<=', '<']:
+            elif self.option in [">", ">=", "<=", "<"]:
                 operator = self.option
 
             elif operator == "LIKE":
@@ -162,9 +184,9 @@ class ValueOption:
             return f"{operator} {search_value}"
 
 
-def get_sql_match(odb_request: OdbRequest,
-                  columns_dict: Dict[str, List[str]],
-                  match_template: str) -> str:
+def get_sql_match(
+    odb_request: OdbRequest, columns_dict: Dict[str, List[str]], match_template: str
+) -> str:
     """Return an OrientDB match string.
 
     Example:
@@ -198,17 +220,23 @@ def get_sql_match(odb_request: OdbRequest,
         if odb_request.odb_classes.get(odb_class):
             where_array = []
             for column, values in odb_request.odb_classes[odb_class].items():
-                if values['value']:
-                    operator_value_string = ValueOption(**values).get_operator_value_sql_string()
+                if values["value"]:
+                    operator_value_string = ValueOption(
+                        **values
+                    ).get_operator_value_sql_string()
                     if operator_value_string:
                         where_array.append(f"`{column}` {operator_value_string}")
-            where_dict[odb_class] = ", where:(" + " and ".join(where_array) + ")" if where_array else ''
+            where_dict[odb_class] = (
+                ", where:(" + " and ".join(where_array) + ")" if where_array else ""
+            )
 
     sql_match = match_template.format(**where_dict)
     return sql_match
 
 
-def get_odb_results(query_request: OdbRequest, class_column_dict: dict, sql_match_template: str):
+def get_odb_results(
+    query_request: OdbRequest, class_column_dict: dict, sql_match_template: str
+):
     """Return OrientDB results for a given query."""
     query_get_dict = Bel().query_get_dict
     select_sql = TabColSelectSql(class_column_dict)
@@ -223,7 +251,9 @@ def get_odb_results(query_request: OdbRequest, class_column_dict: dict, sql_matc
     return results
 
 
-def get_odb_options(column: str, query_request: OdbRequest, class_column_dict, sql_match_template) -> List[str]:
+def get_odb_options(
+    column: str, query_request: OdbRequest, class_column_dict, sql_match_template
+) -> List[str]:
     """Short summary.
 
     Returns
@@ -241,6 +271,6 @@ def get_odb_options(column: str, query_request: OdbRequest, class_column_dict, s
         ({sql_match}
         return {column} as option) where option IS NOT NULL and option!='' order by option"""
 
-    results = [str(x.oRecordData.get('option')) for x in client.command(query_string)]
+    results = [str(x.oRecordData.get("option")) for x in client.command(query_string)]
 
     return results

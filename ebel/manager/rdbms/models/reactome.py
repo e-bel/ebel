@@ -10,7 +10,7 @@ Base = declarative_base()
 class Reactome(Base):
     """Class definition for the reactome table."""
 
-    __tablename__ = 'reactome'
+    __tablename__ = "reactome"
     id = Column(Integer, primary_key=True)
     identifier = Column(String(50), index=True)
     uniprot_accession = Column(String(50), index=True)

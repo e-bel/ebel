@@ -22,14 +22,32 @@ from ebel.constants import GRAMMAR_START_LINE, GRAMMAR_BEL_PATH
 # TODO: check all strings if they can be stored in constants
 
 # Following trees (rules in grammar) have one 1 value. This list is use in creation of json file
-trees_with_one_value = ("document_name", "document_version", "document_description", "document_copyright",
-                        "document_authors", "document_licences", "document_contact_info", "keyword", "anno_keyword",
-                        "c_type", "c_title", "c_ref", "evidence", "frag_range", "frag_descriptor", "hgvs",
-                        "gene_fusion_range", "rna_fusion_range", "protein_fusion_range", "document_keywords")
+trees_with_one_value = (
+    "document_name",
+    "document_version",
+    "document_description",
+    "document_copyright",
+    "document_authors",
+    "document_licences",
+    "document_contact_info",
+    "keyword",
+    "anno_keyword",
+    "c_type",
+    "c_title",
+    "c_ref",
+    "evidence",
+    "frag_range",
+    "frag_descriptor",
+    "hgvs",
+    "gene_fusion_range",
+    "rna_fusion_range",
+    "protein_fusion_range",
+    "document_keywords",
+)
 
 
 # Exclude this token types if json of created
-exclude_token_types = ('OB', 'CB', 'QM', 'COLON', 'COMMA', 'OCB', 'CCB')
+exclude_token_types = ("OB", "CB", "QM", "COLON", "COMMA", "OCB", "CCB")
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +68,7 @@ def load_grammar(grammar_path):
     """
     # FIXME: something to do here
     logger.info("load grammar {}".format(grammar_path))
-    with codecs.open(grammar_path, 'r', encoding="utf-8") as fd_grammar:
+    with codecs.open(grammar_path, "r", encoding="utf-8") as fd_grammar:
         grammar = fd_grammar.read()
     fd_grammar.close()
     return grammar
@@ -76,7 +94,9 @@ def first_token_value(tree: Tree, subtree_name: str) -> str:
 
     for subtree in tree.iter_subtrees():
         if subtree.data == subtree_name:
-            return [node.value for node in subtree.children if isinstance(node, Token)][0]
+            return [node.value for node in subtree.children if isinstance(node, Token)][
+                0
+            ]
 
 
 def first_real_token_value(tokens: List[Token], purge: bool) -> str:
@@ -102,8 +122,8 @@ def first_real_token_value(tokens: List[Token], purge: bool) -> str:
 
 def camel_case(name: str) -> str:
     """Camel case a string."""
-    first, *rest = name.split('_')
-    return first + ''.join(word.capitalize() for word in rest)
+    first, *rest = name.split("_")
+    return first + "".join(word.capitalize() for word in rest)
 
 
 def tupleit(lst: list) -> tuple:
@@ -117,7 +137,6 @@ def to_tuple(py_obj: Any) -> tuple:
 
     # check if instance is dict, str, Iterable or something different
     if isinstance(py_obj, dict):
-
         for k, v in py_obj.items():
             lst.append((k, to_tuple(v)))
 
@@ -148,7 +167,7 @@ def get_values(childs: list, num_expected_values=0) -> list:
     """
     values = [x.value for x in childs if x.type not in exclude_token_types]
     if num_expected_values:
-        values = values + [''] * (num_expected_values - len(values))
+        values = values + [""] * (num_expected_values - len(values))
     return values
 
 
@@ -177,7 +196,9 @@ def append_to_list(py_tree, rule_name, value):
 
     if rule_name_exists:
         if value not in py_tree[rule_name_index][rule_name]:
-            py_tree[rule_name_index][rule_name] = sorted(py_tree[rule_name_index][rule_name] + [value])
+            py_tree[rule_name_index][rule_name] = sorted(
+                py_tree[rule_name_index][rule_name] + [value]
+            )
     else:
         py_tree.append({rule_name: [value]})
 
@@ -268,7 +289,9 @@ class _BELParser:
     """class manage the parsing with python lib lark-parser."""
 
     @staticmethod
-    def check_bel_script_line_by_line(bel_script_path: str, bel_version: str) -> List[str]:
+    def check_bel_script_line_by_line(
+        bel_script_path: str, bel_version: str
+    ) -> List[str]:
         """Check BEL script line by line.
 
         Parameters
@@ -283,32 +306,34 @@ class _BELParser:
         List[str]
             List of errors found in BEL script.
         """
-        logger.info("Start syntax check for {} line by line with grammar BEL {}".format(
-            bel_script_path, bel_version))
+        logger.info(
+            "Start syntax check for {} line by line with grammar BEL {}".format(
+                bel_script_path, bel_version
+            )
+        )
         errors = []
 
         grammar = load_grammar(GRAMMAR_BEL_PATH[str(bel_version)])
 
-        parser = Lark(grammar,
-                      start=GRAMMAR_START_LINE,
-                      parser='lalr',
-                      lexer="contextual")
+        parser = Lark(
+            grammar, start=GRAMMAR_START_LINE, parser="lalr", lexer="contextual"
+        )
 
         cached_line = ""
-        with codecs.open(bel_script_path, 'r', encoding="utf-8") as fd:
-
+        with codecs.open(bel_script_path, "r", encoding="utf-8") as fd:
             lines = fd.readlines()
-            if not re.search('(\n|\r|\r\n)$', lines[-1]):
+            if not re.search("(\n|\r|\r\n)$", lines[-1]):
                 lines[-1] += "\n"
 
             num_and_lines = OrderedDict(enumerate(lines, 1))
 
             for line_num, line in copy(num_and_lines).items():
-
-                if re.search(r'\\\s*(\n|\r|\r\n)$', line):
-
-                    num_and_lines[line_num + 1] = num_and_lines[line_num].strip()[:-1] + " " + \
-                        num_and_lines[line_num + 1]
+                if re.search(r"\\\s*(\n|\r|\r\n)$", line):
+                    num_and_lines[line_num + 1] = (
+                        num_and_lines[line_num].strip()[:-1]
+                        + " "
+                        + num_and_lines[line_num + 1]
+                    )
                     del num_and_lines[line_num]
 
             for line_number, line in num_and_lines.items():
@@ -318,14 +343,17 @@ class _BELParser:
                         continue
 
                     elif cached_line:
-
                         if not line.endswith("\\n"):
                             try:
                                 cached_line += line
                                 parser.parse(cached_line)
 
                             except (UnexpectedInput, UnexpectedToken) as exc1:
-                                errors.append(BelSyntaxError(exc1, line_number, cached_line.strip()))
+                                errors.append(
+                                    BelSyntaxError(
+                                        exc1, line_number, cached_line.strip()
+                                    )
+                                )
 
                             cached_line = ""
                             continue
@@ -342,9 +370,9 @@ class _BELParser:
 
         return errors
 
-    def check_bel_script(self, bel_script_path: str,
-                         bel_version: str,
-                         force_new_db: bool = False) -> dict:
+    def check_bel_script(
+        self, bel_script_path: str, bel_version: str, force_new_db: bool = False
+    ) -> dict:
         """Check file with BEL script for syntax correctness.
 
         Parameters
@@ -366,18 +394,20 @@ class _BELParser:
         if bel_version.startswith("2"):  # TODO change this hardcoded value
             transformer = _BelTransformer()
         else:
-            logger.error(f"Transformer for version {bel_version} not implemented", exc_info=True)
+            logger.error(
+                f"Transformer for version {bel_version} not implemented", exc_info=True
+            )
             raise
 
         parser = Lark(
             grammar,
-            start='script',
-            parser='lalr',
+            start="script",
+            parser="lalr",
             lexer="contextual",
-            transformer=transformer
+            transformer=transformer,
         )
 
-        with codecs.open(bel_script_path, 'r', encoding="utf-8") as fd:
+        with codecs.open(bel_script_path, "r", encoding="utf-8") as fd:
             bel_content = fd.read() + "\n"
         fd.close()
 
@@ -393,9 +423,7 @@ class _BELParser:
             logger.info("UnexpectedInput exception in check_bel_script: %s" % exc)
             errors = self.check_bel_script_line_by_line(bel_script_path, bel_version)
 
-        return {'errors': errors,
-                'tree': tree,
-                'warnings': warnings}
+        return {"errors": errors, "tree": tree, "warnings": warnings}
 
 
 def write_error_report(data_frame: DataFrame, file_path: str) -> None:
@@ -413,7 +441,7 @@ def write_error_report(data_frame: DataFrame, file_path: str) -> None:
     type
         Description of returned object.
     """
-    if file_path.endswith('.xlsx'):
+    if file_path.endswith(".xlsx"):
         data_frame.to_excel(file_path)
     else:
         data_frame.to_csv(file_path)
@@ -430,7 +458,7 @@ def write_warning_report(data_frame: DataFrame, file_path: str) -> None:
         file path to error report.
 
     """
-    if file_path.endswith('.xlsx'):
+    if file_path.endswith(".xlsx"):
         data_frame.to_excel(file_path)
     else:
         data_frame.to_csv(file_path)
@@ -459,9 +487,7 @@ def check_bel_script_line_by_line(bel_script_path, error_report_file_path, bel_v
         return data_frame
 
 
-def check_bel_script(bel_script_path,
-                     bel_version,
-                     force_new_db=False) -> dict:
+def check_bel_script(bel_script_path, bel_version, force_new_db=False) -> dict:
     """Check BEL script.
 
     Parameters
@@ -482,7 +508,7 @@ def check_bel_script(bel_script_path,
     result = bel_parser.check_bel_script(
         bel_script_path=bel_script_path,
         force_new_db=force_new_db,
-        bel_version=bel_version
+        bel_version=bel_version,
     )
 
     return result

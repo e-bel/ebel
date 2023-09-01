@@ -15,9 +15,18 @@ from ebel.config import write_to_config
 from ebel.warnings import AlsoUsedInOtherNamespace, _Warning
 from ebel.constants import URL, PATTERN, LIST, ALLOWED_TYPES
 from ebel.constants import GRAMMAR_START_NS, GRAMMAR_START_ANNO
-from ebel.errors import NotInNamespaceUrl, NotInAnnotationUrl, WithoutDefinedNamespace, \
-    WithoutDefinedAnnotation, NotInNamespaceList, NotInAnnotationList, \
-    NotInNamespacePattern, NotInAnnotationPattern, NotDownloadedFromUrl, _Error
+from ebel.errors import (
+    NotInNamespaceUrl,
+    NotInAnnotationUrl,
+    WithoutDefinedNamespace,
+    WithoutDefinedAnnotation,
+    NotInNamespaceList,
+    NotInAnnotationList,
+    NotInNamespacePattern,
+    NotInAnnotationPattern,
+    NotDownloadedFromUrl,
+    _Error,
+)
 
 # TODO: Because of change of `BelScript.ALLOWED_TYPES` FILE have to be handled on different way
 
@@ -26,19 +35,26 @@ logger = logging.getLogger(__name__)
 
 def set_mysql_interactive() -> tuple:
     """Interactive mode to setup MySQL database."""
-    print("Interactive mode\n \
+    print(
+        "Interactive mode\n \
           ================\n \
-          1st setup of db and user with root:\n")
-    host = input("host[localhost]:") or 'localhost'
-    user = input("ebel user[ebel]:") or 'ebel'
-    password = getpass.getpass(prompt="ebel password[ebel]:") or 'ebel'
-    db = input("database name[ebel]") or 'ebel'
-    print("If you want to setup the database automatically,\n \
-          then type in the root password, otherwise nothing")
-    root_pwd = getpass.getpass(prompt='root password (only for 1st setup):')
+          1st setup of db and user with root:\n"
+    )
+    host = input("host[localhost]:") or "localhost"
+    user = input("ebel user[ebel]:") or "ebel"
+    password = getpass.getpass(prompt="ebel password[ebel]:") or "ebel"
+    db = input("database name[ebel]") or "ebel"
+    print(
+        "If you want to setup the database automatically,\n \
+          then type in the root password, otherwise nothing"
+    )
+    root_pwd = getpass.getpass(prompt="root password (only for 1st setup):")
 
     if root_pwd:
-        root_host = getpass.getpass(prompt='IP or name mysql server [localhost]:') or 'localhost'
+        root_host = (
+            getpass.getpass(prompt="IP or name mysql server [localhost]:")
+            or "localhost"
+        )
         conn = pymysql.connect(host=root_host, user="root", password=root_pwd)
         c = conn.cursor()
         db_exists = c.execute("show databases like '{}'".format(db))
@@ -61,9 +77,15 @@ def set_mysql_interactive() -> tuple:
         else:
             logger.warning(f"Database '{db}' already exists!")
 
-        privileges_exists = c.execute("Select 1 from mysql.db where User='{}' and Db='{}'".format(user, db))
+        privileges_exists = c.execute(
+            "Select 1 from mysql.db where User='{}' and Db='{}'".format(user, db)
+        )
         if not privileges_exists:
-            c.execute("GRANT ALL PRIVILEGES ON {}.* TO '{}'@'%'  IDENTIFIED BY '{}'".format(db, user, password))
+            c.execute(
+                "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'%'  IDENTIFIED BY '{}'".format(
+                    db, user, password
+                )
+            )
         else:
             logger.warning(f"User already has privileges for database '{db}'")
 
@@ -72,11 +94,13 @@ def set_mysql_interactive() -> tuple:
     return host, user, password, db
 
 
-def set_mysql_connection(host: str = 'localhost',
-                         user: str = 'ebel_user',
-                         password: str = 'ebel_passwd',
-                         db: str = 'ebel',
-                         charset: str = 'utf8mb4'):
+def set_mysql_connection(
+    host: str = "localhost",
+    user: str = "ebel_user",
+    password: str = "ebel_passwd",
+    db: str = "ebel",
+    charset: str = "utf8mb4",
+):
     """Set the connection using MySQL Parameters.
 
     Parameters
@@ -98,12 +122,11 @@ def set_mysql_connection(host: str = 'localhost',
         SQLAlchemy MySQL connection string.
 
     """
-    connection_string = 'mysql+pymysql://{user}:{passwd}@{host}/{db}?charset={charset}'.format(
-        host=host,
-        user=user,
-        passwd=password,
-        db=db,
-        charset=charset)
+    connection_string = (
+        "mysql+pymysql://{user}:{passwd}@{host}/{db}?charset={charset}".format(
+            host=host, user=user, passwd=password, db=db, charset=charset
+        )
+    )
     set_connection(connection_string)
 
     return connection_string
@@ -118,7 +141,7 @@ def set_always_create_new_db(always_create_new_db: bool = True) -> None:
         Option `always_create_new_db` in section `database` in config file.
 
     """
-    write_to_config('database', 'always_create_new', str(always_create_new_db))
+    write_to_config("database", "always_create_new", str(always_create_new_db))
 
 
 def set_connection(connection: str = defaults.CONN_STR_DEFAULT) -> None:
@@ -130,7 +153,7 @@ def set_connection(connection: str = defaults.CONN_STR_DEFAULT) -> None:
         SQLAlchemy connection string.
 
     """
-    write_to_config('database', 'sqlalchemy_connection_string', connection)
+    write_to_config("database", "sqlalchemy_connection_string", connection)
 
 
 class _BelScript:
@@ -158,13 +181,13 @@ class _BelScript:
         self.namespace_manager = models.NamespaceManager(
             model=models.Namespace,
             entries_model=models.NamespaceEntry,
-            grammar_start=GRAMMAR_START_NS
+            grammar_start=GRAMMAR_START_NS,
         )
 
         self.annotation_manager = models.AnnotationManager(
             model=models.Annotation,
             entries_model=models.AnnotationEntry,
-            grammar_start=GRAMMAR_START_ANNO
+            grammar_start=GRAMMAR_START_ANNO,
         )
 
     def set_namespace_definition(self, as_type, keyword, value):
@@ -178,7 +201,9 @@ class _BelScript:
             self._namespaces.add(as_type, keyword, value)
             return True
         else:
-            logger.error("{} is not a allowed type of {}".format(as_type, ALLOWED_TYPES))
+            logger.error(
+                "{} is not a allowed type of {}".format(as_type, ALLOWED_TYPES)
+            )
             return False
 
     def set_annotation_definition(self, as_type, keyword, value):
@@ -192,7 +217,9 @@ class _BelScript:
             self._annotations.add(as_type, keyword, value)
             return True
         else:
-            logger.error("{} is not an allowed type of {}".format(as_type, ALLOWED_TYPES))
+            logger.error(
+                "{} is not an allowed type of {}".format(as_type, ALLOWED_TYPES)
+            )
             return False
 
     def set_annotation_entry(self, annotation: str, entry: str, token: Token):
@@ -202,7 +229,9 @@ class _BelScript:
         :param str entry: entry
         :param lark.lexer.Token token:
         """
-        self._annotation_entries.set_annotation_entry(keyword=annotation, entry=entry, token=token)
+        self._annotation_entries.set_annotation_entry(
+            keyword=annotation, entry=entry, token=token
+        )
 
     def set_namespace_entry(self, namespace: str, entry: str, token: Token):
         """Set namespace, entry and lark.lexer.Token token.
@@ -214,7 +243,9 @@ class _BelScript:
         if not isinstance(token, Token):
             raise Exception("expecting Token in cache.set_namespace_entry")
 
-        self._namespace_entries.set_namespace_entry(keyword=namespace, entry=entry, token=token)
+        self._namespace_entries.set_namespace_entry(
+            keyword=namespace, entry=entry, token=token
+        )
 
     @property
     def errors(self) -> List[_Error]:
@@ -222,16 +253,17 @@ class _BelScript:
         self.update_database()
 
         # all errors are children from errors._Error instances
-        return (self.notDownloadedFromUrls
-                + self.entries_without_namespace
-                + self.entries_without_annotation
-                + self.entries_not_in_namespace_url
-                + self.entries_not_in_annotation_url
-                + self.entries_not_in_namespace_list
-                + self.entries_not_in_annotation_list
-                + self.entries_not_in_namespace_pattern
-                + self.entries_not_in_annotation_pattern
-                )
+        return (
+            self.notDownloadedFromUrls
+            + self.entries_without_namespace
+            + self.entries_without_annotation
+            + self.entries_not_in_namespace_url
+            + self.entries_not_in_annotation_url
+            + self.entries_not_in_namespace_list
+            + self.entries_not_in_annotation_list
+            + self.entries_not_in_namespace_pattern
+            + self.entries_not_in_annotation_pattern
+        )
 
     @property
     def warnings(self) -> List[_Warning]:
@@ -252,21 +284,25 @@ class _BelScript:
             for entry in entries:
                 entry_keyword_dict[entry.lower()] |= {keyword1}
         # identify all ambiguous entries (in more than 1 namespace)
-        ambiguous_entries = {entry: keywords for entry, keywords in entry_keyword_dict.items() if len(keywords) > 1}
+        ambiguous_entries = {
+            entry: keywords
+            for entry, keywords in entry_keyword_dict.items()
+            if len(keywords) > 1
+        }
 
         # ToDo: iterate all lower entries an check for permutation
-#        for lower_entry in entry_keyword_dict:
-#            if lower_entry.count(",") == 1:
-#                reverse_without_comma = " ".join([x.strip() for x in lower_entry.split(",")][::-1])
-#                if reverse_without_comma in entry_keyword_dict:
-#                    print(lower_entry,
+        #        for lower_entry in entry_keyword_dict:
+        #            if lower_entry.count(",") == 1:
+        #                reverse_without_comma = " ".join([x.strip() for x in lower_entry.split(",")][::-1])
+        #                if reverse_without_comma in entry_keyword_dict:
+        #                    print(lower_entry,
         #                    "%s exists in %s" % (reverse_without_comma,
         #                    entry_keyword_dict[reverse_without_comma]))
-#                    ret.append(AlsoUsedInOtherNamespace(keyword=keyword2,
-#                                                        entry=entry,
-#                                                        line_number=token.line,
-#                                                        column=token.column,
-#                                                        hint=hint))
+        #                    ret.append(AlsoUsedInOtherNamespace(keyword=keyword2,
+        #                                                        entry=entry,
+        #                                                        line_number=token.line,
+        #                                                        column=token.column,
+        #                                                        hint=hint))
 
         # iterate all tokens with namespace entries and check if they are also exists in ambiguous entries
         for keyword2, entries_tokens in self._namespace_entries.tokens.items():
@@ -274,12 +310,19 @@ class _BelScript:
                 if entry.lower() in ambiguous_entries:
                     ambiguous_tokens = self._namespace_entries.tokens[keyword2][entry]
                     for token in ambiguous_tokens:
-                        hint = "%s exists also in %s" % (entry, ambiguous_entries[entry.lower()] - {keyword2})
-                        ret.append(AlsoUsedInOtherNamespace(keyword=keyword2,
-                                                            entry=entry,
-                                                            line_number=token.line,
-                                                            column=token.column,
-                                                            hint=hint))
+                        hint = "%s exists also in %s" % (
+                            entry,
+                            ambiguous_entries[entry.lower()] - {keyword2},
+                        )
+                        ret.append(
+                            AlsoUsedInOtherNamespace(
+                                keyword=keyword2,
+                                entry=entry,
+                                line_number=token.line,
+                                column=token.column,
+                                hint=hint,
+                            )
+                        )
         return ret
 
     @property
@@ -287,7 +330,9 @@ class _BelScript:
         """Return a list of entries not fitting a given namespace pattern."""
         ret = []
 
-        ns_pattern_kwds = self.used_namespace_keywords & self._namespaces.keywords_by_type(PATTERN)
+        ns_pattern_kwds = (
+            self.used_namespace_keywords & self._namespaces.keywords_by_type(PATTERN)
+        )
 
         for kwd in ns_pattern_kwds:
             regex = self._namespaces.keyword_dict[kwd].value
@@ -295,10 +340,11 @@ class _BelScript:
             elcs = self._namespace_entries.get_entry_line_column_list_by_keyword(kwd)
             for entry, line, column in elcs:
                 if not pattern.search(entry):
-                    ret.append(NotInNamespacePattern(keyword=kwd,
-                                                     entry=entry,
-                                                     line_number=line,
-                                                     column=column))
+                    ret.append(
+                        NotInNamespacePattern(
+                            keyword=kwd, entry=entry, line_number=line, column=column
+                        )
+                    )
         return ret
 
     @property
@@ -306,7 +352,9 @@ class _BelScript:
         """Return a list of entries not fitting a given annotation pattern."""
         ret = []
 
-        anno_pattern_kwds = self.used_annotation_keywords & self._annotations.keywords_by_type(PATTERN)
+        anno_pattern_kwds = (
+            self.used_annotation_keywords & self._annotations.keywords_by_type(PATTERN)
+        )
 
         for kwd in anno_pattern_kwds:
             regex = self._annotations.keyword_dict[kwd].value
@@ -314,10 +362,11 @@ class _BelScript:
             elcs = self._annotation_entries.get_entry_line_column_list_by_keyword(kwd)
             for entry, line, column in elcs:
                 if not pattern.search(entry):
-                    ret.append(NotInAnnotationPattern(keyword=kwd,
-                                                      entry=entry,
-                                                      line_number=line,
-                                                      column=column))
+                    ret.append(
+                        NotInAnnotationPattern(
+                            keyword=kwd, entry=entry, line_number=line, column=column
+                        )
+                    )
         return ret
 
     @property
@@ -325,16 +374,19 @@ class _BelScript:
         """Return a list of entries not in a given annotations."""
         ret = []
 
-        anno_kwd_used_and_as_list = self.used_annotation_keywords & self._annotations.keywords_by_type(LIST)
+        anno_kwd_used_and_as_list = (
+            self.used_annotation_keywords & self._annotations.keywords_by_type(LIST)
+        )
 
         for kwd in anno_kwd_used_and_as_list:
             elcs = self._annotation_entries.get_entry_line_column_list_by_keyword(kwd)
             for entry, line, column in elcs:
                 if entry not in self._annotations.keyword_dict[kwd].value:
-                    ret.append(NotInAnnotationList(keyword=kwd,
-                                                   entry=entry,
-                                                   line_number=line,
-                                                   column=column))
+                    ret.append(
+                        NotInAnnotationList(
+                            keyword=kwd, entry=entry, line_number=line, column=column
+                        )
+                    )
         return ret
 
     @property
@@ -342,16 +394,19 @@ class _BelScript:
         """Return a list of entries not in a given namespace."""
         ret = []
 
-        ns_kwd_used_and_as_list = self.used_namespace_keywords & self._namespaces.keywords_by_type(LIST)
+        ns_kwd_used_and_as_list = (
+            self.used_namespace_keywords & self._namespaces.keywords_by_type(LIST)
+        )
 
         for kwd in ns_kwd_used_and_as_list:
             elcs = self._namespace_entries.get_entry_line_column_list_by_keyword(kwd)
             for entry, line, column in elcs:
                 if entry not in self._namespaces.keyword_dict[kwd].value:
-                    ret.append(NotInNamespaceList(keyword=kwd,
-                                                  entry=entry,
-                                                  line_number=line,
-                                                  column=column))
+                    ret.append(
+                        NotInNamespaceList(
+                            keyword=kwd, entry=entry, line_number=line, column=column
+                        )
+                    )
         return ret
 
     @property
@@ -359,12 +414,18 @@ class _BelScript:
         """Return WithoutDefinedNamespace list."""
         ret = []
         for namespace_keyword in self.namespaces_without_definition:
-            elcs = self._namespace_entries.get_entry_line_column_list_by_keyword(namespace_keyword)
+            elcs = self._namespace_entries.get_entry_line_column_list_by_keyword(
+                namespace_keyword
+            )
             for entry, line, column in elcs:
-                ret.append(WithoutDefinedNamespace(keyword=namespace_keyword,
-                                                   entry=entry,
-                                                   line_number=line,
-                                                   column=column))
+                ret.append(
+                    WithoutDefinedNamespace(
+                        keyword=namespace_keyword,
+                        entry=entry,
+                        line_number=line,
+                        column=column,
+                    )
+                )
         return ret
 
     @property
@@ -372,12 +433,18 @@ class _BelScript:
         """Return WithoutDefinedNamespace list."""
         ret = []
         for annotation_keyword in self.annotations_without_definition:
-            elcs = self._annotation_entries.get_entry_line_column_list_by_keyword(annotation_keyword)
+            elcs = self._annotation_entries.get_entry_line_column_list_by_keyword(
+                annotation_keyword
+            )
             for entry, line, column in elcs:
-                ret.append(WithoutDefinedAnnotation(keyword=annotation_keyword,
-                                                    entry=entry,
-                                                    line_number=line,
-                                                    column=column))
+                ret.append(
+                    WithoutDefinedAnnotation(
+                        keyword=annotation_keyword,
+                        entry=entry,
+                        line_number=line,
+                        column=column,
+                    )
+                )
         return ret
 
     def update_database(self) -> None:
@@ -404,13 +471,15 @@ class _BelScript:
         entries_not_in_namespace = []
 
         for keyword in self.used_namespace_keywords:
-
             namespace = self._namespaces.keyword_dict[keyword]
 
             if namespace.as_type == URL:
-
                 url = namespace.value
-                elc_list = self._namespace_entries.get_entry_line_column_list_by_keyword(keyword)
+                elc_list = (
+                    self._namespace_entries.get_entry_line_column_list_by_keyword(
+                        keyword
+                    )
+                )
 
                 names_not_exists = self.namespace_manager.get_entries_not_exists(
                     keyword=keyword,
@@ -425,7 +494,7 @@ class _BelScript:
                         entry=entry,
                         line_number=line,
                         column=column,
-                        hint=hint
+                        hint=hint,
                     )
                     entries_not_in_namespace.append(error)
 
@@ -437,18 +506,18 @@ class _BelScript:
         entries_not_in_annotation = []
 
         for keyword in self.used_annotation_keywords:
-
             annotation = self._annotations.keyword_dict[keyword]
 
             if annotation.as_type == URL:
-
                 url = annotation.value
-                elc_list = self._annotation_entries.get_entry_line_column_list_by_keyword(keyword)
+                elc_list = (
+                    self._annotation_entries.get_entry_line_column_list_by_keyword(
+                        keyword
+                    )
+                )
 
                 names_not_exists = self.annotation_manager.get_entries_not_exists(
-                    keyword=keyword,
-                    url=url,
-                    entry_line_column_list=elc_list
+                    keyword=keyword, url=url, entry_line_column_list=elc_list
                 )
 
                 for entry, line, column, hint in names_not_exists:
@@ -458,7 +527,7 @@ class _BelScript:
                         entry=entry,
                         line_number=line,
                         column=column,
-                        hint=hint
+                        hint=hint,
                     )
                     entries_not_in_annotation.append(error)
         return entries_not_in_annotation
@@ -467,16 +536,19 @@ class _BelScript:
         """Update annotation in database if URL and keyword not exists."""
         import_success = True
         for anno in self._annotations.to_update:
-
             if anno.keyword in self.used_annotation_keywords:
-
-                if not self.annotation_manager.keyword_url_exists(keyword=anno.keyword, url=anno.value):
-
+                if not self.annotation_manager.keyword_url_exists(
+                    keyword=anno.keyword, url=anno.value
+                ):
                     if anno.as_type == URL:
+                        logger.info(
+                            f"Update db with annotation {anno.keyword}: download from {anno.value}"
+                        )
 
-                        logger.info(f"Update db with annotation {anno.keyword}: download from {anno.value}")
-
-                        successful, error = self.annotation_manager.save_from_url_or_path(
+                        (
+                            successful,
+                            error,
+                        ) = self.annotation_manager.save_from_url_or_path(
                             keyword=anno.keyword,
                             url_or_path=anno.value,
                             doc_type=anno.as_type,
@@ -485,9 +557,13 @@ class _BelScript:
                         if not successful:
                             import_success = False
                             error_args = error.args[0].split("\n")
-                            string_error = error_args[2] if len(error_args) > 1 else error_args[0]
-                            logger.error(f"Annotation {anno.keyword} failed to be added from {anno.value}",
-                                         exc_info=False)
+                            string_error = (
+                                error_args[2] if len(error_args) > 1 else error_args[0]
+                            )
+                            logger.error(
+                                f"Annotation {anno.keyword} failed to be added from {anno.value}",
+                                exc_info=False,
+                            )
 
                             if "column" in dir(error):  # Indicates it's a Lark error
                                 download_error = NotDownloadedFromUrl(
@@ -495,7 +571,7 @@ class _BelScript:
                                     url_or_path=anno.value,
                                     column=error.column,
                                     line=error.line,
-                                    hint=f'{error.allowed} error in "{string_error}"'
+                                    hint=f'{error.allowed} error in "{string_error}"',
                                 )
 
                             else:  # It's an HTTPError of some kind
@@ -504,7 +580,7 @@ class _BelScript:
                                     url_or_path=anno.value,
                                     column=0,
                                     line=0,
-                                    hint=f"{string_error}"
+                                    hint=f"{string_error}",
                                 )
                             self.notDownloadedFromUrls.append(download_error)
 
@@ -514,16 +590,19 @@ class _BelScript:
         """Update namespaces in database if URL and keyword does not exist."""
         import_success = True
         for ns in self._namespaces.to_update:
-
             if ns.keyword in self.used_namespace_keywords:
-
-                if not self.namespace_manager.keyword_url_exists(keyword=ns.keyword, url=ns.value):
-
+                if not self.namespace_manager.keyword_url_exists(
+                    keyword=ns.keyword, url=ns.value
+                ):
                     if ns.as_type == URL:
+                        logger.info(
+                            f"Update db with namespace {ns.keyword}: download from {ns.value}"
+                        )
 
-                        logger.info(f"Update db with namespace {ns.keyword}: download from {ns.value}")
-
-                        successful, error = self.namespace_manager.save_from_url_or_path(
+                        (
+                            successful,
+                            error,
+                        ) = self.namespace_manager.save_from_url_or_path(
                             keyword=ns.keyword,
                             url_or_path=ns.value,
                             doc_type=ns.as_type,
@@ -532,9 +611,13 @@ class _BelScript:
                         if not successful:
                             import_success = False
                             error_args = error.args[0].split("\n")
-                            string_error = error_args[2] if len(error_args) > 1 else error_args[0]
-                            logger.error(f"Namespace {ns.keyword} failed to be added from {ns.value}",
-                                         exc_info=False)
+                            string_error = (
+                                error_args[2] if len(error_args) > 1 else error_args[0]
+                            )
+                            logger.error(
+                                f"Namespace {ns.keyword} failed to be added from {ns.value}",
+                                exc_info=False,
+                            )
 
                             if "column" in dir(error):  # Indicates it's a Lark error
                                 download_error = NotDownloadedFromUrl(
@@ -542,7 +625,7 @@ class _BelScript:
                                     url_or_path=ns.value,
                                     column=error.column,
                                     line=error.line,
-                                    hint=f'{error.allowed} error in "{string_error}"'
+                                    hint=f'{error.allowed} error in "{string_error}"',
                                 )
 
                             else:  # It's an HTTPError of some kind
@@ -551,7 +634,7 @@ class _BelScript:
                                     url_or_path=ns.value,
                                     column=0,
                                     line=0,
-                                    hint=f"{string_error}"
+                                    hint=f"{string_error}",
                                 )
 
                             self.notDownloadedFromUrls.append(download_error)
@@ -565,7 +648,9 @@ class _BelScript:
         This is returned as a dictionary (key:keyword, value: list of Namespace objects).
         """
         ret = defaultdict(list)
-        multiple_keyword = [k for k, v in Counter(self._namespaces.keywords).items() if v > 1]
+        multiple_keyword = [
+            k for k, v in Counter(self._namespaces.keywords).items() if v > 1
+        ]
         for ns in self._namespaces:
             if ns.keyword in multiple_keyword:
                 ret[ns.keyword].append(ns)
@@ -578,7 +663,9 @@ class _BelScript:
         This is returned as a dictionary (key:keyword, value: list of Annotation objects).
         """
         ret = defaultdict(list)
-        multiple_keyword = [k for k, v in Counter(self._annotations.keywords).items() if v > 1]
+        multiple_keyword = [
+            k for k, v in Counter(self._annotations.keywords).items() if v > 1
+        ]
         for anno in self._annotations:
             if anno.keyword in multiple_keyword:
                 ret[anno.keyword].append(anno)
@@ -643,7 +730,9 @@ class Entries:
     tokens = defaultdict(dict)
     entries = defaultdict(set)
 
-    def get_entry_line_column_list_by_keyword(self, keyword: str) -> Generator[str, int, int]:
+    def get_entry_line_column_list_by_keyword(
+        self, keyword: str
+    ) -> Generator[str, int, int]:
         """Get generator of tuple(entry, line, column) by keyword.
 
         Parameters
@@ -706,7 +795,9 @@ class NamespaceEntries(Entries):
             else:
                 self.tokens[keyword][entry] = [token]
         else:
-            raise "Argument token is type {} not {}".format(type(token), 'lark.lexer.Token')
+            raise "Argument token is type {} not {}".format(
+                type(token), "lark.lexer.Token"
+            )
 
 
 class AnnotationEntries(Entries):
@@ -731,7 +822,9 @@ class AnnotationEntries(Entries):
             else:
                 self.tokens[keyword][entry] = [token]
         else:
-            raise "argument token is type {} not {}".format(type(token), 'lark.lexer.Token')
+            raise "argument token is type {} not {}".format(
+                type(token), "lark.lexer.Token"
+            )
 
 
 class NsAnsBase:
@@ -826,7 +919,7 @@ class Namespace:
 
     def to_dict(self):
         """Convert class values to dictionary."""
-        return {'as_type': self.as_type, 'keyword': self.keyword, 'value': self.value}
+        return {"as_type": self.as_type, "keyword": self.keyword, "value": self.value}
 
     def __unicode__(self):
         return "Namespace:" + str(self.to_dict())
@@ -846,7 +939,7 @@ class Annotation:
 
     def to_dict(self):
         """Convert class values to dictionary."""
-        return {'as_type': self.as_type, 'keyword': self.keyword, 'value': self.value}
+        return {"as_type": self.as_type, "keyword": self.keyword, "value": self.value}
 
     def __unicode__(self):
         return "Annotation" + str(self.to_dict())
