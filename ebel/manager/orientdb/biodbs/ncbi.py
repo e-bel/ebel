@@ -260,7 +260,7 @@ class Ncbi(odb_meta.Graph):
             df.set_index("gene_id", inplace=True)
             df["db_xrefs"] = df["db_xrefs"].str.split("|")
             df = df.explode("db_xrefs")
-            df[["db", "dbid"]] = df["db_xrefs"].str.split(":", 1, expand=True)
+            df[["db", "dbid"]] = df["db_xrefs"].str.split(":", n=1, expand=True)
             df.drop(columns=["db_xrefs"], inplace=True)
             df.reset_index().to_sql(
                 "ncbi_gene_info_xref", self.engine, if_exists="append", index=False
