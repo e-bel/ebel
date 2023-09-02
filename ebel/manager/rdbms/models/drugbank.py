@@ -151,7 +151,7 @@ class ExternalIdentifier(Base):
 
     __tablename__ = "drugbank_external_identifier"
     id = Column(Integer, primary_key=True)
-    resource = Column(String(255))
+    resource = Column(String(255), index=True)
     identifier = Column(String(255), index=True)
 
     drugbank_id = Column(Integer, ForeignKey("drugbank.id"))

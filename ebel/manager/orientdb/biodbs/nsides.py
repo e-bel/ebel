@@ -1,11 +1,12 @@
 """NSIDES module."""
 
+import os
 import tarfile
 import logging
 import pandas as pd
 
 from tqdm import tqdm
-from typing import Dict
+from typing import Dict, Optional
 from pyorientdb import OrientDB
 
 from ebel.tools import get_file_path
@@ -78,65 +79,60 @@ class Nsides(odb_meta.Graph):
         https://github.com/tatonetti-lab/nsides-release/blob/master/release-notes/v0.1.md
         """
         file_path = get_file_path(self.urls[OFFSIDES], self.biodb_name)
-        offsides_df = pd.read_csv(file_path, low_memory=False)
-        # Because of repeating header, we have to delete all rows which are equal to the columns
-        offsides_df = offsides_df[offsides_df.ne(offsides_df.columns).any(1)]
-        offsides_df.drop_duplicates(inplace=True)
-        offsides_df["source"] = "offsides"
-        offsides_df.columns = self._standardize_column_names(offsides_df.columns)
+        df = pd.read_csv(file_path, low_memory=False)
+        df.drop_duplicates(inplace=True)
+        df["source"] = "offsides"
+        df.columns = self._standardize_column_names(df.columns)
 
-        onsides_df = self.__import_onsides()
-        combined_df = pd.concat(
-            [offsides_df, onsides_df], ignore_index=True, sort=False
-        )
-
-        combined_df.index += 1
-        combined_df.index.rename("id", inplace=True)
-        combined_df.to_sql(
+        df.index += 1
+        df.index.rename("id", inplace=True)
+        df[pd.to_numeric(df["condition_meddra_id"], errors="coerce").notnull()].to_sql(
             nsides.Nsides.__tablename__,
             self.engine,
-            if_exists="replace",
-            chunksize=10000,
+            if_exists="append",
+            chunksize=100000,
         )
-        return {self.biodb_name: combined_df.shape[0]}
+        return {self.biodb_name: df.shape[0]}
 
-    def __import_onsides(self):
-        """Extract OnSIDES CSV file and format into a DF."""
-        file_path = get_file_path(self.urls[ONSIDES], self.biodb_name)
-        with tarfile.open(file_path, "r:*") as tar:
-            df = pd.read_csv(
-                tar.extractfile("csv/adverse_reactions.csv"), header=0
-            ).drop_duplicates()
+    # TODO: Reimplement, but structure have changed
+    # def __import_onsides(self) -> Optional[pd.DataFrame]:
+    #     """Extract OnSIDES CSV file and format into a DF."""
+    #     file_path = get_file_path(self.urls[ONSIDES], self.biodb_name)
+    #     file_folder = os.path.dirname(file_path)
+    #     tar = tarfile.open(file_path, "r:gz")
+    #     folder_in_tar_file = tar.members[0].path
+    #     fd = tar.extractfile(f"{folder_in_tar_file}/adverse_reactions.csv.gz")
+    #     df = pd.read_csv(fd, compression="gzip", encoding="utf-8")
 
-        df.drop(  # Remove columns that aren't needed
-            [
-                "xml_id",
-                "Unnamed: 10",
-                "omop_concept_id",
-                "drug_concept_ids",
-                "concept_class_id",
-            ],
-            inplace=True,
-            axis=1,
-        )
+    #     df.drop(  # Remove columns that aren't needed
+    #         [
+    #             "xml_id",
+    #             "Unnamed: 10",
+    #             "omop_concept_id",
+    #             "drug_concept_ids",
+    #             "concept_class_id",
+    #         ],
+    #         inplace=True,
+    #         axis=1,
+    #     )
 
-        df.rename(
-            columns={  # Rename columns to match OFFSIDES
-                "rxnorm_ids": "drug_rxnorn_id",
-                "concept_name": "condition_concept_name",
-                "meddra_id": "condition_meddra_id",
-                "ingredients": "drug_concept_name",
-            },
-            inplace=True,
-        )
+    #     df.rename(
+    #         columns={  # Rename columns to match OFFSIDES
+    #             "rxnorm_ids": "drug_rxnorn_id",
+    #             "pt_meddra_term": "condition_concept_name",
+    #             "pt_meddra_id": "condition_meddra_id",
+    #             "ingredients_names": "drug_concept_name",
+    #         },
+    #         inplace=True,
+    #     )
 
-        # Keep rows with only 1 ingredient/drug
-        single_value_mask = df["drug_concept_name"].apply(
-            lambda x: len(x.split(",")) == 1
-        )
-        pruned_df = df.loc[single_value_mask]
-        pruned_df["source"] = "onsides"
-        return pruned_df
+    #     # Keep rows with only 1 ingredient/drug
+    #     single_value_mask = df["drug_concept_name"].apply(
+    #         lambda x: len(x.split(",")) == 1
+    #     )
+    #     pruned_df = df.loc[single_value_mask]
+    #     pruned_df["source"] = "onsides"
+    #     return pruned_df
 
     def update_bel(self) -> int:
         """Create has_side_effect edges between drugs (drugbank) and side_effects.

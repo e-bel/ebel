@@ -75,7 +75,7 @@ DISGENET_VDP_ASSOC = DISGENET_BASE + "all_variant_disease_pmid_associations.tsv.
 
 # Drugs and Side Effects #
 OFFSIDES = "http://tatonettilab.org/resources/nsides/OFFSIDES.csv.xz"
-ONSIDES = "https://github.com/tatonetti-lab/onsides/releases/download/v01/onsides_v01_20220430.tar.gz"
+ONSIDES = "https://github.com/tatonetti-lab/onsides/releases/download/v2.0.0-20230629/onsides_v2.0.0_20230629.tar.gz"
 # DrugBank
 DRUGBANK_VERSION = "https://go.drugbank.ca/releases/latest#full"
 DRUGBANK_DATA = "https://go.drugbank.com/releases/{}/downloads/all-full-database"
