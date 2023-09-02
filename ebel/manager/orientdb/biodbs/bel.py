@@ -400,7 +400,7 @@ class Bel(Graph):
             CLINICAL_TRIALS: self.clinical_trials,
             PROTEIN_ATLAS: self.protein_atlas,
             NCBI: self.ncbi,
-            EXPRESSION_ATLAS: self.expression_atlas,
+            # EXPRESSION_ATLAS: self.expression_atlas, # TODO: Skipped because file with all results is no longer supported
         }
         # calc all sets (what is used, missing in skip and include)
         include = (
