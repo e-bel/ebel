@@ -77,7 +77,7 @@ class Throughput(Base):
     __tablename__ = "biogrid_throughput"
     id = Column(Integer, primary_key=True)
     throughput = Column(String(255))
-    frequency = Column(Integer)
+    count = Column(Integer)
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -103,7 +103,7 @@ class ExperimentalSystem(Base):
     id = Column(Integer, primary_key=True)
     experimental_system = Column(String(255), nullable=True)
     experimental_system_type = Column(String(255), nullable=True)
-    frequency = Column(Integer)
+    count = Column(Integer)
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -154,7 +154,7 @@ class Modification(Base):
     __tablename__ = "biogrid_modification"
     id = Column(Integer, primary_key=True)
     modification = Column(String(255), nullable=True)
-    frequency = Column(Integer)
+    count = Column(Integer)
 
     def as_dict(self):
         """Convert object values to dictionary."""
