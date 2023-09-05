@@ -12,7 +12,7 @@ from typing import Dict, Tuple
 from ebel import tools
 from ebel.manager.orientdb.constants import BIOGRID
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
-from ebel.manager.constants import normalized_pmod_reverse, BelPmod
+from ebel.manager.orientdb.odb_defaults import BelPmod, normalized_pmod_reverse
 
 from ebel.manager.rdbms.models import biogrid
 

@@ -11,7 +11,7 @@ from ebel.manager.orientdb.odb_meta import Graph
 from ebel.constants import SPECIES_NAMESPACE, RID
 from ebel.manager.orientdb.importer import _BelImporter
 from ebel.manager.orientdb import odb_meta, odb_structure
-from ebel.manager.constants import bel_func_short
+from ebel.manager.orientdb.odb_defaults import bel_func_short
 from ebel.manager.orientdb.constants import DRUGBANK, EXPRESSION_ATLAS, HGNC, CHEBI, ENSEMBL, GWAS_CATALOG, CLINVAR, \
     UNIPROT, REACTOME, STRINGDB, INTACT, BIOGRID, MIRTARBASE, PATHWAY_COMMONS, DISGENET, KEGG, IUPHAR, NSIDES, \
     CLINICAL_TRIALS, PROTEIN_ATLAS, NCBI

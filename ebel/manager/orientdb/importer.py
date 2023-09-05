@@ -18,7 +18,7 @@ from collections import OrderedDict, defaultdict, namedtuple
 from ebel import tools
 from ebel.constants import RID
 from ebel.manager.orientdb.constants import NODES, EDGES
-from ..constants import bel_func_short, normalized_pmod
+from .odb_defaults import normalized_pmod, bel_func_short
 
 BEL_GIT_ID = namedtuple('BEL_GIT_ID', ['hexsha', 'repo_path', 'origin_url'])
 JsonParts = namedtuple('JsonParts', ['document',

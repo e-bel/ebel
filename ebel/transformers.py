@@ -426,7 +426,7 @@ class _BelTransformer(Transformer):
 
     def molec_process(self, n):
         """Return molecular process."""
-        return {'molec_process': self._format_sub_obj(n[0])}
+        return {'object': self._format_sub_obj(n[0])}
 
     def act_or_abundance(self, n):
         """Return activity or abundance."""
@@ -438,7 +438,7 @@ class _BelTransformer(Transformer):
 
     def pat(self, n):
         """Return object."""
-        return {'pat': self._format_sub_obj(n[0])}
+        return {'subject': self._format_sub_obj(n[0])}
 
     def transc_subject(self, n):
         return self.subject(n)
@@ -450,6 +450,14 @@ class _BelTransformer(Transformer):
         return self.subject(n)
 
     def transl_object(self, n):
+        return self.object(n)
+
+    def ortho_subject(self, n):
+        """Return orthologous gene subject."""
+        return self.subject(n)
+
+    def ortho_object(self, n):
+        """Return orthologous gene object."""
         return self.object(n)
 
     def surf(self, n):

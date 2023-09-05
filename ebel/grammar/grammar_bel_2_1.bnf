@@ -46,9 +46,9 @@ WORD_WITHOUT_ESCAPED_NEW_LINE: /([^\\\n\r](?!\\[\n\r]))+/
 
 statement: ( subject
          | ( subject relation_basic object )
-	     | ( subject biomarker_relation _molec_process )
-	     | ( pat process_relation _molec_process )
-	     | ( gene orthologous_relation gene )
+	     | ( subject biomarker_relation molec_process )
+	     | ( pat process_relation molec_process )
+	     | ( ortho_subject orthologous_relation ortho_object )
 	     | ( _basic_subobj analogous_relation _basic_subobj )
          | ( transc_subject transc_relation transc_object )
          | ( transl_subject transl_relation transl_object )
@@ -69,13 +69,15 @@ transc_subject: gene
 transc_object: rna
 transl_subject: rna
 transl_object: protein
+ortho_subject: gene
+ortho_object: gene
 
 bio_obj: protein | rna | gene
 
 subject: _sub_obj
 object: _sub_obj
 
-molecular_process: _molec_process
+molec_process: _molec_process
 _molec_process: path | bp
 
 nested_subject: _sub_obj

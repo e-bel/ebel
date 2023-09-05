@@ -77,7 +77,7 @@ TYPE(r) as relation, elementId(r) as rel_id, r.evidence as evidence"""
         new_edges = 0
 
         for e in tqdm(statements_and_sets, desc="Insert BEL Statements"):
-            #print(e)
+
             dtype, data = tuple(e.items())[0]
 
             if dtype == "sets":
@@ -109,22 +109,20 @@ TYPE(r) as relation, elementId(r) as rel_id, r.evidence as evidence"""
                             annotation.pop(anno_keyword, None)
 
             elif dtype == "statement" and len(data) >= 1:
-                #print(data[0]["subject"])
-                try:
-                    _, subj_class, subject_id = self.get_node_id(data[0]['subject'])
 
-                    if len(data) > 1 and 'object' in data[2]:
-                        # TODO: nested statements are missing
-                        
-                        _, obj_class, object_id = self.get_node_id(data[2]['object'])
+                _, subj_class, subject_id = self.get_node_id(data[0]['subject'])
 
-                        relation = data[1]['relation']
-                        neo4j_relation_class = edge_map[relation]
+                if len(data) > 1 and 'object' in data[2]:
+                    # TODO: nested statements are missing
 
-                        new_edges += self.insert_bel_edge(annotation, citation, evidence, pmid, neo4j_relation_class,
-                                                        subject_id, object_id)
-                except Exception as e:
-                    print("error", e)
+                    _, obj_class, object_id = self.get_node_id(data[2]['object'])
+
+                    relation = data[1]['relation']
+                    neo4j_relation_class = edge_map[relation]
+
+                    new_edges += self.insert_bel_edge(annotation, citation, evidence, pmid, neo4j_relation_class,
+                                                      subject_id, object_id)
+
         return new_edges
 
     @staticmethod
