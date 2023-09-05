@@ -76,10 +76,8 @@ class Neo4jBel:
         else:  # It is a list
             files_to_import = [Path(fp) for fp in input_path]
 
-        print(files_to_import)
         for path in files_to_import:
             if path.is_file():
-                print("import: " + path.name)
                 logger.info(f"Begin import: {path.name}")
 
                 try:

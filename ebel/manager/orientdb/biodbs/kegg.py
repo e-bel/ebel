@@ -14,7 +14,7 @@ from ebel.defaults import DATA_DIR
 from ebel.config import get_config_value
 from ebel.manager.orientdb.constants import KEGG
 from ebel.manager.orientdb.biodbs.hgnc import Hgnc
-from ebel.manager.orientdb.odb_defaults import BelPmod
+from ebel.manager.constants import BelPmod
 from ebel.manager.orientdb import odb_meta, urls, odb_structure
 
 from ebel.manager.rdbms.models import kegg

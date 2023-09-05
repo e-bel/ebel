@@ -19,3 +19,4 @@ cryptography==3.4.7
 openpyxl==3.0.7
 graphviz
 pyorientdb
+neo4j

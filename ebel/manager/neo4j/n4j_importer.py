@@ -3,6 +3,7 @@
 import re
 import json
 import logging
+import traceback
 
 from collections import defaultdict
 from tqdm import tqdm
@@ -109,20 +110,21 @@ TYPE(r) as relation, elementId(r) as rel_id, r.evidence as evidence"""
                             annotation.pop(anno_keyword, None)
 
             elif dtype == "statement" and len(data) >= 1:
-
                 _, subj_class, subject_id = self.get_node_id(data[0]['subject'])
-
                 if len(data) > 1 and 'object' in data[2]:
                     # TODO: nested statements are missing
-
+                    #print(data)
                     _, obj_class, object_id = self.get_node_id(data[2]['object'])
 
                     relation = data[1]['relation']
                     neo4j_relation_class = edge_map[relation]
 
                     new_edges += self.insert_bel_edge(annotation, citation, evidence, pmid, neo4j_relation_class,
-                                                      subject_id, object_id)
+                                                    subject_id, object_id)
 
+                else:
+                    logger.warning(f"The following couldn't be imported {data}")
+              
         return new_edges
 
     @staticmethod

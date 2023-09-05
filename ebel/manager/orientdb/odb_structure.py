@@ -9,7 +9,8 @@ from copy import deepcopy
 from enum import Enum
 from typing import List, Dict, Optional, Tuple
 
-from ebel.manager.orientdb.odb_defaults import OIndexType, ODataType, normalized_pmod
+from ebel.manager.orientdb.odb_defaults import OIndexType, ODataType
+from ebel.manager.constants import normalized_pmod
 
 
 class OClassType(Enum):
