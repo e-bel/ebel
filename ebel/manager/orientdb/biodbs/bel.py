@@ -733,3 +733,8 @@ class Bel(Graph):
     def update_interactions(self) -> int:
         """Abstract method."""
         pass
+
+
+if __name__ == "__main__":
+    b = Bel()
+    b.kegg.update_interactions()

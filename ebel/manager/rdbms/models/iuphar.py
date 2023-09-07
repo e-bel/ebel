@@ -35,7 +35,7 @@ class IupharLigand(Base):
         Text
     )  # TODO: This is a integer, but for import reasons this changed to text
     uniprot_id = Column(Text)
-    ensembl_id = Column(BigInteger)
+    ensembl_id = Column(Text)
     ligand_subunit_ids = Column(Text)
     ligand_subunit_name = Column(Text)
     ligand_subunit_uni_prot_ids = Column(Text)
@@ -83,6 +83,7 @@ class IupharInteraction(Base):
     ligand_gene_symbol = Column(String(50))
     ligand_species = Column(String(50))
     ligand_pubchem_sid = Column(Integer)
+    ligand_type = Column(Text)
     approved = Column(Boolean)
     type = Column(String(100))
     action = Column(String(100))

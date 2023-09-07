@@ -8,6 +8,7 @@ from typing import Dict
 import pandas as pd
 import requests
 from pyorientdb import OrientDB
+from pathlib import Path
 from tqdm import tqdm
 
 from ebel.config import get_config_value
@@ -31,12 +32,8 @@ class Kegg(odb_meta.Graph):
         self.biodb_name = KEGG
         self.urls = {"kegg_path_list": urls.KEGG_PATH_LIST}
 
-        # TODO Improve KGML folder creation
-        self.file_paths = {"kgml": os.path.join(DATA_DIR, self.biodb_name, "kgml")}
-        _ = [
-            os.makedirs(bio_db_dir, exist_ok=True)
-            for bio_db_dir in self.file_paths.values()
-        ]
+        self.file_paths = {"kgml": Path(DATA_DIR, self.biodb_name, "kgml")}
+        self.file_paths["kgml"].mkdir(exist_ok=True, parents=True)
 
         super().__init__(
             tables_base=kegg.Base,
@@ -143,9 +140,9 @@ class Kegg(odb_meta.Graph):
 
     def _get_pathway_kgml(self, pathway: str):
         """Reads KGML pathway file if downloaded, downloads if not there. Returns XML content."""
-        kgml_path = os.path.join(self.file_paths["kgml"], pathway)
+        kgml_path = self.file_paths["kgml"].joinpath(pathway)
 
-        if os.path.exists(kgml_path):
+        if kgml_path.is_file():
             with open(kgml_path, "r") as kgmlf:
                 xml_content = kgmlf.read()
 
@@ -176,9 +173,11 @@ class Kegg(odb_meta.Graph):
                 url_pathway_list, sep="\t", names=["path_id", "path_desc"]
             )
             df_pathways[["path_name", "organism"]] = df_pathways.path_desc.str.split(
-                " - ", 1, expand=True
+                pat=" - ", n=1, expand=True
             )
-            df_pathways.path_id = df_pathways.path_id.str.split(":").str[1]
+            # df_pathways.path_id = df_pathways.path_id.str.lstrip(
+            #     kegg_species_identifier
+            # )
             df_pathways.drop(columns=["path_desc"], inplace=True)
 
             desc = f"Inserting KEGG data for KEGG species: {kegg_species_identifier}"
@@ -326,16 +325,28 @@ class Kegg(odb_meta.Graph):
                 symbol=symbol, interaction_types=post_translational_modifications
             )
             df = pd.read_sql(sql, self.engine)
-            by = [
+            keys = (
                 "interaction_type",
                 "gene_symbol_a",
                 "gene_symbol_b",
                 "kegg_species_id",
-            ]
+            )
 
-            for key, pathway_names in (
-                df.groupby(by=by).apply(lambda x: set(x.pathway_name)).to_dict().items()
-            ):
+            grouped_records = dict()
+            for _, row in df.iterrows():
+                index = row[[keys]]
+                pname = row["pathway_name"]
+
+                if index in grouped_records:
+                    grouped_records[index].add(pname)
+
+                else:
+                    grouped_records[index] = {pname}
+
+            # TODO not working so using the more verbose method above
+            # grouped_records = df.groupby(by=by).apply(lambda x: set(x.pathway_name)).to_dict()
+
+            for key, pathway_names in grouped_records.items():
                 interaction_type, subject_name, object_name, kegg_species_id = key
 
                 namespace = self.species_namespace_dict[kegg_species_id]

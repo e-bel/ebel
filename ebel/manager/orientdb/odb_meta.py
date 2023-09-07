@@ -47,7 +47,7 @@ from ebel.manager.orientdb.odb_structure import (
     Node,
 )
 from ebel.tools import BelRdb, get_file_path, chunks, get_standard_name
-from ebel.config import write_to_config, get_config_as_dict
+from ebel.config import write_to_config, get_config_as_dict, get_config_value
 
 type_map_inverse = {v: k for k, v in orient.type_map.items()}
 
@@ -123,7 +123,10 @@ class Graph(abc.ABC):
         self.engine = rdb.engine
         self.session = rdb.session
 
-        if not database_exists(self.engine.url):
+        if not (
+            get_config_value("DATABASE", "sqlalchemy_connection_string")
+            or database_exists(self.engine.url)
+        ):
             if str(self.engine.url).startswith("mysql"):
                 set_mysql_interactive()
 
@@ -165,10 +168,12 @@ class Graph(abc.ABC):
             missing_params = ", ".join(
                 {key for key, val in credentials.items() if val is None}
             )
+            logger.info(
+                f"Initial configuration parameters missing. Missing parameters: {missing_params}"
+            )
             raise ValueError(
                 f"Please provide initial configuration parameters. Missing parameters: {missing_params}"
             )
-            # logger.error(f"Please provide initial configuration parameters. Missing parameters: {missing_params}")
 
     def execute(self, command_str: str) -> List[OrientRecord]:
         """Execute a command directly in the OrientDB server.

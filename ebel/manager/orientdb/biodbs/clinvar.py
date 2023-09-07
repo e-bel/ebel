@@ -80,7 +80,10 @@ class ClinVar(odb_meta.Graph):
         df_phenotype.index += 1
         df_phenotype.index.rename("id", inplace=True)
         df_phenotype.to_sql(
-            clinvar.ClinvarPhenotype.__tablename__, self.engine, if_exists="append"
+            clinvar.ClinvarPhenotype.__tablename__,
+            self.engine,
+            if_exists="append",
+            chunksize=10000,
         )
         inserted.update({clinvar.ClinvarPhenotype.__tablename__: df_phenotype.shape[0]})
 
@@ -98,7 +101,11 @@ class ClinVar(odb_meta.Graph):
         df_clinvar__phenotype.index += 1
         df_clinvar__phenotype.index.rename("id", inplace=True)
         df_clinvar__phenotype.to_sql(
-            "clinvar__phenotype", self.engine, if_exists="append", index=False
+            "clinvar__phenotype",
+            self.engine,
+            if_exists="append",
+            index=False,
+            chunksize=10000,
         )
         inserted.update(
             {
@@ -128,6 +135,7 @@ class ClinVar(odb_meta.Graph):
             clinvar.ClinvarPhenotypeMedgen.__tablename__,
             self.engine,
             if_exists="append",
+            chunksize=10000,
         )
         inserted.update(
             {
@@ -151,6 +159,7 @@ class ClinVar(odb_meta.Graph):
             clinvar.ClinvarOtherIdentifier.__tablename__,
             self.engine,
             if_exists="append",
+            chunksize=10000,
         )
         inserted.update(
             {clinvar.ClinvarOtherIdentifier.__tablename__: df_other_ids.shape[0]}
