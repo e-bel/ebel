@@ -9,7 +9,7 @@ repo_url: https://github.com/e-bel/ebel
 theme: readthedocs
 
 extra:
-    version: 1.0.29
+    version: 1.0.30
 
 nav:
     - Home: index.md

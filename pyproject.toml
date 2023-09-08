@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "ebel"
-version = "1.0.29"
+version = "1.0.30"
 description = "e(BE:L) - validation and extension of BEL networks."
 authors = ["Bruce Schultz <bruce.schultz@scai.fraunhofer.de>, Christian Ebeling <christian.ebeling@scai.fraunhofer.de>"]
 maintainers = ["Christian Ebeling <christian.ebeling@scai.fraunhofer.de>"]

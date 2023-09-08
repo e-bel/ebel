@@ -2,7 +2,7 @@
 from . import cache, constants, errors, parser, transformers
 from .manager.orientdb.biodbs.bel import Bel
 
-__version__ = "1.0.29"
+__version__ = "1.0.30"
 
 __title__ = "e(BE:L)"
 __description__ = "Validation and extension of biomedical knowledge graphs"
