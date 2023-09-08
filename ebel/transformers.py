@@ -93,10 +93,12 @@ class _BelTransformer(Transformer):
         self.cache = _BelScript(force_new_db=force_new_db)
         self.citations = []
 
-    def script(self, n):
+    @staticmethod
+    def script(n):
         return n
 
-    def statements_and_sets(self, n):
+    @staticmethod
+    def statements_and_sets(n):
         return {"statements_and_sets": n}
 
     def abundance(self, n):
@@ -127,7 +129,8 @@ class _BelTransformer(Transformer):
         """Return composite."""
         return [self.nt_type("list", "composite"), sorted(n)]
 
-    def definitions(self, n):
+    @staticmethod
+    def definitions(n):
         """Return definitions of namespace and annotations."""
         return {"definitions": n}
 
@@ -216,7 +219,8 @@ class _BelTransformer(Transformer):
         props = self._ns_anno_props(n)
         return {"annotation": props}
 
-    def document(self, n):
+    @staticmethod
+    def document(n):
         """Return Document vertex."""
         return {"document": OrderedDict(sorted(n))}
 
@@ -267,7 +271,8 @@ class _BelTransformer(Transformer):
         """Return complex as list."""
         return [self.nt_type("list", "complex"), n]
 
-    def list_complex(self, n):
+    @staticmethod
+    def list_complex(n):
         """Return abundance list of complex."""
         return sorted(n)
 
@@ -293,10 +298,12 @@ class _BelTransformer(Transformer):
         """Return tloc."""
         return [self.nt_type("transformation", "translocation"), n]
 
-    def _get_rel(self, n):
+    @staticmethod
+    def _get_rel(n):
         return {"relation": n[0].data}
 
-    def nested_relation(self, n):
+    @staticmethod
+    def nested_relation(n):
         """Return nested relation."""
         return {"nested_relation": n[0]}
 
@@ -340,11 +347,13 @@ class _BelTransformer(Transformer):
         """Return relation."""
         return self._get_rel(n)
 
-    def has_members(self, n):
+    @staticmethod
+    def has_members(n):
         """Return relation."""
         return {"relation": "has_members"}
 
-    def statement(self, n: list):
+    @staticmethod
+    def statement(n: list):
         """Return statement."""
         return {"statement": n}
 
@@ -360,11 +369,13 @@ class _BelTransformer(Transformer):
         """Return nested subject."""
         return {"nested_object": self._format_sub_obj(n[0])}
 
-    def sets(self, n):
+    @staticmethod
+    def sets(n):
         """Return sets."""
         return {"sets": n}
 
-    def evidence(self, n):
+    @staticmethod
+    def evidence(n):
         """Return support.
 
         support formily known as evidence, supprtingText
@@ -494,14 +505,17 @@ class _BelTransformer(Transformer):
         """Create dict of protein changes."""
         return self.changes(n)
 
-    def statement_comment(self, n):
+    @staticmethod
+    def statement_comment(n):
         return {"statement_comment": " ".join([x.value for x in n]).strip()}
 
-    def changes(self, n):
+    @staticmethod
+    def changes(n):
         """Create dict of abundance changes."""
         return [list((x[0], [x[1]])) for x in sorted(list(set(n)))]
 
-    def gene_changes(self, n):
+    @staticmethod
+    def gene_changes(n):
         """Return gene abundance changes; Only valid in BEL 2.1."""
         return [list((x[0], [x[1]])) for x in sorted(list(set(n)))]
 
@@ -588,11 +602,13 @@ class _BelTransformer(Transformer):
 
         return self.nt_type("modifier", "pmod"), nt
 
-    def amino_acid(self, n):
+    @staticmethod
+    def amino_acid(n):
         """Return amino acid."""
         return {"amino_acid": n[0].data.split("_")[1].upper()}
 
-    def pmod_type(self, n):
+    @staticmethod
+    def pmod_type(n):
         """Return pmod_type."""
         return {"pmod_type": n[0].data}
 
@@ -616,7 +632,8 @@ class _BelTransformer(Transformer):
         """Return products."""
         return [self.nt_type("reaction_partner", "products"), sorted(n)]
 
-    def fusion(self, n):
+    @staticmethod
+    def fusion(n):
         """Return fusion."""
         return n[0]
 
@@ -634,22 +651,28 @@ class _BelTransformer(Transformer):
         """Return fusion range."""
         return self._fusion_range(n)
 
-    def fus_gene1(self, n):
+    @staticmethod
+    def fus_gene1(n):
         return ["gene1", n]
 
-    def fus_gene2(self, n):
+    @staticmethod
+    def fus_gene2(n):
         return ["gene2", n]
 
-    def fus_rna1(self, n):
+    @staticmethod
+    def fus_rna1(n):
         return ["rna1", n]
 
-    def fus_rna2(self, n):
+    @staticmethod
+    def fus_rna2(n):
         return ["rna2", n]
 
-    def fus_protein1(self, n):
+    @staticmethod
+    def fus_protein1(n):
         return ["protein1", n]
 
-    def fus_protein2(self, n):
+    @staticmethod
+    def fus_protein2(n):
         return ["protein2", n]
 
     def rna_fusion(self, n):
@@ -668,17 +691,20 @@ class _BelTransformer(Transformer):
         """Return fusion range."""
         return self._fusion_range(n)
 
-    def _get_dict_value(self, n, key_name):
+    @staticmethod
+    def _get_dict_value(n, key_name):
         """Return value of key_name for first dict with key_name."""
         for e in n:
             if isinstance(e, dict) and key_name in e:
                 return e[key_name]
 
-    def __get_token_dict(self, tokens: typing.List[Token]) -> dict:
+    @staticmethod
+    def __get_token_dict(tokens: typing.List[Token]) -> dict:
         """Get dictionary of tokens with typs as key."""
         return {t.type: t.value for t in tokens if isinstance(t, Token)}
 
-    def _get_value(self, tokens, token_name):
+    @staticmethod
+    def _get_value(tokens, token_name):
         """Get first Token value of list with token_name.
 
         If token_name is a list method checks aginst list.
@@ -712,7 +738,8 @@ class _BelTransformer(Transformer):
 
         return ret_lst
 
-    def _get_tree(self, n: list, tree_name):
+    @staticmethod
+    def _get_tree(n: list, tree_name):
         """Return first lark.Tree, namedtuple or dict linked to tree_name."""
         for e in n:
             if isinstance(e, Tree) and e.data == tree_name:
@@ -722,14 +749,16 @@ class _BelTransformer(Transformer):
 
         raise "Type not supported or empty list"
 
-    def _get_all_values_by_name(self, tree_or_tokens, token_name):
+    @staticmethod
+    def _get_all_values_by_name(tree_or_tokens, token_name):
         n = tree_or_tokens
         if isinstance(tree_or_tokens, Tree):
             n = tree_or_tokens.children
 
         return sorted([x.value for x in n if isinstance(x, Token) and x.type == token_name])
 
-    def _first_tree(self, n: list) -> Tree:
+    @staticmethod
+    def _first_tree(n: list) -> Tree:
         """Return first tree in list."""
         for e in n:
             if isinstance(e, Tree):
