@@ -12,7 +12,7 @@ from urllib.parse import quote_plus, urlencode
 import pandas as pd
 import requests
 import sqlalchemy
-from lark import Lark, Tree, Token
+from lark import Lark, Token, Tree
 from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship

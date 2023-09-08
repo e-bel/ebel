@@ -3,20 +3,26 @@
 import logging
 import re
 import typing
-from collections import OrderedDict, defaultdict, namedtuple, Counter
-from typing import List, Set, Generator, Dict, DefaultDict
+from collections import Counter, OrderedDict, defaultdict, namedtuple
+from typing import DefaultDict, Dict, Generator, List, Set
 
-from lark import Transformer, Token
+from lark import Token, Transformer
 from lark.lexer import Token
 from lark.tree import Tree
 
 from ebel.cache import logger
-from ebel.constants import FILE, LIST, PATTERN, URL, GRAMMAR_START_NS, GRAMMAR_START_ANNO, ALLOWED_TYPES
-from ebel.errors import _Error, NotInNamespacePattern, NotInAnnotationPattern, NotInAnnotationList, NotInNamespaceList, \
-    WithoutDefinedNamespace, WithoutDefinedAnnotation, NotInNamespaceUrl, NotInAnnotationUrl, NotDownloadedFromUrl
-from ebel.manager.models import reset_tables, NamespaceManager, NamespaceEntry, AnnotationManager, AnnotationEntry
+from ebel.constants import (ALLOWED_TYPES, FILE, GRAMMAR_START_ANNO,
+                            GRAMMAR_START_NS, LIST, PATTERN, URL)
+from ebel.errors import (NotDownloadedFromUrl, NotInAnnotationList,
+                         NotInAnnotationPattern, NotInAnnotationUrl,
+                         NotInNamespaceList, NotInNamespacePattern,
+                         NotInNamespaceUrl, WithoutDefinedAnnotation,
+                         WithoutDefinedNamespace, _Error)
+from ebel.manager.models import (AnnotationEntry, AnnotationManager,
+                                 NamespaceEntry, NamespaceManager,
+                                 reset_tables)
 from ebel.tools import BelRdb
-from ebel.warnings import _Warning, AlsoUsedInOtherNamespace
+from ebel.warnings import AlsoUsedInOtherNamespace, _Warning
 
 log = logging.getLogger(__name__)
 
