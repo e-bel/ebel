@@ -1,12 +1,15 @@
 graft ebel
 graft tests
+graft docs
 
-include Dockerfile docs/Makefile .dockerignore
-include *.rst *.txt *.yml LICENSE tox.ini *.sh
-
-recursive-include docs/source *.py *.rst
-recursive-include docs *.ini *.txt *.py *.md *.yml
+recursive-include docs *.md
+recursive-include docs *.txt
+recursive-include docs *.yml
 
 global-exclude *.py[cod] __pycache__ *.so .DS_Store *.png *.ipynb *.json
 
-exclude .bumpversion.cfg
+include Dockerfile
+include *.cfg *.yml
+include *.txt *.in *.sh
+exclude .dockerignore
+
