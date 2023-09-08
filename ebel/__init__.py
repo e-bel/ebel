@@ -1,10 +1,5 @@
 """Root init for eBEL."""
-from . import parser
-from . import constants
-from . import errors
-from . import transformers
-from . import cache
-
+from . import cache, constants, errors, parser, transformers
 from .manager.orientdb.biodbs.bel import Bel
 
 __version__ = "1.0.29"

@@ -30,29 +30,14 @@ from ebel.manager.orientdb.biodbs.protein_atlas import ProteinAtlas
 from ebel.manager.orientdb.biodbs.reactome import Reactome
 from ebel.manager.orientdb.biodbs.stringdb import StringDb
 from ebel.manager.orientdb.biodbs.uniprot import UniProt
-from ebel.manager.orientdb.constants import (
-    BIOGRID,
-    CHEBI,
-    CLINICAL_TRIALS,
-    CLINVAR,
-    DISGENET,
-    DRUGBANK,
-    ENSEMBL,
-    EXPRESSION_ATLAS,
-    GWAS_CATALOG,
-    HGNC,
-    INTACT,
-    IUPHAR,
-    KEGG,
-    MIRTARBASE,
-    NCBI,
-    NSIDES,
-    PATHWAY_COMMONS,
-    PROTEIN_ATLAS,
-    REACTOME,
-    STRINGDB,
-    UNIPROT,
-)
+from ebel.manager.orientdb.constants import (BIOGRID, CHEBI, CLINICAL_TRIALS,
+                                             CLINVAR, DISGENET, DRUGBANK,
+                                             ENSEMBL, EXPRESSION_ATLAS,
+                                             GWAS_CATALOG, HGNC, INTACT,
+                                             IUPHAR, KEGG, MIRTARBASE, NCBI,
+                                             NSIDES, PATHWAY_COMMONS,
+                                             PROTEIN_ATLAS, REACTOME, STRINGDB,
+                                             UNIPROT)
 from ebel.manager.orientdb.importer import _BelImporter
 from ebel.manager.orientdb.odb_defaults import bel_func_short
 from ebel.manager.orientdb.odb_meta import Graph
@@ -85,9 +70,7 @@ class Bel(Graph):
     __ncbi = None
     __protein_atlas = None
 
-    def __init__(
-        self, graph_config: Optional[dict] = None, overwrite_config: bool = False
-    ):
+    def __init__(self, graph_config: Optional[dict] = None, overwrite_config: bool = False):
         """Interface for OrientDB database.
 
         Bel objects allow the user to interact with the different modules in OrientDB and execute queries.
@@ -305,9 +288,7 @@ class Bel(Graph):
         bel_json_ext = ".bel.json"
 
         if not skip_drugbank:
-            self.drugbank.get_user_passwd(
-                drugbank_user=drugbank_user, drugbank_password=drugbank_password
-            )
+            self.drugbank.get_user_passwd(drugbank_user=drugbank_user, drugbank_password=drugbank_password)
 
         # If directory, get a list of all files there
         if isinstance(input_path, str) and os.path.isdir(input_path):
@@ -318,9 +299,7 @@ class Bel(Graph):
                 ]
                 input_path = [x for y in files2d for x in y]
             else:
-                input_path = [
-                    os.path.join(input_path, file) for file in os.listdir(input_path)
-                ]
+                input_path = [os.path.join(input_path, file) for file in os.listdir(input_path)]
 
         if isinstance(input_path, str):
             input_path: Iterable[str] = [input_path]
@@ -403,18 +382,10 @@ class Bel(Graph):
             # EXPRESSION_ATLAS: self.expression_atlas, # TODO: Skipped because file with all results is no longer supported
         }
         # calc all sets (what is used, missing in skip and include)
-        include = (
-            [] if include == ["[]"] else include
-        )  # fixes problems in python3.9/docker
+        include = [] if include == ["[]"] else include  # fixes problems in python3.9/docker
         skip = [] if skip == ["[]"] else skip  # fixes problems in python3.9/docker
-        include_set = (
-            {include.lower()}
-            if isinstance(include, str)
-            else set([x.lower() for x in include])
-        )
-        skip_set = (
-            {skip.lower()} if isinstance(skip, str) else set([x.lower() for x in skip])
-        )
+        include_set = {include.lower()} if isinstance(include, str) else set([x.lower() for x in include])
+        skip_set = {skip.lower()} if isinstance(skip, str) else set([x.lower() for x in skip])
         biodb_set = set([x.lower() for x in biodb_updaters.keys()])
         used_biodb_set = (biodb_set & include_set) if include_set else biodb_set
         used_biodb_set = (used_biodb_set - skip_set) if skip_set else used_biodb_set
@@ -423,13 +394,9 @@ class Bel(Graph):
 
         logger.info(f"BioDbs for enrichment: {used_biodb_set}")
         if include_not_exists:
-            logger.warning(
-                f"{include_not_exists} cannot be included, because they do not exist"
-            )
+            logger.warning(f"{include_not_exists} cannot be included, because they do not exist")
         if skip_not_exists:
-            logger.warning(
-                f"{skip_not_exists} cannot be excluded, because they do not exist."
-            )
+            logger.warning(f"{skip_not_exists} cannot be excluded, because they do not exist.")
 
         # to get the correct order
         db_names = [x for x in biodb_updaters if x in used_biodb_set]
@@ -446,9 +413,7 @@ class Bel(Graph):
     @property
     def pure_protein_rid_dict(self) -> dict:
         """Get pure protein/rid dictbel. where name is the key and rid is the value."""
-        pureprots = self.query_class(
-            class_name="protein", columns=["name"], with_rid=True, pure=True
-        )  # List of dicts
+        pureprots = self.query_class(class_name="protein", columns=["name"], with_rid=True, pure=True)  # List of dicts
         return {prot["name"]: prot[RID] for prot in pureprots}
 
     def _update_species(self) -> dict:
@@ -465,9 +430,7 @@ class Bel(Graph):
                 namespaces_updated[namespace] = results[0]
 
         # Update complexes/composites
-        results = self.execute(
-            "Select @rid.asString() as rid from bel where both('bel_relation').size()>0"
-        )
+        results = self.execute("Select @rid.asString() as rid from bel where both('bel_relation').size()>0")
         for r in tqdm(results, desc="Update species"):
             rid = r.oRecordData[RID]
             sql = f"""Select namespace FROM (
@@ -479,18 +442,12 @@ class Bel(Graph):
                                          'has__gene',
                                          'has__rna') FROM {rid}) WHERE @class in ['protein','rna','gene']"""
             namespace_results = self.execute(sql)
-            ns_set = {
-                x.oRecordData["namespace"]
-                for x in namespace_results
-                if namespace_results
-            }
+            ns_set = {x.oRecordData["namespace"] for x in namespace_results if namespace_results}
 
             if len(ns_set) == 1:
                 ns = list(ns_set)[0]
                 if ns in SPECIES_NAMESPACE.keys():
-                    species_sql = (
-                        f"""UPDATE {rid} SET species = {SPECIES_NAMESPACE[ns]}"""
-                    )
+                    species_sql = f"""UPDATE {rid} SET species = {SPECIES_NAMESPACE[ns]}"""
                     self.execute(species_sql)
                     namespaces_updated[ns] += 1
 
@@ -558,15 +515,11 @@ class Bel(Graph):
             results[edge_class] = self.execute(sql.format(edge_class))
 
         created = 0
-        for edge_class, class_name_from_pure in tqdm(
-            edge_classes.items(), desc="Add edges to pure nodes"
-        ):
+        for edge_class, class_name_from_pure in tqdm(edge_classes.items(), desc="Add edges to pure nodes"):
             for row in results[edge_class]:
                 r = row.oRecordData
 
-                if (
-                    r
-                ):  # Might return an empty result, but don't know until we look at oRecordData
+                if r:  # Might return an empty result, but don't know until we look at oRecordData
                     namespace = r["namespace"]
                     name = r["name"]
                     class_name = r["class_name"]
@@ -586,9 +539,7 @@ class Bel(Graph):
                         "bel": bel,
                     }
 
-                    from_rid = self.get_create_rid(
-                        class_name=class_name, value_dict=data, check_for="bel"
-                    )
+                    from_rid = self.get_create_rid(class_name=class_name, value_dict=data, check_for="bel")
                     to_rid = r[RID]
 
                     self.create_edge(
@@ -663,9 +614,7 @@ class Bel(Graph):
                                 group by name, namespace"""
 
         results = [r.oRecordData for r in self.execute(modified_proteins_sql)]
-        modified_proteins = [
-            ModifiedProtein(r["ns"], r["name"], r["rids"]) for r in results
-        ]
+        modified_proteins = [ModifiedProtein(r["ns"], r["name"], r["rids"]) for r in results]
 
         for modified_protein in modified_proteins:
             pass
@@ -704,9 +653,7 @@ class Bel(Graph):
         results = self.execute(sql)
 
         if results:
-            for to_class_node in tqdm(
-                self.execute(sql), desc=f"Adding {edge_name} edges"
-            ):
+            for to_class_node in tqdm(self.execute(sql), desc=f"Adding {edge_name} edges"):
                 p = to_class_node.oRecordData
                 bel = '{bel_function}({ns}:"{name}")'.format(
                     ns=p["namespace"], name=p["name"], bel_function=bel_function
@@ -733,8 +680,3 @@ class Bel(Graph):
     def update_interactions(self) -> int:
         """Abstract method."""
         pass
-
-
-if __name__ == "__main__":
-    b = Bel()
-    b.kegg.update_interactions()
