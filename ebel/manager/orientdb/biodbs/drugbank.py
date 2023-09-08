@@ -396,8 +396,8 @@ class DrugBank(odb_meta.Graph):
 
     def get_drugbank_id_rids(self) -> Dict[str, str]:
         """Get dict of DrugBank IDs as keys and their rIDs as values."""
-        rows = self.execute("Select drugbank_id, @rid.asString() as rid  from drug")
-        return {x.oRecordData["drugbank_id"]: x.oRecordData[RID] for x in rows}
+        rows = self.execute("Select drugbank_id, @rid.asString() as rid from drug")
+        return {x.oRecordData["drugbank_id"]: x.oRecordData[RID] for x in rows if "drugbank_id" in x.oRecordData}
 
     @staticmethod
     def _replace_new_lines(input_string: str) -> str:
