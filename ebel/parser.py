@@ -10,12 +10,11 @@ from typing import Any, Iterable, List
 
 from lark import Lark
 from lark.exceptions import UnexpectedInput, UnexpectedToken
-from lark.lexer import Token
-from lark.tree import Tree
 from pandas import DataFrame
 
 from ebel.constants import GRAMMAR_BEL_PATH, GRAMMAR_START_LINE
 from ebel.errors import BelSyntaxError
+from ebel.manager.models import load_grammar
 from ebel.transformers import _BelTransformer
 
 # TODO: check all strings if they can be stored in constants
@@ -49,72 +48,6 @@ trees_with_one_value = (
 exclude_token_types = ("OB", "CB", "QM", "COLON", "COMMA", "OCB", "CCB")
 
 logger = logging.getLogger(__name__)
-
-
-def load_grammar(grammar_path):
-    """Return eBNF grammar in lark style.
-
-    Parameters
-    ----------
-    grammar_path : str
-        path to eBNF grammar in lark style.
-
-    Returns
-    -------
-    string
-        eBNF grammar in lark style.
-
-    """
-    # FIXME: something to do here
-    logger.info("load grammar {}".format(grammar_path))
-    with codecs.open(grammar_path, "r", encoding="utf-8") as fd_grammar:
-        grammar = fd_grammar.read()
-    fd_grammar.close()
-    return grammar
-
-
-def first_token_value(tree: Tree, subtree_name: str) -> str:
-    """Get the first token value of Lark tree with subtree name.
-
-    Parameters
-    ----------
-    tree : type
-        Description of parameter `tree`.
-    subtree_name : type
-        Description of parameter `subtree_name`.
-
-    Returns
-    -------
-    type
-        Description of returned object.
-
-    """
-    # TODO: Get rid of this method by using a Transformer? Is this possible?
-
-    for subtree in tree.iter_subtrees():
-        if subtree.data == subtree_name:
-            return [node.value for node in subtree.children if isinstance(node, Token)][0]
-
-
-def first_real_token_value(tokens: List[Token], purge: bool) -> str:
-    """Return value of first token not excluded by `exclude_token_types`.
-
-    Parameters
-    ----------
-    tokens: List[Token]
-        list of lark.lexer.Token
-    purge: bool
-        set if value will be purged.
-
-    Returns
-    -------
-    str
-        String value from first 'real' token.
-    """
-    t = [token for token in tokens if token.type not in exclude_token_types][0]
-    if purge:
-        t.value = re.sub(r"\s{2,}", " ", t.value.replace("\\\n", "").strip())
-    return t.value
 
 
 def camel_case(name: str) -> str:
@@ -372,6 +305,7 @@ class _BELParser:
 
         if bel_version.startswith("2"):  # TODO change this hardcoded value
             transformer = _BelTransformer()
+
         else:
             logger.error(f"Transformer for version {bel_version} not implemented", exc_info=True)
             raise
@@ -386,7 +320,6 @@ class _BELParser:
 
         with codecs.open(bel_script_path, "r", encoding="utf-8") as fd:
             bel_content = fd.read() + "\n"
-        fd.close()
 
         tree = None
         warnings = None

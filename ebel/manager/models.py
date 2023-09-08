@@ -12,7 +12,7 @@ from urllib.parse import quote_plus, urlencode
 import pandas as pd
 import requests
 import sqlalchemy
-from lark import Lark
+from lark import Lark, Tree, Token
 from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship
@@ -20,7 +20,6 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
 
-from ebel import parser
 from ebel.constants import (FILE, GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_ANNO,
                             GRAMMAR_START_NS, URL)
 from ebel.tools import BelRdb
@@ -358,7 +357,7 @@ class ModelManager:
         type
             Description of returned object.
         """
-        grammar = parser.load_grammar(GRAMMAR_NS_ANNO_PATH)
+        grammar = load_grammar(GRAMMAR_NS_ANNO_PATH)
         header, header_ends_in_line = self.get_namespace_header(path_to_file)
         lark_parser = Lark(grammar, start=self.grammar_start)
 
@@ -368,13 +367,13 @@ class ModelManager:
         except Exception as e:
             return False, e
 
-        delimiter = parser.first_token_value(tree, "pr_delimiter_string")
-        case_sensitive = parser.first_token_value(tree, "pr_case_sensitive_flag")
-        cacheable = parser.first_token_value(tree, "pr_cacheable_flag")
+        delimiter = first_token_value(tree, "pr_delimiter_string")
+        case_sensitive = first_token_value(tree, "pr_case_sensitive_flag")
+        cacheable = first_token_value(tree, "pr_cacheable_flag")
         is_case_sensitive = False if re.search("no", case_sensitive, re.I) else False
         is_cacheable = False if re.search("no", cacheable, re.I) else True
 
-        keyword_in_anno = parser.first_token_value(tree, "keyword")
+        keyword_in_anno = first_token_value(tree, "keyword")
         if keyword != keyword_in_anno:
             warning = f"Keyword {keyword} in BEL namespace URL {url} is different from keyword in BEL script"
             logger.warning(warning)
@@ -465,3 +464,48 @@ class AnnotationManager(ModelManager):
             entries_model=AnnotationEntry,
             grammar_start=GRAMMAR_START_ANNO,
         )
+
+
+def load_grammar(grammar_path):
+    """Return eBNF grammar in lark style.
+
+    Parameters
+    ----------
+    grammar_path : str
+        path to eBNF grammar in lark style.
+
+    Returns
+    -------
+    string
+        eBNF grammar in lark style.
+
+    """
+    # FIXME: something to do here
+    logger.info("load grammar {}".format(grammar_path))
+    with codecs.open(grammar_path, "r", encoding="utf-8") as fd_grammar:
+        grammar = fd_grammar.read()
+
+    return grammar
+
+
+def first_token_value(tree: Tree, subtree_name: str) -> str:
+    """Get the first token value of Lark tree with subtree name.
+
+    Parameters
+    ----------
+    tree : type
+        Description of parameter `tree`.
+    subtree_name : type
+        Description of parameter `subtree_name`.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
+    """
+    # TODO: Get rid of this method by using a Transformer? Is this possible?
+
+    for subtree in tree.iter_subtrees():
+        if subtree.data == subtree_name:
+            return [node.value for node in subtree.children if isinstance(node, Token)][0]
