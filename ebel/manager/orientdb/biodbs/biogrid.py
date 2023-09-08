@@ -209,6 +209,8 @@ class Modification(Enum):
     NEDDYLATION: ModConfig = ModConfig("Neddylation", Effect.INCREASES, BelPmod.NED)
     DE_ISGYLATION: ModConfig = ModConfig("de-ISGylation", Effect.INCREASES, BelPmod.DEI)
     FAT10YLATION: ModConfig = ModConfig("FAT10ylation", Effect.INCREASES, BelPmod.FAT)
+    UFMYLATION: ModConfig = ModConfig("Ufmylation", Effect.INCREASES, BelPmod.UFM)
+    ISGYLATION: ModConfig = ModConfig("ISGylation", Effect.INCREASES, BelPmod.ISG)
 
     @classmethod
     def get_reverse_dict(cls) -> typing.Dict[str, ModConfig]:

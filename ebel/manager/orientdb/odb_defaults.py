@@ -109,6 +109,7 @@ normalized_pmod: Dict[str, str] = {
     "pre": "Prenylation",  # added for BioGrid
     "dei": "de-ISGylation",  # added for BioGrid
     "fat": "FAT10ylation",
+    "ufm": "Ufmylation",  # added for BioGrid
 }
 
 normalized_pmod_reverse = {v: k for k, v in normalized_pmod.items()}
@@ -151,3 +152,4 @@ class BelPmod:
     PRE = normalized_pmod["pre"]  # added for BioGrid
     DEI = normalized_pmod["dei"]  # added for BioGrid
     FAT = normalized_pmod["fat"]
+    UFM = normalized_pmod["ufm"]  # added for BioGrid
