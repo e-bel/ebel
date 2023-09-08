@@ -1,7 +1,7 @@
 """StringDB RDBMS model definition."""
 
+from sqlalchemy import Boolean, Column, Integer, SmallInteger, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, SmallInteger, Boolean
 
 from ebel.manager.rdbms.models import object_as_dict
 

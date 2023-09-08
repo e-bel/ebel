@@ -2,11 +2,11 @@
 
 """This file contains default values for configurations and parameters."""
 
-import os
 import logging
 import logging.handlers as handlers
+import os
 
-from .constants import PROJECT_DIR, DATA_DIR, LOG_DIR
+from .constants import DATA_DIR, LOG_DIR, PROJECT_DIR
 
 ###############################################################################
 # UNIPROT taxonomy IDs to import

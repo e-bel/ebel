@@ -1,7 +1,7 @@
 """API methods."""
-import connexion
 import webbrowser
 
+import connexion
 from flask_cors import CORS
 
 application = connexion.FlaskApp(__name__)

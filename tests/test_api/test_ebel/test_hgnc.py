@@ -1,14 +1,12 @@
 """HGNC API unit tests."""
 
 from .conftest import format_response_data
-from .constants import RESULTS, NUM_RESULTS, PAGE_SIZE
+from .constants import NUM_RESULTS, PAGE_SIZE, RESULTS
 
 
 class TestHgnc:
     def test_get_by_symbol(self, client):
-        response = client.get(
-            "api/v1/hgnc/by_symbol?symbol=CD33", content_type="application/json"
-        )
+        response = client.get("api/v1/hgnc/by_symbol?symbol=CD33", content_type="application/json")
         output = format_response_data(response)
         expected_results = {
             "agr": "HGNC:1659",

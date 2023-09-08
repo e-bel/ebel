@@ -1,22 +1,21 @@
 """UniProt module."""
-import os
-import re
 import ftplib
 import logging
-import pandas as pd
-
-from tqdm import tqdm
-from pyorientdb import OrientDB
-from lxml.etree import iterparse
+import os
+import re
 from collections import namedtuple
-from typing import List, Dict, Tuple, Union
+from typing import Dict, List, Tuple, Union
+
+import pandas as pd
+from lxml.etree import iterparse
+from pyorientdb import OrientDB
+from tqdm import tqdm
 
 from ebel.defaults import default_tax_ids
-from ebel.tools import gunzip, get_file_path
 from ebel.manager.orientdb import odb_meta, urls
 from ebel.manager.orientdb.constants import UNIPROT
-
 from ebel.manager.rdbms.models import uniprot as up
+from ebel.tools import get_file_path, gunzip
 
 logger = logging.getLogger(__name__)
 
@@ -165,9 +164,9 @@ class UniProt(odb_meta.Graph):
         self._add_fly_symbols()
 
     def _delete_gene_symbols(self, taxid) -> None:
-        self.session.query(up.GeneSymbol).filter(
-            up.GeneSymbol.uniprot.has(up.Uniprot.taxid == taxid)
-        ).delete(synchronize_session=False)
+        self.session.query(up.GeneSymbol).filter(up.GeneSymbol.uniprot.has(up.Uniprot.taxid == taxid)).delete(
+            synchronize_session=False
+        )
         self.session.commit()
 
     def _add_hgnc_symbols(self) -> int:
@@ -175,24 +174,16 @@ class UniProt(odb_meta.Graph):
         inserted = 0
         self._delete_gene_symbols(9606)
 
-        df = pd.read_csv(
-            urls.HGNC_TSV, sep="\t", low_memory=False, usecols=["symbol", "uniprot_ids"]
-        ).dropna()
+        df = pd.read_csv(urls.HGNC_TSV, sep="\t", low_memory=False, usecols=["symbol", "uniprot_ids"]).dropna()
 
         for row in tqdm(
             df.itertuples(index=False),
             desc="Add HGNC symbols to UniProt",
             total=df.shape[0],
         ):
-            uniprot = (
-                self.session.query(up.Uniprot)
-                .filter(up.Uniprot.accession == row.uniprot_ids)
-                .scalar()
-            )
+            uniprot = self.session.query(up.Uniprot).filter(up.Uniprot.accession == row.uniprot_ids).scalar()
             if uniprot:
-                self.session.add(
-                    up.GeneSymbol(symbol=row.symbol, uniprot_id=uniprot.id)
-                )
+                self.session.add(up.GeneSymbol(symbol=row.symbol, uniprot_id=uniprot.id))
                 inserted += 1
         self.session.commit()
 
@@ -216,16 +207,10 @@ class UniProt(odb_meta.Graph):
             desc="Add MGI symbols to UniProt",
             total=df.shape[0],
         ):
-            uniprot = (
-                self.session.query(up.Uniprot)
-                .filter(up.Uniprot.accession == row.uniprot_accession)
-                .scalar()
-            )
+            uniprot = self.session.query(up.Uniprot).filter(up.Uniprot.accession == row.uniprot_accession).scalar()
 
             if uniprot:
-                self.session.add(
-                    up.GeneSymbol(symbol=row.symbol, uniprot_id=uniprot.id)
-                )
+                self.session.add(up.GeneSymbol(symbol=row.symbol, uniprot_id=uniprot.id))
                 inserted += 1
         self.session.commit()
 
@@ -253,15 +238,9 @@ class UniProt(odb_meta.Graph):
             total=df.shape[0],
         ):
             for accession in row.uniprot_accessions:
-                uniprot = (
-                    self.session.query(up.Uniprot)
-                    .filter(up.Uniprot.accession == accession)
-                    .scalar()
-                )
+                uniprot = self.session.query(up.Uniprot).filter(up.Uniprot.accession == accession).scalar()
                 if uniprot:
-                    self.session.add(
-                        up.GeneSymbol(symbol=row.symbol, uniprot_id=uniprot.id)
-                    )
+                    self.session.add(up.GeneSymbol(symbol=row.symbol, uniprot_id=uniprot.id))
                     inserted += 1
         self.session.commit()
 
@@ -275,11 +254,7 @@ class UniProt(odb_meta.Graph):
         ftp = ftplib.FTP(ftp_base)
         ftp.login("anonymous", "anonymous")
         files = ftp.nlst(ftp_folder)
-        file_found = [
-            x
-            for x in files
-            if re.search(r"fbgn_NAseq_Uniprot_fb_\d{4}_\d{2}.tsv.gz", x)
-        ]
+        file_found = [x for x in files if re.search(r"fbgn_NAseq_Uniprot_fb_\d{4}_\d{2}.tsv.gz", x)]
         if file_found:
             url = f"ftp://{ftp_base}{file_found[0]}"
             inserted = 0
@@ -300,15 +275,9 @@ class UniProt(odb_meta.Graph):
                 desc="Add FlyBase symbols to UniProt",
                 total=df.shape[0],
             ):
-                uniprot = (
-                    self.session.query(up.Uniprot)
-                    .filter(up.Uniprot.accession == row.uniprot_accession)
-                    .scalar()
-                )
+                uniprot = self.session.query(up.Uniprot).filter(up.Uniprot.accession == row.uniprot_accession).scalar()
                 if uniprot:
-                    self.session.add(
-                        up.GeneSymbol(symbol=row.symbol, uniprot_id=uniprot.id)
-                    )
+                    self.session.add(up.GeneSymbol(symbol=row.symbol, uniprot_id=uniprot.id))
                     inserted += 1
             self.session.commit()
         ftp.close()
@@ -323,9 +292,7 @@ class UniProt(odb_meta.Graph):
         updated["UNIPROT"] = self._update_uniprot_proteins()
         return updated
 
-    def _update_protein_node(
-        self, uniprot_accession, recommended_name, name, namespace, taxid
-    ) -> int:
+    def _update_protein_node(self, uniprot_accession, recommended_name, name, namespace, taxid) -> int:
         """Update all proteins using UNIPROT as namespace. Returns numbers of updated."""
         sql = (
             f'Update protein set uniprot = "{uniprot_accession}", label = "{recommended_name}", '
@@ -333,9 +300,7 @@ class UniProt(odb_meta.Graph):
         )
         return self.execute(sql)[0]
 
-    def _get_accesssion_recname(
-        self, taxid, gene_symbol
-    ) -> Union[Tuple[str, str], None]:
+    def _get_accesssion_recname(self, taxid, gene_symbol) -> Union[Tuple[str, str], None]:
         """Get uniprot accession and recommended name from HGNC.
 
         If this has no result it tries uniprot by gene symbol and NCBI taxonomy ID.
@@ -354,17 +319,13 @@ class UniProt(odb_meta.Graph):
 
         Returns number of updated proteins.
         """
-        sql = (
-            f'SELECT distinct(name) as name from protein WHERE namespace="{namespace}"'
-        )
+        sql = f'SELECT distinct(name) as name from protein WHERE namespace="{namespace}"'
         updated = 0
         for protein in self.query(sql).itertuples(index=False):
             acc_rec = self._get_accesssion_recname(taxid, protein.name)
             if acc_rec:
                 accession, recommended_name = acc_rec
-                num_updated = self._update_protein_node(
-                    accession, recommended_name, protein.name, namespace, taxid
-                )
+                num_updated = self._update_protein_node(accession, recommended_name, protein.name, namespace, taxid)
                 updated += num_updated
             else:
                 err_txt = (
@@ -374,9 +335,7 @@ class UniProt(odb_meta.Graph):
                 logging.warning(err_txt)
         return updated
 
-    def _get_recname_taxid_by_accession_from_uniprot_api(
-        self, accession
-    ) -> Tuple[str, int]:
+    def _get_recname_taxid_by_accession_from_uniprot_api(self, accession) -> Tuple[str, int]:
         """Fetch uniprot entry by accession and adds to the database. Returns recommended name."""
         sql = f"Select recommended_name,taxid from uniprot where accession='{accession}' limit 1"
         result = self.engine.execute(sql).fetchone()
@@ -386,12 +345,8 @@ class UniProt(odb_meta.Graph):
     def _update_uniprot_proteins(self) -> int:
         """Update all proteins using UNIPROT as namespace. Returns number of updated proteins."""
         updated = 0
-        sql_temp = (
-            "Select recommended_name, taxid from uniprot where accession='{}' limit 1"
-        )
-        sql_uniprot = (
-            'SELECT distinct(name) as accession from protein WHERE namespace="UNIPROT"'
-        )
+        sql_temp = "Select recommended_name, taxid from uniprot where accession='{}' limit 1"
+        sql_uniprot = 'SELECT distinct(name) as accession from protein WHERE namespace="UNIPROT"'
         sql_update = (
             'Update protein set uniprot = name, label = "{}", species = {} '
             'where namespace = "UNIPROT" and name = "{}"'
@@ -401,19 +356,13 @@ class UniProt(odb_meta.Graph):
             found = self.engine.execute(sql).fetchone()
             if found:
                 recommended_name, taxid = found
-                num_updated = self.execute(
-                    sql_update.format(recommended_name, taxid, protein.accession)
-                )[0]
+                num_updated = self.execute(sql_update.format(recommended_name, taxid, protein.accession))[0]
                 updated += num_updated
             else:
-                recname_taxid = self._get_recname_taxid_by_accession_from_uniprot_api(
-                    protein.accession
-                )
+                recname_taxid = self._get_recname_taxid_by_accession_from_uniprot_api(protein.accession)
                 if recname_taxid:
                     recommended_name, taxid = recname_taxid
-                    num_updated = self.execute(
-                        sql_update.format(recommended_name, taxid, protein.accession)
-                    )[0]
+                    num_updated = self.execute(sql_update.format(recommended_name, taxid, protein.accession))[0]
                     updated += num_updated
         return updated
 
@@ -430,9 +379,7 @@ class UniProt(odb_meta.Graph):
         sclocation_index = 0
         keywords: Keywords = {}
 
-        doc = iterparse(
-            self.file_path_gunzipped, events=("end",), tag=f"{XML_NAMESPACE}entry"
-        )
+        doc = iterparse(self.file_path_gunzipped, events=("end",), tag=f"{XML_NAMESPACE}entry")
 
         counter = 0
 
@@ -453,9 +400,7 @@ class UniProt(odb_meta.Graph):
                 elif ctag in ["organismHost", "organism"]:
                     taxid = int(child.xpath(self.xpath_pattern.taxid, namespaces=XN)[0])
                     if taxid not in organisms:
-                        organism_scientific = child.xpath(
-                            self.xpath_pattern.organism_scientific, namespaces=XN
-                        )[0]
+                        organism_scientific = child.xpath(self.xpath_pattern.organism_scientific, namespaces=XN)[0]
                         organisms[taxid] = organism_scientific
 
                 elif ctag == "keyword":
@@ -467,9 +412,7 @@ class UniProt(odb_meta.Graph):
                     ctype = child.attrib.get("type")
 
                     if ctype == "function":
-                        func = child.xpath(self.xpath_pattern.function, namespaces=XN)[
-                            0
-                        ]
+                        func = child.xpath(self.xpath_pattern.function, namespaces=XN)[0]
 
                         if func not in functions:
                             function_index += 1
@@ -495,21 +438,15 @@ class UniProt(odb_meta.Graph):
     ):
         """Insert data from file."""
         if keywords:
-            df_kw = pd.DataFrame(
-                keywords.items(), columns=["keywordid", "keyword_name"]
-            )
+            df_kw = pd.DataFrame(keywords.items(), columns=["keywordid", "keyword_name"])
             self._insert_into_database(df_kw, up.Keyword)
 
         if organisms:
-            df_org = pd.DataFrame(
-                organisms.items(), columns=["taxid", "scientific_name"]
-            )
+            df_org = pd.DataFrame(organisms.items(), columns=["taxid", "scientific_name"])
             self._insert_into_database(df_org, up.Organism)
 
         if sclocations:
-            df_sl = pd.DataFrame(
-                [x[::-1] for x in sclocations.items()], columns=["id", "name"]
-            )
+            df_sl = pd.DataFrame([x[::-1] for x in sclocations.items()], columns=["id", "name"])
             self._insert_into_database(df_sl, up.SubcellularLocation)
 
         if xrefs:
@@ -520,9 +457,7 @@ class UniProt(odb_meta.Graph):
             self._insert_into_database(df_xr, up.Xref)
 
         if functions:
-            df_fc = pd.DataFrame(
-                [x[::-1] for x in functions.items()], columns=["id", "description"]
-            )
+            df_fc = pd.DataFrame([x[::-1] for x in functions.items()], columns=["id", "description"])
             self._insert_into_database(df_fc, up.Function)
 
     def _insert_into_database(self, dataframe, model):
@@ -558,9 +493,7 @@ class UniProt(odb_meta.Graph):
             number_of_entries,
         ) = self.__read_linked_tables()
         self.__insert_linked_data(keywords, hosts, xrefs, functions, sclocations)
-        inserted = self.__insert_uniprot_data(
-            xrefs, functions, sclocations, number_of_entries
-        )
+        inserted = self.__insert_uniprot_data(xrefs, functions, sclocations, number_of_entries)
 
         # save storage space
         if os.path.exists(self.file_path_gunzipped):
@@ -579,20 +512,14 @@ class UniProt(odb_meta.Graph):
         """Get tag based on given name."""
         return f"{XML_NAMESPACE}{name}"
 
-    def __insert_uniprot_data(
-        self, xrefs, functions, sclocations, number_of_entries
-    ) -> int:
-        doc = iterparse(
-            self.file_path_gunzipped, events=("end",), tag=self.get_tag("entry")
-        )
+    def __insert_uniprot_data(self, xrefs, functions, sclocations, number_of_entries) -> int:
+        doc = iterparse(self.file_path_gunzipped, events=("end",), tag=self.get_tag("entry"))
 
         counter = 0
 
         uniprots = []
 
-        for action, elem in tqdm(
-            doc, total=number_of_entries, desc=f"Import {self.biodb_name.upper()}"
-        ):
+        for action, elem in tqdm(doc, total=number_of_entries, desc=f"Import {self.biodb_name.upper()}"):
             counter += 1
 
             uniprot = UniProtEntry()
@@ -616,12 +543,8 @@ class UniProt(odb_meta.Graph):
                             break
 
                 elif ctag == "protein":
-                    for cchild in child.iterchildren(
-                        tag=self.get_tag("recommendedName")
-                    ):
-                        for ccchild in cchild.iterchildren(
-                            tag=self.get_tag("fullName")
-                        ):
+                    for cchild in child.iterchildren(tag=self.get_tag("recommendedName")):
+                        for ccchild in cchild.iterchildren(tag=self.get_tag("fullName")):
                             uniprot.recommended_name = ccchild.text
                             break
 
@@ -639,15 +562,9 @@ class UniProt(odb_meta.Graph):
                             break
 
                     elif ctype == "subcellular location":
-                        for cchild in child.iterchildren(
-                            tag=self.get_tag("subcellularLocation")
-                        ):
-                            for ccchild in cchild.iterchildren(
-                                tag=self.get_tag("location")
-                            ):
-                                uniprot.subcellular_location_ids.append(
-                                    sclocations[ccchild.text]
-                                )
+                        for cchild in child.iterchildren(tag=self.get_tag("subcellularLocation")):
+                            for ccchild in cchild.iterchildren(tag=self.get_tag("location")):
+                                uniprot.subcellular_location_ids.append(sclocations[ccchild.text])
 
                 elif ctag == "dbReference":
                     xref = child.attrib.get("type"), child.attrib.get("id")
@@ -659,23 +576,17 @@ class UniProt(odb_meta.Graph):
             uniprots.append(uniprot)
             elem.clear()
 
-        df = pd.DataFrame(
-            [u.get_data_tuple() for u in uniprots], columns=UniProtEntry.column_names
-        )
+        df = pd.DataFrame([u.get_data_tuple() for u in uniprots], columns=UniProtEntry.column_names)
         df.index += 1
         df.index.rename("id", inplace=True)
         cols_uniprot = ["name", "accession", "recommended_name", "taxid", "function_id"]
         logger.info(f"start insert {up.Uniprot.__tablename__}")
-        df[cols_uniprot].to_sql(
-            up.Uniprot.__tablename__, self.engine, if_exists="append", chunksize=100000
-        )
+        df[cols_uniprot].to_sql(up.Uniprot.__tablename__, self.engine, if_exists="append", chunksize=100000)
 
         df["uniprot_id"] = df.index
 
         logger.info(f"start insert {up.Gene.__tablename__}")
-        df[["gene_names", "uniprot_id"]].explode("gene_names").dropna().rename(
-            columns={"gene_names": "name"}
-        ).to_sql(
+        df[["gene_names", "uniprot_id"]].explode("gene_names").dropna().rename(columns={"gene_names": "name"}).to_sql(
             up.Gene.__tablename__,
             self.engine,
             if_exists="append",
@@ -717,9 +628,7 @@ class UniProt(odb_meta.Graph):
         )
 
         logger.info(f"start insert {up.uniprot__uniprot_subcellular_location.name}")
-        df[["subcellular_location_ids", "uniprot_id"]].explode(
-            "subcellular_location_ids"
-        ).dropna().rename(
+        df[["subcellular_location_ids", "uniprot_id"]].explode("subcellular_location_ids").dropna().rename(
             columns={"subcellular_location_ids": "uniprot_subcellular_location_id"}
         ).to_sql(
             up.uniprot__uniprot_subcellular_location.name,

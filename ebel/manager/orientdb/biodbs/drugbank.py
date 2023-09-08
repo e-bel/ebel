@@ -78,9 +78,7 @@ class DrugBank(odb_meta.Graph):
         self.biodb_dir = os.path.join(DATA_DIR, self.biodb_name)
         os.makedirs(self.biodb_dir, exist_ok=True)
 
-        self.file_path = os.path.join(
-            self.biodb_dir, "drugbank_all_full_database.xml.zip"
-        )
+        self.file_path = os.path.join(self.biodb_dir, "drugbank_all_full_database.xml.zip")
         self.file_name_unzipped = "full database.xml"
         self.file_path_unzipped = os.path.join(self.biodb_dir, self.file_name_unzipped)
 
@@ -98,9 +96,7 @@ class DrugBank(odb_meta.Graph):
 
     def __len__(self):
         """Get number of 'has_drug_target' graph edges."""
-        return self.execute("Select count(*) from has_drug_target")[0].oRecordData[
-            "count"
-        ]
+        return self.execute("Select count(*) from has_drug_target")[0].oRecordData["count"]
 
     def __contains__(self, unique_identifier):
         """Check if drug with identifier '?' exists in graph."""
@@ -137,9 +133,7 @@ class DrugBank(odb_meta.Graph):
             "fda-label",
         ]
 
-        doc = iterparse(
-            self.file_path_unzipped, events=("end",), tag=f"{XML_NAMESPACE}drug"
-        )
+        doc = iterparse(self.file_path_unzipped, events=("end",), tag=f"{XML_NAMESPACE}drug")
         for action, elem in tqdm(doc, desc=f"Import {self.biodb_name.upper()}"):
             if "type" in elem.attrib:
                 drug_index += 1
@@ -165,58 +159,37 @@ class DrugBank(odb_meta.Graph):
                             drug["drugbank_id"] = child.text
 
                     elif ctag == "general-references":
-                        pmid_strs = child.xpath(
-                            self.xpath_pattern.references, namespaces=XN
-                        )
-                        references = [
-                            drugbank.Reference(pmid=int(x)) for x in pmid_strs
-                        ]
+                        pmid_strs = child.xpath(self.xpath_pattern.references, namespaces=XN)
+                        references = [drugbank.Reference(pmid=int(x)) for x in pmid_strs]
 
                     elif ctag == "synonyms":
                         syns = child.xpath(self.xpath_pattern.synonyms, namespaces=XN)
                         synonyms = [drugbank.Synonym(synonym=x) for x in set(syns)]
 
                     elif ctag == "products":
-                        pro_names = child.xpath(
-                            self.xpath_pattern.product_names, namespaces=XN
-                        )
-                        product_names = [
-                            drugbank.ProductName(name=x) for x in set(pro_names)
-                        ]
+                        pro_names = child.xpath(self.xpath_pattern.product_names, namespaces=XN)
+                        product_names = [drugbank.ProductName(name=x) for x in set(pro_names)]
 
                     elif ctag == "drug-interactions":
                         for di_child in child:
-                            di = {
-                                x.tag[len(XML_NAMESPACE) :].replace("-", "_"): x.text
-                                for x in di_child
-                            }
+                            di = {x.tag[len(XML_NAMESPACE) :].replace("-", "_"): x.text for x in di_child}
                             drug_interactions.append(drugbank.DrugInteraction(**di))
 
                     elif ctag == "external-identifiers":
                         for ex_ids_child in child:
-                            resource = ex_ids_child.xpath(
-                                self.xpath_pattern.ex_ids_resourec, namespaces=XN
-                            )[0]
-                            identifier = ex_ids_child.xpath(
-                                self.xpath_pattern.ex_ids_id, namespaces=XN
-                            )[0]
+                            resource = ex_ids_child.xpath(self.xpath_pattern.ex_ids_resourec, namespaces=XN)[0]
+                            identifier = ex_ids_child.xpath(self.xpath_pattern.ex_ids_id, namespaces=XN)[0]
                             external_identifiers.append(
-                                drugbank.ExternalIdentifier(
-                                    resource=resource, identifier=identifier
-                                )
+                                drugbank.ExternalIdentifier(resource=resource, identifier=identifier)
                             )
 
                     elif ctag == "targets":
                         for target in child:
-                            u = target.xpath(
-                                self.xpath_pattern.target_uniprot, namespaces=XN
-                            )
+                            u = target.xpath(self.xpath_pattern.target_uniprot, namespaces=XN)
                             uniprot = u[0] if u else None
 
                             if uniprot:
-                                actions = target.xpath(
-                                    self.xpath_pattern.target_actions, namespaces=XN
-                                )
+                                actions = target.xpath(self.xpath_pattern.target_actions, namespaces=XN)
                                 action = actions[0] if actions else None
 
                                 kactions = target.xpath(
@@ -237,16 +210,12 @@ class DrugBank(odb_meta.Graph):
                         for patent in child:
                             patent_dict = {}
                             for patent_child in patent:
-                                patent_key = patent_child.tag[
-                                    len(XML_NAMESPACE) :
-                                ].replace("-", "_")
+                                patent_key = patent_child.tag[len(XML_NAMESPACE) :].replace("-", "_")
                                 patent_value = patent_child.text
                                 if patent_key in ("expires", "approved") and re.search(
                                     r"^\d{4}-\d{2}-\d{2}$", patent_value
                                 ):
-                                    patent_value = datetime.strptime(
-                                        patent_value.strip(), "%Y-%m-%d"
-                                    ).date()
+                                    patent_value = datetime.strptime(patent_value.strip(), "%Y-%m-%d").date()
                                 patent_dict[patent_key] = patent_value
                             if patent_dict:
                                 patents.append(drugbank.Patent(**patent_dict))
@@ -307,9 +276,7 @@ class DrugBank(odb_meta.Graph):
 
             except TimeoutError:
                 if timeout_msg:
-                    logger.error(
-                        f"The following error occurred while contacting the DrugBank website: {timeout_msg}"
-                    )
+                    logger.error(f"The following error occurred while contacting the DrugBank website: {timeout_msg}")
                 signal.signal(signal.SIGALRM, signal.SIG_IGN)
                 return None
 
@@ -344,22 +311,14 @@ class DrugBank(odb_meta.Graph):
             prompt = "Do you have an approved account with DrugBank [y/n]: "
             timeout_msg = "No answer was provided. Skipping DrugBank update...\n"
             timeout = 20
-            answer = self.get_timed_answer(
-                prompt=prompt, timeout=timeout, timeout_msg=timeout_msg
-            )
+            answer = self.get_timed_answer(prompt=prompt, timeout=timeout, timeout_msg=timeout_msg)
 
             num_tries = 0
             max_tries = 4
 
-            while (
-                num_tries < max_tries
-                and answer not in ["yes", "y", "no", "n"]
-                and answer is not None
-            ):
+            while num_tries < max_tries and answer not in ["yes", "y", "no", "n"] and answer is not None:
                 print("Invalid response!\n")
-                answer = self.get_timed_answer(
-                    prompt=prompt, timeout=timeout, timeout_msg=timeout_msg
-                )
+                answer = self.get_timed_answer(prompt=prompt, timeout=timeout, timeout_msg=timeout_msg)
                 num_tries += 1
 
                 if num_tries == max_tries:
@@ -373,9 +332,7 @@ class DrugBank(odb_meta.Graph):
                 write_to_config(section_name, "password", passwd)
                 conf = get_config_as_dict()[section_name]
 
-            elif (
-                answer in ["no", "n"] or num_tries >= max_tries or answer is None
-            ):  # If no, write 'NA' to config
+            elif answer in ["no", "n"] or num_tries >= max_tries or answer is None:  # If no, write 'NA' to config
                 write_to_config(section_name, "user", "NA")
                 write_to_config(section_name, "password", "NA")
 
@@ -391,10 +348,7 @@ class DrugBank(odb_meta.Graph):
             drugbank_table_exists = self.engine.dialect.has_table(
                 self.engine.connect(), drugbank.Drugbank.__tablename__
             )
-            if (
-                not drugbank_table_exists
-                or self.session.query(drugbank.Drugbank.id).count() == 0
-            ):
+            if not drugbank_table_exists or self.session.query(drugbank.Drugbank.id).count() == 0:
                 self.recreate_tables()
                 inserted.update(self.insert_data())
         else:
@@ -430,18 +384,14 @@ class DrugBank(odb_meta.Graph):
                     downloaded = True
 
                 else:
-                    logger.warning(
-                        "Invalid username and password. Skipping DrugBank update..."
-                    )
+                    logger.warning("Invalid username and password. Skipping DrugBank update...")
 
         return {self.biodb_name: downloaded}
 
     def __latest_version(self) -> str:
         """Gets latest version of Drugbank and adds it to URL."""
         webpage = requests.get(self.urls["drugbank_version"])
-        version = re.findall(r"(DrugBank Release Version) (\d\.\d\.\d)", webpage.text)[
-            0
-        ][1]
+        version = re.findall(r"(DrugBank Release Version) (\d\.\d\.\d)", webpage.text)[0][1]
         return self.urls[self.biodb_name].format(version.replace(".", "-"))
 
     def get_drugbank_id_rids(self) -> Dict[str, str]:
@@ -459,9 +409,7 @@ class DrugBank(odb_meta.Graph):
         """Updates the edges between drug and pure protein nodes."""
         self.clear_edges()
 
-        drugbank_table_exists = self.engine.dialect.has_table(
-            self.engine.connect(), drugbank.Drugbank.__tablename__
-        )
+        drugbank_table_exists = self.engine.dialect.has_table(self.engine.connect(), drugbank.Drugbank.__tablename__)
         if not drugbank_table_exists:
             logger.error("Update failed - DrugBank table does not exist.")
             return 0
@@ -472,14 +420,10 @@ class DrugBank(odb_meta.Graph):
 
         sql = """Select @rid.asString() as rid, uniprot FROM protein
         WHERE pure=true and uniprot IS NOT NULL AND namespace = 'HGNC'"""
-        for row in tqdm(
-            self.execute(sql), desc=f"Update {self.biodb_name.upper()} interaction."
-        ):
+        for row in tqdm(self.execute(sql), desc=f"Update {self.biodb_name.upper()} interaction."):
             r = row.oRecordData
             protein_rid, uniprot = r["rid"], r["uniprot"]
-            query = self.session.query(drugbank.Target).filter(
-                drugbank.Target.uniprot == uniprot
-            )
+            query = self.session.query(drugbank.Target).filter(drugbank.Target.uniprot == uniprot)
             for target in query.all():
                 drugbank_id = target.drugbank.drugbank_id
 
@@ -489,23 +433,13 @@ class DrugBank(odb_meta.Graph):
                     value_dict_drug = {
                         "drugbank_id": target.drugbank.drugbank_id,
                         "label": target.drugbank.name,
-                        "description": self._replace_new_lines(
-                            target.drugbank.description
-                        ),
+                        "description": self._replace_new_lines(target.drugbank.description),
                         "cas_number": target.drugbank.cas_number,
-                        "indication": self._replace_new_lines(
-                            target.drugbank.indication
-                        ),
-                        "pharmacodynamics": self._replace_new_lines(
-                            target.drugbank.pharmacodynamics
-                        ),
+                        "indication": self._replace_new_lines(target.drugbank.indication),
+                        "pharmacodynamics": self._replace_new_lines(target.drugbank.pharmacodynamics),
                         "toxicity": self._replace_new_lines(target.drugbank.toxicity),
-                        "metabolism": self._replace_new_lines(
-                            target.drugbank.metabolism
-                        ),
-                        "mechanism_of_action": self._replace_new_lines(
-                            target.drugbank.mechanism_of_action
-                        ),
+                        "metabolism": self._replace_new_lines(target.drugbank.metabolism),
+                        "mechanism_of_action": self._replace_new_lines(target.drugbank.mechanism_of_action),
                     }
 
                     drug_rid = self.insert_record("drug_db", value_dict=value_dict_drug)

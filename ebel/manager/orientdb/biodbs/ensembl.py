@@ -22,19 +22,13 @@ class Ensembl(odb_meta.Graph):
         self.client = client
         self.biodb_name = ENSEMBL
         self.urls = {self.biodb_name: urls.ENSEMBL_CDS}
-        super().__init__(
-            urls=self.urls, tables_base=ensembl.Base, biodb_name=self.biodb_name
-        )
+        super().__init__(urls=self.urls, tables_base=ensembl.Base, biodb_name=self.biodb_name)
 
     def __len__(self):
         return self.session.query(ensembl.Ensembl).count()
 
     def __contains__(self, ensembl_id) -> bool:
-        count = (
-            self.session.query(ensembl.Ensembl)
-            .filter(ensembl.Ensembl.gene_id_short == ensembl_id)
-            .count()
-        )
+        count = self.session.query(ensembl.Ensembl).filter(ensembl.Ensembl.gene_id_short == ensembl_id).count()
         return bool(count)
 
     def insert_data(self) -> Dict[str, int]:
@@ -42,9 +36,7 @@ class Ensembl(odb_meta.Graph):
         data = []
         file_path = get_file_path(self.urls[self.biodb_name], self.biodb_name)
         with gzip.open(file_path, "r") as f:
-            lines = [
-                x.decode("utf-8").strip() for x in f.readlines() if x.startswith(b">")
-            ]
+            lines = [x.decode("utf-8").strip() for x in f.readlines() if x.startswith(b">")]
 
         regex = (
             r"^>(?P<enst>ENST\d+)\.\d+ cds chromosome:GRCh"

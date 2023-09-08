@@ -1,20 +1,21 @@
 """Methods for handling the configuration file."""
 import configparser
 import logging
+import os
 import random
 import re
-import os
 import string
 from collections import namedtuple
 from configparser import RawConfigParser
 from getpass import getpass
-from typing import Union, Optional
+from typing import Optional, Union
 from urllib.parse import quote
 
 import pymysql
 
 from ebel import defaults
-from ebel.constants import DEFAULT_ODB, TerminalFormatting as TF
+from ebel.constants import DEFAULT_ODB
+from ebel.constants import TerminalFormatting as TF
 from ebel.defaults import CONN_STR_DEFAULT, DATABASE_LOCATION
 
 
@@ -52,9 +53,7 @@ def set_configuration(
         write_to_config("KEGG", "species", kegg_species)
 
     if sqlalchemy_connection_string:
-        write_to_config(
-            "DATABASE", "sqlalchemy_connection_string", sqlalchemy_connection_string
-        )
+        write_to_config("DATABASE", "sqlalchemy_connection_string", sqlalchemy_connection_string)
 
     if snp_related_traits:
         write_to_config("SNP_RELATED_TRAITS", "keyword", snp_related_traits)
@@ -88,9 +87,7 @@ def write_to_config(section: str, option: str, value: str) -> None:
             with open(cfp, "w") as config_file:
                 config[section] = {option: value}
                 config.write(config_file)
-                logging.info(
-                    f"Set in configuration file {cfp} in section {section} {option}={value}"
-                )
+                logging.info(f"Set in configuration file {cfp} in section {section} {option}={value}")
         else:
             config.read(cfp)
             if not config.has_section(section):
@@ -118,9 +115,7 @@ def user_config_setup(config_exists: bool = True) -> dict:
     configs = {}
 
     print(f"\n{TF.TITLE}e(BE:L) Configuration WIZARD{TF.RESET}")
-    print(
-        "\nThe following questionnaire will guide you through the configuration process.\n"
-    )
+    print("\nThe following questionnaire will guide you through the configuration process.\n")
     print(
         "Before we start: Make sure\n\t1. OrientDB and\n\t2. MySQL/MariaDB (optional)\n are running and "
         "you have the root password for both, if databases and users do not already exist.\n"
@@ -131,16 +126,12 @@ def user_config_setup(config_exists: bool = True) -> dict:
     )
 
     print(f"{TF.Format.UNDERLINED}Installation references{TF.RESET}")
-    print(
-        f"\t OrientDB: {TF.Fore.BLUE}https://orientdb.org/docs/3.1.x/fiveminute/java.html{TF.RESET}"
-    )
+    print(f"\t OrientDB: {TF.Fore.BLUE}https://orientdb.org/docs/3.1.x/fiveminute/java.html{TF.RESET}")
     print(
         f"\t MySQL: {TF.Fore.BLUE}"
         f"https://dev.mysql.com/doc/mysql-getting-started/en/#mysql-getting-started-installing{TF.RESET}"
     )
-    print(
-        f"\t MariaDB: {TF.Fore.BLUE}https://mariadb.com/kb/en/getting-installing-and-upgrading-mariadb/{TF.RESET}\n"
-    )
+    print(f"\t MariaDB: {TF.Fore.BLUE}https://mariadb.com/kb/en/getting-installing-and-upgrading-mariadb/{TF.RESET}\n")
 
     # RDBMS setup
     old_sa_con_str = old_configs.get("sqlalchemy_connection_string", "").strip()
@@ -214,23 +205,15 @@ def user_config_setup(config_exists: bool = True) -> dict:
         while invalid_value:
             if conf.default:
                 question = f"{TF.QUESTION}{conf.question}{TF.RESET} {TF.DEFAULT_VALUE}[{conf.default}]{TF.RESET}"
-                configs[conf.name] = (
-                    input_method(f"{question}: ").strip() or conf.default
-                )
+                configs[conf.name] = input_method(f"{question}: ").strip() or conf.default
 
             else:
-                configs[conf.name] = input_method(
-                    f"{TF.QUESTION}{conf.question}{TF.RESET}"
-                ).strip()
+                configs[conf.name] = input_method(f"{TF.QUESTION}{conf.question}{TF.RESET}").strip()
 
             if conf.validation_regex and conf.required:
-                invalid_value = not bool(
-                    re.search(conf.validation_regex, configs[conf.name])
-                )
+                invalid_value = not bool(re.search(conf.validation_regex, configs[conf.name]))
                 if invalid_value:
-                    print(
-                        "!!!>>> WARNING <<<!!!\nInvalid entry. Please select a valid option"
-                    )
+                    print("!!!>>> WARNING <<<!!!\nInvalid entry. Please select a valid option")
 
             else:
                 invalid_value = False
@@ -249,9 +232,7 @@ def user_config_setup(config_exists: bool = True) -> dict:
     print(f"\n{TF.HEADER}SNP related traits settings{TF.RESET}")
 
     # SNP
-    default_snp_related_traits = (
-        old_configs.get("snp_related_traits") or "Alzheimer,Parkinson"
-    )
+    default_snp_related_traits = old_configs.get("snp_related_traits") or "Alzheimer,Parkinson"
     snp_related_traits_question = (
         f"{TF.QUESTION}SNPs related to (separated by comma){TF.RESET} "
         f"{TF.DEFAULT_VALUE}[{default_snp_related_traits}]: {TF.RESET}"
@@ -266,9 +247,7 @@ def user_config_setup(config_exists: bool = True) -> dict:
 
     if drugbank_user:
         configs["drugbank_user"] = drugbank_user
-        configs["drugbank_password"] = getpass(
-            f"{TF.QUESTION}DrugBank password: {TF.RESET}"
-        )
+        configs["drugbank_password"] = getpass(f"{TF.QUESTION}DrugBank password: {TF.RESET}")
 
     current_config = set_configuration(**configs)
 
@@ -306,9 +285,7 @@ MySQL/SQLite [MySQL]: """
     else:  # MySQL
         db_conn = __mysql_setup(prev_conn)
 
-    print(
-        "Database set. Connection string can be changed using `ebel set_connection` or `ebel set_mysql`"
-    )
+    print("Database set. Connection string can be changed using `ebel set_connection` or `ebel set_mysql`")
     return db_conn
 
 
@@ -320,8 +297,7 @@ def __mysql_setup(old_sa_con_str: str) -> str:
 
     if old_sa_con_str:
         regex_con_str = (
-            r"^mysql\+pymysql://(?P<mysql_user>.*?):"
-            r"(?P<mysql_passwd>.*?)@(?P<mysql_host>.*?)/(?P<mysql_db>.*)$"
+            r"^mysql\+pymysql://(?P<mysql_user>.*?):" r"(?P<mysql_passwd>.*?)@(?P<mysql_host>.*?)/(?P<mysql_db>.*)$"
         )
         found_old_mysql = re.search(regex_con_str, old_sa_con_str)
         if found_old_mysql:
@@ -329,15 +305,13 @@ def __mysql_setup(old_sa_con_str: str) -> str:
 
     default_mysql_host = old_mysql.get("mysql_host") or "localhost"
     mysql_host_question = (
-        f"{TF.QUESTION}MySQL/MariaDB server name{TF.RESET} "
-        f"{TF.DEFAULT_VALUE}[{default_mysql_host}]: {TF.RESET}"
+        f"{TF.QUESTION}MySQL/MariaDB server name{TF.RESET} " f"{TF.DEFAULT_VALUE}[{default_mysql_host}]: {TF.RESET}"
     )
     mysql_host = input(mysql_host_question) or default_mysql_host
 
     default_mysql_port = old_mysql.get("mysql_db") or "3306"
     mysql_port_question = (
-        f"{TF.QUESTION}MySQL/MariaDB port{TF.RESET} "
-        f"{TF.DEFAULT_VALUE}[{default_mysql_port}]: {TF.RESET}"
+        f"{TF.QUESTION}MySQL/MariaDB port{TF.RESET} " f"{TF.DEFAULT_VALUE}[{default_mysql_port}]: {TF.RESET}"
     )
     mysql_port = input(mysql_port_question).strip() or default_mysql_port
 
@@ -357,38 +331,28 @@ def __mysql_setup(old_sa_con_str: str) -> str:
 
     default_mysql_db = old_mysql.get("mysql_db") or "ebel"
     mysql_db_question = (
-        f"{TF.QUESTION}MySQL/MariaDB database name{TF.RESET} "
-        f"{TF.DEFAULT_VALUE}[{default_mysql_db}]: {TF.RESET}"
+        f"{TF.QUESTION}MySQL/MariaDB database name{TF.RESET} " f"{TF.DEFAULT_VALUE}[{default_mysql_db}]: {TF.RESET}"
     )
     mysql_db = input(mysql_db_question).strip() or default_mysql_db
 
     db_conn = f"mysql+pymysql://{mysql_user}:{quote(mysql_pwd)}@{mysql_host}:{mysql_port}/{mysql_db}?charset=utf8mb4"
 
     try:
-        pymysql.connect(
-            host=mysql_host, user=mysql_user, password=mysql_pwd, db=mysql_db
-        )
+        pymysql.connect(host=mysql_host, user=mysql_user, password=mysql_pwd, db=mysql_db)
 
     except pymysql.err.OperationalError:
         mysql_root_passwd = getpass(
-            f"{TF.QUESTION}MySQL root password (will be not stored) "
-            f"to create database and user: {TF.RESET}"
+            f"{TF.QUESTION}MySQL root password (will be not stored) " f"to create database and user: {TF.RESET}"
         )
         print(mysql_host, "root", mysql_root_passwd)
-        cursor = pymysql.connect(
-            host=mysql_host, user="root", password=mysql_root_passwd
-        ).cursor()
+        cursor = pymysql.connect(host=mysql_host, user="root", password=mysql_root_passwd).cursor()
         db_exists = cursor.execute("show databases like %s", mysql_db)
         if not db_exists:
-            cursor.execute(
-                f"CREATE DATABASE {mysql_db} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
-            )
+            cursor.execute(f"CREATE DATABASE {mysql_db} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci")
         else:
             print(f"Database {mysql_db} already exists.")
 
-        user_exists = cursor.execute(
-            "Select 1 from mysql.user where User=%s", mysql_user
-        )
+        user_exists = cursor.execute("Select 1 from mysql.user where User=%s", mysql_user)
 
         if user_exists:
             print("USer already exists, will be recreated")
@@ -399,9 +363,7 @@ def __mysql_setup(old_sa_con_str: str) -> str:
         cursor.execute(sql)
         cursor.execute("FLUSH PRIVILEGES")
 
-        privileges_exists = cursor.execute(
-            "Select 1 from mysql.db where User=%s and Db=%s", (mysql_user, mysql_db)
-        )
+        privileges_exists = cursor.execute("Select 1 from mysql.db where User=%s and Db=%s", (mysql_user, mysql_db))
 
         if not privileges_exists:
             sql = f"GRANT ALL PRIVILEGES ON `{mysql_db}`.*  TO '{mysql_user}'@'%'"
@@ -410,9 +372,7 @@ def __mysql_setup(old_sa_con_str: str) -> str:
             cursor.execute("FLUSH PRIVILEGES")
 
         else:
-            print(
-                f"MySQL user {mysql_user} already has sufficient rights to {mysql_db}"
-            )
+            print(f"MySQL user {mysql_user} already has sufficient rights to {mysql_db}")
 
     return db_conn
 

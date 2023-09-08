@@ -1,13 +1,11 @@
 """DisGeNet API methods."""
 from flask import request
 
-from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import disgenet
-from ebel.web.api.ebel.v1 import (
-    _get_paginated_query_result,
-    _get_terms_from_model_starts_with,
-    _get_paginated_ebel_query_result,
-)
+from ebel.web.api import RDBMS
+from ebel.web.api.ebel.v1 import (_get_paginated_ebel_query_result,
+                                  _get_paginated_query_result,
+                                  _get_terms_from_model_starts_with)
 
 
 def get_sources():
@@ -111,9 +109,7 @@ def get_ebel_has_snp_disgenet():
         out.@rid.asString() as gene_rid,
         out.name as gene_symbol FROM {edge_class}"""
     if where:
-        sql += " WHERE " + " AND ".join(
-            [f'{k} like "{v}"' for k, v in where.items() if v]
-        )
+        sql += " WHERE " + " AND ".join([f'{k} like "{v}"' for k, v in where.items() if v])
     sql += " GROUP BY @class, in.rs_number, score, disease_name, source, out.name"
 
     return _get_paginated_ebel_query_result(sql)

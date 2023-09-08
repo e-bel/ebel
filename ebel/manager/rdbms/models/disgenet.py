@@ -1,7 +1,7 @@
 """DisGeNet RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import BigInteger, Column, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, BigInteger, ForeignKey
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -15,9 +15,7 @@ class DisgenetGene(Base):
     id = Column(Integer, primary_key=True)
 
     gene_id = Column(Integer, ForeignKey("disgenet_gene_symbol.gene_id"))
-    gene_symbol = relationship(
-        "DisgenetGeneSymbol", back_populates="gene_disease_pmid_associations"
-    )
+    gene_symbol = relationship("DisgenetGeneSymbol", back_populates="gene_disease_pmid_associations")
     disease_id = Column(String(100), ForeignKey("disgenet_disease.disease_id"))
     disease = relationship("DisgenetDisease", foreign_keys=[disease_id])
     score = Column(Float)
@@ -45,9 +43,7 @@ class DisgenetGeneSymbol(Base):
     gene_id = Column(Integer, primary_key=True)
     gene_symbol = Column(String(50), index=True)
 
-    gene_disease_pmid_associations = relationship(
-        "DisgenetGene", back_populates="gene_symbol"
-    )
+    gene_disease_pmid_associations = relationship("DisgenetGene", back_populates="gene_symbol")
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -73,9 +69,7 @@ class DisgenetVariant(Base):
     def as_dict(self):
         """Convert object values to dictionary."""
         rs = object_as_dict(self, exclude=["id", "source_id"])
-        rs.update(
-            {"disease_name": self.disease.disease_name, "source": self.source.source}
-        )
+        rs.update({"disease_name": self.disease.disease_name, "source": self.source.source})
         return rs
 
 

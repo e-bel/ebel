@@ -1,15 +1,15 @@
 """Transformer module for the transformation of lark trees."""
 
-import typing
 import logging
+import typing
+from collections import OrderedDict, defaultdict, namedtuple
 
-from lark.tree import Tree
 from lark import Transformer
 from lark.lexer import Token
-from collections import defaultdict, namedtuple, OrderedDict
+from lark.tree import Tree
 
 from ebel.cache import _BelScript
-from ebel.constants import FILE, URL, PATTERN, LIST
+from ebel.constants import FILE, LIST, PATTERN, URL
 
 log = logging.getLogger(__name__)
 
@@ -71,13 +71,9 @@ class _BelTransformer(Transformer):
     nt_nn = namedtuple("nn", ("namespace", "name"))
     nt_var = namedtuple("variant", ("hgvs",))
     nt_ma = namedtuple("ma", ("namespace", "name", "default"))
-    nt_pmod = namedtuple(
-        "protein_modification", ("namespace", "name", "type", "amino_acid", "position")
-    )
+    nt_pmod = namedtuple("protein_modification", ("namespace", "name", "type", "amino_acid", "position"))
     nt_support = namedtuple("support", ("text",))
-    nt_citation = namedtuple(
-        "citation", ("type", "title", "ref", "pub_date", "author_list", "comment")
-    )
+    nt_citation = namedtuple("citation", ("type", "title", "ref", "pub_date", "author_list", "comment"))
     nt_type = namedtuple("function", ("type", "name"))
     nt_gmod = namedtuple("gene_modification", ("namespace", "name"))
     named_tuples = (
@@ -418,9 +414,7 @@ class _BelTransformer(Transformer):
                 entries.append(tkn)
 
         for entry in entries:
-            self.cache.set_annotation_entry(
-                annotation=annotation_key, entry=entry.value, token=entry
-            )
+            self.cache.set_annotation_entry(annotation=annotation_key, entry=entry.value, token=entry)
 
         keyword = self._get_value(n, "KEYWORD")
         entries = self._get_all_values_by_name(n, "ANNO_SET_ENTRY")
@@ -486,9 +480,7 @@ class _BelTransformer(Transformer):
         """Change namedtuples to tuple(name_of_namedtuple,dictionary)."""
         if isinstance(obj, (list, tuple)):
             for i in range(len(obj)):
-                if not isinstance(obj[i], self.named_tuples) and isinstance(
-                    obj[i], (list, tuple)
-                ):
+                if not isinstance(obj[i], self.named_tuples) and isinstance(obj[i], (list, tuple)):
                     self._format_sub_obj(obj[i])
                 elif isinstance(obj[i], self.named_tuples):
                     function_type = obj[i].__class__.__name__
@@ -564,9 +556,7 @@ class _BelTransformer(Transformer):
         simple_string = token_dict.get("STRING_SIMPLE")
         entry_token = name_with_quotes or simple_string
 
-        self.cache.set_namespace_entry(
-            namespace=namespace, entry=name, token=entry_token
-        )
+        self.cache.set_namespace_entry(namespace=namespace, entry=name, token=entry_token)
 
         return self.nt_nn(namespace=namespace, name=name)
 
@@ -737,9 +727,7 @@ class _BelTransformer(Transformer):
         if isinstance(tree_or_tokens, Tree):
             n = tree_or_tokens.children
 
-        return sorted(
-            [x.value for x in n if isinstance(x, Token) and x.type == token_name]
-        )
+        return sorted([x.value for x in n if isinstance(x, Token) and x.type == token_name])
 
     def _first_tree(self, n: list) -> Tree:
         """Return first tree in list."""

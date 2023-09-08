@@ -84,18 +84,12 @@ class GwasCatalog(odb_meta.Graph):
         df.snp_gene_ids = df.snp_gene_ids.str.strip().str.split(", ")
         df[table_name + "_id"] = df.index
 
-        df_snp_gene_ids = df[[table_name + "_id", "snp_gene_ids"]].explode(
-            "snp_gene_ids"
-        )
+        df_snp_gene_ids = df[[table_name + "_id", "snp_gene_ids"]].explode("snp_gene_ids")
         df_snp_gene_ids.dropna(inplace=True)
         df_snp_gene_ids.index = range(1, df_snp_gene_ids.shape[0] + 1)
-        df_snp_gene_ids.rename(
-            columns={"snp_gene_ids": "ensembl_identifier"}, inplace=True
-        )
+        df_snp_gene_ids.rename(columns={"snp_gene_ids": "ensembl_identifier"}, inplace=True)
         df_snp_gene_ids.index.rename("id", inplace=True)
-        df_snp_gene_ids.to_sql(
-            gwas_catalog.SnpGene.__tablename__, self.engine, if_exists="append"
-        )
+        df_snp_gene_ids.to_sql(gwas_catalog.SnpGene.__tablename__, self.engine, if_exists="append")
 
         self.session.commit()
 
@@ -132,9 +126,7 @@ class GwasCatalog(odb_meta.Graph):
             query_results = (
                 self.session.query(gwas_catalog.SnpGene)
                 .join(gwas_catalog.GwasCatalog)
-                .filter(
-                    gwas_catalog.GwasCatalog.disease_trait.like(f"%{disease_keyword}%")
-                )
+                .filter(gwas_catalog.GwasCatalog.disease_trait.like(f"%{disease_keyword}%"))
                 .with_entities(
                     gwas_catalog.SnpGene.ensembl_identifier,
                     gwas_catalog.GwasCatalog.snp,
@@ -144,9 +136,7 @@ class GwasCatalog(odb_meta.Graph):
                 .all()
             )
 
-            inserted += self.insert_snps(
-                query_results, "has_mapped_snp_gc", disease_keyword
-            )
+            inserted += self.insert_snps(query_results, "has_mapped_snp_gc", disease_keyword)
         return inserted
 
     def update_upstream_genes(self):
@@ -165,9 +155,7 @@ class GwasCatalog(odb_meta.Graph):
                 gwas_catalog.GwasCatalog.pubmedid,
             ).all()
 
-            inserted += self.insert_snps(
-                query_results, "has_downstream_snp_gc", disease_keyword
-            )
+            inserted += self.insert_snps(query_results, "has_downstream_snp_gc", disease_keyword)
         return inserted
 
     def update_downstream_genes(self):
@@ -186,9 +174,7 @@ class GwasCatalog(odb_meta.Graph):
                 gwas_catalog.GwasCatalog.pubmedid,
             ).all()
 
-            inserted += self.insert_snps(
-                query_results, "has_upstream_snp_gc", disease_keyword
-            )
+            inserted += self.insert_snps(query_results, "has_upstream_snp_gc", disease_keyword)
         return inserted
 
     def insert_snps(self, query_results, edge_class: str, keyword: str):
@@ -199,9 +185,7 @@ class GwasCatalog(odb_meta.Graph):
 
         inserted = 0
         desc = f"Update {edge_class} for {keyword}"
-        for ensembl_gene_id, row in tqdm(
-            snps.iterrows(), total=snps.shape[0], desc=desc
-        ):
+        for ensembl_gene_id, row in tqdm(snps.iterrows(), total=snps.shape[0], desc=desc):
             snp_rid = self._get_set_snp_rid(row.snp)
             value_dict = {"disease_trait": row.disease_trait, "pubmed_id": row.pubmedid}
 
@@ -220,9 +204,7 @@ class GwasCatalog(odb_meta.Graph):
 
     def _get_set_snp_rid(self, rs_number: str) -> str:
         """Insert snp (if not exists) and returns OrientDB @rid."""
-        results = self.query_class(
-            class_name="snp", limit=1, columns=[], rs_number=rs_number
-        )
+        results = self.query_class(class_name="snp", limit=1, columns=[], rs_number=rs_number)
 
         if results:
             rid = results[0][RID]
@@ -240,9 +222,7 @@ class GwasCatalog(odb_meta.Graph):
                 "Select hgnc.ensembl_gene_id as ensembl, @rid.asString() as rid from gene "
                 "where hgnc.ensembl_gene_id IS NOT NULL and namespace='HGNC' and pure=true"
             )
-            self._ensembl_gene_rid_dict = {
-                r["ensembl"]: r[RID] for r in [x.oRecordData for x in self.execute(sql)]
-            }
+            self._ensembl_gene_rid_dict = {r["ensembl"]: r[RID] for r in [x.oRecordData for x in self.execute(sql)]}
         return self._ensembl_gene_rid_dict
 
     def _get_gene_rid(self, ensembl_id: str):
@@ -251,9 +231,7 @@ class GwasCatalog(odb_meta.Graph):
         if ensembl_id in self._ensembl_gene_rid_dict:
             rid = self._ensembl_gene_rid_dict[ensembl_id]
         else:
-            hgnc_found = self.query_class(
-                "hgnc", columns=["symbol"], limit=1, ensembl_gene_id=ensembl_id
-            )
+            hgnc_found = self.query_class("hgnc", columns=["symbol"], limit=1, ensembl_gene_id=ensembl_id)
             if hgnc_found:
                 r = hgnc_found[0]
                 bel = f'g(HGNC:"{r["symbol"]}")'

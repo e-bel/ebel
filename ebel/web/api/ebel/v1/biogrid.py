@@ -1,26 +1,19 @@
 """BioGRID API methods."""
 import json
-
-from math import ceil
-from flask import request
-from sqlalchemy import or_, and_
 from collections import namedtuple
-from typing import List, Dict, Optional
+from math import ceil
+from typing import Dict, List, Optional
+
+from flask import request
+from sqlalchemy import and_, or_
 
 from ebel import Bel
 from ebel.manager.orientdb.biodbs.biogrid import MODIFICATIONS
-from ebel.manager.rdbms.models.biogrid import (
-    Biogrid,
-    ExperimentalSystem,
-    Source,
-    Modification,
-    Taxonomy,
-    Interactor,
-    Publication,
-)
+from ebel.manager.rdbms.models.biogrid import (Biogrid, ExperimentalSystem,
+                                               Interactor, Modification,
+                                               Publication, Source, Taxonomy)
 from ebel.web.api import RDBMS
 from ebel.web.api.ebel.v1 import _get_data
-
 
 SQL_SELECT_HAS_PPI_BG = """select
     @rid.asString() as rid,
@@ -79,9 +72,7 @@ def get_biogrid_by_biogrid_id() -> dict:
         dict: BioGrid entry.
     """
     biogrid_id: int = request.args.get("biogrid_id")
-    biogrid_entry = (
-        RDBMS.get_session().query(Biogrid).filter_by(biogrid_id=biogrid_id).first()
-    )
+    biogrid_entry = RDBMS.get_session().query(Biogrid).filter_by(biogrid_id=biogrid_id).first()
     return biogrid_entry.as_dict()
 
 
@@ -102,12 +93,7 @@ def get_sources() -> Dict[str, int]:
     Returns:
         Dict[str, int]: schema: Dict[source, table_id]
     """
-    rs = (
-        RDBMS.get_session()
-        .query(Source.source, Source.id)
-        .order_by(Source.source.asc())
-        .all()
-    )
+    rs = RDBMS.get_session().query(Source.source, Source.id).order_by(Source.source.asc()).all()
     return {x.source: x.id for x in rs}
 
 
@@ -144,17 +130,9 @@ def get_biogrid_by_pmid() -> List[dict]:
     """
     pmid = request.args.get("pmid")
     publication_id = (
-        RDBMS.get_session()
-        .query(Publication.id)
-        .filter_by(source="PUBMED", source_identifier=pmid)
-        .first()[0]
+        RDBMS.get_session().query(Publication.id).filter_by(source="PUBMED", source_identifier=pmid).first()[0]
     )
-    biogrid_entry = (
-        RDBMS.get_session()
-        .query(Biogrid)
-        .filter_by(publication_id=publication_id)
-        .all()
-    )
+    biogrid_entry = RDBMS.get_session().query(Biogrid).filter_by(publication_id=publication_id).all()
     return [x.as_dict() for x in biogrid_entry]
 
 
@@ -178,9 +156,7 @@ def get_biogrid() -> dict:
         List[dict]: List[BioGrid entry]
     """
     # cancel if neither interactor_a or interactor_b are submitted
-    if not (
-        bool(request.args.get("interactor_a")) or bool(request.args.get("interactor_b"))
-    ):
+    if not (bool(request.args.get("interactor_a")) or bool(request.args.get("interactor_b"))):
         return {"error": "At least interactor_a or interactor_b"}
 
     Req = namedtuple(
@@ -222,18 +198,12 @@ def get_biogrid() -> dict:
     if req.interactor_a:
         a = {req.id_type_a: req.interactor_a, "taxonomy_id": req.taxonomy_id_a}
         a = {k: v for k, v in a.items() if v}
-        biogrid_a_ids = [
-            x[0]
-            for x in RDBMS.get_session().query(Interactor.biogrid_id).filter_by(**a)
-        ]
+        biogrid_a_ids = [x[0] for x in RDBMS.get_session().query(Interactor.biogrid_id).filter_by(**a)]
 
     if req.interactor_b:
         b = {req.id_type_b: req.interactor_b, "taxonomy_id": req.taxonomy_id_b}
         b = {k: v for k, v in b.items() if v}
-        biogrid_b_ids = [
-            x[0]
-            for x in RDBMS.get_session().query(Interactor.biogrid_id).filter_by(**b)
-        ]
+        biogrid_b_ids = [x[0] for x in RDBMS.get_session().query(Interactor.biogrid_id).filter_by(**b)]
 
     if req.interactor_a and req.interactor_b:
         interaction_forward = and_(
@@ -279,17 +249,12 @@ def get_biogrid() -> dict:
 
     if req.modification:
         modification_id = (
-            RDBMS.get_session()
-            .query(Modification.id)
-            .filter_by(modification=req.modification)
-            .first()[0]
+            RDBMS.get_session().query(Modification.id).filter_by(modification=req.modification).first()[0]
         )
         query = query.filter_by(modification_id=modification_id)
 
     if req.source:
-        source_id = (
-            RDBMS.get_session().query(Source.id).filter_by(source=req.source).first()[0]
-        )
+        source_id = RDBMS.get_session().query(Source.id).filter_by(source=req.source).first()[0]
         query = query.filter_by(source_id=source_id)
 
     number_of_results = query.count()

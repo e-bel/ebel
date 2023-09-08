@@ -3,19 +3,12 @@
 from flask import request
 from sqlalchemy import or_
 
-from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models.pathway_commons import (
-    PathwayCommons,
-    PathwayName,
-    pathway_commons__pathway_name,
-    Pmid,
-)
-from ebel.web.api.ebel.v1 import (
-    _get_data,
-    _get_paginated_ebel_query_result,
-    _get_paginated_query_result,
-    _get_terms_from_model_starts_with,
-)
+    PathwayCommons, PathwayName, Pmid, pathway_commons__pathway_name)
+from ebel.web.api import RDBMS
+from ebel.web.api.ebel.v1 import (_get_data, _get_paginated_ebel_query_result,
+                                  _get_paginated_query_result,
+                                  _get_terms_from_model_starts_with)
 
 
 def get_pathway_commons():
@@ -100,9 +93,7 @@ def get_ebel_relation():
 
     paras = {k: request.args[k] for k in request.args if k in conf}
     if paras:
-        wheres += [
-            f'{conf[k].replace(".asString()","")} like "{v}"' for k, v in paras.items()
-        ]
+        wheres += [f'{conf[k].replace(".asString()","")} like "{v}"' for k, v in paras.items()]
 
     if wheres:
         sql += " WHERE " + " AND ".join(wheres)

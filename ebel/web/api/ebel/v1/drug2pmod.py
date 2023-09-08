@@ -1,14 +1,14 @@
 """Custom drug2pmod API methods."""
 
 import re
-from collections import namedtuple, defaultdict
+from collections import defaultdict, namedtuple
 from math import ceil
 from typing import List, Union
 
 from flask import request
 
 from ebel import Bel
-from ebel.web.api.ebel.v1 import OrientDbSqlOperator, DataType
+from ebel.web.api.ebel.v1 import DataType, OrientDbSqlOperator
 
 SQL_MATCH_TEMPLATE = """
     match {{class:drug, as:drug{drug}}}
@@ -76,11 +76,7 @@ class Query:
         for col in self.columns:
             if col.value:
                 if col.column.endswith("@rid") and "," in col.value:
-                    rids = [
-                        x.strip()
-                        for x in col.value.split(",")
-                        if re.search(r"^#\d+:\d+$", x.strip())
-                    ]
+                    rids = [x.strip() for x in col.value.split(",") if re.search(r"^#\d+:\d+$", x.strip())]
                     rids_str = "[" + ",".join(rids) + "]"
                     wheres[col.odb_class].append(f"{col.column} in {rids_str}")
                 elif col.column != "@class":
@@ -96,17 +92,11 @@ class Query:
                         DataType.LIST_NUMBER,
                         DataType.LIST_INTEGER,
                     ]:
-                        wheres[col.odb_class].append(
-                            f"{value} {col.sql_operator.value} {col.column}"
-                        )
+                        wheres[col.odb_class].append(f"{value} {col.sql_operator.value} {col.column}")
                     else:
-                        wheres[col.odb_class].append(
-                            f"{col.column} {col.sql_operator.value} {value}"
-                        )
+                        wheres[col.odb_class].append(f"{col.column} {col.sql_operator.value} {value}")
 
-        wheres_dict = {
-            odb_class: "" for odb_class in {c.odb_class for c in self.columns}
-        }
+        wheres_dict = {odb_class: "" for odb_class in {c.odb_class for c in self.columns}}
         for odb_class, col_queries in wheres.items():
             if col_queries:
                 wheres_dict[odb_class] = ", where:( " + " AND ".join(col_queries) + " )"
@@ -128,9 +118,7 @@ class Query:
 
     @property
     def __sql4results(self):
-        cols = ", ".join(
-            [f"{c.odb_class}.{c.display_column} as {c.form_name}" for c in self.columns]
-        )
+        cols = ", ".join([f"{c.odb_class}.{c.display_column} as {c.form_name}" for c in self.columns])
         return self.sql + " return " + cols
 
     def get_result(self) -> dict:
@@ -191,9 +179,7 @@ def get_drug2pmod() -> dict:
         Column("drug_target", "drug_target__name", "name", OrientDbSqlOperator.LIKE),
         Column("drug_target", "drug_target__bel", "bel", OrientDbSqlOperator.LIKE),
         Column("drug_target", "drug_target__label", "label", OrientDbSqlOperator.LIKE),
-        Column(
-            "drug_target", "drug_target__uniprot", "uniprot", OrientDbSqlOperator.LIKE
-        ),
+        Column("drug_target", "drug_target__uniprot", "uniprot", OrientDbSqlOperator.LIKE),
         Column(
             "drug_target",
             "drug_target__reactome_pathways",

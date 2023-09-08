@@ -1,13 +1,12 @@
 """Error class definitions."""
-from lark.exceptions import UnexpectedToken, UnexpectedCharacters
-
-from collections import OrderedDict
 import re
 import sys
+from collections import OrderedDict
+
+from lark.exceptions import UnexpectedCharacters, UnexpectedToken
 
 TEMPLATE = (
-    "{error_class}\tkeyword:{keyword}\tentry:{entry}\tline:{line_number}\tcolumn:{column}"
-    "\turl:{url}\thint:{hint}"
+    "{error_class}\tkeyword:{keyword}\tentry:{entry}\tline:{line_number}\tcolumn:{column}" "\turl:{url}\thint:{hint}"
 )
 
 
@@ -30,9 +29,7 @@ class _Error:
 
     def to_dict(self):
         """Format the properties of error into a dictionary."""
-        raise NotImplementedError(
-            "to_dict have to be implemented in {}".format(self.__class__.__name__)
-        )
+        raise NotImplementedError("to_dict have to be implemented in {}".format(self.__class__.__name__))
 
     def to_string(self) -> str:
         """Format the output to a string."""
@@ -354,9 +351,7 @@ class BelSyntaxError(_Error):
             )
         else:
             print(
-                "Not covered by library: lark.expections type {}".format(
-                    type(self.exception)
-                ),
+                "Not covered by library: lark.expections type {}".format(type(self.exception)),
                 sys.exc_info()[0],
             )
             raise

@@ -1,9 +1,10 @@
 """Base methods for API."""
 
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
 from typing import Dict, List, Union
+
 from pymysql.converters import escape_string
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database, database_exists
 
 from ebel import Bel
@@ -40,18 +41,14 @@ class OdbRequest:
 
     def __init__(
         self,
-        request_query_dict: Dict[
-            str, Dict[str, Dict[str, Union[str, int, bool, float, None]]]
-        ],
+        request_query_dict: Dict[str, Dict[str, Dict[str, Union[str, int, bool, float, None]]]],
     ):
         """Init method."""
         self.__request_query_dict = request_query_dict
         if self.validate():
             self.__odb_classes = request_query_dict
         else:
-            raise TypeError(
-                "RequestQuery must be initialized with Dict[str, Dict[str, Dict[str, str]]]"
-            )
+            raise TypeError("RequestQuery must be initialized with Dict[str, Dict[str, Dict[str, str]]]")
 
     @property
     def odb_classes(
@@ -71,9 +68,7 @@ class OdbRequest:
                 if isinstance(odb_class, str) and isinstance(column_params, Dict):
                     for column_name, value_option_dict in column_params.items():
                         if isinstance(value_option_dict, Dict):
-                            keywords_exists = {"value", "option"}.issubset(
-                                set(value_option_dict.keys())
-                            )
+                            keywords_exists = {"value", "option"}.issubset(set(value_option_dict.keys()))
                             value_types_ok = isinstance(
                                 value_option_dict["value"],
                                 (str, int, bool, float, type(None)),
@@ -86,9 +81,7 @@ class OdbRequest:
 class TabColSelectSql:
     """Formatter for OrientDb SQL columns Select part."""
 
-    def __init__(
-        self, odbclass_columns_dict, with_rids: bool = True, with_class: bool = True
-    ):
+    def __init__(self, odbclass_columns_dict, with_rids: bool = True, with_class: bool = True):
         """Init method."""
         self.odbclass_columns_dict = odbclass_columns_dict
         self.with_rids = with_rids
@@ -113,9 +106,7 @@ class TabColSelectSql:
             if self.with_class:
                 sql_list.append(sql_class.format(odb_class=odb_class))
             for column in columns:
-                sql_list.append(
-                    f"{odb_class}.{column} as {odb_class}__{column.replace('.', '_')}"
-                )
+                sql_list.append(f"{odb_class}.{column} as {odb_class}__{column.replace('.', '_')}")
         return ", ".join(sql_list)
 
 
@@ -127,9 +118,7 @@ class ValueOption:
         self.value = value
         self.option = option
 
-    def get_operator_value_sql_string(
-        self, dialect: Union[str, None] = None
-    ) -> Union[str, None]:
+    def get_operator_value_sql_string(self, dialect: Union[str, None] = None) -> Union[str, None]:
         """Get "operator value" part of a WHERE SQL statement.
 
         Option is translated to dialect specific Operator like 'exact' to '='. Value will be escaped.
@@ -184,9 +173,7 @@ class ValueOption:
             return f"{operator} {search_value}"
 
 
-def get_sql_match(
-    odb_request: OdbRequest, columns_dict: Dict[str, List[str]], match_template: str
-) -> str:
+def get_sql_match(odb_request: OdbRequest, columns_dict: Dict[str, List[str]], match_template: str) -> str:
     """Return an OrientDB match string.
 
     Example:
@@ -221,22 +208,16 @@ def get_sql_match(
             where_array = []
             for column, values in odb_request.odb_classes[odb_class].items():
                 if values["value"]:
-                    operator_value_string = ValueOption(
-                        **values
-                    ).get_operator_value_sql_string()
+                    operator_value_string = ValueOption(**values).get_operator_value_sql_string()
                     if operator_value_string:
                         where_array.append(f"`{column}` {operator_value_string}")
-            where_dict[odb_class] = (
-                ", where:(" + " and ".join(where_array) + ")" if where_array else ""
-            )
+            where_dict[odb_class] = ", where:(" + " and ".join(where_array) + ")" if where_array else ""
 
     sql_match = match_template.format(**where_dict)
     return sql_match
 
 
-def get_odb_results(
-    query_request: OdbRequest, class_column_dict: dict, sql_match_template: str
-):
+def get_odb_results(query_request: OdbRequest, class_column_dict: dict, sql_match_template: str):
     """Return OrientDB results for a given query."""
     query_get_dict = Bel().query_get_dict
     select_sql = TabColSelectSql(class_column_dict)
@@ -251,9 +232,7 @@ def get_odb_results(
     return results
 
 
-def get_odb_options(
-    column: str, query_request: OdbRequest, class_column_dict, sql_match_template
-) -> List[str]:
+def get_odb_options(column: str, query_request: OdbRequest, class_column_dict, sql_match_template) -> List[str]:
     """Short summary.
 
     Returns

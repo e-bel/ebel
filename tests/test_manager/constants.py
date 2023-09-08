@@ -3,8 +3,8 @@ import os
 import pathlib
 
 from ebel import Bel
-from ebel.constants import DEFAULT_ODB
 from ebel.config import get_config_value
+from ebel.constants import DEFAULT_ODB
 from ebel.manager.orientdb.odb_meta import Graph
 
 # Paths
@@ -16,12 +16,12 @@ TEST_BEL = os.path.join(IMPORT_DIR, "basic_import_test.bel")
 TEST_JSON = TEST_BEL + ".json"
 
 # Parameters for TEST database
-USER = get_config_value(DEFAULT_ODB, 'user')
-PASSWORD = get_config_value(DEFAULT_ODB, 'password')
-DB_NAME = 'ebel_test'
-SERVER = 'localhost'
+USER = get_config_value(DEFAULT_ODB, "user")
+PASSWORD = get_config_value(DEFAULT_ODB, "password")
+DB_NAME = "ebel_test"
+SERVER = "localhost"
 PORT = "2424"
-ROOT_PWD = get_config_value(DEFAULT_ODB, 'root_password')
+ROOT_PWD = get_config_value(DEFAULT_ODB, "root_password")
 
 if ROOT_PWD is None:
     raise ValueError("Need root password to perform tests. Please add 'root_password' to configuration file")
@@ -33,7 +33,7 @@ config_params = {
     "password": PASSWORD,
     "server": SERVER,
     "port": PORT,
-    "root_password": ROOT_PWD
+    "root_password": ROOT_PWD,
 }
 
 test_client = Bel(graph_config=config_params)

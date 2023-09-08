@@ -1,27 +1,23 @@
 """Methods for interfacing with the RDBMS."""
+import getpass
 import logging
 import sys
-import getpass
 from typing import Optional, Union
 
 import pymysql
 from pyorientdb import OrientDB
-from pyorientdb.exceptions import (
-    PyOrientCommandException,
-    PyOrientConnectionException,
-    PyOrientSecurityAccessException,
-)
+from pyorientdb.exceptions import (PyOrientCommandException,
+                                   PyOrientConnectionException,
+                                   PyOrientSecurityAccessException)
 
-from ebel.defaults import CONN_STR_DEFAULT
-from ebel.config import write_to_config, get_config_as_dict
+from ebel.config import get_config_as_dict, write_to_config
 from ebel.constants import TerminalFormatting as TF
+from ebel.defaults import CONN_STR_DEFAULT
 
 logger = logging.getLogger(__name__)
 
 
-def orientdb_connection_works(
-    server: str, port: int, name: str, user: str, password: str
-) -> bool:
+def orientdb_connection_works(server: str, port: int, name: str, user: str, password: str) -> bool:
     """Check if the connection to OrientDB works."""
     try:
         client = OrientDB(server, port)
@@ -86,9 +82,7 @@ def get_orientdb_client(
             client.command(f"CREATE USER {user} IDENTIFIED BY {password} ROLE admin")
             # create a reader
             if user_reader and user_reader_password:
-                client.command(
-                    f"CREATE USER {user_reader} IDENTIFIED BY {user_reader_password} ROLE reader"
-                )
+                client.command(f"CREATE USER {user_reader} IDENTIFIED BY {user_reader_password} ROLE reader")
             client.close()
             # reopen with new user and password
             client = OrientDB(server, int(port))
@@ -104,14 +98,10 @@ def get_orientdb_client(
             admin_user_exists = client.command(admin_user_exists_sql)
             if admin_user_exists:
                 print("Update password for OrientDB admin")
-                client.command(
-                    f"UPDATE OUser SET password = '{password}' WHERE name = '{user}'"
-                )
+                client.command(f"UPDATE OUser SET password = '{password}' WHERE name = '{user}'")
             else:
                 print("Create password for OrientDB reader")
-                client.command(
-                    f"CREATE USER {user} IDENTIFIED BY {password} ROLE admin"
-                )
+                client.command(f"CREATE USER {user} IDENTIFIED BY {password} ROLE admin")
 
             # reader
             if user_reader and user_reader_password:
@@ -125,9 +115,7 @@ def get_orientdb_client(
                         f"UPDATE OUser SET password = '{user_reader_password}' WHERE name = '{user_reader}'"
                     )
                 else:
-                    client.command(
-                        f"CREATE USER {user_reader} IDENTIFIED BY {user_reader_password} ROLE admin"
-                    )
+                    client.command(f"CREATE USER {user_reader} IDENTIFIED BY {user_reader_password} ROLE admin")
 
     return client
 
@@ -150,18 +138,13 @@ def set_mysql_interactive() -> tuple:
     root_pwd = getpass.getpass(prompt="root password (only for 1st setup):")
 
     if root_pwd:
-        root_host = (
-            getpass.getpass(prompt="IP or name mysql server [localhost]:")
-            or "localhost"
-        )
+        root_host = getpass.getpass(prompt="IP or name mysql server [localhost]:") or "localhost"
         conn = pymysql.connect(host=root_host, user="root", password=root_pwd)
         c = conn.cursor()
         db_exists = c.execute(f"show databases like '{db}'")
 
         if not db_exists:
-            c.execute(
-                f"CREATE DATABASE {db} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci"
-            )
+            c.execute(f"CREATE DATABASE {db} CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci")
         else:
             logger.warning(f"Database '{db}' already exists!")
 
@@ -177,13 +160,9 @@ def set_mysql_interactive() -> tuple:
         else:
             logger.warning(f"Database '{db}' already exists!")
 
-        privileges_exists = c.execute(
-            f"Select 1 from mysql.db where User='{user}' and Db='{db}'"
-        )
+        privileges_exists = c.execute(f"Select 1 from mysql.db where User='{user}' and Db='{db}'")
         if not privileges_exists:
-            c.execute(
-                f"GRANT ALL PRIVILEGES ON {db}.* TO '{user}'@'%'  IDENTIFIED BY '{password}'"
-            )
+            c.execute(f"GRANT ALL PRIVILEGES ON {db}.* TO '{user}'@'%'  IDENTIFIED BY '{password}'")
         else:
             logger.warning(f"User already has privileges for database '{db}'")
 
@@ -223,9 +202,7 @@ def set_mysql_connection(
         SQLAlchemy MySQL connection string.
 
     """
-    connection_string = (
-        f"mysql+pymysql://{user}:{password}@{host}/{db}:{port}?charset={charset}"
-    )
+    connection_string = f"mysql+pymysql://{user}:{password}@{host}/{db}:{port}?charset={charset}"
     set_connection(connection_string)
 
     return connection_string

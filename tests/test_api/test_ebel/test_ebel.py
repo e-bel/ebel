@@ -1,7 +1,7 @@
 """eBEL API unit tests."""
 
 from .conftest import format_response_data
-from .constants import RESULTS, NUM_RESULTS, PAGE_SIZE
+from .constants import NUM_RESULTS, PAGE_SIZE, RESULTS
 
 
 class TestEbel:
@@ -15,7 +15,7 @@ class TestEbel:
 
     def test_find_all(self, client):
         response = client.post(
-            'api/v1/ebel/find_all',
+            "api/v1/ebel/find_all",
             json={"term": "CD33"},
         )
         output = format_response_data(response)

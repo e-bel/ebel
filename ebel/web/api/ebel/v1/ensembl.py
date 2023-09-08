@@ -1,6 +1,6 @@
 """EnsEMBL API methods."""
-from ebel.web.api.ebel.v1 import _get_data
 from ebel.manager.rdbms.models import ensembl
+from ebel.web.api.ebel.v1 import _get_data
 
 
 def get_ensembl():

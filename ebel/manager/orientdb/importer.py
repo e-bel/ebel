@@ -1,24 +1,25 @@
 """Methods for importing BEL files into OrientDB."""
 
-import os
-import re
-import git
 import json
 import logging
-
-from tqdm import tqdm
-from typing import Tuple
+import os
+import re
+from collections import OrderedDict, defaultdict, namedtuple
 from copy import deepcopy
-from pyorientdb import OrientDB
 from datetime import datetime
 from pathlib import Path
+from typing import Tuple
+
+import git
 from git.exc import InvalidGitRepositoryError
-from collections import OrderedDict, defaultdict, namedtuple
+from pyorientdb import OrientDB
+from tqdm import tqdm
 
 from ebel import tools
 from ebel.constants import RID
-from ebel.manager.orientdb.constants import NODES, EDGES
-from .odb_defaults import normalized_pmod, bel_func_short
+from ebel.manager.orientdb.constants import EDGES, NODES
+
+from .odb_defaults import bel_func_short, normalized_pmod
 
 BEL_GIT_ID = namedtuple("BEL_GIT_ID", ["hexsha", "repo_path", "origin_url"])
 JsonParts = namedtuple("JsonParts", ["document", "definitions", "statements_and_sets"])
@@ -52,10 +53,7 @@ class _BelImporter:
     def _get_bel_rid_cache(self):
         """Get BEL string OrientDB rid dictionary for all bel nodes."""
         sql = "Select @rid.asString(),@class.asString(),bel from bel"
-        return {
-            (y["bel"], y["class"]): y["rid"]
-            for y in [x.oRecordData for x in self.client.command(sql)]
-        }
+        return {(y["bel"], y["class"]): y["rid"] for y in [x.oRecordData for x in self.client.command(sql)]}
 
     def _get_bel_relation_rid_cache(self):
         """Create a dictionary of all bel_relation edges using their properties as keys and RIDs as values."""
@@ -105,9 +103,7 @@ class _BelImporter:
 
         if self.file_is_in_git_repo(absolute_path):
             repo = git.Repo(absolute_path, search_parent_directories=True)
-            origin_url_found = re.search(
-                "(https?://)([^@]+@)?(.*)", repo.remotes.origin.url
-            )
+            origin_url_found = re.search("(https?://)([^@]+@)?(.*)", repo.remotes.origin.url)
 
             origin_url = None
             if origin_url_found:
@@ -140,14 +136,10 @@ class _BelImporter:
             return False, 0
 
         parts = self.get_json_parts(bel_python_object)
-        exists_before, document_id = self.insert_bel_header(
-            parts.document, parts.definitions
-        )
+        exists_before, document_id = self.insert_bel_header(parts.document, parts.definitions)
 
         if not exists_before:
-            inserted = self.insert_statements_and_sets(
-                parts.statements_and_sets, document_id
-            )
+            inserted = self.insert_statements_and_sets(parts.statements_and_sets, document_id)
 
         return not exists_before, inserted
 
@@ -171,12 +163,8 @@ class _BelImporter:
             data["keywords"] = [k.strip() for k in data["keywords"].split(",")]
 
             keyword_rids = self.get_keyword_rids(keywords=data["keywords"])
-            keyword_linkset = (
-                "[" + ",".join(keyword_rids) + "]"
-            )  # This feature is a LINKSET
-            del data[
-                "keywords"
-            ]  # TODO get so rids can be in JSON and load - see line 131
+            keyword_linkset = "[" + ",".join(keyword_rids) + "]"  # This feature is a LINKSET
+            del data["keywords"]  # TODO get so rids can be in JSON and load - see line 131
 
         now = datetime.today().strftime("%Y-%m-%d %H:%M:%S")
         data["date"] = {"uploaded": now}
@@ -237,9 +225,7 @@ class _BelImporter:
 
         return keyword_rids
 
-    def network_exists(
-        self, version, file_path, md5, last_modified, git_info_dict
-    ) -> bool:
+    def network_exists(self, version, file_path, md5, last_modified, git_info_dict) -> bool:
         sql = f"""Select 1 from bel_document where
                     version = '{version}' and
                     file.path = '{Path(file_path).as_posix()}' and
@@ -277,9 +263,7 @@ class _BelImporter:
                         evidence = ""
                         annotation = defaultdict(set)
 
-                        if citation["type"].lower() == "pubmed" and re.search(
-                            r"^\d+$", citation_ref
-                        ):
+                        if citation["type"].lower() == "pubmed" and re.search(r"^\d+$", citation_ref):
                             pmid = citation_ref
                         else:
                             pmid = 0
@@ -469,9 +453,7 @@ class _BelImporter:
 
                 elif function_name == "pmod":
                     if param["namespace"]:
-                        first_part_pmod = (
-                            param["namespace"] + ':"' + param["name"] + '"'
-                        )
+                        first_part_pmod = param["namespace"] + ':"' + param["name"] + '"'
                     else:
                         first_part_pmod = normalized_pmod[param["type"]]
                     position = str(param["position"]) if param["position"] else None
@@ -479,9 +461,7 @@ class _BelImporter:
                     bels.append(",".join([x for x in parts_pmod if x]))
 
                 else:
-                    bels.append(
-                        ",".join(['"' + str(x) + '"' for x in param.values() if x])
-                    )
+                    bels.append(",".join(['"' + str(x) + '"' for x in param.values() if x]))
 
         joined_params = ",".join(bels)
 

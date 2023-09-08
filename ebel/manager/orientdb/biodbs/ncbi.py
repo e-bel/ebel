@@ -1,15 +1,14 @@
 """NCBI module."""
-import pandas as pd
-
-from tqdm import tqdm
-from pyorientdb import OrientDB
 from typing import Dict, Optional
 
-from ebel.manager.orientdb.constants import NCBI
-from ebel.manager.orientdb import odb_meta, urls
-from ebel.tools import get_file_path, get_standard_name
+import pandas as pd
+from pyorientdb import OrientDB
+from tqdm import tqdm
 
+from ebel.manager.orientdb import odb_meta, urls
+from ebel.manager.orientdb.constants import NCBI
 from ebel.manager.rdbms.models import ncbi
+from ebel.tools import get_file_path, get_standard_name
 
 
 class Ncbi(odb_meta.Graph):
@@ -30,19 +29,13 @@ class Ncbi(odb_meta.Graph):
             ncbi.NcbiMedGenPmid.__tablename__: urls.NCBI_GENE_MEDGEN_PUBMED,
             "neighbors": urls.NCBI_GENE_NEIGHBORS,
         }
-        super().__init__(
-            urls=self.urls, tables_base=ncbi.Base, biodb_name=self.biodb_name
-        )
+        super().__init__(urls=self.urls, tables_base=ncbi.Base, biodb_name=self.biodb_name)
 
     def __len__(self):
         return self.session.query(ncbi.NcbiGeneInfo).count()
 
     def __contains__(self, gene_id) -> bool:
-        count = (
-            self.session.query(ncbi.NcbiGeneInfo)
-            .filter(ncbi.NcbiGeneInfo.gene_id == gene_id)
-            .count()
-        )
+        count = self.session.query(ncbi.NcbiGeneInfo).filter(ncbi.NcbiGeneInfo.gene_id == gene_id).count()
         return bool(count)
 
     def insert_data(self) -> Dict[str, int]:
@@ -62,9 +55,7 @@ class Ncbi(odb_meta.Graph):
         inserts[ncbi.NcbiMedGenName.__tablename__] = self._insert_medgen()
         return inserts
 
-    def __insert_table(
-        self, model, use_cols=None, sep: str = "\t", chunksize: Optional[int] = None
-    ) -> int:
+    def __insert_table(self, model, use_cols=None, sep: str = "\t", chunksize: Optional[int] = None) -> int:
         """Generic method to insert data.
 
         :param model: NCBI SQLAlchemy model
@@ -95,9 +86,7 @@ class Ncbi(odb_meta.Graph):
         table_name = ncbi.NcbiMedGenName.__tablename__
         file_path_name = get_file_path(self.urls[table_name], self.biodb_name)
         use_cols_name = ["#CUI", "name", "source", "SUPPRESS"]
-        df_name = pd.read_csv(
-            file_path_name, usecols=use_cols_name, sep="|"
-        ).rename_axis("id")
+        df_name = pd.read_csv(file_path_name, usecols=use_cols_name, sep="|").rename_axis("id")
         df_name.index += 1
         self._standardize_dataframe(df_name)
         df_name.to_sql(table_name, self.engine, if_exists="append")
@@ -141,13 +130,7 @@ class Ncbi(odb_meta.Graph):
         df.index.rename("id", inplace=True)
         df.pub_med = df.pub_med.str.split("|")
         rename_columns = {"id": "ncbi_gene_go_id", "pub_med": "pmid"}
-        df_pub_med = (
-            df[["pub_med"]]
-            .explode("pub_med")
-            .dropna()
-            .reset_index()
-            .rename(columns=rename_columns)
-        )
+        df_pub_med = df[["pub_med"]].explode("pub_med").dropna().reset_index().rename(columns=rename_columns)
 
         df.drop(columns=["pub_med"], inplace=True)
         df.to_sql(table, self.engine, if_exists="append")
@@ -217,9 +200,7 @@ class Ncbi(odb_meta.Graph):
                 df_type[ntype] = df_type[ntype].str.split("|")
                 df_type = df_type.explode(ntype)
                 df_type = df_type[df_type[ntype] != "-"].reset_index()
-                df_type.to_sql(
-                    model.__tablename__, self.engine, if_exists="append", index=False
-                )
+                df_type.to_sql(model.__tablename__, self.engine, if_exists="append", index=False)
                 inserted[neighbor_type] += df_type.shape[0]
         return inserted
 
@@ -242,9 +223,7 @@ class Ncbi(odb_meta.Graph):
         )
         df.index += 1
         df.index.rename("id", inplace=True)
-        df.to_sql(
-            ncbi.NcbiGeneInfoDescription.__tablename__, self.engine, if_exists="append"
-        )
+        df.to_sql(ncbi.NcbiGeneInfoDescription.__tablename__, self.engine, if_exists="append")
         return df.assign(description_id=df.index).set_index(["description"])
 
     def _insert_info_xref(self, dataframe: pd.DataFrame) -> int:
@@ -262,9 +241,7 @@ class Ncbi(odb_meta.Graph):
             df = df.explode("db_xrefs")
             df[["db", "dbid"]] = df["db_xrefs"].str.split(":", n=1, expand=True)
             df.drop(columns=["db_xrefs"], inplace=True)
-            df.reset_index().to_sql(
-                "ncbi_gene_info_xref", self.engine, if_exists="append", index=False
-            )
+            df.reset_index().to_sql("ncbi_gene_info_xref", self.engine, if_exists="append", index=False)
             inserted = df.shape[0]
 
         return inserted
@@ -309,9 +286,7 @@ class Ncbi(odb_meta.Graph):
         ):
             self._standardize_dataframe(df)
 
-            df.drop(columns=["db_xrefs"]).set_index(["description"]).join(
-                df_info_decr
-            ).set_index("gene_id").to_sql(
+            df.drop(columns=["db_xrefs"]).set_index(["description"]).join(df_info_decr).set_index("gene_id").to_sql(
                 table, self.engine, if_exists="append", index=True
             )
             inserted += df.shape[0]

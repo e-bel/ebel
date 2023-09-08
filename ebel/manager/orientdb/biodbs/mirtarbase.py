@@ -1,15 +1,14 @@
 """miRTarBase."""
-import pandas as pd
-
-from tqdm import tqdm
 from typing import Dict
+
+import pandas as pd
 from pyorientdb import OrientDB
+from tqdm import tqdm
 
-from ebel.tools import get_file_path
+from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import MIRTARBASE
-from ebel.manager.orientdb import odb_meta, urls, odb_structure
-
 from ebel.manager.rdbms.models import mirtarbase
+from ebel.tools import get_file_path
 
 
 class MirTarBase(odb_meta.Graph):
@@ -56,9 +55,7 @@ class MirTarBase(odb_meta.Graph):
     def update_interactions(self) -> int:
         """Update edges with mirtarbase metadata."""
         self.clear_edges()
-        df_symbol_rid = self.get_pure_symbol_rid_df_in_bel_context(
-            class_name="rna", namespace="HGNC"
-        )
+        df_symbol_rid = self.get_pure_symbol_rid_df_in_bel_context(class_name="rna", namespace="HGNC")
 
         sql = f"""Select
                 mi_rna,
@@ -75,16 +72,12 @@ class MirTarBase(odb_meta.Graph):
         cols = ["mi_rna", "symbol", "support_type", "pmid", "experiments"]
         df_mirtarbase = pd.DataFrame(self.engine.execute(sql).fetchall(), columns=cols)
         df_mirtarbase.experiments = df_mirtarbase.experiments.str.split("//")
-        df_join = df_mirtarbase.set_index("symbol").join(
-            df_symbol_rid.set_index("symbol"), how="inner"
-        )
+        df_join = df_mirtarbase.set_index("symbol").join(df_symbol_rid.set_index("symbol"), how="inner")
 
         desc = f"Update {self.biodb_name.upper()} interactions"
 
         updated = 0
-        for protein_rid, row in tqdm(
-            df_join.set_index("rid").iterrows(), total=df_join.shape[0], desc=desc
-        ):
+        for protein_rid, row in tqdm(df_join.set_index("rid").iterrows(), total=df_join.shape[0], desc=desc):
             mir_data = {
                 "bel": f'm(MIRBASE:"{row.mi_rna}")',
                 "name": row.mi_rna,
@@ -97,9 +90,7 @@ class MirTarBase(odb_meta.Graph):
                 "pmid": row.pmid,
                 "experiments": row.experiments,
             }
-            self.create_edge(
-                "has_mirgene_target", mir_rid, str(protein_rid), value_dict=value_dict
-            )
+            self.create_edge("has_mirgene_target", mir_rid, str(protein_rid), value_dict=value_dict)
             updated += 1
 
         return updated

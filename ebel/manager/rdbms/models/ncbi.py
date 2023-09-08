@@ -1,7 +1,7 @@
 """NCBI RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Text, ForeignKey
+from sqlalchemy.orm import relationship
 
 from . import object_as_dict
 
@@ -23,21 +23,15 @@ class NcbiGeneInfo(Base):
     description_id = Column(Integer, ForeignKey("ncbi_gene_info_description.id"))
     description = relationship("NcbiGeneInfoDescription", foreign_keys=[description_id])
     xrefs = relationship("NcbiGeneInfoXref", back_populates="gene")
-    mims = relationship(
-        "NcbiGeneMim", foreign_keys="NcbiGeneMim.gene_id", back_populates="gene"
-    )
+    mims = relationship("NcbiGeneMim", foreign_keys="NcbiGeneMim.gene_id", back_populates="gene")
     orthologs = relationship(
         "NcbiGeneOrtholog",
         foreign_keys="NcbiGeneOrtholog.gene_id",
         back_populates="gene",
     )
     ensembl_ids = relationship("NcbiGeneEnsembl", back_populates="genes")
-    gene_ids_right = relationship(
-        "NcbiGeneOnRight", foreign_keys="NcbiGeneOnRight.gene_id", back_populates="gene"
-    )
-    gene_ids_left = relationship(
-        "NcbiGeneOnLeft", foreign_keys="NcbiGeneOnLeft.gene_id", back_populates="gene"
-    )
+    gene_ids_right = relationship("NcbiGeneOnRight", foreign_keys="NcbiGeneOnRight.gene_id", back_populates="gene")
+    gene_ids_left = relationship("NcbiGeneOnLeft", foreign_keys="NcbiGeneOnLeft.gene_id", back_populates="gene")
     gene_ids_overlapping = relationship(
         "NcbiGeneOverlapping",
         foreign_keys="NcbiGeneOverlapping.gene_id",
@@ -56,9 +50,7 @@ class NcbiGeneInfo(Base):
                 "orthologs": [x.other_gene_id for x in self.orthologs],
                 "gene_ids_right": [x.gene_id_on_right for x in self.gene_ids_right],
                 "gene_ids_left": [x.gene_id_on_left for x in self.gene_ids_left],
-                "gene_ids_overlapping": [
-                    x.overlapping_gene_id for x in self.gene_ids_overlapping
-                ],
+                "gene_ids_overlapping": [x.overlapping_gene_id for x in self.gene_ids_overlapping],
             }
         )
         return rdict

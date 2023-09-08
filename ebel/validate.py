@@ -1,21 +1,20 @@
 """Collect of methods used for validating a BEL file."""
-import os
-import re
 import csv
 import difflib
 import logging
-
-from typing import Iterable, Union, Optional
-from textwrap import fill
+import os
+import re
 from pathlib import Path
+from textwrap import fill
+from typing import Iterable, Optional, Union
 
 import numpy as np
 import pandas as pd
 
 import ebel.database
 from ebel.errors import BelSyntaxError
-from ebel.parser import check_bel_script_line_by_line, check_bel_script, bel_to_json
-
+from ebel.parser import (bel_to_json, check_bel_script,
+                         check_bel_script_line_by_line)
 
 logger = logging.getLogger(__name__)
 
@@ -107,15 +106,10 @@ def validate_bel_file(
                 if result["errors"]:
                     if force_json:  # Check for syntax errors
                         bel_syntax_error_present = result["errors"] and any(
-                            [
-                                isinstance(error_type, BelSyntaxError)
-                                for error_type in result["errors"]
-                            ]
+                            [isinstance(error_type, BelSyntaxError) for error_type in result["errors"]]
                         )
                         if bel_syntax_error_present:
-                            logger.error(
-                                "Cannot force JSON file due to syntax errors. Please check the BEL file."
-                            )
+                            logger.error("Cannot force JSON file due to syntax errors. Please check the BEL file.")
 
                         else:
                             json_file = _write_odb_json(
@@ -126,37 +120,27 @@ def validate_bel_file(
                             validation_results[bel_file]["json"] = json_file
 
                     else:
-                        logger.error(
-                            "Unable to create JSON file due to grammar/syntax errors in BEL file"
-                        )
+                        logger.error("Unable to create JSON file due to grammar/syntax errors in BEL file")
 
                 else:  # No errors so everything is fine
-                    json_file = _write_odb_json(
-                        bel_path=bel_file, results=result, bel_version=bel_version
-                    )
+                    json_file = _write_odb_json(bel_path=bel_file, results=result, bel_version=bel_version)
                     validation_results[bel_file]["json"] = json_file
 
             if tree:
                 if result["errors"]:
-                    logger.error(
-                        "Tree can not be printed because errors still exists\n"
-                    )
+                    logger.error("Tree can not be printed because errors still exists\n")
 
                 else:
                     logger.debug(result["tree"])
                     validation_results[bel_file]["tree"] = result["tree"]
 
                 if result["warnings"] and reports:
-                    report_paths = _write_report(
-                        reports, result, report_type="warnings"
-                    )
+                    report_paths = _write_report(reports, result, report_type="warnings")
                     validation_results[bel_file]["reports"] = report_paths
 
             elif result["errors"]:
                 if not reports:
-                    logger.info(
-                        "\n".join([x.to_string() for x in result["errors"]]) + "\n"
-                    )
+                    logger.info("\n".join([x.to_string() for x in result["errors"]]) + "\n")
 
                 else:
                     _write_report(reports, result, report_type="errors")
@@ -180,8 +164,7 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
     new_content = content
 
     for regex_pattern in re.findall(
-        r"\n((SET\s+(DOCUMENT\s+Description|Evidence|SupportingText|Support)"
-        r'\s*=\s*)"(((?<=\\)"|[^"])+)"\s*\n*)',
+        r"\n((SET\s+(DOCUMENT\s+Description|Evidence|SupportingText|Support)" r'\s*=\s*)"(((?<=\\)"|[^"])+)"\s*\n*)',
         content,
     ):
         if regex_pattern[2].startswith("DOCUMENT"):
@@ -192,9 +175,7 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
         new_evidence_text = re.sub(r"(\\?[\r\n]+)|\\ ", " ", regex_pattern[3].strip())
         new_evidence_text = re.sub(r"\s{2,}", " ", new_evidence_text)
         new_evidence_text = re.sub(r"(\\)(\w)", r"\g<2>", new_evidence_text)
-        new_evidence_text = fill(new_evidence_text, break_long_words=False).replace(
-            "\n", " \\\n"
-        )
+        new_evidence_text = fill(new_evidence_text, break_long_words=False).replace("\n", " \\\n")
         new_evidence = new_prefix + '"' + new_evidence_text + '"\n\n'
 
         new_content = new_content.replace(regex_pattern[0], new_evidence)
@@ -202,13 +183,7 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
     if content != new_content:
         if new_file_path:
             with open(new_file_path + ".diff2repaired", "w") as new_file:
-                new_file.write(
-                    "\n".join(
-                        list(
-                            difflib.ndiff(content.split("\n"), new_content.split("\n"))
-                        )
-                    )
-                )
+                new_file.write("\n".join(list(difflib.ndiff(content.split("\n"), new_content.split("\n")))))
 
         else:
             with open(bel_script_path, "w") as output_file:
@@ -239,9 +214,7 @@ def _create_list_bel_files(bel_path: str) -> list:
     return bel_files
 
 
-def _write_report(
-    reports: Union[Iterable[str], str], result: dict, report_type: str
-) -> list:
+def _write_report(reports: Union[Iterable[str], str], result: dict, report_type: str) -> list:
     """Write report in different types depending on the file name suffix in reports.
 
     Parameters
@@ -287,9 +260,7 @@ def _write_report(
                     df.to_excel(report, index=False)
 
                 except ValueError:
-                    logger.warning(
-                        "Max Excel sheet size exceeded. Writing to CSV instead."
-                    )
+                    logger.warning("Max Excel sheet size exceeded. Writing to CSV instead.")
                     df.to_csv(report, index=False)
 
             if report.endswith(".xlsx"):
@@ -297,9 +268,7 @@ def _write_report(
                     df.to_excel(report, engine="xlsxwriter", index=False)
 
                 except ValueError:
-                    logger.warning(
-                        "Max Excel sheet size exceeded. Writing to CSV instead."
-                    )
+                    logger.warning("Max Excel sheet size exceeded. Writing to CSV instead.")
                     df.to_csv(report, index=False)
 
             if report.endswith(".tsv"):
@@ -332,14 +301,8 @@ def _write_report(
                 if df.entry.dtype == np.str:
                     df.entry = df.entry.str.replace(r"\|", "&#124;")
 
-                df.url = [
-                    ("[url](" + str(x) + ")" if not pd.isna(x) else "") for x in df.url
-                ]
-                url_template = (
-                    "[%s]("
-                    + report.split(".bel.")[0]
-                    + ".bel?expanded=true&viewer=simple#L%s)"
-                )
+                df.url = [("[url](" + str(x) + ")" if not pd.isna(x) else "") for x in df.url]
+                url_template = "[%s](" + report.split(".bel.")[0] + ".bel?expanded=true&viewer=simple#L%s)"
                 df.line_number = [url_template % (x, x) for x in df.line_number]
                 df3 = pd.concat([df2, df])
                 df3.to_csv(
@@ -351,8 +314,6 @@ def _write_report(
                 )
 
         except PermissionError:
-            logger.error(
-                "Previous version of error report is still open and cannot be overwritten. Unable to update."
-            )
+            logger.error("Previous version of error report is still open and cannot be overwritten. Unable to update.")
 
     return reports

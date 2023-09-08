@@ -1,12 +1,11 @@
 """Unit tests for the enrich methods."""
 
-from ..constants import test_client, TEST_JSON
+from ..constants import TEST_JSON, test_client
 
 bel = test_client
 
 
 class TestEnrich:
-
     # TODO: Erasing and reimporting causes an error when these tests are run with test_bel.py
     # Make sure test DB is populated
     bel.clear_all_nodes_and_edges()
@@ -15,16 +14,18 @@ class TestEnrich:
     assert all([count == 0 for count in bel.number_of_nodes.values()])
     assert all([count == 0 for count in bel.number_of_edges.values()])
 
-    bel.import_json(input_path=TEST_JSON,
-                    update_from_protein2gene=True,
-                    extend_graph=False,)
+    bel.import_json(
+        input_path=TEST_JSON,
+        update_from_protein2gene=True,
+        extend_graph=False,
+    )
 
     def test_uniprot_enrich(self):
         updated = bel.uniprot.update_bel()
         assert isinstance(updated, dict)
         assert all([species in updated for species in ("HGNC", "MGI", "RGD")])
         assert all([isinstance(val, int) for val in updated.values()])
-        assert updated['HGNC'] == 3
+        assert updated["HGNC"] == 3
 
     def test_hgnc_enrich(self):
         updated = bel.hgnc.update_bel()
@@ -39,7 +40,7 @@ class TestEnrich:
     def test_gwas_enrich(self):
         updated = bel.gwas_catalog.update_bel()
         assert isinstance(updated, dict)
-        assert updated == {'has_mapped_snp_gc': 1141, 'has_downstream_snp_gc': 401, 'has_upstream_snp_gc': 394}
+        assert updated == {"has_mapped_snp_gc": 1141, "has_downstream_snp_gc": 401, "has_upstream_snp_gc": 394}
 
     def test_clinvar_enrich(self):
         updated = bel.clinvar.update_bel()
@@ -54,7 +55,7 @@ class TestEnrich:
     def test_stringdb_enrich(self):
         updated = bel.stringdb.update_interactions()
         assert isinstance(updated, dict)
-        assert updated == {'interactions': 43, 'actions': 152}
+        assert updated == {"interactions": 43, "actions": 152}
 
     def test_biogrid_enrich(self):
         updated = bel.biogrid.update_interactions()
@@ -69,9 +70,11 @@ class TestEnrich:
     def test_pc_enrich(self):
         updated = bel.pathway_commons.update_interactions()
         assert isinstance(updated, dict)
-        assert updated == {'controls-transport-of': 19,
-                           'controls-expression-of': 71,
-                           'controls-phosphorylation-of': 12}
+        assert updated == {
+            "controls-transport-of": 19,
+            "controls-expression-of": 71,
+            "controls-phosphorylation-of": 12,
+        }
 
     def test_disgenet_enrich(self):
         updated = bel.disgenet.update_interactions()

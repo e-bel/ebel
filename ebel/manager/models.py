@@ -1,37 +1,29 @@
 """This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
+import codecs
+import datetime
+import logging
 import os
 import re
 import urllib
-import codecs
-import logging
-import requests
-import datetime
-import sqlalchemy
+from typing import List, Optional, Tuple, Union
+from urllib.parse import quote_plus, urlencode
+
 import pandas as pd
-
-from tqdm import tqdm
+import requests
+import sqlalchemy
 from lark import Lark
-from urllib.parse import urlencode, quote_plus
-from typing import List, Tuple, Optional, Union
-
+from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import func
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy import Column, ForeignKey, Integer, String, Index, Boolean
-
 from sqlalchemy_utils import create_database, database_exists
+from tqdm import tqdm
 
 from ebel import parser
+from ebel.constants import (FILE, GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_ANNO,
+                            GRAMMAR_START_NS, URL)
 from ebel.tools import BelRdb
-from ebel.constants import (
-    GRAMMAR_NS_ANNO_PATH,
-    GRAMMAR_START_NS,
-    GRAMMAR_START_ANNO,
-    URL,
-    FILE,
-)
-
 
 Base = declarative_base()
 logger = logging.getLogger(__name__)
@@ -135,9 +127,7 @@ class Annotation(Base, MasterModel):
     cacheable = Column(Boolean)
     case_sensitive = Column(Boolean)
 
-    entries = relationship(
-        "AnnotationEntry", back_populates="annotation", cascade="all, delete-orphan"
-    )
+    entries = relationship("AnnotationEntry", back_populates="annotation", cascade="all, delete-orphan")
 
 
 class AnnotationEntry(Base, MasterModel):
@@ -196,34 +186,24 @@ class ModelManager:
 
         names_not_exists = []
 
-        search_for = self.session.query(self.model.id).filter(
-            self.model.keyword == keyword, self.model.url == url
-        )
+        search_for = self.session.query(self.model.id).filter(self.model.keyword == keyword, self.model.url == url)
 
         desc = "Check BEL for {}: ".format(keyword)
 
-        for entry, line, column in tqdm(
-            list(entry_line_column_list), desc=desc, ncols=100
-        ):
+        for entry, line, column in tqdm(list(entry_line_column_list), desc=desc, ncols=100):
             if entry in not_exists_cache:
                 hint = not_exists_cache[entry]
                 names_not_exists.append((entry, line, column, hint))
 
             elif (keyword, url, entry) not in exists_cache:
-                exists = (
-                    search_for.join(self.entries_model)
-                    .filter(self.entries_model.name == entry)
-                    .count()
-                )
+                exists = search_for.join(self.entries_model).filter(self.entries_model.name == entry).count()
 
                 if exists:
                     exists_cache.update(set([(keyword, url, entry)]))
                 else:
                     hint = ""
                     alternatives = (
-                        self.session.query(
-                            self.entries_model.name, self.model.keyword, self.model.url
-                        )
+                        self.session.query(self.entries_model.name, self.model.keyword, self.model.url)
                         .join(self.model)
                         .filter(self.entries_model.name.like(entry))
                         .all()
@@ -231,41 +211,26 @@ class ModelManager:
 
                     if alternatives:
                         hint = "Did you mean: "
-                        hint += ", ".join(
-                            [
-                                x[1] + ':"' + x[0] + '"(' + x[2] + ")"
-                                for x in alternatives
-                            ]
-                        )
+                        hint += ", ".join([x[1] + ':"' + x[0] + '"(' + x[2] + ")" for x in alternatives])
 
                     else:
                         if len(entry) >= 6:
                             similars = (
-                                self.session.query(
-                                    self.entries_model.name, self.model.keyword
-                                )
+                                self.session.query(self.entries_model.name, self.model.keyword)
                                 .join(self.model)
                                 .filter(self.entries_model.name.like(entry[:-2] + "%"))
-                                .filter(
-                                    func.length(self.entries_model.name)
-                                    < len(entry) + 3
-                                )
+                                .filter(func.length(self.entries_model.name) < len(entry) + 3)
                                 .limit(20)
                                 .all()
                             )
 
                             if similars:
                                 hint = "Similar: "
-                                hint += ", ".join(
-                                    [x[1] + ':"' + x[0] + '"' for x in set(similars)]
-                                )
+                                hint += ", ".join([x[1] + ':"' + x[0] + '"' for x in set(similars)])
 
                     if not hint:
                         url_query_string = urlencode({"q": entry}, quote_via=quote_plus)
-                        hint = (
-                            "[OLS suggests](https://www.ebi.ac.uk/ols/search?%s)"
-                            % url_query_string
-                        )
+                        hint = "[OLS suggests](https://www.ebi.ac.uk/ols/search?%s)" % url_query_string
 
                     names_not_exists.append((entry, line, column, hint))
                     not_exists_cache[entry] = hint
@@ -369,18 +334,14 @@ class ModelManager:
         elif doc_type == FILE:
             path_to_file = url_or_path
 
-        saved, save_error = self.save_in_db(
-            path_to_file=path_to_file, url=url_or_path, keyword=keyword
-        )
+        saved, save_error = self.save_in_db(path_to_file=path_to_file, url=url_or_path, keyword=keyword)
 
         if doc_type == URL:
             os.remove(path_to_file)
 
         return saved, save_error
 
-    def save_in_db(
-        self, path_to_file: str, url: str, keyword: str
-    ) -> Tuple[bool, Optional[Exception]]:
+    def save_in_db(self, path_to_file: str, url: str, keyword: str) -> Tuple[bool, Optional[Exception]]:
         """Save content of namespace or annotation file from URL with keyword in database.
 
         Parameters
@@ -444,13 +405,9 @@ class ModelManager:
         df[self.name + "__id"] = model_instance.id
         df.set_index(["name", second_column], inplace=True)
 
-        logger.info(
-            f"Import `{keyword}` table '{table_name}' of engine '{self.session.bind.engine}'"
-        )
+        logger.info(f"Import `{keyword}` table '{table_name}' of engine '{self.session.bind.engine}'")
 
-        df.to_sql(
-            table_name, self.session.bind.engine, if_exists="append", chunksize=1000
-        )
+        df.to_sql(table_name, self.session.bind.engine, if_exists="append", chunksize=1000)
         self.session.commit()
         return True, None
 
@@ -470,9 +427,7 @@ class ModelManager:
             Description of returned object.
 
         """
-        result = self.session.query(self.model).filter(
-            self.model.keyword == keyword, self.model.url == url
-        )
+        result = self.session.query(self.model).filter(self.model.keyword == keyword, self.model.url == url)
 
         if result.count() == 0:
             exists = False

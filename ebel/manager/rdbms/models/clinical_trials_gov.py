@@ -1,12 +1,11 @@
 """ClinicalTrials.gov RDBMS model definition."""
 import re
 
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Table, Text, ForeignKey
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
-
 
 Base = declarative_base()
 
@@ -136,9 +135,7 @@ class ClinicalTrialGov(Base):
     def as_dict(self):
         """Convert object values to dictionary."""
         basic_dict = object_as_dict(self)
-        basic_dict["brief_summary"] = re.sub(
-            r"\r?\n\s*", " ", basic_dict["brief_summary"]
-        ).strip()
+        basic_dict["brief_summary"] = re.sub(r"\r?\n\s*", " ", basic_dict["brief_summary"]).strip()
         basic_dict.update({"keywords": [x.keyword for x in self.keywords]})
         basic_dict.update({"conditions": [x.condition for x in self.conditions]})
         basic_dict.update({"mesh_terms": [x.mesh_term for x in self.mesh_terms]})
@@ -162,9 +159,7 @@ class Keyword(Base):
     __tablename__ = "clinical_trials_gov_keyword"
     id = Column(Integer, primary_key=True)
     keyword = Column(String(255), index=True)
-    trials = relationship(
-        "ClinicalTrialGov", secondary=ctg_keyword_n2m, back_populates="keywords"
-    )
+    trials = relationship("ClinicalTrialGov", secondary=ctg_keyword_n2m, back_populates="keywords")
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -177,9 +172,7 @@ class Condition(Base):
     __tablename__ = "clinical_trials_gov_condition"
     id = Column(Integer, primary_key=True)
     condition = Column(Text)
-    trials = relationship(
-        "ClinicalTrialGov", secondary=ctg_condition_n2m, back_populates="conditions"
-    )
+    trials = relationship("ClinicalTrialGov", secondary=ctg_condition_n2m, back_populates="conditions")
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -192,9 +185,7 @@ class MeshTerm(Base):
     __tablename__ = "clinical_trials_gov_mesh_term"
     id = Column(Integer, primary_key=True)
     mesh_term = Column(String(100), unique=True)
-    trials = relationship(
-        "ClinicalTrialGov", secondary=ctg_mesh_term_n2m, back_populates="mesh_terms"
-    )
+    trials = relationship("ClinicalTrialGov", secondary=ctg_mesh_term_n2m, back_populates="mesh_terms")
 
     def as_dict(self):
         """Convert object values to dictionary."""

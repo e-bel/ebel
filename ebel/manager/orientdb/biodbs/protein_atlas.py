@@ -1,15 +1,14 @@
 """Protein Atlas module."""
-import pandas as pd
-
-from pyorientdb import OrientDB
 from typing import Dict, Optional
 
-from ebel.tools import get_file_path
+import pandas as pd
+from pyorientdb import OrientDB
+from tqdm import tqdm
+
 from ebel.manager.orientdb import odb_meta, urls
 from ebel.manager.orientdb.constants import PROTEIN_ATLAS
-
 from ebel.manager.rdbms.models import protein_atlas
-from tqdm import tqdm
+from ebel.tools import get_file_path
 
 
 class ProteinAtlas(odb_meta.Graph):
@@ -27,9 +26,7 @@ class ProteinAtlas(odb_meta.Graph):
             protein_atlas.ProteinAtlasRnaBrainFantom.__tablename__: urls.PROTEIN_ATLAS_RNA_FANTOM_BRAIN,
             protein_atlas.ProteinAtlasRnaMouseBrainAllen.__tablename__: urls.PROTEIN_ATLAS_RNA_MOUSE_BRAIN_ALLEN,
         }
-        super().__init__(
-            urls=self.urls, tables_base=protein_atlas.Base, biodb_name=self.biodb_name
-        )
+        super().__init__(urls=self.urls, tables_base=protein_atlas.Base, biodb_name=self.biodb_name)
 
     def __len__(self):
         return self.session.query(protein_atlas.ProteinAtlasNormalTissue).count()
@@ -49,29 +46,15 @@ class ProteinAtlas(odb_meta.Graph):
         """
         self.recreate_tables()
         inserts = dict()
-        inserts[
-            protein_atlas.ProteinAtlasNormalTissue.__tablename__
-        ] = self._insert_normal_tissue()
-        inserts[
-            protein_atlas.ProteinAtlasSubcellularLocation.__tablename__
-        ] = self._insert_subcellular_location()
-        inserts[
-            protein_atlas.ProteinAtlasRnaTissueConsensus.__tablename__
-        ] = self._insert_rna_tissue_consensus()
-        inserts[
-            protein_atlas.ProteinAtlasRnaBrainGtex.__tablename__
-        ] = self._insert_rna_brain_gtex()
-        inserts[
-            protein_atlas.ProteinAtlasRnaBrainFantom.__tablename__
-        ] = self._insert_rna_brain_fantom()
-        inserts[
-            protein_atlas.ProteinAtlasRnaMouseBrainAllen.__tablename__
-        ] = self._insert_rna_mouse_brain_allen()
+        inserts[protein_atlas.ProteinAtlasNormalTissue.__tablename__] = self._insert_normal_tissue()
+        inserts[protein_atlas.ProteinAtlasSubcellularLocation.__tablename__] = self._insert_subcellular_location()
+        inserts[protein_atlas.ProteinAtlasRnaTissueConsensus.__tablename__] = self._insert_rna_tissue_consensus()
+        inserts[protein_atlas.ProteinAtlasRnaBrainGtex.__tablename__] = self._insert_rna_brain_gtex()
+        inserts[protein_atlas.ProteinAtlasRnaBrainFantom.__tablename__] = self._insert_rna_brain_fantom()
+        inserts[protein_atlas.ProteinAtlasRnaMouseBrainAllen.__tablename__] = self._insert_rna_mouse_brain_allen()
         return inserts
 
-    def __insert_table(
-        self, model, use_cols=None, sep: str = "\t", chunksize: Optional[int] = None
-    ) -> int:
+    def __insert_table(self, model, use_cols=None, sep: str = "\t", chunksize: Optional[int] = None) -> int:
         """Generic method to insert data.
 
         :param model: NCBI SQLAlchemy model
@@ -140,9 +123,7 @@ class ProteinAtlas(odb_meta.Graph):
 
     def get_tissues_by_ensembl_id(self, ensembl_gene_id):
         """Return tissues for a given ensembl ID."""
-        level_exixs = protein_atlas.ProteinAtlasNormalTissue.level.in_(
-            ["Medium", "High", "Low"]
-        )
+        level_exixs = protein_atlas.ProteinAtlasNormalTissue.level.in_(["Medium", "High", "Low"])
         columns = (
             protein_atlas.ProteinAtlasNormalTissue.tissue,
             protein_atlas.ProteinAtlasNormalTissue.cell_type,
@@ -183,15 +164,11 @@ class ProteinAtlas(odb_meta.Graph):
                 both('bel_relation').size()>=1 and
                 hgnc.ensembl_gene_id IS NOT NULL"""
 
-        rid_ensembl_gene_ids = {
-            x.oRecordData["ensembl_gene_id"]: x for x in self.execute(match)
-        }
+        rid_ensembl_gene_ids = {x.oRecordData["ensembl_gene_id"]: x for x in self.execute(match)}
 
         self.execute("Delete EDGE has_located_protein where levels IS NOT NULL")
 
-        location_rid_cache = {
-            x["bel"]: x["rid"] for x in self.query_class("location", columns=["bel"])
-        }
+        location_rid_cache = {x["bel"]: x["rid"] for x in self.query_class("location", columns=["bel"])}
 
         for ensembl_gene_id, data in tqdm(rid_ensembl_gene_ids.items()):
             ns_location = "PROTEIN_ATLAS"
@@ -242,6 +219,4 @@ class ProteinAtlas(odb_meta.Graph):
                     )
                     location_rid_cache[location_bel] = location_rid
 
-                self.create_edge(
-                    "has__location", from_rid=protein_located_rid, to_rid=location_rid
-                )
+                self.create_edge("has__location", from_rid=protein_located_rid, to_rid=location_rid)

@@ -1,10 +1,9 @@
 """ClinVar RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, ForeignKey, Index, Integer, String, Table, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Table, Text, ForeignKey, Index
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
-
 
 Base = declarative_base()
 
@@ -81,12 +80,8 @@ class Clinvar(Base):
     reference_allele_vcf = Column(Text(100000))
     alternate_allele_vcf = Column(Text(100000))
 
-    phenotypeMedgens = relationship(
-        "ClinvarPhenotypeMedgen", foreign_keys=[ClinvarPhenotypeMedgen.clinvar_id]
-    )
-    otherIdentifiers = relationship(
-        "ClinvarOtherIdentifier", foreign_keys=[ClinvarOtherIdentifier.clinvar_id]
-    )
+    phenotypeMedgens = relationship("ClinvarPhenotypeMedgen", foreign_keys=[ClinvarPhenotypeMedgen.clinvar_id])
+    otherIdentifiers = relationship("ClinvarOtherIdentifier", foreign_keys=[ClinvarOtherIdentifier.clinvar_id])
 
     phenotypes = relationship("ClinvarPhenotype", secondary=clinvar__clinvar_phenotype)
 
@@ -95,12 +90,8 @@ class Clinvar(Base):
     def as_dict(self):
         """Convert object values to dictionary."""
         clinvar_entry = object_as_dict(self)
-        clinvar_entry.update(
-            {"phenotypeMedgens": [x.identifier for x in self.phenotypeMedgens]}
-        )
-        clinvar_entry.update(
-            {"otherIdentifiers": [x.as_dict() for x in self.otherIdentifiers]}
-        )
+        clinvar_entry.update({"phenotypeMedgens": [x.identifier for x in self.phenotypeMedgens]})
+        clinvar_entry.update({"otherIdentifiers": [x.as_dict() for x in self.otherIdentifiers]})
         return clinvar_entry
 
 
@@ -111,9 +102,7 @@ class ClinvarPhenotype(Base):
     id = Column(Integer, primary_key=True)
     phenotype = Column(Text)
 
-    clinvars = relationship(
-        "Clinvar", secondary=clinvar__clinvar_phenotype, back_populates="phenotypes"
-    )
+    clinvars = relationship("Clinvar", secondary=clinvar__clinvar_phenotype, back_populates="phenotypes")
 
     def as_dict(self):
         """Convert object values to dictionary."""

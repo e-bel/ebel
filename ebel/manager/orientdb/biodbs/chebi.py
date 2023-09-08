@@ -34,9 +34,7 @@ class Chebi(odb_meta.Graph):
             chebi.Structure.__tablename__: urls.CHEBI_STRUCTURE,
         }
 
-        super().__init__(
-            urls=self.urls, biodb_name=self.biodb_name, tables_base=chebi.Base
-        )
+        super().__init__(urls=self.urls, biodb_name=self.biodb_name, tables_base=chebi.Base)
 
     def __len__(self) -> int:
         """Get number of edges in OrientDB."""
@@ -55,15 +53,11 @@ class Chebi(odb_meta.Graph):
         inserted = {}
 
         file_path_compound = tools.get_file_path(urls.CHEBI_COMPOUND, self.biodb_name)
-        df_compounds = pd.read_csv(
-            file_path_compound, sep="\t", low_memory=False, on_bad_lines="skip"
-        )
+        df_compounds = pd.read_csv(file_path_compound, sep="\t", low_memory=False, on_bad_lines="skip")
         df_compound_ids = df_compounds[["ID"]]
         del df_compounds
 
-        for table_name, url in tqdm(
-            self.urls.items(), desc=f"Import {self.biodb_name.upper()}"
-        ):
+        for table_name, url in tqdm(self.urls.items(), desc=f"Import {self.biodb_name.upper()}"):
             file_path = tools.get_file_path(url, self.biodb_name)
             seperator = "\t" if re.search(r".*\.tsv(\.gz)?$", file_path) else ","
             encoding = "ISO-8859-1" if table_name == "chebi_reference" else None
@@ -129,15 +123,11 @@ class Chebi(odb_meta.Graph):
 
         for chebi_node in tqdm(chebi_nodes, desc="Update ChEBI identifier in BEL"):
             chebi_compound = (
-                self.session.query(chebi.Compound.id)
-                .filter(chebi.Compound.name == chebi_node["name"])
-                .first()
+                self.session.query(chebi.Compound.id).filter(chebi.Compound.name == chebi_node["name"]).first()
             )
 
             if chebi_compound:
-                updated += self.execute(
-                    sql.format(rid=chebi_node["rid"], chebi_id=chebi_compound[0])
-                )[0]
+                updated += self.execute(sql.format(rid=chebi_node["rid"], chebi_id=chebi_compound[0]))[0]
 
         return updated
 

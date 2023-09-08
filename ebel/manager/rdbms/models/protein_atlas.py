@@ -1,6 +1,6 @@
 """Protein Atlas RDBMS model definition."""
+from sqlalchemy import Column, Integer, Numeric, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Text, Numeric
 
 Base = declarative_base()
 

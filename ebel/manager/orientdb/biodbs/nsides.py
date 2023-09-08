@@ -1,20 +1,19 @@
 """NSIDES module."""
 
+import logging
 import os
 import tarfile
-import logging
-import pandas as pd
-
-from tqdm import tqdm
 from typing import Dict, Optional
+
+import pandas as pd
 from pyorientdb import OrientDB
+from tqdm import tqdm
 
-from ebel.tools import get_file_path
 from ebel.constants import RID
+from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import OFFSIDES, ONSIDES
-from ebel.manager.orientdb import odb_meta, urls, odb_structure
-
 from ebel.manager.rdbms.models import nsides
+from ebel.tools import get_file_path
 
 logger = logging.getLogger(__name__)
 pd.options.mode.chained_assignment = None
@@ -163,9 +162,7 @@ class Nsides(odb_meta.Graph):
             o.mean_reporting_frequency
         """
 
-        drugbank_ids = self.query_class(
-            "drug", columns=["drugbank_id"], drugbank_id="notnull"
-        )
+        drugbank_ids = self.query_class("drug", columns=["drugbank_id"], drugbank_id="notnull")
         drugbank_id_rids = {d["drugbank_id"]: d[RID] for d in drugbank_ids}
 
         side_effects = self.query_class("side_effect", columns=["condition_meddra_id"])
@@ -173,9 +170,7 @@ class Nsides(odb_meta.Graph):
 
         updated = 0
 
-        for drugbank_id, drugbank_rid in tqdm(
-            drugbank_id_rids.items(), desc=f"Update {self.biodb_name.upper()}"
-        ):
+        for drugbank_id, drugbank_rid in tqdm(drugbank_id_rids.items(), desc=f"Update {self.biodb_name.upper()}"):
             for r in self.engine.execute(sql_temp.format(drugbank_id)):
                 (
                     condition_meddra_id,

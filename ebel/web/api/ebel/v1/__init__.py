@@ -5,8 +5,7 @@ import re
 from collections import namedtuple
 from enum import Enum
 from math import ceil
-from typing import Dict, Type
-from typing import List
+from typing import Dict, List, Type
 
 from flask import request
 from sqlalchemy import inspect, not_
@@ -54,11 +53,7 @@ def _get_pagination() -> Pagination:
     """Get page and page_size from request."""
     request_obj = request.args if request.args else json.loads(request.data)
     page_size = request_obj.get("page_size", 10)
-    page_size = (
-        int(page_size)
-        if (isinstance(page_size, int) or re.search(r"^\d+$", page_size))
-        else 10
-    )
+    page_size = int(page_size) if (isinstance(page_size, int) or re.search(r"^\d+$", page_size)) else 10
     page = request_obj.get("page", 1)
     page = int(page) if (isinstance(page, int) or re.search(r"^\d+$", page)) else 1
     skip = (page - 1) * page_size
@@ -71,17 +66,11 @@ def _get_data(
     order_by: List[InstrumentedAttribute] = [],
 ):
     columns: Dict[str, InstrumentedAttribute] = {
-        col_name: col_obj
-        for col_name, col_obj in model.__dict__.items()
-        if isinstance(col_obj, InstrumentedAttribute)
+        col_name: col_obj for col_name, col_obj in model.__dict__.items() if isinstance(col_obj, InstrumentedAttribute)
     }
     bool_map = {"true": 1, "false": 0}
     request_obj = request.args if request.args else json.loads(request.data)
-    params = {
-        k: (bool_map[v] if v in bool_map else v)
-        for k, v in request_obj.items()
-        if k in columns and v
-    }
+    params = {k: (bool_map[v] if v in bool_map else v) for k, v in request_obj.items() if k in columns and v}
     like_queries = [columns[k].like(v) for k, v in params.items()]
     query = RDBMS.get_session().query(model).filter(*like_queries)
     return _get_paginated_query_result(query, print_sql=print_sql, order_by=order_by)
@@ -158,27 +147,19 @@ def _get_paginated_ebel_query_result(sql: str, print_sql=False):
     }
 
 
-def _get_terms_from_model_starts_with(
-    form_field: str, sa_column: InstrumentedAttribute, by="args"
-):
+def _get_terms_from_model_starts_with(form_field: str, sa_column: InstrumentedAttribute, by="args"):
     return _get_terms_from_model_like(form_field, sa_column, how="starts_with", by=by)
 
 
-def _get_terms_from_model_ends_with(
-    form_field: str, sa_column: InstrumentedAttribute, by="args"
-):
+def _get_terms_from_model_ends_with(form_field: str, sa_column: InstrumentedAttribute, by="args"):
     return _get_terms_from_model_like(form_field, sa_column, how="starts_with", by=by)
 
 
-def _get_terms_from_model_contains(
-    form_field: str, sa_column: InstrumentedAttribute, by="args"
-):
+def _get_terms_from_model_contains(form_field: str, sa_column: InstrumentedAttribute, by="args"):
     return _get_terms_from_model_like(form_field, sa_column, how="contains", by=by)
 
 
-def _get_terms_from_model_like(
-    form_field: str, sa_column: InstrumentedAttribute, how="like", by="args"
-):
+def _get_terms_from_model_like(form_field: str, sa_column: InstrumentedAttribute, how="like", by="args"):
     """Get terms from SQL Alchemy models field. Alchemy models field should be unique.
 
     :param form_field: name of form field
@@ -209,10 +190,7 @@ def _get_terms_from_model_like(
     model = sa_column.class_
     primary_key = inspect(model).primary_key[0]
     query = (
-        RDBMS.get_session()
-        .query(primary_key, sa_column)
-        .filter(sa_column.like(f"{search_term}%"))
-        .order_by(sa_column)
+        RDBMS.get_session().query(primary_key, sa_column).filter(sa_column.like(f"{search_term}%")).order_by(sa_column)
     )
 
     number_of_results = query.count()
@@ -232,9 +210,7 @@ def _get_terms_from_model_like(
     }
 
 
-def add_query_filters(
-    query: Query, columns_params: Dict[str, Dict[str, str]], model: DeclarativeMeta
-):
+def add_query_filters(query: Query, columns_params: Dict[str, Dict[str, str]], model: DeclarativeMeta):
     """Add optional filters to query."""
     col_filters = []
     for column_name, v in columns_params.items():

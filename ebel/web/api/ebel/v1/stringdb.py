@@ -38,9 +38,7 @@ def get_ebel_relation():
     paras = {k: ra[k] for k in ra if k in conf}
 
     if paras:
-        wheres = [
-            f'{conf[k].replace(".asString()","")} like "{v}"' for k, v in paras.items()
-        ]
+        wheres = [f'{conf[k].replace(".asString()","")} like "{v}"' for k, v in paras.items()]
         sql += " WHERE " + " AND ".join(wheres)
 
     return _get_paginated_ebel_query_result(sql)

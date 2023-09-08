@@ -1,14 +1,14 @@
 """Generic e(BE:L) API methods."""
 import json
-import numpy as np
-import pandas as pd
-
-from flask import request
 from collections import Counter
 
+import numpy as np
+import pandas as pd
+from flask import request
+
 from ebel import Bel
-from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models.uniprot import Uniprot
+from ebel.web.api import RDBMS
 
 
 def get_bel_edge_statistics_by_uniprot_accession():
@@ -18,9 +18,7 @@ def get_bel_edge_statistics_by_uniprot_accession():
     eclass = query_object["edge_class"]
     results = {}
     for direction in ("out", "in"):
-        results[direction] = __get_bel_edge_statistics_by_uniprot_accession(
-            acc, eclass, direction
-        )
+        results[direction] = __get_bel_edge_statistics_by_uniprot_accession(acc, eclass, direction)
 
     return results
 
@@ -43,25 +41,19 @@ def __get_bel_edge_statistics_by_uniprot_accession(acc, eclass, direction):
 
     rows = [x.oRecordData for x in Bel().client.command(sql)]
     edge_counter = Counter([x["eclass"] for x in rows])
-    edge_counter_sorted = sorted(
-        edge_counter.items(), key=lambda item: item[1], reverse=True
-    )
+    edge_counter_sorted = sorted(edge_counter.items(), key=lambda item: item[1], reverse=True)
     edge_counter_ordered = [{"name": x[0], "value": x[1]} for x in edge_counter_sorted]
     # make object unique
     object_rid_class_dict = {x["orid"]: x["oclass"] for x in rows}
     counter = Counter(object_rid_class_dict.values())
     object_counter_ordered = [
-        {"name": x[0], "value": x[1]}
-        for x in sorted(counter.items(), key=lambda i: i[1], reverse=True)
+        {"name": x[0], "value": x[1]} for x in sorted(counter.items(), key=lambda i: i[1], reverse=True)
     ]
     return {"edges": edge_counter_ordered, "objects": object_counter_ordered}
 
 
 def _describe(s: pd.Series):
-    return {
-        k: (int(v) if isinstance(v, np.int64) else v)
-        for k, v in s.describe().to_dict().items()
-    }
+    return {k: (int(v) if isinstance(v, np.int64) else v) for k, v in s.describe().to_dict().items()}
 
 
 def get_intact_by_uniprot():

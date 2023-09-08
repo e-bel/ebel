@@ -1,16 +1,8 @@
 """IUPHAR RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import (BigInteger, Boolean, Column, ForeignKey, Integer,
+                        Numeric, String, Text)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    Boolean,
-    Text,
-    ForeignKey,
-    BigInteger,
-    Numeric,
-)
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -31,9 +23,7 @@ class IupharLigand(Base):
     labelled = Column(Boolean)
     radioactive = Column(Boolean)
     pubchem_sid = Column(BigInteger)
-    pubchem_cid = Column(
-        Text
-    )  # TODO: This is a integer, but for import reasons this changed to text
+    pubchem_cid = Column(Text)  # TODO: This is a integer, but for import reasons this changed to text
     uniprot_id = Column(Text)
     ensembl_id = Column(Text)
     ligand_subunit_ids = Column(Text)

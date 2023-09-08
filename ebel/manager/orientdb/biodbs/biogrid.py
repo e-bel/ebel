@@ -157,12 +157,7 @@ class BioGridEdge:
     @property
     def edge_name(self):
         """Get edge name."""
-        return (
-            self.modConfig.effect
-            + "_"
-            + normalized_pmod_reverse[self.modConfig.pmod_bel]
-            + "_bg"
-        )
+        return self.modConfig.effect + "_" + normalized_pmod_reverse[self.modConfig.pmod_bel] + "_bg"
 
 
 class Effect:
@@ -195,28 +190,16 @@ class ModConfig:
 class Modification(Enum):
     """BioGrid modification and configuration for BEL converting."""
 
-    PHOSPHORYLATION: ModConfig = ModConfig(
-        "Phosphorylation", Effect.INCREASES, BelPmod.PHO
-    )
-    UBIQUITINATION: ModConfig = ModConfig(
-        "Ubiquitination", Effect.INCREASES, BelPmod.UBI
-    )
+    PHOSPHORYLATION: ModConfig = ModConfig("Phosphorylation", Effect.INCREASES, BelPmod.PHO)
+    UBIQUITINATION: ModConfig = ModConfig("Ubiquitination", Effect.INCREASES, BelPmod.UBI)
     ACETYLATION: ModConfig = ModConfig("Acetylation", Effect.INCREASES, BelPmod.ACE)
-    DEUBIQUITINATION: ModConfig = ModConfig(
-        "Deubiquitination", Effect.DECREASES, BelPmod.UBI
-    )
-    PROTEOLYTIC_PROCESSING: ModConfig = ModConfig(
-        "Proteolytic Processing", Effect.DECREASES
-    )
+    DEUBIQUITINATION: ModConfig = ModConfig("Deubiquitination", Effect.DECREASES, BelPmod.UBI)
+    PROTEOLYTIC_PROCESSING: ModConfig = ModConfig("Proteolytic Processing", Effect.DECREASES)
     METHYLATION: ModConfig = ModConfig("Methylation", Effect.INCREASES, BelPmod.ME0)
     SUMOYLATION: ModConfig = ModConfig("Sumoylation", Effect.INCREASES, BelPmod.SUM)
-    DEPHOSPHORYLATION: ModConfig = ModConfig(
-        "Dephosphorylation", Effect.DECREASES, BelPmod.PHO
-    )
+    DEPHOSPHORYLATION: ModConfig = ModConfig("Dephosphorylation", Effect.DECREASES, BelPmod.PHO)
     DEACETYLATION: ModConfig = ModConfig("Deacetylation", Effect.DECREASES, BelPmod.ACE)
-    NEDD_RUB1_YLATION: ModConfig = ModConfig(
-        "Nedd(Rub1)ylation", Effect.INCREASES, BelPmod.NED
-    )
+    NEDD_RUB1_YLATION: ModConfig = ModConfig("Nedd(Rub1)ylation", Effect.INCREASES, BelPmod.NED)
     RIBOSYLATION: ModConfig = ModConfig("Ribosylation", Effect.INCREASES, BelPmod.ADD)
     DESUMOYLATION: ModConfig = ModConfig("Desumoylation", Effect.DECREASES, BelPmod.SUM)
     DEMETHYLATION: ModConfig = ModConfig("Demethylation", Effect.DECREASES, BelPmod.ME0)
@@ -230,10 +213,7 @@ class Modification(Enum):
     @classmethod
     def get_reverse_dict(cls) -> typing.Dict[str, ModConfig]:
         """Reverse the key and values for the dictionary."""
-        return {
-            cls.__members__[x].value.bg_mod_name: cls.__members__[x].value
-            for x in cls.__members__
-        }
+        return {cls.__members__[x].value.bg_mod_name: cls.__members__[x].value for x in cls.__members__}
 
 
 MODIFICATIONS = tuple(Modification.get_reverse_dict().keys())
@@ -265,9 +245,7 @@ class BioGrid(odb_meta.Graph):
     def __contains__(self, biogrid_id) -> bool:
         """Check if biogrid_interaction edge with biogrid_id exists in graph."""
         # TODO: Check if this is still valid
-        sql = "Select 1 from biogrid_interaction where any(biogrid).biogrid_id = {}".format(
-            biogrid_id
-        )
+        sql = "Select 1 from biogrid_interaction where any(biogrid).biogrid_id = {}".format(biogrid_id)
         return bool(len(self.execute(sql)))
 
     def insert_data(self) -> Dict[str, int]:
@@ -302,9 +280,7 @@ class BioGrid(odb_meta.Graph):
         }
 
         # main table
-        df = pd.read_csv(
-            self.file_path, usecols=use_columns.keys(), sep="\t", low_memory=False
-        )
+        df = pd.read_csv(self.file_path, usecols=use_columns.keys(), sep="\t", low_memory=False)
         df.rename(columns=use_columns, inplace=True)
         df.replace("-", np.nan, inplace=True)
 
@@ -338,12 +314,8 @@ class BioGrid(odb_meta.Graph):
         return {self.biodb_name: df.shape[0]}
 
     def _create_publication_table(self, df: pd.DataFrame) -> pd.DataFrame:
-        df_ay = df.author.str.extract(
-            r"^(?P<author_name>[^(]+)\s*\((?P<publication_year>\d+)\)$"
-        )
-        df_source = df.publication_source.str.extract(
-            r"^(?P<source>[^:]+):(?P<source_identifier>.*)"
-        )
+        df_ay = df.author.str.extract(r"^(?P<author_name>[^(]+)\s*\((?P<publication_year>\d+)\)$")
+        df_source = df.publication_source.str.extract(r"^(?P<source>[^:]+):(?P<source_identifier>.*)")
         df_pub = pd.concat([df_ay, df_source, df.publication_source], axis=1)
         df_pub.drop_duplicates(inplace=True)
         df_pub.reset_index(inplace=True)
@@ -356,23 +328,13 @@ class BioGrid(odb_meta.Graph):
             .reset_index()
             .drop(columns=["publication_source", "author"])
         )
-        df_pub.drop(
-            columns=["publication_source", "index", "publication_id"], inplace=True
-        )
-        df_pub.to_sql(
-            biogrid.Publication.__tablename__, self.engine, if_exists="append"
-        )
+        df_pub.drop(columns=["publication_source", "index", "publication_id"], inplace=True)
+        df_pub.to_sql(biogrid.Publication.__tablename__, self.engine, if_exists="append")
 
         return df
 
     def _create_modification_table(self, df: pd.DataFrame) -> pd.DataFrame:
-        df_mod = (
-            df[["modification"]]
-            .dropna()
-            .value_counts()
-            .reset_index()
-            .rename(columns={0: "frequency"})
-        )
+        df_mod = df[["modification"]].dropna().value_counts().reset_index().rename(columns={0: "frequency"})
         df_mod.index += 1
         df_mod.index.rename("id", inplace=True)
         df_mod["modification_id"] = df_mod.index
@@ -388,21 +350,12 @@ class BioGrid(odb_meta.Graph):
         return df
 
     def _create_throughput_table(self, df: pd.DataFrame) -> pd.DataFrame:
-        df_tp = (
-            df[["throughput"]]
-            .value_counts()
-            .reset_index()
-            .rename(columns={0: "frequency"})
-        )
+        df_tp = df[["throughput"]].value_counts().reset_index().rename(columns={0: "frequency"})
         df_tp.index += 1
         df_tp.index.rename("id", inplace=True)
         df_tp["throughput_id"] = df_tp.index
         df_tp_join = df_tp.set_index("throughput")[["throughput_id"]]
-        df = (
-            df_tp_join.join(df.set_index("throughput"), how="right")
-            .reset_index()
-            .drop(columns=["throughput"])
-        )
+        df = df_tp_join.join(df.set_index("throughput"), how="right").reset_index().drop(columns=["throughput"])
         df_tp.drop(columns=["throughput_id"], inplace=True)
         df_tp.to_sql(biogrid.Throughput.__tablename__, self.engine, if_exists="append")
         return df
@@ -439,15 +392,11 @@ class BioGrid(odb_meta.Graph):
         df_a.columns = columns
         df_b = df[cols_b]
         df_b.columns = columns
-        df_ia = pd.concat(
-            [df_a.set_index("biogrid_id"), df_b.set_index("biogrid_id")]
-        ).drop_duplicates()
+        df_ia = pd.concat([df_a.set_index("biogrid_id"), df_b.set_index("biogrid_id")]).drop_duplicates()
         # extract the first accession
         df_ia.uniprot = df_ia.uniprot.str.split("|").str[0]
         df_ia.trembl = df_ia.trembl.str.split("|").str[0]
-        df_ia.replace("-", None).to_sql(
-            biogrid.Interactor.__tablename__, self.engine, if_exists="append"
-        )
+        df_ia.replace("-", None).to_sql(biogrid.Interactor.__tablename__, self.engine, if_exists="append")
         cols4delete = list(set(cols_a + cols_b) - {"biogrid_a_id", "biogrid_b_id"})
         df.drop(columns=cols4delete, inplace=True)
         return df
@@ -465,9 +414,7 @@ class BioGrid(odb_meta.Graph):
         df_exp["experimental_system_id"] = df_exp.index
         # join ExperimentalSystem ID to main table and drop cols experimental_system, experimental_system_type
         df = (
-            df_exp.set_index(["experimental_system", "experimental_system_type"])[
-                ["experimental_system_id"]
-            ]
+            df_exp.set_index(["experimental_system", "experimental_system_type"])[["experimental_system_id"]]
             .join(df.set_index(["experimental_system", "experimental_system_type"]))
             .reset_index()
             .drop(columns=["experimental_system", "experimental_system_type"])
@@ -490,27 +437,16 @@ class BioGrid(odb_meta.Graph):
         df_taxonomy.reset_index(inplace=True)
         df_taxonomy.drop(columns=["index"], inplace=True)
         df_taxonomy.set_index("taxonomy_id", inplace=True)
-        df_taxonomy.to_sql(
-            biogrid.Taxonomy.__tablename__, self.engine, if_exists="append"
-        )
+        df_taxonomy.to_sql(biogrid.Taxonomy.__tablename__, self.engine, if_exists="append")
         df.drop(columns=["org_a", "org_b"], inplace=True)
 
     def _create_source_table(self, df: pd.DataFrame) -> pd.DataFrame:
-        df_source = (
-            df[["source"]].drop_duplicates().reset_index().drop(columns=["index"])
-        )
+        df_source = df[["source"]].drop_duplicates().reset_index().drop(columns=["index"])
         df_source.index += 1
         df_source.index.rename("id", inplace=True)
         df_source["source_id"] = df_source.index
-        df = (
-            df_source.set_index(["source"])
-            .join(df.set_index(["source"]))
-            .reset_index()
-            .drop(columns=["source"])
-        )
-        df_source.drop(columns=["source_id"]).to_sql(
-            biogrid.Source.__tablename__, self.engine, if_exists="append"
-        )
+        df = df_source.set_index(["source"]).join(df.set_index(["source"])).reset_index().drop(columns=["source"])
+        df_source.drop(columns=["source_id"]).to_sql(biogrid.Source.__tablename__, self.engine, if_exists="append")
         return df
 
     def get_uniprot_modification_pairs(self):
@@ -605,10 +541,7 @@ class BioGrid(odb_meta.Graph):
             uniprot_modification_pairs,
             desc=f"Update {self.biodb_name.upper()} interactions",
         ):
-            if (
-                e["subject_uniprot"] in uniprots_in_bel_set
-                or e["object_uniprot"] in uniprots_in_bel_set
-            ):
+            if e["subject_uniprot"] in uniprots_in_bel_set or e["object_uniprot"] in uniprots_in_bel_set:
                 subj_pure_rid = self.get_create_pure_protein_rid_by_uniprot(
                     taxonomy_id=e["subject_taxonomy_id"],
                     symbol=e["subject_symbol"],
@@ -628,9 +561,7 @@ class BioGrid(odb_meta.Graph):
 
                 for row in self.engine.execute(sql).fetchall():
                     row_dict = dict(row)
-                    be = BioGridEdge(
-                        subject_rid=subj_pure_rid, object_rid=obj_pure_rid, **row_dict
-                    )
+                    be = BioGridEdge(subject_rid=subj_pure_rid, object_rid=obj_pure_rid, **row_dict)
                     edge_value_dict = be.get_edge_value_dict()
 
                     if be.modConfig.bg_mod_name == "Proteolytic Processing":
@@ -643,19 +574,11 @@ class BioGrid(odb_meta.Graph):
                         counter += 1
                     else:
                         obj_pmod_value_dict = be.obj.get_pmod_protein_as_value_dict()
-                        pmod_protein_rid = self.node_exists(
-                            "protein", obj_pmod_value_dict, check_for="bel"
-                        )
+                        pmod_protein_rid = self.node_exists("protein", obj_pmod_value_dict, check_for="bel")
                         if not pmod_protein_rid:
-                            pmod_protein_rid = self.get_create_rid(
-                                "protein", obj_pmod_value_dict, check_for="bel"
-                            )
-                            self.create_edge(
-                                "has_modified_protein", obj_pure_rid, pmod_protein_rid
-                            )
-                            pmod_rid = self.insert_record(
-                                "pmod", be.get_pmod_as_value_dict()
-                            )
+                            pmod_protein_rid = self.get_create_rid("protein", obj_pmod_value_dict, check_for="bel")
+                            self.create_edge("has_modified_protein", obj_pure_rid, pmod_protein_rid)
+                            pmod_rid = self.insert_record("pmod", be.get_pmod_as_value_dict())
                             self.create_edge("has__pmod", pmod_protein_rid, pmod_rid)
                         self.create_edge(
                             be.edge_name,

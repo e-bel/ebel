@@ -1,7 +1,7 @@
 """Pathway Commons RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import BigInteger, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, BigInteger, Table, ForeignKey
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -50,9 +50,7 @@ class PathwayCommons(Base):
         back_populates="pathway_commonses",
     )
 
-    sources = relationship(
-        "Source", secondary=pathway_commons__source, back_populates="pathway_commonses"
-    )
+    sources = relationship("Source", secondary=pathway_commons__source, back_populates="pathway_commonses")
 
     def __str__(self):
         return f"{self.participant_a} {self.interaction_type} {self.participant_b}"
@@ -109,9 +107,7 @@ class Source(Base):
 
     source = Column(String(50))
 
-    pathway_commonses = relationship(
-        "PathwayCommons", secondary=pathway_commons__source, back_populates="sources"
-    )
+    pathway_commonses = relationship("PathwayCommons", secondary=pathway_commons__source, back_populates="sources")
 
     def __str__(self):
         """Class string definition."""

@@ -1,9 +1,9 @@
 """UniProt RDBMS model definition."""
-from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Table, Text, ForeignKey
-
 from collections import defaultdict
+
+from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -51,9 +51,7 @@ class Uniprot(Base):
     name = Column(String(100), nullable=False, unique=True)
     recommended_name = Column(String(255), nullable=True)
 
-    taxid = Column(
-        Integer, ForeignKey("uniprot_organism.taxid"), nullable=False, index=True
-    )
+    taxid = Column(Integer, ForeignKey("uniprot_organism.taxid"), nullable=False, index=True)
     organism = relationship("Organism")
 
     function_id = Column(Integer, ForeignKey("uniprot_function.id"), nullable=True)
@@ -63,17 +61,11 @@ class Uniprot(Base):
 
     gene_symbol = relationship("GeneSymbol", uselist=False, back_populates="uniprot")
 
-    keywords = relationship(
-        "Keyword", secondary=uniprot__uniprot_keyword, back_populates="uniprots"
-    )
+    keywords = relationship("Keyword", secondary=uniprot__uniprot_keyword, back_populates="uniprots")
 
-    hosts = relationship(
-        "Organism", secondary=uniprot__uniprot_host, back_populates="uniprots"
-    )
+    hosts = relationship("Organism", secondary=uniprot__uniprot_host, back_populates="uniprots")
 
-    xrefs = relationship(
-        "Xref", secondary=uniprot__uniprot_xref, back_populates="uniprots"
-    )
+    xrefs = relationship("Xref", secondary=uniprot__uniprot_xref, back_populates="uniprots")
 
     subcellular_locations = relationship(
         "SubcellularLocation",
@@ -96,19 +88,11 @@ class Uniprot(Base):
             "accession": self.accession,
             "recommended_name": self.recommended_name,
             "taxid": self.taxid,
-            "function_description": self.function.description
-            if self.function
-            else self.function,
+            "function_description": self.function.description if self.function else self.function,
             "gene_names": [x.name for x in self.gene_names],
-            "gene_symbol": self.gene_symbol.symbol
-            if self.gene_symbol
-            else self.gene_symbol,
-            "keywords": [
-                {"keyword": x.keyword_name, "id": x.keywordid} for x in self.keywords
-            ],
-            "hosts": [
-                {"name": x.scientific_name, "taxid": x.taxid} for x in self.hosts
-            ],
+            "gene_symbol": self.gene_symbol.symbol if self.gene_symbol else self.gene_symbol,
+            "keywords": [{"keyword": x.keyword_name, "id": x.keywordid} for x in self.keywords],
+            "hosts": [{"name": x.scientific_name, "taxid": x.taxid} for x in self.hosts],
             "xrefs": xrefs_grouped,
             "subcellular_locations": [x.name for x in self.subcellular_locations],
             "organism": self.organism.scientific_name,
@@ -147,9 +131,7 @@ class Keyword(Base):
     keywordid = Column(Integer, primary_key=True)
     keyword_name = Column(String(100), index=True)
 
-    uniprots = relationship(
-        "Uniprot", secondary=uniprot__uniprot_keyword, back_populates="keywords"
-    )
+    uniprots = relationship("Uniprot", secondary=uniprot__uniprot_keyword, back_populates="keywords")
 
     def __repr__(self):
         """Define repr."""
@@ -164,9 +146,7 @@ class Organism(Base):
     taxid = Column(Integer, primary_key=True)
     scientific_name = Column(String(255))  # TODO:Check if index=True with  is possible
 
-    uniprots = relationship(
-        "Uniprot", secondary=uniprot__uniprot_host, back_populates="hosts"
-    )
+    uniprots = relationship("Uniprot", secondary=uniprot__uniprot_host, back_populates="hosts")
 
 
 class SubcellularLocation(Base):
@@ -195,9 +175,7 @@ class Xref(Base):
     db = Column(String(50), index=True)
     identifier = Column(String(100), index=True)
 
-    uniprots = relationship(
-        "Uniprot", secondary=uniprot__uniprot_xref, back_populates="xrefs"
-    )
+    uniprots = relationship("Uniprot", secondary=uniprot__uniprot_xref, back_populates="xrefs")
 
 
 class Function(Base):

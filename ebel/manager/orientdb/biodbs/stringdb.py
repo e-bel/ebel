@@ -1,19 +1,18 @@
 """STRING module."""
 import logging
+from collections import namedtuple
+from typing import Dict
+
 import numpy as np
 import pandas as pd
-
-from tqdm import tqdm
-from typing import Dict
 from pyorientdb import OrientDB
-from collections import namedtuple
+from tqdm import tqdm
 
-from ebel.tools import get_file_path
-from ebel.manager.orientdb.constants import STRINGDB
+from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.biodbs.hgnc import Hgnc
-from ebel.manager.orientdb import odb_meta, urls, odb_structure
-
+from ebel.manager.orientdb.constants import STRINGDB
 from ebel.manager.rdbms.models import stringdb
+from ebel.tools import get_file_path
 
 logger = logging.getLogger(__name__)
 
@@ -63,9 +62,9 @@ class StringDb(odb_meta.Graph):
         logger.info(f"Insert {self.biodb_name} link data in RDBMS.")
 
         file_path = get_file_path(self.urls[self.table_protein], self.biodb_name)
-        df_protein = pd.read_csv(
-            file_path, sep="\t", usecols=["#string_protein_id", "preferred_name"]
-        ).rename(columns={"#string_protein_id": "string_protein_id"})
+        df_protein = pd.read_csv(file_path, sep="\t", usecols=["#string_protein_id", "preferred_name"]).rename(
+            columns={"#string_protein_id": "string_protein_id"}
+        )
 
         # Define column types to improve memory efficiency
         cols = [
@@ -97,20 +96,12 @@ class StringDb(odb_meta.Graph):
         file_path = get_file_path(self.urls[self.table_strdb], self.biodb_name)
         df_link = pd.read_csv(file_path, dtype=col_types, sep=" ")
 
-        df = df_link.set_index("protein1").join(
-            df_protein.set_index("string_protein_id"), how="inner"
-        )
+        df = df_link.set_index("protein1").join(df_protein.set_index("string_protein_id"), how="inner")
         df.reset_index(inplace=True)
-        df.rename(
-            columns={"index": "protein1", "preferred_name": "symbol1"}, inplace=True
-        )
-        df = df.set_index("protein2").join(
-            df_protein.set_index("string_protein_id"), how="inner"
-        )
+        df.rename(columns={"index": "protein1", "preferred_name": "symbol1"}, inplace=True)
+        df = df.set_index("protein2").join(df_protein.set_index("string_protein_id"), how="inner")
         df.reset_index(inplace=True)
-        df.rename(
-            columns={"index": "protein2", "preferred_name": "symbol2"}, inplace=True
-        )
+        df.rename(columns={"index": "protein2", "preferred_name": "symbol2"}, inplace=True)
         df.index += 1
         df.index.rename("id", inplace=True)
 
@@ -121,9 +112,9 @@ class StringDb(odb_meta.Graph):
     def insert_protein_data(self) -> int:
         """Generates a dictionary of STRINGDB identifiers as keys and HGNC symbols as values."""
         file_path = get_file_path(self.urls[self.table_protein], self.biodb_name)
-        df = pd.read_csv(
-            file_path, sep="\t", usecols=["#string_protein_id", "preferred_name"]
-        ).rename(columns={"#string_protein_id": "string_protein_id"})
+        df = pd.read_csv(file_path, sep="\t", usecols=["#string_protein_id", "preferred_name"]).rename(
+            columns={"#string_protein_id": "string_protein_id"}
+        )
         df.index += 1
         df.index.rename("id", inplace=True)
         df.to_sql(self.table_protein, self.engine, if_exists="append")
@@ -134,9 +125,9 @@ class StringDb(odb_meta.Graph):
         logger.info(f"Insert {self.biodb_name} action data in RDBMS.")
 
         file_path = get_file_path(self.urls[self.table_protein], self.biodb_name)
-        df_protein = pd.read_csv(
-            file_path, sep="\t", usecols=["#string_protein_id", "preferred_name"]
-        ).rename(columns={"#string_protein_id": "string_protein_id"})
+        df_protein = pd.read_csv(file_path, sep="\t", usecols=["#string_protein_id", "preferred_name"]).rename(
+            columns={"#string_protein_id": "string_protein_id"}
+        )
 
         file_path = get_file_path(self.urls[self.table_action], self.biodb_name)
         df_action = pd.read_csv(file_path, sep="\t")
@@ -153,20 +144,12 @@ class StringDb(odb_meta.Graph):
         # Replace NaN with None
         df_action.replace({np.nan: None}, inplace=True)
 
-        df = df_action.set_index("item_id_a").join(
-            df_protein.set_index("string_protein_id"), how="inner"
-        )
+        df = df_action.set_index("item_id_a").join(df_protein.set_index("string_protein_id"), how="inner")
         df.reset_index(inplace=True)
-        df.rename(
-            columns={"index": "item_id_a", "preferred_name": "symbol1"}, inplace=True
-        )
-        df = df.set_index("item_id_b").join(
-            df_protein.set_index("string_protein_id"), how="inner"
-        )
+        df.rename(columns={"index": "item_id_a", "preferred_name": "symbol1"}, inplace=True)
+        df = df.set_index("item_id_b").join(df_protein.set_index("string_protein_id"), how="inner")
         df.reset_index(inplace=True)
-        df.rename(
-            columns={"index": "item_id_b", "preferred_name": "symbol2"}, inplace=True
-        )
+        df.rename(columns={"index": "item_id_b", "preferred_name": "symbol2"}, inplace=True)
         df.index += 1
         df.index.rename("id", inplace=True)
 
@@ -190,10 +173,7 @@ class StringDb(odb_meta.Graph):
 
     def get_stringdb_symbols(self):
         """Return all gene symbols used by StringDB."""
-        return {
-            x[0]
-            for x in self.session.query(stringdb.StringDbProtein.preferred_name).all()
-        }
+        return {x[0] for x in self.session.query(stringdb.StringDbProtein.preferred_name).all()}
 
     def update_stringdb_interactions(self, hgnc: Hgnc) -> int:
         """Iterate through BEL proteins and adds stringdb edges to existing proteins in KG."""
@@ -214,9 +194,7 @@ class StringDb(odb_meta.Graph):
             "combined_score",
         )
 
-        bel_hgnc_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(
-            namespace="HGNC"
-        )
+        bel_hgnc_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(namespace="HGNC")
         bel_hgncs = set(bel_hgnc_rid_dict.keys())
         strdb_hgncs = self.get_stringdb_symbols()
         shared_hgncs = bel_hgncs & strdb_hgncs
@@ -236,12 +214,8 @@ class StringDb(odb_meta.Graph):
                 if sorted_combi not in already_inserted:
                     value_dict = {k: v for k, v in row.__dict__.items() if k in columns}
 
-                    from_rid = self.get_create_rid_by_symbol(
-                        row.symbol1, bel_hgnc_rid_dict, hgnc
-                    )
-                    to_rid = self.get_create_rid_by_symbol(
-                        row.symbol2, bel_hgnc_rid_dict, hgnc
-                    )
+                    from_rid = self.get_create_rid_by_symbol(row.symbol1, bel_hgnc_rid_dict, hgnc)
+                    to_rid = self.get_create_rid_by_symbol(row.symbol2, bel_hgnc_rid_dict, hgnc)
 
                     if from_rid and to_rid:
                         self.create_edge(
@@ -255,9 +229,7 @@ class StringDb(odb_meta.Graph):
 
         return updated
 
-    def get_create_rid_by_symbol(
-        self, symbol: str, symbol_rid_dict: dict, hgnc: Hgnc
-    ) -> str:
+    def get_create_rid_by_symbol(self, symbol: str, symbol_rid_dict: dict, hgnc: Hgnc) -> str:
         """Create or get rID entry for a given gene symbol.
 
         Parameters
@@ -283,9 +255,7 @@ class StringDb(odb_meta.Graph):
                     "pure": True,
                     "bel": f'p(HGNC:"{symbol}")',
                 }
-                symbol_rid_dict[symbol] = self.get_create_rid(
-                    "protein", value_dict, check_for="bel"
-                )
+                symbol_rid_dict[symbol] = self.get_create_rid("protein", value_dict, check_for="bel")
         return symbol_rid_dict.get(symbol)
 
     def update_action_interactions(self, hgnc: Hgnc) -> int:
@@ -317,9 +287,7 @@ class StringDb(odb_meta.Graph):
                        and (symbol1='{{symbol}}' or symbol2='{{symbol}}')
                        and is_directional=1 and a_is_acting=1"""
 
-        symbols_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(
-            namespace="HGNC"
-        )
+        symbols_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(namespace="HGNC")
         symbols = tuple(symbols_rid_dict.keys())
 
         already_inserted = set()
@@ -333,12 +301,8 @@ class StringDb(odb_meta.Graph):
                 sorted_combi = tuple(sorted([action.symbol1, action.symbol2]))
 
                 if sorted_combi not in already_inserted:
-                    from_rid = self.get_create_rid_by_symbol(
-                        action.symbol1, symbols_rid_dict, hgnc
-                    )
-                    to_rid = self.get_create_rid_by_symbol(
-                        action.symbol2, symbols_rid_dict, hgnc
-                    )
+                    from_rid = self.get_create_rid_by_symbol(action.symbol1, symbols_rid_dict, hgnc)
+                    to_rid = self.get_create_rid_by_symbol(action.symbol2, symbols_rid_dict, hgnc)
 
                     if from_rid and to_rid:
                         class_name = translator[(action.mode, action.action)]

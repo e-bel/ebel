@@ -1,26 +1,26 @@
 """Generic BEL relation API methods."""
+import cgi
 import io
 import json
 import re
-import cgi
-import requests
-import xmltodict
-import pandas as pd
-
-from enum import Enum
-from collections import namedtuple, defaultdict, Counter
+from collections import Counter, defaultdict, namedtuple
 from copy import deepcopy
+from enum import Enum
 from math import ceil
 from pathlib import Path
-from typing import List, Optional, Dict, Set, NamedTuple, Any, Union, Tuple
+from typing import Any, Dict, List, NamedTuple, Optional, Set, Tuple, Union
 
-from flask import request, make_response, send_from_directory, send_file
+import pandas as pd
+import requests
+import xmltodict
+from flask import make_response, request, send_file, send_from_directory
 from graphviz import Digraph
 
 from ebel import Bel
+from ebel.manager.orientdb.odb_structure import (get_columns,
+                                                 get_node_view_labels)
 from ebel.validate import validate_bel_file
-from ebel.manager.orientdb.odb_structure import get_columns, get_node_view_labels
-from ebel.web.api.ebel.v1 import _get_pagination, DataType, OrientDbSqlOperator
+from ebel.web.api.ebel.v1 import DataType, OrientDbSqlOperator, _get_pagination
 
 PathLengthDict = Dict[int, List[Dict[str, list]]]
 PathLength = int
@@ -74,9 +74,7 @@ node_colours = {
 }
 
 
-def validate_uploaded_bel_file(
-    file, errorOutput: str = "download", forceJson: bool = False
-):
+def validate_uploaded_bel_file(file, errorOutput: str = "download", forceJson: bool = False):
     """Validate the uploaded BEL file and return either the excel or JSON file.
 
     errorOutput : str
@@ -101,9 +99,7 @@ def validate_uploaded_bel_file(
             with open(error_report_file, "rb") as errorf:
                 return_data.write(errorf.read())
 
-            return_data.seek(
-                0
-            )  # (after writing, cursor will be at last byte, so move it to start)
+            return_data.seek(0)  # (after writing, cursor will be at last byte, so move it to start)
 
             response = send_file(
                 return_data,
@@ -124,9 +120,7 @@ def validate_uploaded_bel_file(
             response = {"type": "error-report", "format": "html", "content": content}
 
         else:
-            raise ValueError(
-                f"errorOutput must be either 'download', 'json', or 'html', not {errorOutput}"
-            )
+            raise ValueError(f"errorOutput must be either 'download', 'json', or 'html', not {errorOutput}")
 
         Path(error_report_file).unlink()
 
@@ -276,11 +270,7 @@ class Query:
             if col.value:
                 if col.column.endswith("@rid"):
                     if "," in col.value:
-                        rids = [
-                            x.strip()
-                            for x in col.value.split(",")
-                            if re.search(r"^#\d+:\d+$", x.strip())
-                        ]
+                        rids = [x.strip() for x in col.value.split(",") if re.search(r"^#\d+:\d+$", x.strip())]
                         rids_str = "[" + ",".join(rids) + "]"
                         wheres.append(f"{col.column} in {rids_str}")
                     else:
@@ -301,13 +291,9 @@ class Query:
                         wheres.append(f"{value} {col.sql_operator.value} {col.column}")
                     else:
                         if col.switch_where_terms:
-                            wheres.append(
-                                f"{value} {col.sql_operator.value} {col.column}"
-                            )
+                            wheres.append(f"{value} {col.sql_operator.value} {col.column}")
                         else:
-                            wheres.append(
-                                f"{col.column} {col.sql_operator.value} {value}"
-                            )
+                            wheres.append(f"{col.column} {col.sql_operator.value} {value}")
         if wheres:
             where = " WHERE " + " AND ".join(wheres)
         return where
@@ -316,13 +302,7 @@ class Query:
     def sql(self):
         """Generic sql execution method."""
         select = "SELECT "
-        select += ", ".join(
-            [
-                f"{sw.display_column} as {sw.form_name}"
-                for sw in self.columns
-                if sw.show_in_results
-            ]
-        )
+        select += ", ".join([f"{sw.display_column} as {sw.form_name}" for sw in self.columns if sw.show_in_results])
         select += " FROM " + self.odb_class
         sql = select + self.where
         return sql
@@ -356,9 +336,7 @@ class Query:
 
 
 def _get_where_by_how(column: str, value: str, how_to_search: str):
-    how_to_search = (
-        how_to_search if SearchType.has_value(how_to_search) else SearchType.EXACT.value
-    )
+    how_to_search = how_to_search if SearchType.has_value(how_to_search) else SearchType.EXACT.value
     value_by_how = {
         SearchType.EXACT.value: f" = '{value}'",
         SearchType.CONTAINS.value: f" like '%{value}%'",
@@ -424,11 +402,7 @@ def _get_suggested_bels(
 
     sql += " order by bel limit 30"
     print(sql)
-    return [
-        y
-        for y in [x.oRecordData.get("bel") for x in Bel().execute(sql)]
-        if y is not None
-    ]
+    return [y for y in [x.oRecordData.get("bel") for x in Bel().execute(sql)] if y is not None]
 
 
 def _get_suggested_node_names(
@@ -443,9 +417,7 @@ def _get_suggested_node_names(
 
     sql = f"Select name from {node_class} where "
     where = []
-    where.append(
-        _get_where_by_how(column="name", value=node_name, how_to_search=how_name)
-    )
+    where.append(_get_where_by_how(column="name", value=node_name, how_to_search=how_name))
 
     if namespace:
         where.append(f"namespace = '{namespace}'")
@@ -471,13 +443,9 @@ def _get_node_namespace_list(
         node_class = node_class if node_class else "bel"
         sql = f"Select namespace from {node_class} where namespace is not null "
         if node_name:
-            sql += " and " + _get_where_by_how(
-                column="name", value=node_name, how_to_search=how_name
-            )
+            sql += " and " + _get_where_by_how(column="name", value=node_name, how_to_search=how_name)
         if bel:
-            sql += " and " + _get_where_by_how(
-                column="bel", value=bel, how_to_search=how_bel
-            )
+            sql += " and " + _get_where_by_how(column="bel", value=bel, how_to_search=how_bel)
         sql += " group by namespace order by namespace"
         # print(sql)
         return [x.oRecordData["namespace"] for x in Bel().execute(sql)]
@@ -485,25 +453,17 @@ def _get_node_namespace_list(
         return [namespace]
 
 
-def _get_node_class_list(
-    bel: str, node_name: str, node_class: str, namespace: str, how_name: str, how_bel
-):
+def _get_node_class_list(bel: str, node_name: str, node_class: str, namespace: str, how_name: str, how_bel):
     if not node_class:
         sql = "Select @class.asString() as node_class from bel"
         where = []
         if node_name or namespace or bel:
             if node_name:
-                where.append(
-                    _get_where_by_how(
-                        column="name", value=node_name, how_to_search=how_name
-                    )
-                )
+                where.append(_get_where_by_how(column="name", value=node_name, how_to_search=how_name))
             if namespace:
                 where.append(f"namespace = '{namespace}'")
             if bel:
-                where.append(
-                    _get_where_by_how(column="bel", value=bel, how_to_search=how_bel)
-                )
+                where.append(_get_where_by_how(column="bel", value=bel, how_to_search=how_bel))
             sql += " where " + " and ".join(where)
         sql += " group by @class order by @class"
         # print(sql)
@@ -567,9 +527,7 @@ def get_bel_relations_by_pmid():
             DataType.LIST_STRING,
         ),
     ]
-    column_pmid = Column(
-        "pmid", "pmid", data_type=DataType.INTEGER, value=request.args.get("pmid")
-    )
+    column_pmid = Column("pmid", "pmid", data_type=DataType.INTEGER, value=request.args.get("pmid"))
     columns.append(column_pmid)
     sql_builder = Query("bel_relation", columns)
     return sql_builder.get_result(Pagination(1, 1000, 0))
@@ -672,23 +630,19 @@ def get_nodes() -> dict:
 
     conn2bel_rel = request.args.get("connected_to_bel_relation")
     if conn2bel_rel:
-        conn2bel_rel_dir = request.args.get(
-            "connected_to_bel_relation_direction", "both"
-        )
+        conn2bel_rel_dir = request.args.get("connected_to_bel_relation_direction", "both")
         where_list.append(f"{conn2bel_rel_dir}('{conn2bel_rel}').size()>0")
 
     conn2ebel_rel = request.args.get("connected_to_ebel_relation")
     if conn2ebel_rel:
-        conn2ebel_rel_dir = request.args.get(
-            "connected_to_ebel_relation_direction", "both"
-        )
+        conn2ebel_rel_dir = request.args.get("connected_to_ebel_relation_direction", "both")
         where_list.append(f"{conn2ebel_rel_dir}('{conn2ebel_rel}').size()>0")
 
     node_class = request.args.get("node_class")
     p = _get_pagination()
-    number_of_results = b.query_class(
-        class_name=node_class, columns=["count(*)"], with_rid=False, **params
-    )[0]["count"]
+    number_of_results = b.query_class(class_name=node_class, columns=["count(*)"], with_rid=False, **params)[0][
+        "count"
+    ]
     pages = ceil(number_of_results / p.page_size)
     results = b.query_class(
         class_name=node_class,
@@ -797,9 +751,7 @@ def get_abstract_by_pmid():
     url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id={pmid}&retmode=XML&rettype=abstract"
     r = requests.get(url.format(pmid=pmid))
     d = xmltodict.parse(r.text)
-    return d["PubmedArticleSet"]["PubmedArticle"]["MedlineCitation"]["Article"][
-        "Abstract"
-    ]["AbstractText"]
+    return d["PubmedArticleSet"]["PubmedArticle"]["MedlineCitation"]["Article"]["Abstract"]["AbstractText"]
 
 
 def get_number_of_nodes() -> int:
@@ -878,12 +830,7 @@ class MatchEdge:
         """Return edge based on alias number."""
         mesh_or = ""
         if self.mesh_terms:
-            mesh_or = " OR ".join(
-                [
-                    "'" + x.replace("'", "") + "' in annotation.mesh"
-                    for x in self.mesh_terms
-                ]
-            )
+            mesh_or = " OR ".join(["'" + x.replace("'", "") + "' in annotation.mesh" for x in self.mesh_terms])
             mesh_or = f"({mesh_or})"
 
         pmids_in = ""
@@ -907,13 +854,8 @@ class MatchEdge:
         e_class_single = ""
         e_class_multi = ""
 
-        if (
-            isinstance(self.multiple_edge_classes, str)
-            and self.multiple_edge_classes.strip()
-        ):
-            edge_classes = [
-                x.strip() for x in self.multiple_edge_classes.split(",") if x.strip()
-            ]
+        if isinstance(self.multiple_edge_classes, str) and self.multiple_edge_classes.strip():
+            edge_classes = [x.strip() for x in self.multiple_edge_classes.split(",") if x.strip()]
             if len(edge_classes) == 1:
                 e_class_single = f"class:{edge_classes[0]}, "
             elif len(edge_classes) > 1:
@@ -961,14 +903,10 @@ class MatchNode:
         if bel:
             self.bel = bel
         if how_name:
-            self.how_name = (
-                how_name if SearchType.has_value(how_name) else SearchType.EXACT.value
-            )
+            self.how_name = how_name if SearchType.has_value(how_name) else SearchType.EXACT.value
             print("how_name:", how_name, self.how_name)
         if how_bel:
-            self.how_bel = (
-                how_bel if SearchType.has_value(how_bel) else SearchType.EXACT.value
-            )
+            self.how_bel = how_bel if SearchType.has_value(how_bel) else SearchType.EXACT.value
             print("how_bel:", how_bel, self.how_bel)
 
     def set_inside(self, gene_path: bool, node_class: None):
@@ -979,15 +917,11 @@ class MatchNode:
 
     def get_node(self, alias_number: int) -> str:
         """Return node based on alias number."""
-        print(
-            f"hows: \n\tposition{self.position} \n\thow_name: {self.how_name}, \n\thow_bel: {self.how_bel}"
-        )
+        print(f"hows: \n\tposition{self.position} \n\thow_name: {self.how_name}, \n\thow_bel: {self.how_bel}")
         namespace = f"namespace='{self.namespace}'"
         name = _get_where_by_how("name", self.name, self.how_name)
         bel = _get_where_by_how("bel", self.bel, self.how_bel)
-        name_involved = (
-            f"('{self.name}' in involved_genes OR '{self.name}' in involved_other)"
-        )
+        name_involved = f"('{self.name}' in involved_genes OR '{self.name}' in involved_other)"
         involved_genes = "involved_genes.size()>0"
         not_like_node = "$matched.n{}!=$currentMatch"
         where_inside_list = []
@@ -1118,9 +1052,7 @@ class PathQuery:
         )
 
         self.edges = [
-            MatchEdge(
-                self.edge_class, self.multiple_edge_classes, self.mesh_terms, self.pmids
-            )
+            MatchEdge(self.edge_class, self.multiple_edge_classes, self.mesh_terms, self.pmids)
             for _ in range(self.max_length)
         ]
         self.edges[-1].set_last(end_class)
@@ -1146,38 +1078,27 @@ class PathQuery:
         edges = self.edges[-1 * number_of_edges :]
         nodes = self.nodes[-1 * (number_of_edges + 1) :]
         for i in range(1, number_of_edges + 1):
-            query += edges[i - 1].get_edge(alias_number=i) + nodes[i].get_node(
-                alias_number=i + 1
-            )
+            query += edges[i - 1].get_edge(alias_number=i) + nodes[i].get_node(alias_number=i + 1)
 
         query += self.get_match_return(number_of_edges)
         return query
 
     @staticmethod
-    def _get_unique_rids(
-        graph_type: GraphType, path_length_dict: PathLengthDict
-    ) -> Set[Rid]:
+    def _get_unique_rids(graph_type: GraphType, path_length_dict: PathLengthDict) -> Set[Rid]:
         """Get unique node or edge rid set."""
         rids = {
             w
-            for z in [
-                [x for y in [en[graph_type.value] for en in v] for x in y]
-                for _, v in path_length_dict.items()
-            ]
+            for z in [[x for y in [en[graph_type.value] for en in v] for x in y] for _, v in path_length_dict.items()]
             for w in z
         }
         return rids
 
-    def get_unique_edge_list(
-        self, path_length_dict: PathLengthDict
-    ) -> Dict[Rid, EdgeInfo]:
+    def get_unique_edge_list(self, path_length_dict: PathLengthDict) -> Dict[Rid, EdgeInfo]:
         """Get unique list of edges."""
         edge_rids = self._get_unique_rids(GraphType.EDGES, path_length_dict)
         return {rid: self.get_edge_info(rid) for rid in edge_rids}
 
-    def get_unique_node_list(
-        self, path_length_dict: PathLengthDict
-    ) -> Dict[Rid, NodeInfo]:
+    def get_unique_node_list(self, path_length_dict: PathLengthDict) -> Dict[Rid, NodeInfo]:
         """Get unique list of nodes."""
         node_rids = self._get_unique_rids(GraphType.NODES, path_length_dict)
         return {rid: self.get_node_info(rid) for rid in node_rids}
@@ -1195,9 +1116,7 @@ class PathQuery:
         """Get node metadata by given rID."""
         sql = f"Select @class.asString() as class, * from {rid}"
         data = self.execute(sql)[0].oRecordData
-        serializable_columns = get_columns(
-            data["class"], exclude_non_serializable=True
-        ) + ["class"]
+        serializable_columns = get_columns(data["class"], exclude_non_serializable=True) + ["class"]
         serializable_data = {k: v for k, v in data.items() if k in serializable_columns}
         return serializable_data
 
@@ -1261,32 +1180,20 @@ class PathQuery:
                 node_groups = found_node_in_box.groupdict()
                 if node_groups["params"]:
                     node_where = self.get_where_list_by_params(node_groups["params"])
-                match_str += (
-                    f"{{class:{node_groups['class_name']} {node_where}, as:n{i + 1}}}"
-                )
+                match_str += f"{{class:{node_groups['class_name']} {node_where}, as:n{i + 1}}}"
             else:
-                match_str += (
-                    f"{{class:bel, where:(bel like '{node_strings[i]}'), as:n{i + 1}}}"
-                )
+                match_str += f"{{class:bel, where:(bel like '{node_strings[i]}'), as:n{i + 1}}}"
             if i <= len(edges) - 1:
                 edge_temp = edge_direction[edges[i].direction]
-                edge_class_names = [
-                    x.strip() for x in edges[i].name.split(",") if x.strip()
-                ]
+                edge_class_names = [x.strip() for x in edges[i].name.split(",") if x.strip()]
                 edge_where = ""
                 if edges[i].params_str:
                     edge_where = self.get_where_list_by_params(edges[i].params_str)
                 if len(edge_class_names) == 1:
-                    match_str += edge_temp["one_class"].format(
-                        edge_class_names[0], i + 1, edge_where
-                    )
+                    match_str += edge_temp["one_class"].format(edge_class_names[0], i + 1, edge_where)
                 else:
-                    edge_class_names_joined = ",".join(
-                        [f'"{x}"' for x in edge_class_names]
-                    )
-                    match_str += edge_temp["multi_class"].format(
-                        edge_class_names_joined, i + 1, edge_where
-                    )
+                    edge_class_names_joined = ",".join([f'"{x}"' for x in edge_class_names])
+                    match_str += edge_temp["multi_class"].format(edge_class_names_joined, i + 1, edge_where)
 
         match_str += self.get_match_return(len(edges))
         return match_str
@@ -1295,19 +1202,13 @@ class PathQuery:
     def get_where_list_by_params(params_str):
         """Build WHERE section of query based on the passed parameters."""
         where_list = []
-        re_params_in_box = re.compile(
-            r'(\w+(\.\w+)?)(!=|=|>|<|~|\*)(\d+|\d+\.\d+|[\w%]+|"[^"]+")'
-        )
+        re_params_in_box = re.compile(r'(\w+(\.\w+)?)(!=|=|>|<|~|\*)(\d+|\d+\.\d+|[\w%]+|"[^"]+")')
         for param, sub_param, operator, value in re_params_in_box.findall(params_str):
             operator = "like" if operator == "~" else operator
             operator = "in" if operator == "*" else operator
-            equals_or_in_and_number = operator in ["=", "in"] and re.search(
-                r"^\d+(\.\d+)?$", value
-            )
+            equals_or_in_and_number = operator in ["=", "in"] and re.search(r"^\d+(\.\d+)?$", value)
             quotes_surrounded = re.search('^".*"$', value)
-            if not (
-                operator in [">", "<"] or equals_or_in_and_number or quotes_surrounded
-            ):
+            if not (operator in [">", "<"] or equals_or_in_and_number or quotes_surrounded):
                 value = f'"{value}"'
             if operator == "in":
                 where_list.append(f"{value} {operator} {param}")
@@ -1334,17 +1235,14 @@ class PathQuery:
             r[4::12],
         )
         edges: List[BELishEdge] = [
-            BELishEdge(x[0] or x[1] or "", x[3] or x[4] or x[5] or x[6], x[7])
-            for x in edge_zip
+            BELishEdge(x[0] or x[1] or "", x[3] or x[4] or x[5] or x[6], x[7]) for x in edge_zip
         ]
         return nodes, edges
 
     def get_paths(self) -> Union[PathsResult, Dict]:
         """Get paths by query."""
         self.max_paths = 100000
-        if self.edge_class and not (
-            self.edge_class in self.allowed_edges or self.edge_class == "E"
-        ):
+        if self.edge_class and not (self.edge_class in self.allowed_edges or self.edge_class == "E"):
             return {"error": "Unknown relation type."}
 
         path_length_dict: PathLengthDict = {}
@@ -1353,9 +1251,7 @@ class PathQuery:
         for number_of_edges in range(self.min_length, self.max_length + 1):
             query_str = self.get_query_str(number_of_edges)
             print(query_str)
-            paths: List[Dict[str, Any]] = [
-                x.oRecordData for x in self.execute(query_str)
-            ]
+            paths: List[Dict[str, Any]] = [x.oRecordData for x in self.execute(query_str)]
 
             if len(paths) > self.max_paths:
                 return {"error": self.too_many_paths.format(number_of_edges)}
@@ -1385,23 +1281,17 @@ class PathQuery:
 
         if query_str_belish_num_edges:
             query_str, number_of_edges = query_str_belish_num_edges
-            paths: List[Dict[str, Any]] = [
-                x.oRecordData for x in self.execute(query_str)
-            ]
+            paths: List[Dict[str, Any]] = [x.oRecordData for x in self.execute(query_str)]
             if len(paths) > self.max_paths:
                 return {"error": self.too_many_paths.format(number_of_edges)}
 
             path_length_dict[number_of_edges] = paths
             edge_paths_by_length[number_of_edges] = [x["edges"] for x in paths]
-            unique_edges: Dict[Rid, EdgeInfo] = self.get_unique_edge_list(
-                path_length_dict
-            )
+            unique_edges: Dict[Rid, EdgeInfo] = self.get_unique_edge_list(path_length_dict)
             if len(unique_edges) > self.max_unique_edges:
                 return {"error": self.too_many_edges.format(len(unique_edges))}
 
-            unique_nodes: Dict[Rid, NodeInfo] = self.get_unique_node_list(
-                path_length_dict
-            )
+            unique_nodes: Dict[Rid, NodeInfo] = self.get_unique_node_list(path_length_dict)
             paths_results = PathsResult(
                 edge_paths_by_length=edge_paths_by_length,
                 unique_edges=unique_edges,
@@ -1410,9 +1300,7 @@ class PathQuery:
             return paths_results
 
 
-def _get_number(
-    number_string: str, default_value: int, min_value: int = None, max_value: int = None
-) -> int:
+def _get_number(number_string: str, default_value: int, min_value: int = None, max_value: int = None) -> int:
     """Parse the number string.
 
     Check if the number_string is numeric and >= min_value or <= max_value, otherwise assign min_value
@@ -1550,20 +1438,11 @@ def _get_paths_as_dot(paths):
         d.attr("graph", fontname="helvetica")
         d.attr("node", shape="note")
         if len(paths.unique_nodes) == 0:
-            row_template = (
-                '<B><FONT POINT-SIZE="6">{}:</FONT></B>'
-                '<FONT POINT-SIZE="6">{}</FONT>'
-            )
+            row_template = '<B><FONT POINT-SIZE="6">{}:</FONT></B>' '<FONT POINT-SIZE="6">{}</FONT>'
             key_value_dict = {}
             for k, v in request.args.items():
-                key_value_dict[k] = (
-                    cgi.html.escape(v)
-                    .encode("ascii", "xmlcharrefreplace")
-                    .decode("utf-8")
-                )
-            legend_rows = "<BR/>".join(
-                [row_template.format(k, v) for k, v in key_value_dict.items()]
-            )
+                key_value_dict[k] = cgi.html.escape(v).encode("ascii", "xmlcharrefreplace").decode("utf-8")
+            legend_rows = "<BR/>".join([row_template.format(k, v) for k, v in key_value_dict.items()])
             d.node(
                 "legend",
                 f'<<FONT POINT-SIZE="16">NO PATHS FOUND!</FONT><BR/>{legend_rows}>',
@@ -1580,9 +1459,7 @@ def _get_paths_as_dot(paths):
             sub_label = view_labels["sub_label"]
             if "involved_genes" in v or "involved_other" in v:
                 involved = (
-                    ",".join(v["involved_genes"] + v["involved_other"])
-                    .replace("<", "&lt;")
-                    .replace(">", "&gt;")
+                    ",".join(v["involved_genes"] + v["involved_other"]).replace("<", "&lt;").replace(">", "&gt;")
                 )
                 bel_str = v["bel"].replace("<", "&lt;").replace(">", "&gt;")
                 node_label = (
@@ -1599,9 +1476,7 @@ def _get_paths_as_dot(paths):
 
                 sub_label_value = ""
                 if sub_label and v.get(sub_label[0]):
-                    sub_label_value = (
-                        '</FONT><BR/><FONT POINT-SIZE="6">' + v[sub_label[0]]
-                    )
+                    sub_label_value = '</FONT><BR/><FONT POINT-SIZE="6">' + v[sub_label[0]]
                 node_label = (
                     f'<<FONT POINT-SIZE="10">{v["class"]}</FONT><BR/>'
                     f'<FONT POINT-SIZE="16">{label_value}{sub_label_value}</FONT>>'
@@ -1651,9 +1526,7 @@ def get_class_infos():
     for row in b.execute(sql):
         r = dict(row.oRecordData)
         in_out = {
-            p["name"]: p["linkedClass"]
-            for p in r["properties"]
-            if "linkedClass" in p and p["name"] in ["in", "out"]
+            p["name"]: p["linkedClass"] for p in r["properties"] if "linkedClass" in p and p["name"] in ["in", "out"]
         }
         if in_out:
             in_out_dict[r["name"]] = in_out
@@ -1662,9 +1535,7 @@ def get_class_infos():
         r.pop("properties")
         class_name_dict[r["name"]] = r
         if r.get("superClass"):  # all except roots
-            parent_dict[r["superClass"]].append(
-                {"name": r["name"], "abstract": r["abstract"]}
-            )
+            parent_dict[r["superClass"]].append({"name": r["name"], "abstract": r["abstract"]})
 
     results = {}
 

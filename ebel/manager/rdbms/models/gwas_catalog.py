@@ -1,7 +1,7 @@
 """GWAS Catalog RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -52,9 +52,7 @@ class GwasCatalog(Base):
     def as_dict(self):
         """Convert object values to dictionary."""
         gwas_catalog = object_as_dict(self)
-        gwas_catalog.update(
-            {"snp_genes": [x.ensembl_identifier for x in self.snp_genes]}
-        )
+        gwas_catalog.update({"snp_genes": [x.ensembl_identifier for x in self.snp_genes]})
         return gwas_catalog
 
 

@@ -1,8 +1,8 @@
 """DrugBank RDBMS model definition."""
 
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Date
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -30,20 +30,12 @@ class Drugbank(Base):
     mechanism_of_action = Column(Text)
     fda_label = Column(Text)
 
-    references = relationship(
-        "Reference", back_populates="drugbank", cascade="save-update"
-    )
+    references = relationship("Reference", back_populates="drugbank", cascade="save-update")
     synonyms = relationship("Synonym", back_populates="drugbank", cascade="save-update")
     targets = relationship("Target", back_populates="drugbank", cascade="save-update")
-    external_identifiers = relationship(
-        "ExternalIdentifier", back_populates="drugbank", cascade="save-update"
-    )
-    product_names = relationship(
-        "ProductName", back_populates="drugbank", cascade="save-update"
-    )
-    drug_interactions = relationship(
-        "DrugInteraction", back_populates="drugbank", cascade="save-update"
-    )
+    external_identifiers = relationship("ExternalIdentifier", back_populates="drugbank", cascade="save-update")
+    product_names = relationship("ProductName", back_populates="drugbank", cascade="save-update")
+    drug_interactions = relationship("DrugInteraction", back_populates="drugbank", cascade="save-update")
     statuses = relationship("Status", back_populates="drugbank", cascade="save-update")
     patents = relationship("Patent", back_populates="drugbank", cascade="save-update")
     pathways = relationship("Pathway", back_populates="drugbank", cascade="save-update")
@@ -221,9 +213,7 @@ class DrugInteraction(Base):
     name = Column(Text)
     description = Column(Text)
 
-    db_id = Column(
-        Integer, ForeignKey("drugbank.id")
-    )  # exception because drugbank_id is already a field
+    db_id = Column(Integer, ForeignKey("drugbank.id"))  # exception because drugbank_id is already a field
     drugbank = relationship("Drugbank", back_populates="drug_interactions")
 
     def __str__(self):

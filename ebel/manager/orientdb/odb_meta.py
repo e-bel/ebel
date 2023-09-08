@@ -7,47 +7,36 @@ import os
 import random
 import socket
 import time
-
 from abc import abstractmethod
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
 from http.client import RemoteDisconnected
 from shutil import copyfileobj
 from types import GeneratorType
-from typing import List, Iterable, Dict, Union, Tuple, Set, Optional
-from urllib.request import urlopen, Request
+from typing import Dict, Iterable, List, Optional, Set, Tuple, Union
+from urllib.request import Request, urlopen
 
 import numpy as np
 import pandas as pd
 import requests
-import xmltodict
 import sqlalchemy as sqla
-from sqlalchemy.sql.schema import Table
-from sqlalchemy_utils import database_exists, create_database
-
+import xmltodict
 from pyorientdb import OrientDB, orient
-from pyorientdb.exceptions import (
-    PyOrientIndexException,
-    PyOrientCommandException,
-    PyOrientSecurityAccessException,
-)
+from pyorientdb.exceptions import (PyOrientCommandException,
+                                   PyOrientIndexException,
+                                   PyOrientSecurityAccessException)
 from pyorientdb.otypes import OrientRecord
-
+from sqlalchemy.sql.schema import Table
+from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
 
 import ebel.database
-from ebel.constants import RID, DEFAULT_ODB
 from ebel.cache import set_mysql_interactive
+from ebel.config import get_config_as_dict, get_config_value, write_to_config
+from ebel.constants import DEFAULT_ODB, RID
 from ebel.manager.orientdb import urls as default_urls
-from ebel.manager.orientdb.odb_structure import (
-    OClass,
-    OIndex,
-    OProperty,
-    Edge,
-    Generic,
-    Node,
-)
-from ebel.tools import BelRdb, get_file_path, chunks, get_standard_name
-from ebel.config import write_to_config, get_config_as_dict, get_config_value
+from ebel.manager.orientdb.odb_structure import (Edge, Generic, Node, OClass,
+                                                 OIndex, OProperty)
+from ebel.tools import BelRdb, chunks, get_file_path, get_standard_name
 
 type_map_inverse = {v: k for k, v in orient.type_map.items()}
 
@@ -87,27 +76,11 @@ class Graph(abc.ABC):
         self.urls = urls if urls else {}
         self.biodb_name = biodb_name
 
-        self.odb_db_name = (
-            config_params["db"] if config_params and "db" in config_params else None
-        )
-        self.odb_user = (
-            config_params["user"] if config_params and "user" in config_params else None
-        )
-        self.odb_password = (
-            config_params["password"]
-            if config_params and "password" in config_params
-            else None
-        )
-        self.odb_server = (
-            config_params["server"]
-            if config_params and "server" in config_params
-            else "localhost"
-        )
-        self.odb_port = (
-            config_params["port"]
-            if config_params and "port" in config_params
-            else "2424"
-        )
+        self.odb_db_name = config_params["db"] if config_params and "db" in config_params else None
+        self.odb_user = config_params["user"] if config_params and "user" in config_params else None
+        self.odb_password = config_params["password"] if config_params and "password" in config_params else None
+        self.odb_server = config_params["server"] if config_params and "server" in config_params else "localhost"
+        self.odb_port = config_params["port"] if config_params and "port" in config_params else "2424"
         self.odb_user_reader = None
         self.odb_user_reader_password = None
         # Root password should not be set, but can be
@@ -123,10 +96,7 @@ class Graph(abc.ABC):
         self.engine = rdb.engine
         self.session = rdb.session
 
-        if not (
-            get_config_value("DATABASE", "sqlalchemy_connection_string")
-            or database_exists(self.engine.url)
-        ):
+        if not (get_config_value("DATABASE", "sqlalchemy_connection_string") or database_exists(self.engine.url)):
             if str(self.engine.url).startswith("mysql"):
                 set_mysql_interactive()
 
@@ -152,9 +122,7 @@ class Graph(abc.ABC):
             #  If there is no "DEFAULT_ODB" section in the configuration file, then write these values to it
             if DEFAULT_ODB not in config_dict:
                 for option, value in credentials.items():
-                    if (
-                        "root" not in option and overwrite_config
-                    ):  # Don't want to write root to config file
+                    if "root" not in option and overwrite_config:  # Don't want to write root to config file
                         write_to_config(section=DEFAULT_ODB, option=option, value=value)
 
             self.set_configuration_parameters()
@@ -165,15 +133,9 @@ class Graph(abc.ABC):
 
         # No parameters passed and no saved parameters in config means user needs to provide some info
         else:
-            missing_params = ", ".join(
-                {key for key, val in credentials.items() if val is None}
-            )
-            logger.info(
-                f"Initial configuration parameters missing. Missing parameters: {missing_params}"
-            )
-            raise ValueError(
-                f"Please provide initial configuration parameters. Missing parameters: {missing_params}"
-            )
+            missing_params = ", ".join({key for key, val in credentials.items() if val is None})
+            logger.info(f"Initial configuration parameters missing. Missing parameters: {missing_params}")
+            raise ValueError(f"Please provide initial configuration parameters. Missing parameters: {missing_params}")
 
     def execute(self, command_str: str) -> List[OrientRecord]:
         """Execute a command directly in the OrientDB server.
@@ -214,19 +176,11 @@ class Graph(abc.ABC):
         self.odb_password = self.odb_password or odb_config.get("password")
         self.odb_server = self.odb_server or odb_config.get("server")
         self.odb_port = int(self.odb_port or odb_config.get("port") or "2424")
-        self.odb_user_reader = (
-            self.odb_user_reader or odb_config.get("user_reader") or None
-        )
-        self.odb_user_reader_password = (
-            self.odb_user_reader_password
-            or odb_config.get("user_reader_password")
-            or None
-        )
+        self.odb_user_reader = self.odb_user_reader or odb_config.get("user_reader") or None
+        self.odb_user_reader_password = self.odb_user_reader_password or odb_config.get("user_reader_password") or None
 
         # Root password should not be written in the config file, but it's possible
-        self._odb_root_password = self._odb_root_password or odb_config.get(
-            "root_password"
-        )
+        self._odb_root_password = self._odb_root_password or odb_config.get("root_password")
 
     def get_client(self) -> OrientDB:
         """Attempts to connect to the OrientDB client. This is currently done by using session tokens."""
@@ -278,9 +232,7 @@ class Graph(abc.ABC):
             logger.info(f"Successfully inserted data for {self.biodb_name}")
 
         except FileNotFoundError:
-            logging.error(
-                f"Data file for {self.biodb_name.upper()} was not found. Skipping..."
-            )
+            logging.error(f"Data file for {self.biodb_name.upper()} was not found. Skipping...")
 
         except Exception as e:
             logger.error(f"Failed to insert data for {self.biodb_name}!", exc_info=e)
@@ -293,13 +245,9 @@ class Graph(abc.ABC):
             columns = [columns]
         sql_columns = ",".join(columns)
         index_name = f"idx_{table_name}_" + "_".join(columns)
-        self.engine.execute(
-            f"CREATE INDEX {index_name} ON {table_name} ({sql_columns})"
-        )
+        self.engine.execute(f"CREATE INDEX {index_name} ON {table_name} ({sql_columns})")
 
-    def clear_edges_by_bel_doc_rid(
-        self, bel_document_rid: str, even_if_other_doc_rids_exists=True
-    ):
+    def clear_edges_by_bel_doc_rid(self, bel_document_rid: str, even_if_other_doc_rids_exists=True):
         """Delete all edges linked to a specified BEL document rID."""
         changes = 0
         if even_if_other_doc_rids_exists:
@@ -330,9 +278,7 @@ class Graph(abc.ABC):
         """Clear all document info. Returns number of deleted documents."""
         return self.execute("Delete from `bel_document`")[0]
 
-    def get_number_of_bel_statements_by_document_rid(
-        self, bel_document_rid: str
-    ) -> int:
+    def get_number_of_bel_statements_by_document_rid(self, bel_document_rid: str) -> int:
         """Return BEL statement count with a given document ID."""
         sql = f"Select count(*) as num from bel_relation where  document = {bel_document_rid}"
         return self.execute(sql)[0].oRecordData["num"]
@@ -370,10 +316,7 @@ class Graph(abc.ABC):
         o_record_datas = [x.oRecordData for x in self.execute(sql)]
 
         if short:
-            props = [
-                {"name": x["name"], "type": type_map_inverse[x["type"]]}
-                for x in o_record_datas
-            ]
+            props = [{"name": x["name"], "type": type_map_inverse[x["type"]]} for x in o_record_datas]
 
         else:
             props = o_record_datas
@@ -422,9 +365,7 @@ class Graph(abc.ABC):
     ) -> Union[List[dict], pd.DataFrame]:
         """Query class by params and returns list of pyorient.OrientRecord."""
         if not self.class_exists(class_name):
-            raise ExceptionClassNotExists(
-                "Class {} not exists in database.".format(class_name)
-            )
+            raise ExceptionClassNotExists("Class {} not exists in database.".format(class_name))
 
         where = self.__get_sql_where_part(params, where_list)
 
@@ -540,9 +481,7 @@ class Graph(abc.ABC):
         return downloaded
 
     @staticmethod
-    def download_file(
-        url: str, biodb: str, expiration_days: int = 100, addtional_header: dict = None
-    ) -> bool:
+    def download_file(url: str, biodb: str, expiration_days: int = 100, addtional_header: dict = None) -> bool:
         """Download file. Returns True if it was needed to download the file."""
         header = {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/"
@@ -566,9 +505,7 @@ class Graph(abc.ABC):
         if not file_exists or expired:
             logger.info(f"Download {url}")
             try:
-                with urlopen(Request(url, headers=header)) as response, open(
-                    file_path, "wb"
-                ) as out_file:
+                with urlopen(Request(url, headers=header)) as response, open(file_path, "wb") as out_file:
                     copyfileobj(response, out_file)
 
                 downloaded = True
@@ -696,9 +633,7 @@ class Graph(abc.ABC):
         sql_dict = {"name": "`" + oclass.name + "`", "extends": "", "abstract": ""}
 
         if oclass.extends:
-            sql_dict["extends"] = "EXTENDS " + ", ".join(
-                ["`" + x + "`" for x in oclass.extends]
-            )
+            sql_dict["extends"] = "EXTENDS " + ", ".join(["`" + x + "`" for x in oclass.extends])
         if oclass.abstract:
             sql_dict["abstract"] = "ABSTRACT"
 
@@ -718,9 +653,7 @@ class Graph(abc.ABC):
             if oclass.in_out[1]:
                 self.execute(sql_in_out.format("out", oclass.in_out[1]))
 
-    def create_class_property(
-        self, class_name: str, prop: OProperty, print_sql: bool = False
-    ):
+    def create_class_property(self, class_name: str, prop: OProperty, print_sql: bool = False):
         """Create OrientDB class property."""
         sql_prop = "CREATE PROPERTY `{name}`.`{prop_name}`\
         IF NOT EXISTS {dtype} {linked_class} {linked_type} {mandatory}"
@@ -803,11 +736,7 @@ class Graph(abc.ABC):
         sql_temp = "DELETE EDGE `{}`"
         if hasattr(self, "edge_classes"):
             for oclass in self.edge_classes:
-                if (
-                    oclass.own_class
-                    and not oclass.abstract
-                    and self.class_exists(oclass.name)
-                ):
+                if oclass.own_class and not oclass.abstract and self.class_exists(oclass.name):
                     sql = sql_temp.format(oclass.name)
                     deleted[oclass.name] = self.execute(sql)[0]
         return deleted
@@ -918,9 +847,7 @@ class Graph(abc.ABC):
             where = " WHERE " + " AND ".join(where_list)
         return where
 
-    def get_number_of_class(
-        self, class_name, distinct_column_name: str = None, **params
-    ):
+    def get_number_of_class(self, class_name, distinct_column_name: str = None, **params):
         """Return count of unique values for a given class_name and column name."""
         column = "*"
         if distinct_column_name:
@@ -952,15 +879,11 @@ class Graph(abc.ABC):
         """Get all cluster ids by class name."""
         sql_cids = "Select clusterIds from (select expand(classes) from metadata:schema) where name = '{}'"
         if class_name not in self.cluster_ids:
-            cids = self.execute(sql_cids.format(class_name))[0].oRecordData[
-                "clusterIds"
-            ]
+            cids = self.execute(sql_cids.format(class_name))[0].oRecordData["clusterIds"]
             self.cluster_ids[class_name] = cids
         return self.cluster_ids[class_name]
 
-    def insert_record(
-        self, class_name: str, value_dict: dict, print_sql=False
-    ) -> Optional[str]:
+    def insert_record(self, class_name: str, value_dict: dict, print_sql=False) -> Optional[str]:
         """Insert new entry in class with values from dictionary. Returns rid."""
         sql = "insert into `{}` content {}".format(class_name, json.dumps(value_dict))
 
@@ -979,9 +902,7 @@ class Graph(abc.ABC):
         cid = random.choice(self.get_cluster_ids(class_name))
 
         try:
-            r = self.client.record_create(
-                cid, {"@" + class_name: value_dict}
-            )._OrientRecord__rid
+            r = self.client.record_create(cid, {"@" + class_name: value_dict})._OrientRecord__rid
 
         except (PyOrientCommandException, socket.timeout):
             logger.warning("Standard insert in odb_meta.create_record did not work!")
@@ -999,13 +920,9 @@ class Graph(abc.ABC):
         r = self.client.record_update(cid, {"@" + class_name: value_dict})
         return r._OrientRecord__rid
 
-    def edge_exists(
-        self, class_name: str, from_rid: str, to_rid: str, value_dict: dict = {}
-    ) -> str:
+    def edge_exists(self, class_name: str, from_rid: str, to_rid: str, value_dict: dict = {}) -> str:
         """Check if edge exists. Return rid if exists else None."""
-        data = copy.deepcopy(
-            value_dict
-        )  # deep copy and DO NOT change the dictionary!!!
+        data = copy.deepcopy(value_dict)  # deep copy and DO NOT change the dictionary!!!
         data.update({"out.@rid": from_rid, "in.@rid": to_rid})
         result = self.query_class(class_name, limit=1, **data)
         if result:
@@ -1023,9 +940,7 @@ class Graph(abc.ABC):
         if check_for:
             check_for = [check_for] if isinstance(check_for, str) else check_for
             check_for_dict = {k: v for k, v in check_for_dict.items() if k in check_for}
-        result = self.query_class(
-            class_name=class_name, limit=1, print_sql=print_sql, **check_for_dict
-        )
+        result = self.query_class(class_name=class_name, limit=1, print_sql=print_sql, **check_for_dict)
         if result:
             return result[0][RID]
 
@@ -1051,17 +966,13 @@ class Graph(abc.ABC):
                 value_dict = {k: v for k, v in value_dict.items()}
             content = "CONTENT {}".format(json.dumps(value_dict))
         sql_temp = "CREATE EDGE `{class_name}` FROM {from_rid} TO {to_rid} {content}"
-        sql = sql_temp.format(
-            class_name=class_name, from_rid=from_rid, to_rid=to_rid, content=content
-        )
+        sql = sql_temp.format(class_name=class_name, from_rid=from_rid, to_rid=to_rid, content=content)
         if print_sql:
             print(sql)
         r = self.execute(sql)[0]
         return r._OrientRecord__rid
 
-    def get_create_rid(
-        self, class_name: str, value_dict: dict, check_for=None, print_sql=False
-    ) -> str:
+    def get_create_rid(self, class_name: str, value_dict: dict, check_for=None, print_sql=False) -> str:
         """Return class_name.@rid by value_dict. Create record/insert if not exists."""
         rid = self.node_exists(
             class_name=class_name,
@@ -1070,21 +981,15 @@ class Graph(abc.ABC):
             print_sql=print_sql,
         )
         if not rid:
-            rid = self.insert_record(
-                class_name=class_name, value_dict=value_dict, print_sql=print_sql
-            )
+            rid = self.insert_record(class_name=class_name, value_dict=value_dict, print_sql=print_sql)
         return rid
 
     def update_correlative_edges(self) -> List[str]:
         """Create a reverse edge for every correlative edge."""
         updated_edges = []
 
-        correlative_edges = self.query_class(
-            class_name="correlative", with_rid=False, with_class=True
-        )
-        for c_edge in tqdm(
-            correlative_edges, desc="Creating reverse correlative edges"
-        ):
+        correlative_edges = self.query_class(class_name="correlative", with_rid=False, with_class=True)
+        for c_edge in tqdm(correlative_edges, desc="Creating reverse correlative edges"):
             from_rid = c_edge.pop("in").get_hash()
             to_rid = c_edge.pop("out").get_hash()
             edge_class = c_edge.pop("class")
@@ -1108,9 +1013,7 @@ class Graph(abc.ABC):
     def update_pmcids(self) -> int:
         """Add PMC ID to bel_relation if one exists."""
         update_sql_tmp = "UPDATE bel_relation SET pmc = '{}' WHERE pmid = {}"
-        missing_pmc_sql = (
-            "SELECT distinct(pmid) as pmid from bel_relation WHERE pmc IS NULL"
-        )
+        missing_pmc_sql = "SELECT distinct(pmid) as pmid from bel_relation WHERE pmc IS NULL"
 
         results = self.query(missing_pmc_sql)
 
@@ -1171,9 +1074,7 @@ class Graph(abc.ABC):
                     updated += self._query_ncbi(pmid_chunk, edge_name)
 
                 except KeyError as e:
-                    logger.error(
-                        "KeyError occurred during parsing. See logs for full description."
-                    )
+                    logger.error("KeyError occurred during parsing. See logs for full description.")
                     logger.info(e)
 
         return updated
@@ -1183,9 +1084,7 @@ class Graph(abc.ABC):
         sql_template = "Update {} set citation = {} where pmid = {}"
 
         sql_update_mesh_terms = "Update {} set annotation.mesh = {} where pmid = {}"
-        sql_update_mesh_substances = (
-            "Update {} set annotation.substances = {} where pmid = {}"
-        )
+        sql_update_mesh_substances = "Update {} set annotation.substances = {} where pmid = {}"
 
         nameset = {"LastName", "Initials"}
 
@@ -1217,12 +1116,8 @@ class Graph(abc.ABC):
                         authors = [authors]
 
                     for author in authors:
-                        if isinstance(author, OrderedDict) and nameset.issubset(
-                            author.keys()
-                        ):
-                            author_list.append(
-                                author["LastName"] + " " + author["Initials"]
-                            )
+                        if isinstance(author, OrderedDict) and nameset.issubset(author.keys()):
+                            author_list.append(author["LastName"] + " " + author["Initials"])
 
                 data["author_list"] = author_list
 
@@ -1275,16 +1170,12 @@ class Graph(abc.ABC):
 
                 if meshs:
                     content_mesh = json.dumps(meshs)
-                    sql_m = sql_update_mesh_terms.format(
-                        edge_name, content_mesh, data["ref"]
-                    )
+                    sql_m = sql_update_mesh_terms.format(edge_name, content_mesh, data["ref"])
                     self.execute(sql_m)
 
                 if substances:
                     content_substances = json.dumps(substances)
-                    sql_s = sql_update_mesh_substances.format(
-                        edge_name, content_substances, data["ref"]
-                    )
+                    sql_s = sql_update_mesh_substances.format(edge_name, content_substances, data["ref"])
                     self.execute(sql_s)
 
                 updated += 1
@@ -1338,9 +1229,7 @@ class Graph(abc.ABC):
         if replace:
             self.clear_class(class_name)
 
-        dataframe = self._standardize_dataframe(
-            dataframe, replace_nulls_with_nones, standardize_column_names
-        )
+        dataframe = self._standardize_dataframe(dataframe, replace_nulls_with_nones, standardize_column_names)
 
         for row in tqdm(
             dataframe.to_dict(orient="records"),
@@ -1468,9 +1357,7 @@ class Graph(abc.ABC):
                         "bel": bel,
                         "pure": True,
                     }
-                    gene_rid = self.get_create_rid(
-                        "gene", value_dict=data, check_for="bel"
-                    )
+                    gene_rid = self.get_create_rid("gene", value_dict=data, check_for="bel")
                     gene_rids[gene_type] += [gene_rid]
 
         return gene_rids
@@ -1537,9 +1424,7 @@ class Graph(abc.ABC):
 
         try:
             self.update_interactions()
-            logger.info(
-                f"Successfully updated interactions for {self.biodb_name.upper()}"
-            )
+            logger.info(f"Successfully updated interactions for {self.biodb_name.upper()}")
 
         except Exception as e:
             logging.error(e, exc_info=e)
@@ -1555,13 +1440,9 @@ class Graph(abc.ABC):
             return 0
         else:
             class_name = class_name if class_name is not None else "V"
-            return self.execute(f"Delete VERTEX {class_name} where both().size() = 0")[
-                0
-            ]
+            return self.execute(f"Delete VERTEX {class_name} where both().size() = 0")[0]
 
-    def get_pure_symbol_rids_dict_in_bel_context(
-        self, class_name="protein", namespace="HGNC"
-    ) -> Dict[str, str]:
+    def get_pure_symbol_rids_dict_in_bel_context(self, class_name="protein", namespace="HGNC") -> Dict[str, str]:
         """Return dictionary with HGNC names as key and OrientDB @rid as value.
 
         Applies to all pure nodes in graph with class name directly or indirectly involved in BEL stmt.
@@ -1592,18 +1473,12 @@ class Graph(abc.ABC):
         )
         return {x["uniprot"] for x in self.query_get_dict(sql)}
 
-    def get_pure_symbol_rid_df_in_bel_context(
-        self, class_name="protein", namespace="HGNC"
-    ) -> pd.DataFrame:
+    def get_pure_symbol_rid_df_in_bel_context(self, class_name="protein", namespace="HGNC") -> pd.DataFrame:
         """Return dictionary with gene symbols as keys and node rIDs as values."""
-        r = self.get_pure_symbol_rids_dict_in_bel_context(
-            class_name=class_name, namespace=namespace
-        )
+        r = self.get_pure_symbol_rids_dict_in_bel_context(class_name=class_name, namespace=namespace)
         return pd.DataFrame(r.items(), columns=["symbol", "rid"])
 
-    def get_pure_symbol_rids_dict(
-        self, class_name="protein", namespace="HGNC"
-    ) -> Dict[str, str]:
+    def get_pure_symbol_rids_dict(self, class_name="protein", namespace="HGNC") -> Dict[str, str]:
         """Return dictionary with protein name as keys and node rIDs as values."""
         results = self.query_class(class_name, pure=True, namespace=namespace)
         return {r["name"]: r["rid"] for r in results}

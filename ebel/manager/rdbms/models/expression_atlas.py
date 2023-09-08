@@ -1,5 +1,5 @@
 """Expression Atlas RDBMS model definition."""
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, Float
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -26,10 +26,7 @@ class Experiment(Base):
         """Convert object values to dictionary."""
         experiment = object_as_dict(self)
         experiment.update({"idfs": {idf.key_name: idf.value for idf in self.idfs}})
-        gc = [
-            {"groups": x.group_comparison, "name": x.name, "id": x.id}
-            for x in self.group_comparisons
-        ]
+        gc = [{"groups": x.group_comparison, "name": x.name, "id": x.id} for x in self.group_comparisons]
         experiment.update({"group_comparison": gc})
         return experiment
 
@@ -86,9 +83,7 @@ class FoldChange(Base):
     p_value = Column(Float, index=True)
     t_statistic = Column(Float)
 
-    group_comparison_id = Column(
-        Integer, ForeignKey("expression_atlas_group_comparison.id")
-    )
+    group_comparison_id = Column(Integer, ForeignKey("expression_atlas_group_comparison.id"))
     group_comparison = relationship("GroupComparison", back_populates="fold_changes")
 
     def as_dict(self):
@@ -125,9 +120,7 @@ class Gsea(Base):
 
     id = Column(Integer, primary_key=True)
 
-    group_comparison_id = Column(
-        Integer, ForeignKey("expression_atlas_group_comparison.id")
-    )
+    group_comparison_id = Column(Integer, ForeignKey("expression_atlas_group_comparison.id"))
     group_comparison = relationship("GroupComparison", back_populates="gseas")
 
     term = Column(String(255), index=True)

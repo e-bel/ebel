@@ -1,24 +1,20 @@
 """Expression Atlas API methods."""
+import json
 import math
 import re
-import json
-from ebel.web.api import RDBMS
-from . import _get_paginated_query_result, add_query_filters
+from collections import Counter
 
-from ebel.web.api.ebel.v1 import _get_data
 from flask import request
 from sqlalchemy import inspect
 
-from collections import Counter
-from ebel.manager.rdbms.models.expression_atlas import (
-    GroupComparison,
-    Gsea,
-    FoldChange,
-    Experiment,
-    Idf,
-    SdrfCondensed,
-)
 from ebel import Bel
+from ebel.manager.rdbms.models.expression_atlas import (Experiment, FoldChange,
+                                                        GroupComparison, Gsea,
+                                                        Idf, SdrfCondensed)
+from ebel.web.api import RDBMS
+from ebel.web.api.ebel.v1 import _get_data
+
+from . import _get_paginated_query_result, add_query_filters
 
 models_dict = {
     "experiment": Experiment,
@@ -82,19 +78,13 @@ def get_most_common_gseas_by_group_comparison_ids() -> list:
     )
 
     gsea_type = request.args.get("gsea_type", "")
-    gsea_type = (
-        gsea_type
-        if gsea_type in [GseaType.GO, GseaType.REACTOME, GseaType.INTERPRO]
-        else ""
-    )
+    gsea_type = gsea_type if gsea_type in [GseaType.GO, GseaType.REACTOME, GseaType.INTERPRO] else ""
 
     if gsea_type:
         query = query.filter(Gsea.gsea_type == gsea_type)
 
     p_adj_non_dir = request.args.get("p_adj_non_dir", "")
-    p_adj_non_dir = (
-        float(p_adj_non_dir) if re.search(r"\s*\d+(\.\d+)?\s*", p_adj_non_dir) else None
-    )
+    p_adj_non_dir = float(p_adj_non_dir) if re.search(r"\s*\d+(\.\d+)?\s*", p_adj_non_dir) else None
     if isinstance(p_adj_non_dir, float):
         query = query.filter(Gsea.p_adj_non_dir <= p_adj_non_dir)
 
@@ -166,18 +156,14 @@ def get_comparison_groups_by_edge_rid():
                                 from {rid}"""
     )
     if res:
-        has_all_cols = all(
-            [(x in res[0]) for x in ["name_in", "ns_in", "name_out", "ns_out"]]
-        )
+        has_all_cols = all([(x in res[0]) for x in ["name_in", "ns_in", "name_out", "ns_out"]])
         if has_all_cols:
             both_ns_hgnc = res[0]["ns_in"] == "HGNC" and res[0]["ns_out"] == "HGNC"
             not_the_same = res[0]["name_in"] != res[0]["name_out"]
             if has_all_cols and both_ns_hgnc and not_the_same:
                 gene_symbol_1 = res[0]["name_in"]
                 gene_symbol_2 = res[0]["name_out"]
-                comparisons = _get_comparison_groups_by_genes(
-                    gene_symbol_1, gene_symbol_2
-                )
+                comparisons = _get_comparison_groups_by_genes(gene_symbol_1, gene_symbol_2)
                 return {
                     "gene_symbol_1": gene_symbol_1,
                     "gene_symbol_2": gene_symbol_2,
@@ -204,9 +190,7 @@ def get_expression_atlas():
     data = json.loads(request.data)
     b = Bel()
     query = b.session.query(Experiment).join(GroupComparison)
-    for table, columns_params in [
-        (k, v) for k, v in data.items() if k not in ("page", "page_size")
-    ]:
+    for table, columns_params in [(k, v) for k, v in data.items() if k not in ("page", "page_size")]:
         any_value = any([v["value"].strip() for k, v in columns_params.items()])
         if any_value:
             model = models_dict[table]
@@ -222,10 +206,7 @@ def get_expression_atlas():
     query = query.limit(limit).offset(limit * (page - 1))
 
     print(query.statement.compile(compile_kwargs={"literal_binds": True}))
-    column_names = [
-        f"{x.parent.class_.__tablename__}.{x.name}"
-        for x in [inspect(c) for c in columns]
-    ]
+    column_names = [f"{x.parent.class_.__tablename__}.{x.name}" for x in [inspect(c) for c in columns]]
     return {
         "page": page,
         "pages": math.ceil(count / limit),

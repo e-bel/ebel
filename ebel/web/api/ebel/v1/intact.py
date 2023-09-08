@@ -1,15 +1,12 @@
 """IntAct API methods."""
-from sqlalchemy import or_
 from flask.globals import request
+from sqlalchemy import or_
 
-from ebel.web.api import RDBMS
-from ebel.manager.rdbms.models.intact import Intact
 from ebel.manager.orientdb.odb_structure import intact_edges
-from ebel.web.api.ebel.v1 import (
-    _get_data,
-    _get_paginated_query_result,
-    _get_paginated_ebel_query_result,
-)
+from ebel.manager.rdbms.models.intact import Intact
+from ebel.web.api import RDBMS
+from ebel.web.api.ebel.v1 import (_get_data, _get_paginated_ebel_query_result,
+                                  _get_paginated_query_result)
 
 
 def get_intact():
@@ -52,11 +49,6 @@ def get_ebel_relation():
     ra = request.args
     paras = {k: ra[k] for k in ra if k in conf}
     if paras:
-        sql += " WHERE " + " AND ".join(
-            [
-                f'{conf[k].replace(".asString()","")} like "{v}"'
-                for k, v in paras.items()
-            ]
-        )
+        sql += " WHERE " + " AND ".join([f'{conf[k].replace(".asString()","")} like "{v}"' for k, v in paras.items()])
 
     return _get_paginated_ebel_query_result(sql)

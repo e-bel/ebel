@@ -51,9 +51,7 @@ class ClinicalTrials(odb_meta.Graph):
         # update_sql = 'UPDATE drugbank ADD clinical_trials = {} WHERE name = "{}" OR "{}" in synonyms'
         # TODO index drugbank.synonyms
 
-        results = self.query_class(
-            class_name="drugbank", limit=1
-        )  # Check if drugbank is there
+        results = self.query_class(class_name="drugbank", limit=1)  # Check if drugbank is there
 
         if results:
             update_sql = 'UPDATE drugbank ADD clinical_trials = {} WHERE name = "{}"'
@@ -77,9 +75,7 @@ class ClinicalTrials(odb_meta.Graph):
             }
             interventions = set()
 
-            for f in tqdm(
-                xml_files, desc="Get and set unique values tables in ClinicalTrials.gov"
-            ):
+            for f in tqdm(xml_files, desc="Get and set unique values tables in ClinicalTrials.gov"):
                 with zip_file.open(f.filename) as xml_file:
                     xml_content = xml_file.read()
 
@@ -114,9 +110,7 @@ class ClinicalTrials(odb_meta.Graph):
             df = pd.DataFrame(data, columns=[column_name])
             df.index += 1
             df.index.rename("id", inplace=True)
-            df.to_sql(
-                "clinical_trials_gov_" + column_name, self.engine, if_exists="append"
-            )
+            df.to_sql("clinical_trials_gov_" + column_name, self.engine, if_exists="append")
 
     @staticmethod
     def __parse_intervention(interventions) -> tuple:
@@ -176,9 +170,9 @@ class ClinicalTrials(odb_meta.Graph):
             "interventions": "clinical_trials_gov_intervention_id",
         }
         table = clinical_trials_gov.ctg_intervention_n2m.name
-        df[["interventions", "id"]].explode("interventions").rename(
-            columns=columns
-        ).to_sql(table, index=False, if_exists="append", con=self.engine)
+        df[["interventions", "id"]].explode("interventions").rename(columns=columns).to_sql(
+            table, index=False, if_exists="append", con=self.engine
+        )
 
     def insert_data(self) -> Dict[str, int]:
         """Insert Clinical Trial metadata into database."""
@@ -187,18 +181,9 @@ class ClinicalTrials(odb_meta.Graph):
             xml_files = [x for x in zip_file.filelist if x.filename.endswith(".xml")]
 
             self.insert_n2m_tables()
-            conditions = {
-                x.condition: x.id
-                for x in self.session.query(clinical_trials_gov.Condition).all()
-            }
-            keywords = {
-                x.keyword: x.id
-                for x in self.session.query(clinical_trials_gov.Keyword).all()
-            }
-            mesh_terms = {
-                x.mesh_term: x.id
-                for x in self.session.query(clinical_trials_gov.MeshTerm).all()
-            }
+            conditions = {x.condition: x.id for x in self.session.query(clinical_trials_gov.Condition).all()}
+            keywords = {x.keyword: x.id for x in self.session.query(clinical_trials_gov.Keyword).all()}
+            mesh_terms = {x.mesh_term: x.id for x in self.session.query(clinical_trials_gov.MeshTerm).all()}
             interventions = {
                 (x.intervention_type, x.intervention_name): x.id
                 for x in self.session.query(clinical_trials_gov.Intervention).all()
@@ -216,9 +201,7 @@ class ClinicalTrials(odb_meta.Graph):
                     xml_content = xml_file.read()
 
                 doc = etree.fromstring(xml_content)
-                data_dict = self.get_data_as_dict(
-                    doc, conditions, keywords, mesh_terms, interventions
-                )
+                data_dict = self.get_data_as_dict(doc, conditions, keywords, mesh_terms, interventions)
                 data_dict["id"] = index
                 trials.append(data_dict)
 
@@ -266,9 +249,7 @@ class ClinicalTrials(odb_meta.Graph):
         for child in doc:
             if child.tag == "id_info":
                 d["nct_id"] = self.__get_first(child.xpath("./nct_id[1]/text()"))
-                d["org_study_id"] = self.__get_first(
-                    child.xpath("./org_study_id[1]/text()")
-                )
+                d["org_study_id"] = self.__get_first(child.xpath("./org_study_id[1]/text()"))
 
             elif child.tag in [
                 "brief_title",
@@ -285,28 +266,18 @@ class ClinicalTrials(odb_meta.Graph):
                 d[child.tag] = self.__get_first(child.xpath("./textblock[1]/text()"))
 
             elif child.tag == "oversight_info":
-                d["is_fda_regulated_drug"] = self.__get_first(
-                    child.xpath("./is_fda_regulated_drug[1]/text()")
-                )
+                d["is_fda_regulated_drug"] = self.__get_first(child.xpath("./is_fda_regulated_drug[1]/text()"))
 
             elif child.tag == "condition":
                 d["conditions"].append(conditions[child.text])
 
             elif child.tag == "condition_browse":
-                d["mesh_terms"] = [
-                    mesh_terms[x] for x in child.xpath("./mesh_term//text()")
-                ]
+                d["mesh_terms"] = [mesh_terms[x] for x in child.xpath("./mesh_term//text()")]
 
             elif child.tag == "study_design_info":
-                d["study_design_intervention_model"] = self.__get_first(
-                    child.xpath("./intervention_model[1]/text()")
-                )
-                d["study_design_primary_purpose"] = self.__get_first(
-                    child.xpath("./primary_purpose[1]/text()")
-                )
-                d["study_design_masking"] = self.__get_first(
-                    child.xpath("./masking[1]/text()")
-                )
+                d["study_design_intervention_model"] = self.__get_first(child.xpath("./intervention_model[1]/text()"))
+                d["study_design_primary_purpose"] = self.__get_first(child.xpath("./primary_purpose[1]/text()"))
+                d["study_design_masking"] = self.__get_first(child.xpath("./masking[1]/text()"))
 
             elif child.tag in ["primary_outcome", "secondary_outcome"]:
                 outcomes = dict()
@@ -323,12 +294,8 @@ class ClinicalTrials(odb_meta.Graph):
                 d["interventions"].append(formatted_intervention)
 
             elif child.tag == "patient_data":
-                d["patient_data_sharing_ipd"] = self.__get_first(
-                    child.xpath("./sharing_ipd[1]/text()")
-                )
-                d["patient_data_ipd_description"] = self.__get_first(
-                    child.xpath("./ipd_description[1]/text()")
-                )
+                d["patient_data_sharing_ipd"] = self.__get_first(child.xpath("./sharing_ipd[1]/text()"))
+                d["patient_data_ipd_description"] = self.__get_first(child.xpath("./ipd_description[1]/text()"))
 
         return d
 
@@ -340,9 +307,7 @@ class ClinicalTrials(odb_meta.Graph):
 
     def update_pathology_links(self) -> int:
         """Update the pathology class to link to associated clinical trials."""
-        trial_sql = (
-            "SELECT @rid.asString() FROM clinical_trial WHERE '{}' in mesh_conditions"
-        )
+        trial_sql = "SELECT @rid.asString() FROM clinical_trial WHERE '{}' in mesh_conditions"
         update_sql = "UPDATE {} SET clinical_trials = {}"
 
         paths = self.query_class(
@@ -356,9 +321,7 @@ class ClinicalTrials(odb_meta.Graph):
 
             trial_results = self.client.query(trial_sql.format(path_name))
             trial_rids = [x.oRecordData[RID] for x in trial_results]
-            trial_linkset = (
-                "[" + ",".join(trial_rids) + "]"
-            )  # This feature is a LINKSET
+            trial_linkset = "[" + ",".join(trial_rids) + "]"  # This feature is a LINKSET
 
             self.execute(update_sql.format(path_rid, trial_linkset))
             updated += 1

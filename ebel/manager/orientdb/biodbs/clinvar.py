@@ -74,9 +74,7 @@ class ClinVar(odb_meta.Graph):
             .rename(columns={"phenotype_list": "phenotype", "id": "clinvar_id"})
         )
         df_clinvar__phenotype.index += 1
-        df_phenotype = pd.DataFrame(
-            df_clinvar__phenotype.phenotype.unique(), columns=["phenotype"]
-        )
+        df_phenotype = pd.DataFrame(df_clinvar__phenotype.phenotype.unique(), columns=["phenotype"])
         df_phenotype.index += 1
         df_phenotype.index.rename("id", inplace=True)
         df_phenotype.to_sql(
@@ -89,11 +87,7 @@ class ClinVar(odb_meta.Graph):
 
         df_clinvar__phenotype = (
             df_clinvar__phenotype.set_index("phenotype")
-            .join(
-                df_phenotype.assign(clinvar_phenotype_id=df_phenotype.index).set_index(
-                    "phenotype"
-                )
-            )
+            .join(df_phenotype.assign(clinvar_phenotype_id=df_phenotype.index).set_index("phenotype"))
             .reset_index()
             .loc[:, ["clinvar_id", "clinvar_phenotype_id"]]
         )
@@ -107,13 +101,7 @@ class ClinVar(odb_meta.Graph):
             index=False,
             chunksize=10000,
         )
-        inserted.update(
-            {
-                clinvar.clinvar__clinvar_phenotype.__dict__[
-                    "fullname"
-                ]: df_clinvar__phenotype.shape[0]
-            }
-        )
+        inserted.update({clinvar.clinvar__clinvar_phenotype.__dict__["fullname"]: df_clinvar__phenotype.shape[0]})
 
         clinvar_pheno_medgen = (
             df["phenotype_ids"]
@@ -124,10 +112,7 @@ class ClinVar(odb_meta.Graph):
         )
         clinvar_pheno_medgen["clinvar_id"] = clinvar_pheno_medgen.index
         clinvar_phenotype_medgen = (
-            clinvar_pheno_medgen.set_index("db")
-            .loc["MedGen"]
-            .reset_index()
-            .drop(columns=["db"])
+            clinvar_pheno_medgen.set_index("db").loc["MedGen"].reset_index().drop(columns=["db"])
         )
         clinvar_phenotype_medgen.index += 1
         clinvar_phenotype_medgen.index.rename("id", inplace=True)
@@ -137,13 +122,7 @@ class ClinVar(odb_meta.Graph):
             if_exists="append",
             chunksize=10000,
         )
-        inserted.update(
-            {
-                clinvar.ClinvarPhenotypeMedgen.__tablename__: clinvar_phenotype_medgen.shape[
-                    0
-                ]
-            }
-        )
+        inserted.update({clinvar.ClinvarPhenotypeMedgen.__tablename__: clinvar_phenotype_medgen.shape[0]})
 
         df_other_ids = (
             df.other_ids.str.split(",")
@@ -161,9 +140,7 @@ class ClinVar(odb_meta.Graph):
             if_exists="append",
             chunksize=10000,
         )
-        inserted.update(
-            {clinvar.ClinvarOtherIdentifier.__tablename__: df_other_ids.shape[0]}
-        )
+        inserted.update({clinvar.ClinvarOtherIdentifier.__tablename__: df_other_ids.shape[0]})
         return inserted
 
     def update_bel(self) -> int:
@@ -225,9 +202,7 @@ class ClinVar(odb_meta.Graph):
                     hgnc_id_gene_rid_cache[snp.hgnc_id] = gene_mapped_rid
 
                 if gene_mapped_rid:
-                    snp_rid = self.get_create_rid(
-                        "snp", {"rs_number": "rs" + str(snp.rs_number)}
-                    )
+                    snp_rid = self.get_create_rid("snp", {"rs_number": "rs" + str(snp.rs_number)})
                     value_dict = {
                         "clinical_significance": snp.clinical_significance,
                         "phenotype": snp.phenotype,

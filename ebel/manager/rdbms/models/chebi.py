@@ -1,8 +1,9 @@
 """CHEBI RDBMS model definition."""
 
-from sqlalchemy.orm import relationship
+from sqlalchemy import (Column, DateTime, ForeignKey, Index, Integer, String,
+                        Text)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime, Index
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
@@ -194,9 +195,7 @@ class Reference(Base):
     compound_id = Column(Integer, ForeignKey("chebi_compound.id"))
     compounds = relationship("Compound", back_populates="references")
 
-    __table_args__ = (
-        Index("ix_chebi_reference__reference_name", reference_name, mysql_length=500),
-    )
+    __table_args__ = (Index("ix_chebi_reference__reference_name", reference_name, mysql_length=500),)
 
     def __str__(self):
         return f"{self.reference_db_name}:{self.reference_id}"

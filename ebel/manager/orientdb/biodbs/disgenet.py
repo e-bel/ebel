@@ -43,12 +43,8 @@ class DisGeNet(odb_meta.Graph):
 
     def __repr__(self) -> str:
         """Represent DisGeNet as string."""
-        template = (
-            "{{BioDatabase:DisGeNet}}[url:{url}, edges:{edges}, generics:{generics}]"
-        )
-        representation = template.format(
-            url=self.urls, edges=self.number_of_edges, generics=self.number_of_generics
-        )
+        template = "{{BioDatabase:DisGeNet}}[url:{url}, edges:{edges}, generics:{generics}]"
+        representation = template.format(url=self.urls, edges=self.number_of_edges, generics=self.number_of_generics)
         return representation
 
     def insert_data(self) -> Dict[str, int]:
@@ -58,12 +54,8 @@ class DisGeNet(odb_meta.Graph):
         inserted["sources"] = self._insert_sources()
         inserted["gene_symbols"] = self._insert_gene_symbols()
         inserted["gene_disease_names"] = self._insert_disease_names()
-        inserted[
-            "gene_disease_pmid_associations"
-        ] = self._insert_gene_disease_pmid_associations()
-        inserted[
-            "variant_disease_pmid_associations"
-        ] = self._insert_variant_disease_pmid_associations()
+        inserted["gene_disease_pmid_associations"] = self._insert_gene_disease_pmid_associations()
+        inserted["variant_disease_pmid_associations"] = self._insert_variant_disease_pmid_associations()
         return inserted
 
     def __get_file_for_model(self, model):
@@ -81,77 +73,57 @@ class DisGeNet(odb_meta.Graph):
         return self.__get_file_for_model(disgenet.DisgenetVariant)
 
     def _insert_sources(self):
-        df_g = pd.read_csv(
-            self.file_path_gene, sep="\t", usecols=["source"]
-        ).drop_duplicates()
-        df_v = pd.read_csv(
-            self.file_path_variant, sep="\t", usecols=["source"]
-        ).drop_duplicates()
+        df_g = pd.read_csv(self.file_path_gene, sep="\t", usecols=["source"]).drop_duplicates()
+        df_v = pd.read_csv(self.file_path_variant, sep="\t", usecols=["source"]).drop_duplicates()
         df = pd.concat([df_g, df_v]).drop_duplicates()
         df.reset_index(inplace=True, drop=True)
         df.index += 1
         df.index.rename("id", inplace=True)
-        df.to_sql(
-            disgenet.DisgenetSource.__tablename__, self.engine, if_exists="append"
-        )
+        df.to_sql(disgenet.DisgenetSource.__tablename__, self.engine, if_exists="append")
         return df.shape[0]
 
     def _insert_disease_names(self) -> int:
         columns_disease = {"diseaseId": "disease_id", "diseaseName": "disease_name"}
 
         df_gene = (
-            pd.read_csv(
-                self.file_path_gene, sep="\t", usecols=list(columns_disease.keys())
-            )
+            pd.read_csv(self.file_path_gene, sep="\t", usecols=list(columns_disease.keys()))
             .rename(columns=columns_disease)
             .drop_duplicates()
             .set_index("disease_id")
         )
 
         df_variant = (
-            pd.read_csv(
-                self.file_path_variant, sep="\t", usecols=list(columns_disease.keys())
-            )
+            pd.read_csv(self.file_path_variant, sep="\t", usecols=list(columns_disease.keys()))
             .rename(columns=columns_disease)
             .drop_duplicates()
             .set_index("disease_id")
         )
 
         df_concat = pd.concat([df_gene, df_variant]).drop_duplicates()
-        df_concat.to_sql(
-            disgenet.DisgenetDisease.__tablename__, self.engine, if_exists="append"
-        )
+        df_concat.to_sql(disgenet.DisgenetDisease.__tablename__, self.engine, if_exists="append")
         return df_concat.shape[0]
 
     def _insert_gene_symbols(self) -> int:
         columns_gene_symols = {"geneId": "gene_id", "geneSymbol": "gene_symbol"}
         df = (
-            pd.read_csv(
-                self.file_path_gene, sep="\t", usecols=list(columns_gene_symols.keys())
-            )
+            pd.read_csv(self.file_path_gene, sep="\t", usecols=list(columns_gene_symols.keys()))
             .rename(columns=columns_gene_symols)
             .drop_duplicates()
             .set_index("gene_id")
         )
-        df.to_sql(
-            disgenet.DisgenetGeneSymbol.__tablename__, self.engine, if_exists="append"
-        )
+        df.to_sql(disgenet.DisgenetGeneSymbol.__tablename__, self.engine, if_exists="append")
         return df.shape[0]
 
     def _merge_with_source(self, df):
-        df_sources = pd.read_sql_table(
-            disgenet.DisgenetSource.__tablename__, self.engine
-        ).rename(columns={"id": "source_id"})
+        df_sources = pd.read_sql_table(disgenet.DisgenetSource.__tablename__, self.engine).rename(
+            columns={"id": "source_id"}
+        )
         return pd.merge(df, df_sources, on="source").drop(columns=["source"])
 
     def _insert_gene_disease_pmid_associations(self) -> int:
         usecols_gene = ["geneId", "diseaseId", "score", "pmid", "source"]
-        rename_dict = dict(
-            zip(usecols_gene, self._standardize_column_names(usecols_gene))
-        )
-        df = pd.read_csv(self.file_path_gene, sep="\t", usecols=usecols_gene).rename(
-            columns=rename_dict
-        )
+        rename_dict = dict(zip(usecols_gene, self._standardize_column_names(usecols_gene)))
+        df = pd.read_csv(self.file_path_gene, sep="\t", usecols=usecols_gene).rename(columns=rename_dict)
 
         df = self._merge_with_source(df)
         df.index += 1
@@ -169,19 +141,13 @@ class DisGeNet(odb_meta.Graph):
             "pmid",
             "source",
         ]
-        rename_dict = dict(
-            zip(usecols_variant, self._standardize_column_names(usecols_variant))
-        )
-        df = pd.read_csv(
-            self.file_path_variant, sep="\t", usecols=usecols_variant
-        ).rename(columns=rename_dict)
+        rename_dict = dict(zip(usecols_variant, self._standardize_column_names(usecols_variant)))
+        df = pd.read_csv(self.file_path_variant, sep="\t", usecols=usecols_variant).rename(columns=rename_dict)
 
         df = self._merge_with_source(df)
         df.index += 1
         df.index.rename("id", inplace=True)
-        df.to_sql(
-            disgenet.DisgenetVariant.__tablename__, self.engine, if_exists="append"
-        )
+        df.to_sql(disgenet.DisgenetVariant.__tablename__, self.engine, if_exists="append")
 
         return df.shape[0]
 
@@ -241,10 +207,7 @@ class DisGeNet(odb_meta.Graph):
 
         inserted = 0
 
-        snps = {
-            x["rs_number"]: x["rid"]
-            for x in self.query_class("snp", columns=["rs_number"])
-        }
+        snps = {x["rs_number"]: x["rid"] for x in self.query_class("snp", columns=["rs_number"])}
 
         for trait, kwd_disease_results in results.items():
             for r in tqdm(
@@ -258,14 +221,10 @@ class DisGeNet(odb_meta.Graph):
                     snp_rid = snps[snp_id]
 
                 else:
-                    snp_rid = self.insert_record(
-                        class_name="snp", value_dict={"rs_number": snp_id}
-                    )
+                    snp_rid = self.insert_record(class_name="snp", value_dict={"rs_number": snp_id})
                     snps[snp_id] = snp_rid
 
-                gene_type_rids = self.get_set_gene_rids_by_position(
-                    chromosome, position
-                )
+                gene_type_rids = self.get_set_gene_rids_by_position(chromosome, position)
 
                 for gene_type, gene_rids in gene_type_rids.items():
                     for gene_rid in gene_rids:

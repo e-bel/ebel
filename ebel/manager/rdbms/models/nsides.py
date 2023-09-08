@@ -1,6 +1,6 @@
 """NSIDES RDBMS model definition."""
 
-from sqlalchemy import Column, Integer, String, Float, Index
+from sqlalchemy import Column, Float, Index, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
 from ebel.manager.rdbms.models import object_as_dict
@@ -23,9 +23,7 @@ class Nsides(Base):
     )
     id = Column(Integer, primary_key=True)
 
-    drug_rxnorn_id = Column(
-        String(20), index=True
-    )  # This has to be a String because of mapping to drugbank ids
+    drug_rxnorn_id = Column(String(20), index=True)  # This has to be a String because of mapping to drugbank ids
     drug_concept_name = Column(String(255), index=True)
 
     source = Column(String(10), index=True)

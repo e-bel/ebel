@@ -87,9 +87,7 @@ class IntAct(odb_meta.Graph):
         regex_interaction_type = r"psi-mi:\"MI:0*(?P<interaction_type_psimi_id>\d+)\"\((?P<interaction_type>[^)]+)\)"
         df = df.join(df.it.str.extract(regex_interaction_type), how="left")
         df.drop(columns=["it"], inplace=True)
-        df.confidence_value = df.confidence_value.str.extract(
-            r"intact-miscore:(\d+(\.\d+)?)"
-        )[0]
+        df.confidence_value = df.confidence_value.str.extract(r"intact-miscore:(\d+(\.\d+)?)")[0]
         df.index += 1
         df.index.rename("id", inplace=True)
 
@@ -99,9 +97,7 @@ class IntAct(odb_meta.Graph):
 
         return {self.biodb_name: df.shape[0]}
 
-    def get_create_rid_by_uniprot(
-        self, uniprot_accession: str, uniprot_rid_dict: dict
-    ) -> str:
+    def get_create_rid_by_uniprot(self, uniprot_accession: str, uniprot_rid_dict: dict) -> str:
         """Create or get rID entry for a given UniProt ID.
 
         Parameters
@@ -127,9 +123,7 @@ class IntAct(odb_meta.Graph):
                     "bel": f'p({namespace}:"{name}")',
                     "uniprot": uniprot_accession,
                 }
-                uniprot_rid_dict[uniprot_accession] = self.get_create_rid(
-                    "protein", value_dict, check_for="bel"
-                )
+                uniprot_rid_dict[uniprot_accession] = self.get_create_rid("protein", value_dict, check_for="bel")
         return uniprot_rid_dict.get(uniprot_accession)
 
     def get_namespace_name_by_uniprot(self, uniprot_accession: str) -> tuple:
@@ -155,11 +149,7 @@ class IntAct(odb_meta.Graph):
             namespace = taxid_to_namespace.get(taxid, "UNIPROT")
             return_value = (namespace, name)
         else:
-            if (
-                self.session.query(uniprot.Uniprot)
-                .filter(uniprot.Uniprot.accession == uniprot_accession)
-                .first()
-            ):
+            if self.session.query(uniprot.Uniprot).filter(uniprot.Uniprot.accession == uniprot_accession).first():
                 return_value = ("UNIPROT", uniprot_accession)
         return return_value
 
@@ -199,9 +189,7 @@ class IntAct(odb_meta.Graph):
 
         uniprot_accessions = tuple(uniprot_rid_dict.keys())
 
-        for uniprot_accession in tqdm(
-            uniprot_accessions, desc="Update IntAct interactions"
-        ):
+        for uniprot_accession in tqdm(uniprot_accessions, desc="Update IntAct interactions"):
             sql = sql_temp.format(uniprot_accession=uniprot_accession)
             result = self.engine.execute(sql)
 
@@ -225,9 +213,7 @@ class IntAct(odb_meta.Graph):
                         "interaction_type_psimi_id": ia_type_id,
                         "detection_method": d_method,
                         "detection_method_psimi_id": d_method_id,
-                        "interaction_ids": dict(
-                            [x.split(":", 1) for x in ia_ids.split("|")]
-                        ),
+                        "interaction_ids": dict([x.split(":", 1) for x in ia_ids.split("|")]),
                         "confidence_value": float(c_value),
                         "pmid": pmid,
                     }

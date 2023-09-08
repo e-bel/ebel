@@ -7,9 +7,10 @@ typeOfClass or Index
 """
 from copy import deepcopy
 from enum import Enum
-from typing import List, Dict, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
-from ebel.manager.orientdb.odb_defaults import OIndexType, ODataType, normalized_pmod
+from ebel.manager.orientdb.odb_defaults import (ODataType, OIndexType,
+                                                normalized_pmod)
 
 
 class OClassType(Enum):
@@ -99,9 +100,7 @@ class Node(OClass):
     ):
         """Init method for Node ODB class."""
         extends = tuple(x.name for x in extends)
-        OClass.__init__(
-            self, name, extends, abstract, props, own_class, class_type=OClassType.NODE
-        )
+        OClass.__init__(self, name, extends, abstract, props, own_class, class_type=OClassType.NODE)
 
 
 class Edge(OClass):
@@ -120,9 +119,7 @@ class Edge(OClass):
         extends = tuple(x.name for x in extends)
         in_ = in_out[0].name if in_out[0] else None
         out = in_out[1].name if in_out[1] else None
-        OClass.__init__(
-            self, name, extends, abstract, props, own_class, class_type=OClassType.EDGE
-        )
+        OClass.__init__(self, name, extends, abstract, props, own_class, class_type=OClassType.EDGE)
         self.in_out = (in_, out)
 
 
@@ -152,9 +149,7 @@ class Generic(OClass):
 class OIndex(object):
     """Generic class definition for creating indices in the OrientDB database."""
 
-    def __init__(
-        self, odb_class: OClass, columns: Tuple[str, ...], index_type: OIndexType
-    ):
+    def __init__(self, odb_class: OClass, columns: Tuple[str, ...], index_type: OIndexType):
         """Init method."""
         self.class_name = odb_class.name
         self.columns = columns
@@ -225,14 +220,10 @@ bel = Node(
             linked_type=ODataType.STRING,
             node_view_label=True,
         ),
-        OProperty(
-            "suggested_corrections", ODataType.EMBEDDEDMAP, linked_type=ODataType.STRING
-        ),
+        OProperty("suggested_corrections", ODataType.EMBEDDEDMAP, linked_type=ODataType.STRING),
     ),
 )
-bio_object = Node(
-    "bio_object", (bel,), abstract=True, props=(OProperty("chebi", ODataType.INTEGER),)
-)
+bio_object = Node("bio_object", (bel,), abstract=True, props=(OProperty("chebi", ODataType.INTEGER),))
 pure_object = Node(
     "pure_object",
     (basic_node,),
@@ -242,9 +233,7 @@ pure_object = Node(
         OProperty("species", ODataType.INTEGER),
     ),
 )
-genetic_flow = Node(
-    "genetic_flow", (bio_object, namespace_name, pure_object), abstract=True
-)
+genetic_flow = Node("genetic_flow", (bio_object, namespace_name, pure_object), abstract=True)
 bio_concept = Node("bio_concept", (bel,), abstract=True)
 location_object = Node(
     "location_object",
@@ -509,9 +498,7 @@ intact_edges: Tuple[Edge, ...] = (
     has_ppi_ia,
 )
 
-intact_indices = (
-    OIndex(has_ppi_ia, ("detection_method", "interaction_type"), OIndexType.NOTUNIQUE),
-)
+intact_indices = (OIndex(has_ppi_ia, ("detection_method", "interaction_type"), OIndexType.NOTUNIQUE),)
 
 ##############################################################################
 # Definition of HGNC generics and indices
@@ -561,13 +548,9 @@ hgnc = Generic(
         OProperty("prev_name", ODataType.EMBEDDEDLIST, linked_type=ODataType.STRING),
         OProperty("prev_symbol", ODataType.EMBEDDEDLIST, linked_type=ODataType.STRING),
         OProperty("pubmed_id", ODataType.EMBEDDEDLIST, linked_type=ODataType.INTEGER),
-        OProperty(
-            "refseq_accession", ODataType.EMBEDDEDLIST, linked_type=ODataType.STRING
-        ),
+        OProperty("refseq_accession", ODataType.EMBEDDEDLIST, linked_type=ODataType.STRING),
         OProperty("rgd_id", ODataType.EMBEDDEDLIST, linked_type=ODataType.STRING),
-        OProperty(
-            "rna_central_ids", ODataType.EMBEDDEDLIST, linked_type=ODataType.STRING
-        ),
+        OProperty("rna_central_ids", ODataType.EMBEDDEDLIST, linked_type=ODataType.STRING),
         OProperty("snornabase", ODataType.STRING),
         OProperty("status", ODataType.STRING),
         OProperty("symbol", ODataType.STRING),
@@ -580,9 +563,7 @@ hgnc = Generic(
 
 hgnc_generics: Tuple[Generic, ...] = (hgnc,)
 
-hgnc_nodes: Tuple[Node, ...] = (
-    deepcopy(genetic_flow).add_properties([OProperty("hgnc", ODataType.LINK, "hgnc")]),
-)
+hgnc_nodes: Tuple[Node, ...] = (deepcopy(genetic_flow).add_properties([OProperty("hgnc", ODataType.LINK, "hgnc")]),)
 
 hgnc_indices = (
     OIndex(hgnc, ("symbol",), OIndexType.NOTUNIQUE_HASH_INDEX),
@@ -601,9 +582,7 @@ mirtarbase_edges: Tuple[Edge, ...] = (
         props=(
             OProperty("support_type", ODataType.STRING),
             OProperty("pmid", ODataType.INTEGER),
-            OProperty(
-                "experiments", ODataType.EMBEDDEDSET, linked_type=ODataType.STRING
-            ),
+            OProperty("experiments", ODataType.EMBEDDEDSET, linked_type=ODataType.STRING),
         ),
         in_out=(rna, micro_rna),
     ),
@@ -621,13 +600,9 @@ snp = Node(
 )
 gwascatalog_nodes: Tuple[Node, ...] = (snp,)
 
-has_snp = Edge(
-    "has_snp", (ebel_relation,), abstract=True, own_class=False, in_out=(snp, gene)
-)
+has_snp = Edge("has_snp", (ebel_relation,), abstract=True, own_class=False, in_out=(snp, gene))
 has_mapped_snp = Edge("has_mapped_snp", (has_snp,), abstract=True, own_class=False)
-has_downstream_snp = Edge(
-    "has_downstream_snp", (has_snp,), abstract=True, own_class=False
-)
+has_downstream_snp = Edge("has_downstream_snp", (has_snp,), abstract=True, own_class=False)
 has_upstream_snp = Edge("has_upstream_snp", (has_snp,), abstract=True, own_class=False)
 has_snp_gwascatalog = Edge(
     "has_snp_gwascatalog",
@@ -675,9 +650,7 @@ drugbank_nodes: Tuple[Node, ...] = (
     drug_db,
 )
 
-has_drug_target = Edge(
-    "has_drug_target", (ebel_relation,), abstract=True, own_class=False
-)
+has_drug_target = Edge("has_drug_target", (ebel_relation,), abstract=True, own_class=False)
 has_drug_target_db = Edge(
     "has_drug_target_db",
     (has_drug_target,),
@@ -736,11 +709,7 @@ iuphar_edges: Tuple[Edge, ...] = (
 
 reactome_nodes: Tuple[Node, ...] = (
     deepcopy(protein).add_properties(
-        [
-            OProperty(
-                "reactome_pathways", ODataType.EMBEDDEDSET, linked_type=ODataType.STRING
-            )
-        ]
+        [OProperty("reactome_pathways", ODataType.EMBEDDEDSET, linked_type=ODataType.STRING)]
     ),
 )
 
@@ -791,15 +760,9 @@ has_ppi_st = Edge(
     abstract=True,
     props=(OProperty("score", ODataType.INTEGER),),
 )
-controls_expression_of_st = Edge(
-    "controls_expression_of_st", (has_action_st,), abstract=True
-)
-increases_expression_of = Edge(
-    "increases_expression_of", abstract=True, own_class=False
-)
-decreases_expression_of = Edge(
-    "decreases_expression_of", abstract=True, own_class=False
-)
+controls_expression_of_st = Edge("controls_expression_of_st", (has_action_st,), abstract=True)
+increases_expression_of = Edge("increases_expression_of", abstract=True, own_class=False)
+decreases_expression_of = Edge("decreases_expression_of", abstract=True, own_class=False)
 
 stringdb_edges: Tuple[Edge, ...] = (
     has_ppi,
@@ -931,9 +894,7 @@ stitch_indices = (
 
 disgenet_nodes: Tuple[Node, ...] = (snp,)
 
-gene_disease_association = Edge(
-    "gene_disease_association", (ebel_relation,), abstract=True
-)
+gene_disease_association = Edge("gene_disease_association", (ebel_relation,), abstract=True)
 has_snp_disgenet = Edge(
     "has_snp_disgenet",
     (has_snp,),
@@ -998,9 +959,7 @@ pathway_commons_edges: Tuple[Edge, ...] = (
 # Definition of KEGG generics, edges and indices
 ##############################################################################
 
-pathway_interaction = Edge(
-    "pathway_interaction", (ebel_relation,), abstract=True, own_class=False
-)
+pathway_interaction = Edge("pathway_interaction", (ebel_relation,), abstract=True, own_class=False)
 has_ppi_kg = Edge(
     "has_ppi_kg",
     (pathway_interaction,),
@@ -1010,12 +969,8 @@ has_ppi_kg = Edge(
         OProperty("pathway_names", ODataType.EMBEDDEDSET),
     ),
 )
-increases_expression_of = Edge(
-    "increases_expression_of", abstract=True, own_class=False
-)
-decreases_expression_of = Edge(
-    "decreases_expression_of", abstract=True, own_class=False
-)
+increases_expression_of = Edge("increases_expression_of", abstract=True, own_class=False)
+decreases_expression_of = Edge("decreases_expression_of", abstract=True, own_class=False)
 
 kegg_edges: Tuple[Edge, ...] = (
     pathway_interaction,
@@ -1089,9 +1044,7 @@ edges: Tuple[Edge, ...] = (
 
 nodes_and_edges: Tuple[OClass, ...] = nodes + edges
 
-nodes_and_edges_dict: Dict[str, OClass] = {
-    o_class.name: o_class for o_class in nodes_and_edges
-}
+nodes_and_edges_dict: Dict[str, OClass] = {o_class.name: o_class for o_class in nodes_and_edges}
 non_abstract_nodes_and_edges_dict: Dict[str, OClass] = {
     o_class.name: o_class for o_class in nodes_and_edges if o_class.abstract is False
 }
@@ -1100,9 +1053,7 @@ abstract_nodes_and_edges_dict: Dict[str, OClass] = {
 }
 
 
-def get_columns(
-    class_name, columns: Tuple[str] = (), exclude_non_serializable: bool = True
-) -> list:
+def get_columns(class_name, columns: Tuple[str] = (), exclude_non_serializable: bool = True) -> list:
     """Return list of columns.
 
     Parameters
@@ -1130,16 +1081,12 @@ def get_columns(
     columns = list(columns)
 
     if exclude_non_serializable:
-        columns += [
-            p.prop_name for p in o_class.props if p.data_type not in exclude_classes
-        ]
+        columns += [p.prop_name for p in o_class.props if p.data_type not in exclude_classes]
     else:
         columns += [p.prop_name for p in o_class.props]
     for extends_name in o_class.extends:
         if extends_name not in ["V", "E"]:
-            columns += get_columns(
-                extends_name, tuple(columns), exclude_non_serializable
-            )
+            columns += get_columns(extends_name, tuple(columns), exclude_non_serializable)
     return columns
 
 

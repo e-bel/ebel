@@ -1,6 +1,6 @@
 """Protein Atlas API methods."""
-from ebel.web.api.ebel.v1 import _get_data
 from ebel.manager.rdbms.models import protein_atlas
+from ebel.web.api.ebel.v1 import _get_data
 
 
 def get_rna_brain_fantom():

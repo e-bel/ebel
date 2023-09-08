@@ -107,21 +107,15 @@ class ExpressionAtlas(odb_meta.Graph):
                 df_configuration = self.get_configuration(experiment_name)
                 if isinstance(df_configuration, pd.DataFrame):
                     df_idf = self.get_idf(experiment_name)
-                    title = df_idf[
-                        df_idf.key_name == "investigation_title"
-                    ].value.values[0]
+                    title = df_idf[df_idf.key_name == "investigation_title"].value.values[0]
 
                     experiment_id = self.insert_experiment(experiment_name, title)
 
-                    groups_strs: Tuple[str, ...] = self.__insert_configuration(
-                        df_configuration, experiment_id
-                    )
+                    groups_strs: Tuple[str, ...] = self.__insert_configuration(df_configuration, experiment_id)
 
                     self.__insert_idf(df_idf, experiment_id)
                     self.__insert_sdrf_condensed(experiment_id, experiment_name)
-                    self.__insert_foldchange(
-                        experiment_id, experiment_name, groups_strs
-                    )
+                    self.__insert_foldchange(experiment_id, experiment_name, groups_strs)
                     self.insert_gseas(experiment_id, experiment_name, groups_strs)
 
             except Exception as e:
@@ -129,15 +123,9 @@ class ExpressionAtlas(odb_meta.Graph):
                 print(e)
                 sys.exit()
 
-    def __insert_foldchange(
-        self, experiment_id: int, experiment_name: str, groups_strs: Tuple[str, ...]
-    ):
-        df_log2foldchange = self.get_log2foldchange(
-            experiment_name, groups_strs
-        ).set_index("group_comparison")
-        df_group_comparison = self.get_df_group_comparison(
-            experiment_id, groups_strs
-        ).set_index("group_comparison")
+    def __insert_foldchange(self, experiment_id: int, experiment_name: str, groups_strs: Tuple[str, ...]):
+        df_log2foldchange = self.get_log2foldchange(experiment_name, groups_strs).set_index("group_comparison")
+        df_group_comparison = self.get_df_group_comparison(experiment_id, groups_strs).set_index("group_comparison")
         df_log2foldchange.join(df_group_comparison).to_sql(
             expression_atlas.FoldChange.__tablename__,
             self.engine,
@@ -145,9 +133,7 @@ class ExpressionAtlas(odb_meta.Graph):
             index=False,
         )
 
-    def get_df_group_comparison(
-        self, experiment_id: int, groups_strs: Tuple[str, ...]
-    ) -> pd.DataFrame:
+    def get_df_group_comparison(self, experiment_id: int, groups_strs: Tuple[str, ...]) -> pd.DataFrame:
         """Get group comparison IDs and group comparison columns for pairs of group strings.
 
         Parameters
@@ -172,9 +158,7 @@ class ExpressionAtlas(odb_meta.Graph):
             data.append((group_comparison_id, groups_str))
         return pd.DataFrame(data, columns=["group_comparison_id", "group_comparison"])
 
-    def __insert_configuration(
-        self, df_configuration, experiment_id: int
-    ) -> Tuple[str, ...]:
+    def __insert_configuration(self, df_configuration, experiment_id: int) -> Tuple[str, ...]:
         df_configuration["experiment_id"] = experiment_id
         df_configuration.to_sql(
             expression_atlas.GroupComparison.__tablename__,
@@ -208,9 +192,7 @@ class ExpressionAtlas(odb_meta.Graph):
             index=False,
         )
 
-    def insert_gseas(
-        self, experiment_id: int, experiment_name: str, groups_strs: Tuple[str, ...]
-    ):
+    def insert_gseas(self, experiment_id: int, experiment_name: str, groups_strs: Tuple[str, ...]):
         """Insert Gene set enrichment analysis.
 
         For more information about parameters see https://www.bioconductor.org/packages/release/bioc/html/piano.html
@@ -229,9 +211,7 @@ class ExpressionAtlas(odb_meta.Graph):
                 index=False,
             )
 
-    def get_gseas(
-        self, experiment_name: str, experiment_id: int, groups_strs: Tuple[str]
-    ) -> Optional[pd.DataFrame]:
+    def get_gseas(self, experiment_name: str, experiment_id: int, groups_strs: Tuple[str]) -> Optional[pd.DataFrame]:
         """Get GSEA data.
 
         Parameters
@@ -253,24 +233,16 @@ class ExpressionAtlas(odb_meta.Graph):
                 df = self.get_gsea(experiment_name, groups_str, gsea_type)
                 if isinstance(df, pd.DataFrame):
                     df["gsea_type"] = gsea_type
-                    df["group_comparison_id"] = self.__get_group_comparison_id(
-                        groups_str, experiment_id
-                    )
+                    df["group_comparison_id"] = self.__get_group_comparison_id(groups_str, experiment_id)
                     dfs.append(df[df.p_adj_non_dir <= 0.05])
         if dfs:
             return pd.concat(dfs)
 
     def __get_group_comparison_id(self, groups_str: str, experiment_id: int):
         query = self.session.query(expression_atlas.GroupComparison.id)
-        return (
-            query.filter_by(group_comparison=groups_str, experiment_id=experiment_id)
-            .first()
-            .id
-        )
+        return query.filter_by(group_comparison=groups_str, experiment_id=experiment_id).first().id
 
-    def get_gsea(
-        self, experiment_name: str, groups_str: str, gsea_type: str
-    ) -> Optional[pd.DataFrame]:
+    def get_gsea(self, experiment_name: str, groups_str: str, gsea_type: str) -> Optional[pd.DataFrame]:
         """Generate a table of GSEA information for a pair of symbols for a given experiment.
 
         Parameters
@@ -301,9 +273,7 @@ class ExpressionAtlas(odb_meta.Graph):
         if "term" in df.columns:
             return df
 
-    def get_log2foldchange(
-        self, experiment_name: str, groups_strs: Tuple[str]
-    ) -> pd.DataFrame:
+    def get_log2foldchange(self, experiment_name: str, groups_strs: Tuple[str]) -> pd.DataFrame:
         """Generate a table of log2 fold changes between pairs of gene symbols.
 
         Parameters
@@ -356,9 +326,7 @@ class ExpressionAtlas(odb_meta.Graph):
         -------
         DataFrame with IDF values.
         """
-        file_path = os.path.join(
-            self.data_dir, experiment_name, f"{experiment_name}.idf.txt"
-        )
+        file_path = os.path.join(self.data_dir, experiment_name, f"{experiment_name}.idf.txt")
 
         if not os.path.exists(file_path):
             return
@@ -388,9 +356,7 @@ class ExpressionAtlas(odb_meta.Graph):
         -------
         pandas DataFrame.
         """
-        file_path = os.path.join(
-            self.data_dir, experiment_name, f"{experiment_name}.condensed-sdrf.tsv"
-        )
+        file_path = os.path.join(self.data_dir, experiment_name, f"{experiment_name}.condensed-sdrf.tsv")
 
         if not os.path.exists(file_path):
             return
@@ -420,9 +386,7 @@ class ExpressionAtlas(odb_meta.Graph):
         List of pandas DataFrames.
         """
         files = os.scandir(os.path.join(self.data_dir, experiment_name))
-        analytics_tsv_paths = [
-            f.path for f in files if f.name.endswith("-analytics.tsv")
-        ]
+        analytics_tsv_paths = [f.path for f in files if f.name.endswith("-analytics.tsv")]
         dfs = []
         if analytics_tsv_paths:
             for analytics_tsv_path in analytics_tsv_paths:
@@ -443,9 +407,7 @@ class ExpressionAtlas(odb_meta.Graph):
         -------
         pandas DataFrame.
         """
-        file_path = os.path.join(
-            self.data_dir, experiment_name, f"{experiment_name}-configuration.xml"
-        )
+        file_path = os.path.join(self.data_dir, experiment_name, f"{experiment_name}-configuration.xml")
 
         if not os.path.exists(file_path):
             return
@@ -460,12 +422,8 @@ class ExpressionAtlas(odb_meta.Graph):
             for item in ca_items:
                 for _, contrast in item["contrasts"].items():
                     if isinstance(contrast, (OrderedDict, list)):
-                        contrasts = (
-                            contrast if isinstance(contrast, list) else [contrast]
-                        )
+                        contrasts = contrast if isinstance(contrast, list) else [contrast]
                         for ind_contrast in contrasts:
                             compare_dict[ind_contrast["@id"]] = ind_contrast["name"]
 
-            return pd.DataFrame(
-                compare_dict.items(), columns=["group_comparison", "name"]
-            )
+            return pd.DataFrame(compare_dict.items(), columns=["group_comparison", "name"])

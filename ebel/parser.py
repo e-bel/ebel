@@ -1,23 +1,22 @@
 """This module allows to parse BEL scripts."""
 
-import re
-import json
 import codecs
+import json
 import logging
-
+import re
+from collections import OrderedDict, defaultdict
 from copy import copy
+from typing import Any, Iterable, List
+
 from lark import Lark
-from lark.tree import Tree
-from lark.lexer import Token
-from pandas import DataFrame
-from typing import List, Any, Iterable
-from collections import defaultdict, OrderedDict
 from lark.exceptions import UnexpectedInput, UnexpectedToken
+from lark.lexer import Token
+from lark.tree import Tree
+from pandas import DataFrame
 
-from ebel.transformers import _BelTransformer
+from ebel.constants import GRAMMAR_BEL_PATH, GRAMMAR_START_LINE
 from ebel.errors import BelSyntaxError
-
-from ebel.constants import GRAMMAR_START_LINE, GRAMMAR_BEL_PATH
+from ebel.transformers import _BelTransformer
 
 # TODO: check all strings if they can be stored in constants
 
@@ -94,9 +93,7 @@ def first_token_value(tree: Tree, subtree_name: str) -> str:
 
     for subtree in tree.iter_subtrees():
         if subtree.data == subtree_name:
-            return [node.value for node in subtree.children if isinstance(node, Token)][
-                0
-            ]
+            return [node.value for node in subtree.children if isinstance(node, Token)][0]
 
 
 def first_real_token_value(tokens: List[Token], purge: bool) -> str:
@@ -196,9 +193,7 @@ def append_to_list(py_tree, rule_name, value):
 
     if rule_name_exists:
         if value not in py_tree[rule_name_index][rule_name]:
-            py_tree[rule_name_index][rule_name] = sorted(
-                py_tree[rule_name_index][rule_name] + [value]
-            )
+            py_tree[rule_name_index][rule_name] = sorted(py_tree[rule_name_index][rule_name] + [value])
     else:
         py_tree.append({rule_name: [value]})
 
@@ -289,9 +284,7 @@ class _BELParser:
     """class manage the parsing with python lib lark-parser."""
 
     @staticmethod
-    def check_bel_script_line_by_line(
-        bel_script_path: str, bel_version: str
-    ) -> List[str]:
+    def check_bel_script_line_by_line(bel_script_path: str, bel_version: str) -> List[str]:
         """Check BEL script line by line.
 
         Parameters
@@ -306,18 +299,12 @@ class _BELParser:
         List[str]
             List of errors found in BEL script.
         """
-        logger.info(
-            "Start syntax check for {} line by line with grammar BEL {}".format(
-                bel_script_path, bel_version
-            )
-        )
+        logger.info("Start syntax check for {} line by line with grammar BEL {}".format(bel_script_path, bel_version))
         errors = []
 
         grammar = load_grammar(GRAMMAR_BEL_PATH[str(bel_version)])
 
-        parser = Lark(
-            grammar, start=GRAMMAR_START_LINE, parser="lalr", lexer="contextual"
-        )
+        parser = Lark(grammar, start=GRAMMAR_START_LINE, parser="lalr", lexer="contextual")
 
         cached_line = ""
         with codecs.open(bel_script_path, "r", encoding="utf-8") as fd:
@@ -330,9 +317,7 @@ class _BELParser:
             for line_num, line in copy(num_and_lines).items():
                 if re.search(r"\\\s*(\n|\r|\r\n)$", line):
                     num_and_lines[line_num + 1] = (
-                        num_and_lines[line_num].strip()[:-1]
-                        + " "
-                        + num_and_lines[line_num + 1]
+                        num_and_lines[line_num].strip()[:-1] + " " + num_and_lines[line_num + 1]
                     )
                     del num_and_lines[line_num]
 
@@ -349,11 +334,7 @@ class _BELParser:
                                 parser.parse(cached_line)
 
                             except (UnexpectedInput, UnexpectedToken) as exc1:
-                                errors.append(
-                                    BelSyntaxError(
-                                        exc1, line_number, cached_line.strip()
-                                    )
-                                )
+                                errors.append(BelSyntaxError(exc1, line_number, cached_line.strip()))
 
                             cached_line = ""
                             continue
@@ -370,9 +351,7 @@ class _BELParser:
 
         return errors
 
-    def check_bel_script(
-        self, bel_script_path: str, bel_version: str, force_new_db: bool = False
-    ) -> dict:
+    def check_bel_script(self, bel_script_path: str, bel_version: str, force_new_db: bool = False) -> dict:
         """Check file with BEL script for syntax correctness.
 
         Parameters
@@ -394,9 +373,7 @@ class _BELParser:
         if bel_version.startswith("2"):  # TODO change this hardcoded value
             transformer = _BelTransformer()
         else:
-            logger.error(
-                f"Transformer for version {bel_version} not implemented", exc_info=True
-            )
+            logger.error(f"Transformer for version {bel_version} not implemented", exc_info=True)
             raise
 
         parser = Lark(

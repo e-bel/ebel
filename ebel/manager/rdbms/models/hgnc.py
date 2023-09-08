@@ -1,7 +1,8 @@
 """HGNC RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import (BigInteger, Column, Date, ForeignKey, Integer, String,
+                        Text)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, BigInteger, Text, ForeignKey, Date
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 

@@ -1,10 +1,12 @@
 """CHEBI API methods."""
 from math import ceil
+
 from flask import request
 
 from ebel import Bel
-from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import chebi
+from ebel.web.api import RDBMS
+
 from . import _get_pagination
 
 
@@ -21,10 +23,7 @@ def get_compound_by_name(name: str):
     dict
         CHEBI compound information.
     """
-    return [
-        x.as_dict()
-        for x in RDBMS.get_session().query(chebi.Compound).filter_by(name=name).all()
-    ]
+    return [x.as_dict() for x in RDBMS.get_session().query(chebi.Compound).filter_by(name=name).all()]
 
 
 def get_compound_name_by_name_starts_with(name: str):
@@ -41,9 +40,7 @@ def get_compound_name_by_name_starts_with(name: str):
         Names and CHEBI IDs.
     """
     query = (
-        RDBMS.get_session()
-        .query(chebi.Compound.id, chebi.Compound.name)
-        .filter(chebi.Compound.name.like(f"{name}%"))
+        RDBMS.get_session().query(chebi.Compound.id, chebi.Compound.name).filter(chebi.Compound.name.like(f"{name}%"))
     )
     return {x.name: x.id for x in query.all()}
 
@@ -83,19 +80,10 @@ def get_compound_by_other_db_accession(accession_number: str, db_name: str = Non
     query_filter.append(chebi.DatabaseAccession.accession_number == accession_number)
     if db_name:
         query_filter.append(chebi.DatabaseAccession.type == db_name)
-    chebi_ids_rs = (
-        RDBMS.get_session()
-        .query(chebi.DatabaseAccession.compound_id)
-        .filter(*query_filter)
-        .all()
-    )
+    chebi_ids_rs = RDBMS.get_session().query(chebi.DatabaseAccession.compound_id).filter(*query_filter).all()
     chebi_ids = {x[0] for x in chebi_ids_rs}
     return [
-        x.as_dict()
-        for x in RDBMS.get_session()
-        .query(chebi.Compound)
-        .filter(chebi.Compound.id.in_(chebi_ids))
-        .all()
+        x.as_dict() for x in RDBMS.get_session().query(chebi.Compound).filter(chebi.Compound.id.in_(chebi_ids)).all()
     ]
 
 
@@ -141,15 +129,9 @@ def get_bel_chebi_ids():
     number_of_results = b.query_get_dict(sql_count)[0]["count"]
     pages = ceil(number_of_results / p.page_size)
     query = "SELECT @rid.asString(), namespace, name, chebi, bel FROM V where chebi IS NOT NULL"
-    paras = {
-        k: v
-        for k, v in dict(request.args.copy()).items()
-        if k in ["namespace", "name", "chebi"]
-    }
+    paras = {k: v for k, v in dict(request.args.copy()).items() if k in ["namespace", "name", "chebi"]}
     if paras:
-        query += " AND " + " AND ".join(
-            [f"{k} like '{v.strip()}'" for k, v in paras.items()]
-        )
+        query += " AND " + " AND ".join([f"{k} like '{v.strip()}'" for k, v in paras.items()])
 
     print(query)
     return {

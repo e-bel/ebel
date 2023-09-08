@@ -1,7 +1,7 @@
 """Bel module tests."""
 
-from .constants import test_client, TEST_JSON
-from .true_values import NODES_EXTENSION, EDGES_EXTENSION
+from .constants import TEST_JSON, test_client
+from .true_values import EDGES_EXTENSION, NODES_EXTENSION
 
 bel = test_client
 
@@ -24,27 +24,27 @@ class TestBel:
 
     def test_bel_properties(self):
         """Test that all properties are present."""
-        assert hasattr(bel, 'hgnc')
-        assert hasattr(bel, 'uniprot')
+        assert hasattr(bel, "hgnc")
+        assert hasattr(bel, "uniprot")
         # assert hasattr(bel, 'dea')
-        assert hasattr(bel, 'drugbank')
-        assert hasattr(bel, 'gwas_catalog')
-        assert hasattr(bel, 'reactome')
-        assert hasattr(bel, 'biogrid')
-        assert hasattr(bel, 'stringdb')
-        assert hasattr(bel, 'clinical_trials')
-        assert hasattr(bel, 'intact')
-        assert hasattr(bel, 'clinvar')
-        assert hasattr(bel, 'mirtarbase')
-        assert hasattr(bel, 'disgenet')
-        assert hasattr(bel, 'pathway_commons')
-        assert hasattr(bel, 'kegg')
-        assert hasattr(bel, 'ensembl')
-        assert hasattr(bel, 'iuphar')
-        assert hasattr(bel, 'chebi')
-        assert hasattr(bel, 'nsides')
-        assert hasattr(bel, 'ncbi')
-        assert hasattr(bel, 'protein_atlas')
+        assert hasattr(bel, "drugbank")
+        assert hasattr(bel, "gwas_catalog")
+        assert hasattr(bel, "reactome")
+        assert hasattr(bel, "biogrid")
+        assert hasattr(bel, "stringdb")
+        assert hasattr(bel, "clinical_trials")
+        assert hasattr(bel, "intact")
+        assert hasattr(bel, "clinvar")
+        assert hasattr(bel, "mirtarbase")
+        assert hasattr(bel, "disgenet")
+        assert hasattr(bel, "pathway_commons")
+        assert hasattr(bel, "kegg")
+        assert hasattr(bel, "ensembl")
+        assert hasattr(bel, "iuphar")
+        assert hasattr(bel, "chebi")
+        assert hasattr(bel, "nsides")
+        assert hasattr(bel, "ncbi")
+        assert hasattr(bel, "protein_atlas")
 
     def test_import_json(self):
         """Tests update_from_protein2gene feature of import_json."""
@@ -55,9 +55,7 @@ class TestBel:
         assert all([count == 0 for count in bel.number_of_nodes.values()])
         assert all([count == 0 for count in bel.number_of_edges.values()])
 
-        files_imported = bel.import_json(input_path=TEST_JSON,
-                                         update_from_protein2gene=True,
-                                         extend_graph=False)
+        files_imported = bel.import_json(input_path=TEST_JSON, update_from_protein2gene=True, extend_graph=False)
 
         assert len(files_imported) == 1
         assert bel.number_of_nodes == NODES_EXTENSION

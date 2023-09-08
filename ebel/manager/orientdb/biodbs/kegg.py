@@ -3,12 +3,12 @@
 import os
 import re
 import xml.etree.ElementTree as ET
+from pathlib import Path
 from typing import Dict
 
 import pandas as pd
 import requests
 from pyorientdb import OrientDB
-from pathlib import Path
 from tqdm import tqdm
 
 from ebel.config import get_config_value
@@ -42,9 +42,7 @@ class Kegg(odb_meta.Graph):
             biodb_name=self.biodb_name,
         )
 
-        species_list = get_config_value(
-            section="KEGG", option="species", value="hsa, dme, mmu, rno"
-        )
+        species_list = get_config_value(section="KEGG", option="species", value="hsa, dme, mmu, rno")
         self.species = [species_id.strip() for species_id in species_list.split(",")]
 
         # TODO Make so it builds dict from info from KEGG directly. JSON url in urls.py, needs method to parse
@@ -55,9 +53,7 @@ class Kegg(odb_meta.Graph):
             10116: "RGD",
             7227: "DMEL",
         }
-        self.species_namespace_dict = {
-            k: self.tax_namespace_dict[v] for k, v in self.species_dict.items()
-        }
+        self.species_namespace_dict = {k: self.tax_namespace_dict[v] for k, v in self.species_dict.items()}
         self.hgnc = Hgnc(self.client)
         self.bel_rid_cache = {}
 
@@ -112,9 +108,7 @@ class Kegg(odb_meta.Graph):
             relation_dict["entry1"] = rel.attrib["entry1"]
             relation_dict["entry2"] = rel.attrib["entry2"]
             relation_dict["kegg_int_type"] = rel.attrib["type"]
-            relation_dict["interaction_type"] = [
-                name.attrib["name"] for name in rel.iter("subtype")
-            ]
+            relation_dict["interaction_type"] = [name.attrib["name"] for name in rel.iter("subtype")]
             relations.append(relation_dict)
 
         return relations
@@ -128,9 +122,7 @@ class Kegg(odb_meta.Graph):
             sep="\t",
             names=["kegg_id", "external_id"],
         )
-        dict_kegg_genes = (
-            df_kegg_genes.groupby("kegg_id")["external_id"].apply(list).to_dict()
-        )
+        dict_kegg_genes = df_kegg_genes.groupby("kegg_id")["external_id"].apply(list).to_dict()
 
         # Split by ',' or ';' and take the first gene name
         for kegg_id, values in dict_kegg_genes.items():
@@ -158,23 +150,15 @@ class Kegg(odb_meta.Graph):
         """Insert KEGG data into database."""
         dfs = []
 
-        for kegg_species_identifier in tqdm(
-            self.species, desc=f"Import {self.biodb_name.upper()}"
-        ):
+        for kegg_species_identifier in tqdm(self.species, desc=f"Import {self.biodb_name.upper()}"):
             # i of enumerate is needed to decide replace (=0) or append (>0)
 
             dict_kegg_genes = self.get_kegg_gene_identifiers(kegg_species_identifier)
             gene_tag = f"{kegg_species_identifier}:"
 
-            url_pathway_list = (
-                f"http://rest.kegg.jp/list/pathway/{kegg_species_identifier}"
-            )
-            df_pathways = pd.read_csv(
-                url_pathway_list, sep="\t", names=["path_id", "path_desc"]
-            )
-            df_pathways[["path_name", "organism"]] = df_pathways.path_desc.str.split(
-                pat=" - ", n=1, expand=True
-            )
+            url_pathway_list = f"http://rest.kegg.jp/list/pathway/{kegg_species_identifier}"
+            df_pathways = pd.read_csv(url_pathway_list, sep="\t", names=["path_id", "path_desc"])
+            df_pathways[["path_name", "organism"]] = df_pathways.path_desc.str.split(pat=" - ", n=1, expand=True)
             # df_pathways.path_id = df_pathways.path_id.str.lstrip(
             #     kegg_species_identifier
             # )
@@ -318,12 +302,8 @@ class Kegg(odb_meta.Graph):
                 gene_symbol_b,
                 kegg_species_id"""
 
-        for symbol, rid in tqdm(
-            symbol_rids_dict.items(), desc="Update KEGG posttranslational modifications"
-        ):
-            sql = sql_temp.format(
-                symbol=symbol, interaction_types=post_translational_modifications
-            )
+        for symbol, rid in tqdm(symbol_rids_dict.items(), desc="Update KEGG posttranslational modifications"):
+            sql = sql_temp.format(symbol=symbol, interaction_types=post_translational_modifications)
             df = pd.read_sql(sql, self.engine)
             keys = (
                 "interaction_type",
@@ -363,20 +343,12 @@ class Kegg(odb_meta.Graph):
                     "bel": pmod_bel,
                 }
 
-                pmod_protein_rid = self.node_exists(
-                    "protein", pmod_value_dict, check_for="bel"
-                )
+                pmod_protein_rid = self.node_exists("protein", pmod_value_dict, check_for="bel")
 
                 if not pmod_protein_rid:
-                    pmod_protein_rid = self.get_create_rid(
-                        "protein", pmod_value_dict, check_for="bel"
-                    )
-                    self.create_edge(
-                        "has_modified_protein", object_rid, pmod_protein_rid
-                    )
-                    pmod_rid = self.insert_record(
-                        "pmod", {"bel": f"pmod({bel_pmod})", "type": ebel_pmod}
-                    )
+                    pmod_protein_rid = self.get_create_rid("protein", pmod_value_dict, check_for="bel")
+                    self.create_edge("has_modified_protein", object_rid, pmod_protein_rid)
+                    pmod_rid = self.insert_record("pmod", {"bel": f"pmod({bel_pmod})", "type": ebel_pmod})
                     self.create_edge("has__pmod", pmod_protein_rid, pmod_rid)
 
                 edge_class = f"{effect}_{ebel_pmod}_kg"
@@ -384,9 +356,7 @@ class Kegg(odb_meta.Graph):
                     "interaction_type": interaction_type,
                     "pathway_name": list(pathway_names),
                 }
-                self.create_edge(
-                    edge_class, subject_rid, pmod_protein_rid, edge_value_dict
-                )
+                self.create_edge(edge_class, subject_rid, pmod_protein_rid, edge_value_dict)
                 inserted += 1
 
         self.hgnc.update_bel()

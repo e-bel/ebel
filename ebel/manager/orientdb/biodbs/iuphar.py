@@ -112,9 +112,7 @@ class Iuphar(odb_meta.Graph):
         )
         df.index += 1
         df.index.rename("id", inplace=True)
-        df.to_sql(
-            iuphar.IupharInteraction.__tablename__, self.engine, if_exists="append"
-        )
+        df.to_sql(iuphar.IupharInteraction.__tablename__, self.engine, if_exists="append")
 
         return df.shape[0]
 
@@ -154,14 +152,8 @@ class Iuphar(odb_meta.Graph):
             total=df_join.shape[0],
             desc=f"Update {self.biodb_name.upper()} interactions",
         ):
-            if (
-                data.ligand_gene_symbol
-                and data.ligand_species
-                and "Human" in data.ligand_species
-            ):
-                symbol = data.ligand_gene_symbol.split("|")[
-                    0
-                ]  # human seems to always the first
+            if data.ligand_gene_symbol and data.ligand_species and "Human" in data.ligand_species:
+                symbol = data.ligand_gene_symbol.split("|")[0]  # human seems to always the first
                 a_value_dict = {
                     "pure": True,
                     "bel": f'p(HGNC:"{symbol}")',
@@ -178,9 +170,7 @@ class Iuphar(odb_meta.Graph):
                     "label": data.ligand_name,
                 }
                 a_class = "abundance"
-            a_rid = self.get_create_rid(
-                a_class, value_dict=a_value_dict, check_for="bel"
-            )
+            a_rid = self.get_create_rid(a_class, value_dict=a_value_dict, check_for="bel")
 
             i_value_dict = {
                 "pmids": data.pubmed_id.split("|") if data.pubmed_id else None,
@@ -193,9 +183,7 @@ class Iuphar(odb_meta.Graph):
                 "action": data.action,
             }
             edge_class = iuphar_edge_type_mapper.get(data.type, "iuphar_interaction")
-            self.create_edge(
-                edge_class, from_rid=a_rid, to_rid=data.rid, value_dict=i_value_dict
-            )
+            self.create_edge(edge_class, from_rid=a_rid, to_rid=data.rid, value_dict=i_value_dict)
 
         # not sure if this is really needed
         # Hgnc(self.client).update_bel()

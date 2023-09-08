@@ -1,17 +1,16 @@
 """Reactome."""
 import json
-import pandas as pd
-
-from tqdm import tqdm
 from typing import Dict
+
+import pandas as pd
 from pyorientdb import OrientDB
 from sqlalchemy import distinct
+from tqdm import tqdm
 
-from ebel.tools import get_file_path
+from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import REACTOME
-from ebel.manager.orientdb import odb_meta, urls, odb_structure
-
 from ebel.manager.rdbms.models import reactome
+from ebel.tools import get_file_path
 
 
 class Reactome(odb_meta.Graph):
@@ -32,9 +31,7 @@ class Reactome(odb_meta.Graph):
     def __repr__(self):
         """Represent the class."""
         template = "{{BioDatabase:{class_name}}}[url:{url}, nodes_with_reactome:{num_reactome}, generics:{generics}]"
-        num = self.query_get_dict(
-            "Select count(*) from V where reactome_pathways is not null"
-        )[0]["count"]
+        num = self.query_get_dict("Select count(*) from V where reactome_pathways is not null")[0]["count"]
         representation = template.format(
             class_name=self.__class__.__name__,
             url=self.urls,
@@ -47,13 +44,7 @@ class Reactome(odb_meta.Graph):
         return self.number_of_nodes
 
     def __contains__(self, reactome_id: str) -> bool:
-        return bool(
-            len(
-                self.execute(
-                    "Select 1 from reactome where id = '{}' limit 1".format(reactome_id)
-                )
-            )
-        )
+        return bool(len(self.execute("Select 1 from reactome where id = '{}' limit 1".format(reactome_id))))
 
     def insert_data(self) -> Dict[str, int]:
         """Insert data into OrientDB database."""
@@ -89,17 +80,14 @@ class Reactome(odb_meta.Graph):
         sql_update = "Update protein set reactome_pathways = {} where uniprot = '{}' and pure=true"
 
         sql_accessions = (
-            "Select distinct(uniprot) as accession_id from protein "
-            "where uniprot IS NOT NULL and pure=true"
+            "Select distinct(uniprot) as accession_id from protein " "where uniprot IS NOT NULL and pure=true"
         )
 
         proteins = self.execute(sql_accessions)
 
         updated = 0
         if proteins:
-            for unipid_acc in tqdm(
-                proteins, desc="Update Reactome info in pure proteins."
-            ):
+            for unipid_acc in tqdm(proteins, desc="Update Reactome info in pure proteins."):
                 accession_id = unipid_acc.oRecordData["accession_id"]
                 results = (
                     self.session.query(distinct(reactome.Reactome.name))
@@ -108,8 +96,6 @@ class Reactome(odb_meta.Graph):
                 )
                 if results:
                     reactome_pathways = json.dumps([x[0] for x in results])
-                    updated += self.execute(
-                        sql_update.format(reactome_pathways, accession_id)
-                    )[0]
+                    updated += self.execute(sql_update.format(reactome_pathways, accession_id))[0]
 
         return updated

@@ -1,23 +1,21 @@
 """General methods used by e(BE:L) modules."""
-import re
-import gzip
-import shutil
-import hashlib
 import configparser
-
+import gzip
+import hashlib
 import os.path
-
+import re
+import shutil
 from types import GeneratorType
+from typing import Iterable, List, Union
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine.base import Engine
-from typing import Iterable, Union, List
+from sqlalchemy.orm import sessionmaker
 
 from ebel import defaults
-from ebel.config import write_to_config, get_config_value
-from ebel.defaults import CONN_STR_DEFAULT
+from ebel.config import get_config_value, write_to_config
 from ebel.constants import DATA_DIR
+from ebel.defaults import CONN_STR_DEFAULT
 
 
 class BelRdb(object):
@@ -35,9 +33,7 @@ class BelRdb(object):
                 utf8mb4 = "charset=utf8mb4"
                 if utf8mb4 not in connection_string:
                     connection_string = connection_string + f"?{utf8mb4}"
-                BelRdb.__instance.engine = create_engine(
-                    connection_string, pool_size=30, max_overflow=10
-                )
+                BelRdb.__instance.engine = create_engine(connection_string, pool_size=30, max_overflow=10)
             else:
                 BelRdb.__instance.engine = create_engine(connection_string)
             BelRdb.__instance.session = sessionmaker(bind=BelRdb.__instance.engine)()
@@ -46,9 +42,7 @@ class BelRdb(object):
 
 def _get_connection_string():
     """Get the sqlalchemy connection string from config file, sets the default string if not there."""
-    return get_config_value(
-        "DATABASE", "sqlalchemy_connection_string", CONN_STR_DEFAULT
-    )
+    return get_config_value("DATABASE", "sqlalchemy_connection_string", CONN_STR_DEFAULT)
 
 
 def _get_engine() -> Engine:
@@ -119,9 +113,7 @@ def gunzip(file_path: str, file_path_gunzipped: str):
             shutil.copyfileobj(f_in, f_out)
 
 
-def get_disease_trait_keywords_from_config(
-    traits: Union[str, list] = None, overwrite: bool = False
-) -> List[str]:
+def get_disease_trait_keywords_from_config(traits: Union[str, list] = None, overwrite: bool = False) -> List[str]:
     """Interface with the e(BE:L) config file.
 
     This reads and returns keywords found in the 'SNP_RELATED_TRAITS' section or it will create the section using
@@ -146,25 +138,19 @@ def get_disease_trait_keywords_from_config(
         traits = ",".join([trait.strip() for trait in traits])
 
     if traits and isinstance(traits, str):
-        traits = ",".join(
-            [trait.strip() for trait in traits.split(",")]
-        )  # Split, strip, recombine
+        traits = ",".join([trait.strip() for trait in traits.split(",")])  # Split, strip, recombine
 
     if os.path.isfile(defaults.config_file_path):  # If config file exists
         cfg = configparser.ConfigParser()
         cfg.read(defaults.config_file_path)
 
-        if (
-            cfg.has_section(section_name) and not overwrite
-        ):  # If there is a section for the default value
+        if cfg.has_section(section_name) and not overwrite:  # If there is a section for the default value
             traits = cfg.get(section_name, option)  # Get keyword from config
 
         elif traits and overwrite:  # Traits passed and overwrite enabled
             write_to_config(section_name, option, traits)
 
-        elif (
-            not cfg.has_section(section_name) and traits
-        ):  # No section but traits passed
+        elif not cfg.has_section(section_name) and traits:  # No section but traits passed
             write_to_config(section_name, option, traits)
 
     else:  # If no config file then write a new one with the section/option/value

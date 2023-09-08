@@ -1,26 +1,22 @@
 """Test BEL relations against Expression Atlas."""
 
-from ebel.manager.rdbms.models.expression_atlas import (
-    FoldChange,
-    GroupComparison,
-    Experiment,
-)
-from math import ceil
-from typing import List, Dict, Tuple, Set
-from flask import request
 from collections import namedtuple
+from math import ceil
+from typing import Dict, List, Set, Tuple
+
+from flask import request
 from sqlalchemy.sql import func
 
 from ebel import Bel
+from ebel.manager.rdbms.models.expression_atlas import (Experiment, FoldChange,
+                                                        GroupComparison)
 from ebel.web.api.ebel.v1 import _get_pagination
 
 Relation = namedtuple(
     "Relation",
     ["sub", "sub_bel", "rel_rid", "evidence", "rel", "pmid", "obj", "obj_bel"],
 )
-ComparisonGroupValue = namedtuple(
-    "CompGroupFoldChange", ["group_comparison_id", "log2foldchange", "p_value"]
-)
+ComparisonGroupValue = namedtuple("CompGroupFoldChange", ["group_comparison_id", "log2foldchange", "p_value"])
 
 
 def get_fold_changes(
@@ -59,15 +55,9 @@ def get_fold_changes(
         .group_by(FoldChange.group_comparison_id, FoldChange.gene_id)
     )
     if experiment_names:
-        query = (
-            query.join(GroupComparison)
-            .join(Experiment)
-            .filter(Experiment.name.in_(experiment_names))
-        )
+        query = query.join(GroupComparison).join(Experiment).filter(Experiment.name.in_(experiment_names))
 
-    query_up = query.filter(
-        FoldChange.log2foldchange >= l2fc_threshold, FoldChange.p_value <= pv_threshold
-    )
+    query_up = query.filter(FoldChange.log2foldchange >= l2fc_threshold, FoldChange.p_value <= pv_threshold)
     query_down = query.filter(
         FoldChange.log2foldchange <= -1 * l2fc_threshold,
         FoldChange.p_value <= pv_threshold,
@@ -86,20 +76,12 @@ def validate_bel_against_experiment() -> dict:
     subject_name = request.args.get("subject_hgnc_symbol")
     object_class = request.args.get("object_class", "genetic_flow")
     object_name = request.args.get("object_hgnc_symbol")
-    subject_l2fc_threshold = float(
-        request.args.get("subject_log2foldchange_threshold", "2")
-    )
+    subject_l2fc_threshold = float(request.args.get("subject_log2foldchange_threshold", "2"))
     subject_pv_threshold = float(request.args.get("subject_p_value_threshold", "0.05"))
-    object_l2fc_threshold = float(
-        request.args.get("object_log2foldchange_threshold", "2")
-    )
+    object_l2fc_threshold = float(request.args.get("object_log2foldchange_threshold", "2"))
     object_pv_threshold = float(request.args.get("object_p_value_threshold", "0.05"))
 
-    experiment_names = [
-        x.strip()
-        for x in request.args.get("experiment_names", "").split(",")
-        if x.strip()
-    ]
+    experiment_names = [x.strip() for x in request.args.get("experiment_names", "").split(",") if x.strip()]
 
     subject_sql = f" and name = '{subject_name}'" if subject_name else ""
     object_sql = f" and name = '{object_name}'" if object_name else ""
@@ -124,14 +106,8 @@ def validate_bel_against_experiment() -> dict:
 
     bel = Bel()
     session = bel.session
-    number_of_results = bel.execute("Select count(*) " + sql_basis)[0].oRecordData[
-        "count"
-    ]
-    sql = (
-        "Select * "
-        + sql_basis
-        + f" limit {pagination.page_size} skip {pagination.skip}"
-    )
+    number_of_results = bel.execute("Select count(*) " + sql_basis)[0].oRecordData["count"]
+    sql = "Select * " + sql_basis + f" limit {pagination.page_size} skip {pagination.skip}"
     relations: List[Relation] = [Relation(**x.oRecordData) for x in bel.execute(sql)]
 
     dea_results = {}
@@ -164,28 +140,20 @@ def validate_bel_against_experiment() -> dict:
         res = dea_results[gene_name_sub][gene_name_obj] = {}
 
         # opposite direction
-        sub_up_obj_down_values = get_values_for_intersection(
-            sub_up, obj_down, sub_up_gc_set, obj_down_gc_set
-        )
+        sub_up_obj_down_values = get_values_for_intersection(sub_up, obj_down, sub_up_gc_set, obj_down_gc_set)
         gc_ids.update(set(sub_up_obj_down_values.keys()))
         res["sub_up_obj_down"] = sub_up_obj_down_values
 
-        sub_down_obj_up_values = get_values_for_intersection(
-            sub_down, obj_up, sub_down_gc_set, obj_up_gc_set
-        )
+        sub_down_obj_up_values = get_values_for_intersection(sub_down, obj_up, sub_down_gc_set, obj_up_gc_set)
         gc_ids.update(set(sub_down_obj_up_values.keys()))
         res["sub_down_obj_up"] = sub_down_obj_up_values
 
         # same direction
-        sub_up_obj_up_values = get_values_for_intersection(
-            sub_up, obj_up, sub_up_gc_set, obj_up_gc_set
-        )
+        sub_up_obj_up_values = get_values_for_intersection(sub_up, obj_up, sub_up_gc_set, obj_up_gc_set)
         gc_ids.update(set(sub_up_obj_up_values.keys()))
         res["sub_up_obj_up"] = sub_up_obj_up_values
 
-        sub_down_obj_down_values = get_values_for_intersection(
-            sub_down, obj_down, sub_down_gc_set, obj_down_gc_set
-        )
+        sub_down_obj_down_values = get_values_for_intersection(sub_down, obj_down, sub_down_gc_set, obj_down_gc_set)
         gc_ids.update(set(sub_down_obj_down_values.keys()))
         res["sub_down_obj_down"] = sub_down_obj_down_values
 
@@ -216,12 +184,8 @@ def get_bel_relations(relations: List[Relation], dea_results) -> List[dict]:
     for relation in relations:
         dea = dea_results[relation.sub][relation.obj]
         rel_dict = relation._asdict()
-        same_direction = list(dea["sub_up_obj_up"].keys()) + list(
-            dea["sub_down_obj_down"].keys()
-        )
-        opposite_direction = list(dea["sub_up_obj_down"].keys()) + list(
-            dea["sub_down_obj_up"].keys()
-        )
+        same_direction = list(dea["sub_up_obj_up"].keys()) + list(dea["sub_down_obj_down"].keys())
+        opposite_direction = list(dea["sub_up_obj_down"].keys()) + list(dea["sub_down_obj_up"].keys())
         if relation.rel in ["directly_increases", "increases", "positive_correlation"]:
             rel_dict["supported_by"] = same_direction
             rel_dict["in_contradiction_to"] = opposite_direction
@@ -252,9 +216,7 @@ def get_group_experiment_by_gc_ids(session, group_comparison_ids: Set[int]) -> d
     """
     results = {}
     for group_comparison_id in group_comparison_ids:
-        gc: GroupComparison = (
-            session.query(GroupComparison).filter_by(id=group_comparison_id).first()
-        )
+        gc: GroupComparison = session.query(GroupComparison).filter_by(id=group_comparison_id).first()
         results[group_comparison_id] = {
             "experiment_id": gc.experiment.id,
             "experiment": gc.experiment.name,
@@ -285,12 +247,8 @@ def get_values_for_intersection(
     Dictionary with group comparison ID as keys and the log2 fold changes + p values as a value dictionary.
     """
     sub_obj_gc_ids = sub_gc_set & obj_gc_set
-    gc_sub_dict = {
-        x.group_comparison_id: {"l2fc": x.log2foldchange, "pv": x.p_value} for x in sub
-    }
-    gc_obj_dict = {
-        x.group_comparison_id: {"l2fc": x.log2foldchange, "pv": x.p_value} for x in obj
-    }
+    gc_sub_dict = {x.group_comparison_id: {"l2fc": x.log2foldchange, "pv": x.p_value} for x in sub}
+    gc_obj_dict = {x.group_comparison_id: {"l2fc": x.log2foldchange, "pv": x.p_value} for x in obj}
 
     results = {}
     for sub_obj_gc_id in sub_obj_gc_ids:

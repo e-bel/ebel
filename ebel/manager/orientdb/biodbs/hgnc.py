@@ -44,9 +44,7 @@ class Hgnc(odb_meta.Graph):
         """Test existence of hgnc_id."""
         if isinstance(hgnc_id, int):
             hgnc_id = "HGNC:{}".format(hgnc_id)
-        r = self.execute(
-            "Select count(*) from bel where hgnc.id = '{}' limit 1".format(hgnc_id)
-        )
+        r = self.execute("Select count(*) from bel where hgnc.id = '{}' limit 1".format(hgnc_id))
         return bool(len(r[0].oRecordData["count"]))
 
     def __len__(self):
@@ -57,9 +55,7 @@ class Hgnc(odb_meta.Graph):
     def __repr__(self) -> str:
         """Represent HGNC."""
         template = "{{BioDatabase:Hgnc}}[url:{url}, nodes:{nodes}, generics:{generics}]"
-        representation = template.format(
-            url=self.urls, nodes=self.number_of_nodes, generics=self.number_of_generics
-        )
+        representation = template.format(url=self.urls, nodes=self.number_of_nodes, generics=self.number_of_generics)
         return representation
 
     def insert_data(self) -> Dict[str, int]:
@@ -78,9 +74,7 @@ class Hgnc(odb_meta.Graph):
 
         with open(file_path, "r", encoding="utf8") as hgnc_file:
             raw_content = hgnc_file.read()
-            string_encode = raw_content.encode(
-                "ascii", "ignore"
-            )  # Convert unicode chars to ascii
+            string_encode = raw_content.encode("ascii", "ignore")  # Convert unicode chars to ascii
             hgnc_content = json.loads(string_encode.decode())
 
         df = pd.DataFrame(hgnc_content["response"]["docs"])
@@ -149,9 +143,7 @@ class Hgnc(odb_meta.Graph):
             df_1n_table = df[[df_col, "hgnc_id"]].explode(df_col).dropna()
             if m_col:
                 df_1n_table.rename(columns={df_col: m_col}, inplace=True)
-            df_1n_table.to_sql(
-                model.__tablename__, self.engine, if_exists="append", index=False
-            )
+            df_1n_table.to_sql(model.__tablename__, self.engine, if_exists="append", index=False)
 
         return df.shape[0]
 
@@ -165,9 +157,7 @@ class Hgnc(odb_meta.Graph):
 
         with open(file_path, "r", encoding="utf8") as hgnc_file:
             raw_content = hgnc_file.read()
-            string_encode = raw_content.encode(
-                "ascii", "ignore"
-            )  # Convert unicode chars to ascii
+            string_encode = raw_content.encode("ascii", "ignore")  # Convert unicode chars to ascii
             hgnc_content = json.loads(string_encode.decode())
 
         rows = hgnc_content["response"]["docs"]
@@ -235,9 +225,7 @@ class Hgnc(odb_meta.Graph):
             data = result[0].oRecordData
             status = data.pop("status")
             if status == "Entry Withdrawn":
-                data[
-                    "suggested_corrections"
-                ] = f"{status}: Please use correct HGNC symbol"
+                data["suggested_corrections"] = f"{status}: Please use correct HGNC symbol"
             else:
                 data["suggested_corrections"] = None
 
@@ -271,21 +259,15 @@ class Hgnc(odb_meta.Graph):
 
     def get_bel_symbols_all(self):
         """Return set of all gene symbols in database."""
-        sql_symbols = (
-            "Select distinct(name) as symbol from bio_object where namespace='HGNC'"
-        )
+        sql_symbols = "Select distinct(name) as symbol from bio_object where namespace='HGNC'"
         return {x.oRecordData["symbol"] for x in self.execute(sql_symbols)}
 
     def get_correct_symbol(self, symbol: str):
         """Checks if symbol is valid otherwise checks previsous symbols."""
-        result_in_symbol = (
-            self.session.query(hgnc.Hgnc).filter(hgnc.Hgnc.symbol == symbol).first()
-        )
+        result_in_symbol = self.session.query(hgnc.Hgnc).filter(hgnc.Hgnc.symbol == symbol).first()
         if not result_in_symbol:
             result_in_prev_symbol = (
-                self.session.query(hgnc.PrevSymbol)
-                .filter(hgnc.PrevSymbol.prev_symbol == symbol)
-                .first()
+                self.session.query(hgnc.PrevSymbol).filter(hgnc.PrevSymbol.prev_symbol == symbol).first()
             )
             if result_in_prev_symbol:
                 symbol = result_in_prev_symbol.hgnc.symbol
@@ -295,9 +277,7 @@ class Hgnc(odb_meta.Graph):
 
     def correct_wrong_symbol(self, symbol, bel_symbols_all: set):
         """Corrects the symbol of the node and relinks all edges to existing node if needed."""
-        result = (
-            self.session.query(hgnc.PrevSymbol).filter_by(prev_symbol=symbol).first()
-        )
+        result = self.session.query(hgnc.PrevSymbol).filter_by(prev_symbol=symbol).first()
         if result:
             correct_symbol = result.hgnc.symbol
             if correct_symbol not in bel_symbols_all:
@@ -305,12 +285,8 @@ class Hgnc(odb_meta.Graph):
                 for row in self.execute(sql):
                     r = row.oRecordData
                     rid = r["rid"]
-                    correct_bel = re.sub(
-                        rf'(?<=:")({symbol})(?=")', correct_symbol, r["bel"]
-                    )
-                    sql = (
-                        f"UPDATE {rid} SET bel='{correct_bel}', name='{correct_symbol}'"
-                    )
+                    correct_bel = re.sub(rf'(?<=:")({symbol})(?=")', correct_symbol, r["bel"])
+                    sql = f"UPDATE {rid} SET bel='{correct_bel}', name='{correct_symbol}'"
                     self.execute(sql)
             else:
                 # TODO: correction only possible if all edges are relinked to the correct node and old node is deleted
@@ -365,9 +341,7 @@ class Hgnc(odb_meta.Graph):
         )
         return self.execute(sql)[0]
 
-    def update_rna(
-        self, hgnc_rid: str, label: str, hgnc_symbol: str, suggested_corrections: str
-    ) -> int:
+    def update_rna(self, hgnc_rid: str, label: str, hgnc_symbol: str, suggested_corrections: str) -> int:
         """Update RNAs in OrientDB and returns number of updates."""
         suggest = (
             ", suggested_corrections={{'wrong name': {}}}".format(suggested_corrections)
@@ -384,9 +358,7 @@ class Hgnc(odb_meta.Graph):
         )
         return self.execute(sql)[0]
 
-    def update_protein(
-        self, hgnc_rid: str, label: str, hgnc_symbol: str, suggested_corrections: str
-    ) -> int:
+    def update_protein(self, hgnc_rid: str, label: str, hgnc_symbol: str, suggested_corrections: str) -> int:
         """Update proteins in OrientDB and returns number of updates."""
         suggest = (
             ", suggested_corrections={{'wrong name': {}}}".format(suggested_corrections)
@@ -408,11 +380,7 @@ class Hgnc(odb_meta.Graph):
         hgnc = self.get_basic_entry_by_symbol(symbol)
 
         if hgnc:
-            suggest = (
-                json.dumps(hgnc.suggested_corrections)
-                if hgnc.suggested_corrections
-                else None
-            )
+            suggest = json.dumps(hgnc.suggested_corrections) if hgnc.suggested_corrections else None
 
             num_update_genes = self.update_gene(
                 hgnc_symbol=hgnc.symbol,
@@ -441,9 +409,7 @@ class Hgnc(odb_meta.Graph):
 
     def get_symbol_entrez_dict(self) -> Dict[str, int]:
         """Return dictionary with gene symbols as keys and entrez IDs as values."""
-        query = self.session.query(hgnc.Hgnc.symbol, hgnc.Hgnc.entrez_id).filter(
-            hgnc.Hgnc.entrez_id.isnot(None)
-        )
+        query = self.session.query(hgnc.Hgnc.symbol, hgnc.Hgnc.entrez_id).filter(hgnc.Hgnc.entrez_id.isnot(None))
         return {r.symbol: r.entrez_id for r in query.all()}
 
     def update_interactions(self) -> int:

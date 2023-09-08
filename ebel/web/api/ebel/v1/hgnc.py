@@ -1,8 +1,8 @@
 """HGNC API methods."""
 from flask import request
 
-from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import hgnc
+from ebel.web.api import RDBMS
 from ebel.web.api.ebel.v1 import _get_data
 
 

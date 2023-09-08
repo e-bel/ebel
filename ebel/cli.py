@@ -1,22 +1,20 @@
 """Command line interface to e(BE:L)."""
 
-import sys
 import logging
+import sys
 
 import click
 
 import ebel.database
 from ebel import Bel, web
-from ebel.config import user_config_setup, set_configuration
+from ebel.config import set_configuration, user_config_setup
 from ebel.manager.orientdb.constants import DRUGBANK
-from ebel.validate import validate_bel_file, repair_bel_file
+from ebel.validate import repair_bel_file, validate_bel_file
 
 logger = logging.getLogger(__name__)
 
 
-@click.group(
-    help="BEL test framework Command Line Utilities on {}".format(sys.executable)
-)
+@click.group(help="BEL test framework Command Line Utilities on {}".format(sys.executable))
 @click.version_option()
 def main():
     """Entry method."""
@@ -132,17 +130,13 @@ def repair(bel_script_path: str, new_file_path: str):
 @click.option("-h", "--odb_server", help="OrientDB server name or URI")
 @click.option("-o", "--odb_port", help="OrientDB server port")
 @click.option("--odb_user_reader", help=" OrientDB user with only read rights")
-@click.option(
-    "--odb_user_reader_password", help="OrientDB user with only read rights password"
-)
+@click.option("--odb_user_reader_password", help="OrientDB user with only read rights password")
 @click.option(
     "--odb_root_password",
     help="OrientDB root user password (only during database setup)",
 )
 @click.option("--kegg_species", help="KEGG species")
-@click.option(
-    "--sqlalchemy_connection_string", help="schema is user:password@server/database"
-)
+@click.option("--sqlalchemy_connection_string", help="schema is user:password@server/database")
 @click.option("--snp_related_traits", help="key of SNP related traits in GWAS catalog")
 @click.option("--drugbank_user", help="Drugbank user")
 @click.option("--drugbank_password", help="DrugBank password")
@@ -257,15 +251,11 @@ def import_json(
     default=[],
     help="Comma-separated list of databases to include during enrichment",
 )
-@click.option(
-    "--skip_drugbank", is_flag=True, default=False, help="Flag to disable DrugBank"
-)
+@click.option("--skip_drugbank", is_flag=True, default=False, help="Flag to disable DrugBank")
 @click.option("--drugbank_user", default=None, help="Valid username for DrugBank")
 @click.option("--drugbank_password", default=None, help="Valid username for DrugBank")
 @click.option("-n", "--odb_name", default=None, help="OrientDB database name")
-@click.option(
-    "-u", "--odb_user", default=None, help="OrientDB user (with admin rights)"
-)
+@click.option("-u", "--odb_user", default=None, help="OrientDB user (with admin rights)")
 @click.option(
     "-p",
     "--odb_password",
@@ -274,9 +264,7 @@ def import_json(
 )
 @click.option("-h", "--odb_server", default=None, help="OrientDB server name or URI")
 @click.option("-o", "--odb_port", default=None, help="OrientDB server port")
-@click.option(
-    "--odb_user_reader", default=None, help=" OrientDB user with only read rights"
-)
+@click.option("--odb_user_reader", default=None, help=" OrientDB user with only read rights")
 @click.option(
     "--odb_user_reader_password",
     default=None,
@@ -288,12 +276,8 @@ def import_json(
     help="OrientDB root user password (only during database setup)",
 )
 @click.option("--kegg_species", default="hsa,rno,mmu", help="KEGG species")
-@click.option(
-    "--sqlalchemy_connection_string", help="schema is user:password@server/database"
-)
-@click.option(
-    "--snp_related_traits", help="key of SNP related traits in GWAS catalog and ClinVar"
-)
+@click.option("--sqlalchemy_connection_string", help="schema is user:password@server/database")
+@click.option("--snp_related_traits", help="key of SNP related traits in GWAS catalog and ClinVar")
 def enrich(
     skip: str,
     include: str,
@@ -368,9 +352,7 @@ def enrich(
     bel = Bel()
 
     if not skip_drugbank:
-        bel.drugbank.get_user_passwd(
-            drugbank_user=drugbank_user, drugbank_password=drugbank_password
-        )
+        bel.drugbank.get_user_passwd(drugbank_user=drugbank_user, drugbank_password=drugbank_password)
 
     skip = skip.split(",") if isinstance(skip, str) else skip
     include = include.split(",") if isinstance(include, str) else include
@@ -396,17 +378,13 @@ def set_connection(connection):
 @click.option("-u", "--user", default="ebel_user", help="MySQL username")
 @click.option("-p", "--password", default="ebel_passwd", help="MySQL password")
 @click.option("-d", "--database", default="ebel", help="MySQL database name")
-@click.option(
-    "-i", "--interactive", is_flag=True, default=False, help="Enable interactive mode"
-)
+@click.option("-i", "--interactive", is_flag=True, default=False, help="Enable interactive mode")
 def set_mysql(host: str, user: str, password: str, database: str, interactive: bool):
     """Set the SQLAlchemy connection string with MySQL settings."""
     if interactive:
         host, user, password, db = ebel.database.set_mysql_interactive()
 
-    ebel.database.set_mysql_connection(
-        host=host, user=user, password=password, db=database
-    )
+    ebel.database.set_mysql_connection(host=host, user=user, password=password, db=database)
 
 
 @main.command()

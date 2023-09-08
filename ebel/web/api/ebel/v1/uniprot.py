@@ -1,14 +1,15 @@
 """UniProt API methods."""
-from flask import request
 import json
-from . import add_query_filters
+
+from flask import request
+
 from ebel import Bel
-from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import uniprot
-from ebel.web.api.ebel.v1 import (
-    _get_paginated_query_result,
-    _get_terms_from_model_starts_with,
-)
+from ebel.web.api import RDBMS
+from ebel.web.api.ebel.v1 import (_get_paginated_query_result,
+                                  _get_terms_from_model_starts_with)
+
+from . import add_query_filters
 
 model_by_tablename = {x.__tablename__: x for x in uniprot.Base.__subclasses__()}
 nm_tables = {
@@ -73,11 +74,7 @@ def get_uniprot():
 
     keyword = request.args.get("keyword")
     if keyword:
-        q = (
-            q.join(uniprot.uniprot__uniprot_keyword)
-            .join(uniprot.Keyword)
-            .filter_by(keyword_name=keyword)
-        )
+        q = q.join(uniprot.uniprot__uniprot_keyword).join(uniprot.Keyword).filter_by(keyword_name=keyword)
 
     xref_db = request.args.get("xref_db")
     xref_id = request.args.get("xref_id")
@@ -104,9 +101,7 @@ def get_keyword_starts_with():
 
 def get_subcellular_location_starts_with():
     """Get entries where subcellular location starts with given value."""
-    return _get_terms_from_model_starts_with(
-        "subcellular_location", uniprot.SubcellularLocation.name
-    )
+    return _get_terms_from_model_starts_with("subcellular_location", uniprot.SubcellularLocation.name)
 
 
 def get_gene_symbol_starts_with():
@@ -121,16 +116,12 @@ def get_gene_starts_with():
 
 def get_organism_starts_with():
     """Get entries where organism starts with given value."""
-    return _get_terms_from_model_starts_with(
-        "organism", uniprot.Organism.scientific_name
-    )
+    return _get_terms_from_model_starts_with("organism", uniprot.Organism.scientific_name)
 
 
 def get_function_starts_with():
     """Get entries where description starts with given value."""
-    return _get_terms_from_model_starts_with(
-        "description", uniprot.Function.description
-    )
+    return _get_terms_from_model_starts_with("description", uniprot.Function.description)
 
 
 def get_bel_node_uniprot():
@@ -160,9 +151,7 @@ def get_bel_node_uniprot():
         result_dict["edges"] = {}
         for direction in ("in", "out"):
             match = "match {class:protein, where:(uniprot='"
-            match += (
-                uniprot + "' and pure=true)}." + direction + "E(bel_relation){as:e}"
-            )
+            match += uniprot + "' and pure=true)}." + direction + "E(bel_relation){as:e}"
             match += " return e.@rid, e.@class as relation"
             sql_edges = f"""Select relation, count(*)
                     from ({match}) group by relation order by count desc"""

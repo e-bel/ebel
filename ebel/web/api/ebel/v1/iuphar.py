@@ -1,9 +1,9 @@
 """IUPHAR API methods."""
 from flask.globals import request
-from ebel.manager.orientdb.odb_structure import iuphar_edges
 
-from ebel.web.api import RDBMS
+from ebel.manager.orientdb.odb_structure import iuphar_edges
 from ebel.manager.rdbms.models import iuphar
+from ebel.web.api import RDBMS
 from ebel.web.api.ebel.v1 import _get_data, _get_paginated_ebel_query_result
 
 
@@ -54,10 +54,7 @@ def get_ebel_relation():
     if paras or pmid:
         wheres = []
         if paras:
-            wheres += [
-                f'{conf[k].replace(".asString()","")} like "{v}"'
-                for k, v in paras.items()
-            ]
+            wheres += [f'{conf[k].replace(".asString()","")} like "{v}"' for k, v in paras.items()]
         if pmid:
             wheres += [f"{pmid} in pmids"]
 

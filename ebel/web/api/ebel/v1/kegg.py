@@ -1,15 +1,12 @@
 """KEGG API methods."""
 
-from sqlalchemy import or_
 from flask.globals import request
+from sqlalchemy import or_
 
-from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models.kegg import Kegg
-from ebel.web.api.ebel.v1 import (
-    _get_data,
-    _get_paginated_query_result,
-    _get_paginated_ebel_query_result,
-)
+from ebel.web.api import RDBMS
+from ebel.web.api.ebel.v1 import (_get_data, _get_paginated_ebel_query_result,
+                                  _get_paginated_query_result)
 
 
 def get_kegg():
@@ -51,10 +48,7 @@ def get_ebel_relation():
     if paras or pathway_name:
         wheres = []
         if paras:
-            wheres += [
-                f'{conf[k].replace(".asString()","")} like "{v}"'
-                for k, v in paras.items()
-            ]
+            wheres += [f'{conf[k].replace(".asString()","")} like "{v}"' for k, v in paras.items()]
         if pathway_name:
             wheres += [f'"{pathway_name}" in pathway_name']
 

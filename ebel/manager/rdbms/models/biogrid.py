@@ -1,10 +1,9 @@
 """BioGRID RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
-
 
 Base = declarative_base()
 
@@ -20,12 +19,8 @@ class Biogrid(Base):
     biogrid_b_id = Column(Integer, ForeignKey("biogrid_interactor.biogrid_id"))
     biogrid_b = relationship("Interactor", foreign_keys=[biogrid_b_id])
     biogrid_id = Column(Integer, nullable=True)
-    experimental_system_id = Column(
-        Integer, ForeignKey("biogrid_experimental_system.id")
-    )
-    experimental_system = relationship(
-        "ExperimentalSystem", foreign_keys=[experimental_system_id]
-    )
+    experimental_system_id = Column(Integer, ForeignKey("biogrid_experimental_system.id"))
+    experimental_system = relationship("ExperimentalSystem", foreign_keys=[experimental_system_id])
     throughput_id = Column(Integer, ForeignKey("biogrid_throughput.id"))
     throughput = relationship("Throughput", foreign_keys=[throughput_id])
     score = Column(Float, nullable=True)
@@ -43,9 +38,7 @@ class Biogrid(Base):
         return {
             "biogrid_a": self.biogrid_a.as_dict(),
             "biogrid_b": self.biogrid_b.as_dict(),
-            "experimental_system": self.experimental_system.as_dict()
-            if self.experimental_system
-            else None,
+            "experimental_system": self.experimental_system.as_dict() if self.experimental_system else None,
             "throughput": self.throughput.as_dict() if self.throughput else None,
             "biogrid_id": self.biogrid_id,
             "score": self.score if self.score else None,
