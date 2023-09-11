@@ -18,9 +18,10 @@ from ebel.errors import (NotDownloadedFromUrl, NotInAnnotationList,
                          NotInNamespaceList, NotInNamespacePattern,
                          NotInNamespaceUrl, WithoutDefinedAnnotation,
                          WithoutDefinedNamespace, _Error)
-from ebel.manager.models import (AnnotationEntry, AnnotationManager,
-                                 NamespaceEntry, NamespaceManager,
-                                 reset_tables, Namespace as NamespaceModel, Annotation as AnnotationModel)
+from ebel.manager.models import Annotation as AnnotationModel
+from ebel.manager.models import AnnotationEntry, AnnotationManager
+from ebel.manager.models import Namespace as NamespaceModel
+from ebel.manager.models import NamespaceEntry, NamespaceManager, reset_tables
 from ebel.tools import BelRdb
 from ebel.warnings import AlsoUsedInOtherNamespace, _Warning
 
