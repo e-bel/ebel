@@ -6,7 +6,7 @@ import typing
 from collections import Counter, OrderedDict, defaultdict, namedtuple
 from typing import DefaultDict, Dict, Generator, List, Set
 
-from lark import Token, Transformer
+from lark import Transformer
 from lark.lexer import Token
 from lark.tree import Tree
 
@@ -20,7 +20,7 @@ from ebel.errors import (NotDownloadedFromUrl, NotInAnnotationList,
                          WithoutDefinedNamespace, _Error)
 from ebel.manager.models import (AnnotationEntry, AnnotationManager,
                                  NamespaceEntry, NamespaceManager,
-                                 reset_tables)
+                                 reset_tables, Namespace as NamespaceModel, Annotation as AnnotationModel)
 from ebel.tools import BelRdb
 from ebel.warnings import AlsoUsedInOtherNamespace, _Warning
 
@@ -801,13 +801,13 @@ class _BelScript:
         self.notDownloadedFromUrls = []
 
         self.namespace_manager = NamespaceManager(
-            model=Namespace,
+            model=NamespaceModel,
             entries_model=NamespaceEntry,
             grammar_start=GRAMMAR_START_NS,
         )
 
         self.annotation_manager = AnnotationManager(
-            model=Annotation,
+            model=AnnotationModel,
             entries_model=AnnotationEntry,
             grammar_start=GRAMMAR_START_ANNO,
         )

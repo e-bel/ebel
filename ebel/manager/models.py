@@ -20,8 +20,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
 
-from ebel.constants import (FILE, GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_ANNO,
-                            GRAMMAR_START_NS, URL)
+from ebel.constants import FILE, GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_ANNO, GRAMMAR_START_NS, URL
 from ebel.tools import BelRdb
 
 Base = declarative_base()
@@ -447,7 +446,7 @@ class NamespaceManager(ModelManager):
 
     def __int__(self, session_obj):
         """Init method."""
-        super(NamespaceManager, self).__int__(
+        super().__init__(
             model=Namespace,
             entries_model=NamespaceEntry,
             grammar_start=GRAMMAR_START_NS,
@@ -459,7 +458,7 @@ class AnnotationManager(ModelManager):
 
     def __int__(self, session_obj):
         """Init method."""
-        super(AnnotationManager, self).__int__(
+        super().__init__(
             model=Annotation,
             entries_model=AnnotationEntry,
             grammar_start=GRAMMAR_START_ANNO,
