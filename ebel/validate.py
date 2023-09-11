@@ -181,11 +181,11 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
 
     if content != new_content:
         if new_file_path:
-            with open(new_file_path + ".diff2repaired", "w") as new_file:
+            with open(new_file_path + ".diff2repaired", "w", encoding="utf-8") as new_file:
                 new_file.write("\n".join(list(difflib.ndiff(content.split("\n"), new_content.split("\n")))))
 
         else:
-            with open(bel_script_path, "w") as output_file:
+            with open(bel_script_path, "w", encoding="utf-8") as output_file:
                 output_file.write(new_content)
 
 
@@ -213,13 +213,6 @@ def replace_ebel_relation_terms(bel_file_content: str):
         "transcribed_to": "transcribedTo",
         "translated_to": "translatedTo",
     }
-
-    pattern = (
-        r"\)\s(analogous_to|biomarker_for|causes_no_change|directly_decreases|directly_increases"
-        r"|equivalent_to|has_component|has_components|has_member|has_members|is_a|negative_correlation|"
-        r"positive_correlation|prognostic_biomarker_for|rate_limiting_step_of|sub_process_of|transcribed_to"
-        r"|translated_to)"
-    )
 
     # Can use simple string replace since eBEL terms are quite unique
     for ebel_term, bel_term in ebel_to_bel_map.items():
