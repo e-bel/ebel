@@ -57,7 +57,7 @@ flask = "^2.0.1"
 flask_cors = "^3.0.10"
 connexion = {version = "^2.14.1", extras = ["swagger-ui"]}
 cryptography = "^3.4.7"
-openpyxl = "^3.0.7"
+openpyxl = "^3.0.10"
 graphviz = "0.20"
 pyorientdb = "^1.0.0"
 python = "^3.9"
