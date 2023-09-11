@@ -266,7 +266,7 @@ To load example files in container and import.
 .. code-block::
 
     docker exec -it ebel_ebel git clone https://github.com/e-bel/example_json_bel_files.git
-    docker exec -it ebel_ebel ebel ebel import-json example_json_bel_files/phago.json -e
+    docker exec -it ebel_ebel ebel import-json example_json_bel_files/phago.bel.json -e
 
 
 To enrich the network:

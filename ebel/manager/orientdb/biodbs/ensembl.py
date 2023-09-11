@@ -1,16 +1,15 @@
 """Ensembl."""
-import re
 import gzip
-import pandas as pd
-
+import re
 from typing import Dict
+
+import pandas as pd
 from pyorientdb import OrientDB
 
-from ebel.tools import get_file_path
 from ebel.manager.orientdb import odb_meta, urls
 from ebel.manager.orientdb.constants import ENSEMBL
-
 from ebel.manager.rdbms.models import ensembl
+from ebel.tools import get_file_path
 
 # TODO: use ftp://ftp.ensembl.org/pub/release-102/mysql/homo_sapiens_core_102_38/gene.txt.gz instead CDs
 
@@ -23,9 +22,7 @@ class Ensembl(odb_meta.Graph):
         self.client = client
         self.biodb_name = ENSEMBL
         self.urls = {self.biodb_name: urls.ENSEMBL_CDS}
-        super().__init__(urls=self.urls,
-                         tables_base=ensembl.Base,
-                         biodb_name=self.biodb_name)
+        super().__init__(urls=self.urls, tables_base=ensembl.Base, biodb_name=self.biodb_name)
 
     def __len__(self):
         return self.session.query(ensembl.Ensembl).count()
@@ -41,16 +38,18 @@ class Ensembl(odb_meta.Graph):
         with gzip.open(file_path, "r") as f:
             lines = [x.decode("utf-8").strip() for x in f.readlines() if x.startswith(b">")]
 
-        regex = (r"^>(?P<enst>ENST\d+)\.\d+ cds chromosome:GRCh"
-                 r"(?P<version>\d+):"
-                 r"(?P<chromosome>((1|2)?\d|X|Y|MT)):"
-                 r"(?P<start>\d+):"
-                 r"(?P<stop>\d+):"
-                 r"(?P<orientation>-?1) gene:"
-                 r"(?P<gene_id>(?P<gene_id_short>ENSG\d+)\.\d+) "
-                 r"gene_biotype:protein_coding transcript_biotype:protein_coding gene_symbol:"
-                 r"(?P<symbol>\S+) .*? \[Source:HGNC Symbol;Acc:"
-                 r"(?P<hgnc_id>HGNC:\d+)\]")
+        regex = (
+            r"^>(?P<enst>ENST\d+)\.\d+ cds chromosome:GRCh"
+            r"(?P<version>\d+):"
+            r"(?P<chromosome>((1|2)?\d|X|Y|MT)):"
+            r"(?P<start>\d+):"
+            r"(?P<stop>\d+):"
+            r"(?P<orientation>-?1) gene:"
+            r"(?P<gene_id>(?P<gene_id_short>ENSG\d+)\.\d+) "
+            r"gene_biotype:protein_coding transcript_biotype:protein_coding gene_symbol:"
+            r"(?P<symbol>\S+) .*? \[Source:HGNC Symbol;Acc:"
+            r"(?P<hgnc_id>HGNC:\d+)\]"
+        )
         pattern = re.compile(regex)
         for line in lines:
             found = pattern.search(line)
@@ -59,8 +58,8 @@ class Ensembl(odb_meta.Graph):
 
         df = pd.DataFrame(data)
         df.index += 1
-        df.index.rename('id', inplace=True)
-        df.to_sql(ensembl.Ensembl.__tablename__, self.engine, if_exists='append')
+        df.index.rename("id", inplace=True)
+        df.to_sql(ensembl.Ensembl.__tablename__, self.engine, if_exists="append")
 
         self.session.commit()
 

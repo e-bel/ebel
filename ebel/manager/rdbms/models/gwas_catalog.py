@@ -1,7 +1,7 @@
 """GWAS Catalog RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import Column, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, Text, ForeignKey
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -11,7 +11,7 @@ Base = declarative_base()
 class GwasCatalog(Base):
     """Class definition for the gwascatalog table."""
 
-    __tablename__ = 'gwascatalog'
+    __tablename__ = "gwascatalog"
     id = Column(Integer, primary_key=True)
     date_added_to_catalog = Column(String(255))
     pubmedid = Column(Integer)
@@ -52,15 +52,15 @@ class GwasCatalog(Base):
     def as_dict(self):
         """Convert object values to dictionary."""
         gwas_catalog = object_as_dict(self)
-        gwas_catalog.update({'snp_genes': [x.ensembl_identifier for x in self.snp_genes]})
+        gwas_catalog.update({"snp_genes": [x.ensembl_identifier for x in self.snp_genes]})
         return gwas_catalog
 
 
 class SnpGene(Base):
     """Class definition for the gwascatalog_snpgene table."""
 
-    __tablename__ = 'gwascatalog_snpgene'
+    __tablename__ = "gwascatalog_snpgene"
     id = Column(Integer, primary_key=True)
     ensembl_identifier = Column(String(100), nullable=False, index=True)
-    gwascatalog_id = Column(Integer, ForeignKey('gwascatalog.id'))
+    gwascatalog_id = Column(Integer, ForeignKey("gwascatalog.id"))
     gwascatalog = relationship("GwasCatalog", back_populates="snp_genes")

@@ -1,7 +1,7 @@
 """StringDB RDBMS model definition."""
 
+from sqlalchemy import Boolean, Column, Integer, SmallInteger, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, SmallInteger, Boolean
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -11,7 +11,7 @@ Base = declarative_base()
 class StringDb(Base):
     """Class definition for the stringdb table."""
 
-    __tablename__ = 'stringdb'
+    __tablename__ = "stringdb"
 
     id = Column(Integer, primary_key=True)
 
@@ -36,27 +36,27 @@ class StringDb(Base):
 
     def as_dict(self):
         """Convert object values to dictionary."""
-        return object_as_dict(self, exclude=['id'])
+        return object_as_dict(self, exclude=["id"])
 
 
 class StringDbProtein(Base):
     """Class definition for the stringdb_protein table."""
 
-    __tablename__ = 'stringdb_protein'
+    __tablename__ = "stringdb_protein"
 
     id = Column(Integer, primary_key=True)
-    protein_external_id = Column(String(50), nullable=False, index=True)
+    string_protein_id = Column(String(50), nullable=False, index=True)
     preferred_name = Column(String(50), nullable=False, index=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""
-        return object_as_dict(self, exclude=['id'])
+        return object_as_dict(self, exclude=["id"])
 
 
 class StringDbAction(Base):
     """Class definition for the stringdb_action table."""
 
-    __tablename__ = 'stringdb_action'
+    __tablename__ = "stringdb_action"
     id = Column(Integer, primary_key=True)
     item_id_a = Column(String(50), nullable=False)
     item_id_b = Column(String(50), nullable=False)
@@ -70,4 +70,4 @@ class StringDbAction(Base):
 
     def as_dict(self):
         """Convert object values to dictionary."""
-        return object_as_dict(self, exclude=['id'])
+        return object_as_dict(self, exclude=["id"])

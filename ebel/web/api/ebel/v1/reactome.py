@@ -13,8 +13,8 @@ def get_reactome():
 
 def get_bel_node_by_pathway_name():
     """Get Reactome related eBEL nodes by pathway name."""
-    pathway_name = request.args.get('pathway_name')
-    sql = f'''SELECT
+    pathway_name = request.args.get("pathway_name")
+    sql = f"""SELECT
             @rid.asString() as rid,
             namespace,
             name,
@@ -25,5 +25,5 @@ def get_bel_node_by_pathway_name():
         WHERE
             pure=true AND
             "{pathway_name}" in reactome_pathways
-    '''
+    """
     return _get_paginated_ebel_query_result(sql)

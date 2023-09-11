@@ -1,31 +1,28 @@
 """This module contains the SQLAlchemy database models that support the definition cache and graph cache."""
 
+import codecs
+import datetime
+import logging
 import os
 import re
 import urllib
-import codecs
-import logging
-import requests
-import datetime
-import sqlalchemy
+from typing import List, Optional, Tuple, Union
+from urllib.parse import quote_plus, urlencode
+
 import pandas as pd
-
-from tqdm import tqdm
-from lark import Lark
-from urllib.parse import urlencode, quote_plus
-from typing import List, Tuple, Optional, Union
-
+import requests
+import sqlalchemy
+from lark import Lark, Token, Tree
+from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql.expression import func
-from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy import Column, ForeignKey, Integer, String, Index, Boolean
-
 from sqlalchemy_utils import create_database, database_exists
+from tqdm import tqdm
 
-from ebel import parser
+from ebel.constants import (FILE, GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_ANNO,
+                            GRAMMAR_START_NS, URL)
 from ebel.tools import BelRdb
-from ebel.constants import GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_NS, GRAMMAR_START_ANNO, URL, FILE
-
 
 Base = declarative_base()
 logger = logging.getLogger(__name__)
@@ -57,7 +54,7 @@ def foreign_key_to(table_name):
     :return: foreign key column
     :rtype: sqlalchemy.Column
     """
-    foreign_column = table_name + '.id'
+    foreign_column = table_name + ".id"
     return Column(Integer, ForeignKey(foreign_column))
 
 
@@ -72,18 +69,18 @@ class MasterModel(object):
         """Return name of class table."""
         return self.__name__.lower()
 
-    __mapper_args__ = {'always_refresh': True}
+    __mapper_args__ = {"always_refresh": True}
 
     id = Column(Integer, primary_key=True)
 
     def _to_dict(self):
         """Protected method for converting values to dictionary."""
         data_dict = self.__dict__.copy()
-        del data_dict['_sa_instance_state']
-        del data_dict['id']
+        del data_dict["_sa_instance_state"]
+        del data_dict["id"]
         for k, v in data_dict.items():
             if isinstance(v, datetime.date):
-                data_dict[k] = data_dict[k].strftime('%Y-%m-%d')
+                data_dict[k] = data_dict[k].strftime("%Y-%m-%d")
         return data_dict
 
     def to_dict(self):
@@ -114,8 +111,8 @@ class NamespaceEntry(Base, MasterModel):
     name = Column(String(2048), nullable=True)
     encoding = Column(String(8), nullable=True)
 
-    namespace__id = foreign_key_to('namespace')
-    namespace = relationship('Namespace', back_populates="entries")
+    namespace__id = foreign_key_to("namespace")
+    namespace = relationship("Namespace", back_populates="entries")
 
 
 class Annotation(Base, MasterModel):
@@ -141,8 +138,8 @@ class AnnotationEntry(Base, MasterModel):
     name = Column(String(2048), nullable=True)
     identifier = Column(String(255), nullable=True)
 
-    annotation__id = foreign_key_to('annotation')
-    annotation = relationship('Annotation', back_populates="entries")
+    annotation__id = foreign_key_to("annotation")
+    annotation = relationship("Annotation", back_populates="entries")
 
 
 class ModelManager:
@@ -163,8 +160,9 @@ class ModelManager:
 
         self.errors = []
 
-    def get_entries_not_exists(self, keyword: str, url: str,
-                               entry_line_column_list) -> List[Tuple[str, int, int, str]]:
+    def get_entries_not_exists(
+        self, keyword: str, url: str, entry_line_column_list
+    ) -> List[Tuple[str, int, int, str]]:
         """Get entries in namespace or annotation linked to URL for entry_line_column_list(generator).
 
         Parameters
@@ -189,50 +187,48 @@ class ModelManager:
 
         search_for = self.session.query(self.model.id).filter(self.model.keyword == keyword, self.model.url == url)
 
-        desc = 'Check BEL for {}: '.format(keyword)
+        desc = "Check BEL for {}: ".format(keyword)
 
         for entry, line, column in tqdm(list(entry_line_column_list), desc=desc, ncols=100):
-
             if entry in not_exists_cache:
                 hint = not_exists_cache[entry]
                 names_not_exists.append((entry, line, column, hint))
 
             elif (keyword, url, entry) not in exists_cache:
-
                 exists = search_for.join(self.entries_model).filter(self.entries_model.name == entry).count()
 
                 if exists:
                     exists_cache.update(set([(keyword, url, entry)]))
                 else:
                     hint = ""
-                    alternatives = self.session.query(
-                        self.entries_model.name,
-                        self.model.keyword,
-                        self.model.url
-                    ).join(self.model).filter(self.entries_model.name.like(entry)).all()
+                    alternatives = (
+                        self.session.query(self.entries_model.name, self.model.keyword, self.model.url)
+                        .join(self.model)
+                        .filter(self.entries_model.name.like(entry))
+                        .all()
+                    )
 
                     if alternatives:
                         hint = "Did you mean: "
-                        hint += ", ".join([x[1] + ":\"" + x[0] + "\"(" + x[2] + ")" for x in alternatives])
+                        hint += ", ".join([x[1] + ':"' + x[0] + '"(' + x[2] + ")" for x in alternatives])
 
                     else:
                         if len(entry) >= 6:
-                            similars = self.session.query(
-                                self.entries_model.name,
-                                self.model.keyword
-                            )\
-                                .join(self.model)\
-                                .filter(self.entries_model.name.like(entry[:-2] + "%"))\
-                                .filter(func.length(self.entries_model.name) < len(entry) + 3)\
-                                .limit(20)\
+                            similars = (
+                                self.session.query(self.entries_model.name, self.model.keyword)
+                                .join(self.model)
+                                .filter(self.entries_model.name.like(entry[:-2] + "%"))
+                                .filter(func.length(self.entries_model.name) < len(entry) + 3)
+                                .limit(20)
                                 .all()
+                            )
 
                             if similars:
                                 hint = "Similar: "
-                                hint += ", ".join([x[1] + ":\"" + x[0] + "\"" for x in set(similars)])
+                                hint += ", ".join([x[1] + ':"' + x[0] + '"' for x in set(similars)])
 
                     if not hint:
-                        url_query_string = urlencode({'q': entry}, quote_via=quote_plus)
+                        url_query_string = urlencode({"q": entry}, quote_via=quote_plus)
                         hint = "[OLS suggests](https://www.ebi.ac.uk/ols/search?%s)" % url_query_string
 
                     names_not_exists.append((entry, line, column, hint))
@@ -262,7 +258,7 @@ class ModelManager:
             r = requests.get(url)
             r.raise_for_status()
 
-            open(path_to_file, 'wb').write(r.content)
+            open(path_to_file, "wb").write(r.content)
 
         except requests.exceptions.HTTPError as ex:
             return False, ex
@@ -271,7 +267,10 @@ class ModelManager:
             return False, ex
 
         except FileNotFoundError as urlex:
-            return False, f"{str(urlex)}\n{url} does not return a valid belns or belanno file"
+            return (
+                False,
+                f"{str(urlex)}\n{url} does not return a valid belns or belanno file",
+            )
 
         return True, path_to_file
 
@@ -292,7 +291,7 @@ class ModelManager:
         """
         header = ""
         ends_in_line = 0
-        with codecs.open(file_path, 'r', encoding="utf-8") as fd:
+        with codecs.open(file_path, "r", encoding="utf-8") as fd:
             for line in fd:
                 ends_in_line += 1
                 if not re.search(r"^[ \t]*(\[Values\])\s*(\r\n|\r|\n)", line):
@@ -322,7 +321,6 @@ class ModelManager:
         path_to_file = None
 
         if doc_type == URL:
-
             downloaded, path_to_file_or_error = self.download_url(url_or_path)
 
             if not downloaded:
@@ -333,7 +331,6 @@ class ModelManager:
                 path_to_file = path_to_file_or_error
 
         elif doc_type == FILE:
-
             path_to_file = url_or_path
 
         saved, save_error = self.save_in_db(path_to_file=path_to_file, url=url_or_path, keyword=keyword)
@@ -360,7 +357,7 @@ class ModelManager:
         type
             Description of returned object.
         """
-        grammar = parser.load_grammar(GRAMMAR_NS_ANNO_PATH)
+        grammar = load_grammar(GRAMMAR_NS_ANNO_PATH)
         header, header_ends_in_line = self.get_namespace_header(path_to_file)
         lark_parser = Lark(grammar, start=self.grammar_start)
 
@@ -370,39 +367,42 @@ class ModelManager:
         except Exception as e:
             return False, e
 
-        delimiter = parser.first_token_value(tree, 'pr_delimiter_string')
-        case_sensitive = parser.first_token_value(tree, 'pr_case_sensitive_flag')
-        cacheable = parser.first_token_value(tree, 'pr_cacheable_flag')
+        delimiter = first_token_value(tree, "pr_delimiter_string")
+        case_sensitive = first_token_value(tree, "pr_case_sensitive_flag")
+        cacheable = first_token_value(tree, "pr_cacheable_flag")
         is_case_sensitive = False if re.search("no", case_sensitive, re.I) else False
         is_cacheable = False if re.search("no", cacheable, re.I) else True
 
-        keyword_in_anno = parser.first_token_value(tree, 'keyword')
+        keyword_in_anno = first_token_value(tree, "keyword")
         if keyword != keyword_in_anno:
             warning = f"Keyword {keyword} in BEL namespace URL {url} is different from keyword in BEL script"
             logger.warning(warning)
             # ToDo save in Error classes
             self.errors += [warning]
 
-        model_instance = self.model(url=url,
-                                    keyword=keyword,
-                                    cacheable=is_cacheable,
-                                    case_sensitive=is_case_sensitive)
+        model_instance = self.model(
+            url=url,
+            keyword=keyword,
+            cacheable=is_cacheable,
+            case_sensitive=is_case_sensitive,
+        )
         self.session.add(model_instance)
         self.session.commit()
 
-        table_name = self.name + '_entry'
-        second = {'annotation': 'identifier', 'namespace': 'encoding'}
+        table_name = self.name + "_entry"
+        second = {"annotation": "identifier", "namespace": "encoding"}
         second_column = second[self.name]
 
-        df = pd.read_csv(path_to_file,
-                         delimiter=delimiter,
-                         skip_blank_lines=True,
-                         skiprows=header_ends_in_line,
-                         names=['name', second_column],
-                         encoding_errors="ignore",
-                         )
-        df[self.name + '__id'] = model_instance.id
-        df.set_index(['name', second_column], inplace=True)
+        df = pd.read_csv(
+            path_to_file,
+            delimiter=delimiter,
+            skip_blank_lines=True,
+            skiprows=header_ends_in_line,
+            names=["name", second_column],
+            encoding_errors="ignore",
+        )
+        df[self.name + "__id"] = model_instance.id
+        df.set_index(["name", second_column], inplace=True)
 
         logger.info(f"Import `{keyword}` table '{table_name}' of engine '{self.session.bind.engine}'")
 
@@ -426,9 +426,7 @@ class ModelManager:
             Description of returned object.
 
         """
-        result = self.session.query(self.model).filter(
-            self.model.keyword == keyword,
-            self.model.url == url)
+        result = self.session.query(self.model).filter(self.model.keyword == keyword, self.model.url == url)
 
         if result.count() == 0:
             exists = False
@@ -449,9 +447,11 @@ class NamespaceManager(ModelManager):
 
     def __int__(self, session_obj):
         """Init method."""
-        super(NamespaceManager, self).__int__(model=Namespace,
-                                              entries_model=NamespaceEntry,
-                                              grammar_start=GRAMMAR_START_NS)
+        super().__init__(
+            model=Namespace,
+            entries_model=NamespaceEntry,
+            grammar_start=GRAMMAR_START_NS,
+        )
 
 
 class AnnotationManager(ModelManager):
@@ -459,6 +459,53 @@ class AnnotationManager(ModelManager):
 
     def __int__(self, session_obj):
         """Init method."""
-        super(AnnotationManager, self).__int__(model=Annotation,
-                                               entries_model=AnnotationEntry,
-                                               grammar_start=GRAMMAR_START_ANNO)
+        super().__init__(
+            model=Annotation,
+            entries_model=AnnotationEntry,
+            grammar_start=GRAMMAR_START_ANNO,
+        )
+
+
+def load_grammar(grammar_path):
+    """Return eBNF grammar in lark style.
+
+    Parameters
+    ----------
+    grammar_path : str
+        path to eBNF grammar in lark style.
+
+    Returns
+    -------
+    string
+        eBNF grammar in lark style.
+
+    """
+    # FIXME: something to do here
+    logger.info("load grammar {}".format(grammar_path))
+    with codecs.open(grammar_path, "r", encoding="utf-8") as fd_grammar:
+        grammar = fd_grammar.read()
+
+    return grammar
+
+
+def first_token_value(tree: Tree, subtree_name: str) -> str:
+    """Get the first token value of Lark tree with subtree name.
+
+    Parameters
+    ----------
+    tree : type
+        Description of parameter `tree`.
+    subtree_name : type
+        Description of parameter `subtree_name`.
+
+    Returns
+    -------
+    type
+        Description of returned object.
+
+    """
+    # TODO: Get rid of this method by using a Transformer? Is this possible?
+
+    for subtree in tree.iter_subtrees():
+        if subtree.data == subtree_name:
+            return [node.value for node in subtree.children if isinstance(node, Token)][0]

@@ -1,10 +1,12 @@
 """CHEBI API methods."""
 from math import ceil
+
 from flask import request
 
 from ebel import Bel
-from ebel.web.api import RDBMS
 from ebel.manager.rdbms.models import chebi
+from ebel.web.api import RDBMS
+
 from . import _get_pagination
 
 
@@ -37,10 +39,8 @@ def get_compound_name_by_name_starts_with(name: str):
     dict
         Names and CHEBI IDs.
     """
-    query = RDBMS.get_session().query(
-        chebi.Compound.id, chebi.Compound.name
-    ).filter(
-        chebi.Compound.name.like(f"{name}%")
+    query = (
+        RDBMS.get_session().query(chebi.Compound.id, chebi.Compound.name).filter(chebi.Compound.name.like(f"{name}%"))
     )
     return {x.name: x.id for x in query.all()}
 
@@ -90,10 +90,10 @@ def get_compound_by_other_db_accession(accession_number: str, db_name: str = Non
 def get_compound_reference():
     """Compile a dictionary of information for a given compound."""
     req = dict(request.args.copy())
-    page_size = req.pop('page_size', 10)
-    page = req.pop('page', 1)
+    page_size = req.pop("page_size", 10)
+    page = req.pop("page", 1)
     if not req:
-        return {'error': "At least one of the parameters have to be filled."}
+        return {"error": "At least one of the parameters have to be filled."}
     query = RDBMS.get_session().query(chebi.Reference).filter_by(**req)
     number_of_results = query.count()
 
@@ -105,18 +105,18 @@ def get_compound_reference():
     pages = ceil(number_of_results / limit)
 
     return {
-        'page': page,
-        'page_size': limit,
-        'number_of_results': number_of_results,
-        'pages': pages,
-        'results': [x.as_dict_with_compound_id() for x in query.all()]
+        "page": page,
+        "page_size": limit,
+        "number_of_results": number_of_results,
+        "pages": pages,
+        "results": [x.as_dict_with_compound_id() for x in query.all()],
     }
 
 
 def get_relation():
     """Get CHEBI defined relations."""
-    if not (bool(request.args.get('final_id') or bool(request.args.get('init_id')))):
-        return {'error': "At least final_id or init_id have to be filled."}
+    if not (bool(request.args.get("final_id") or bool(request.args.get("init_id")))):
+        return {"error": "At least final_id or init_id have to be filled."}
     rs = RDBMS.get_session().query(chebi.Relation).filter_by(**request.args).all()
     return [x.as_dict() for x in rs]
 
@@ -126,18 +126,18 @@ def get_bel_chebi_ids():
     b = Bel()
     sql_count = "SELECT count(*) FROM V where chebi IS NOT NULL"
     p = _get_pagination()
-    number_of_results = b.query_get_dict(sql_count)[0]['count']
+    number_of_results = b.query_get_dict(sql_count)[0]["count"]
     pages = ceil(number_of_results / p.page_size)
     query = "SELECT @rid.asString(), namespace, name, chebi, bel FROM V where chebi IS NOT NULL"
-    paras = {k: v for k, v in dict(request.args.copy()).items() if k in ['namespace', 'name', 'chebi']}
+    paras = {k: v for k, v in dict(request.args.copy()).items() if k in ["namespace", "name", "chebi"]}
     if paras:
-        query += " AND " + ' AND '.join([f"{k} like '{v.strip()}'" for k, v in paras.items()])
+        query += " AND " + " AND ".join([f"{k} like '{v.strip()}'" for k, v in paras.items()])
 
     print(query)
     return {
-        'page': p.page,
-        'page_size': p.page_size,
-        'number_of_results': number_of_results,
-        'pages': pages,
-        'results': b.query_get_dict(f"{query} LIMIT {p.page_size} SKIP {p.skip}")
+        "page": p.page,
+        "page_size": p.page_size,
+        "number_of_results": number_of_results,
+        "pages": pages,
+        "results": b.query_get_dict(f"{query} LIMIT {p.page_size} SKIP {p.skip}"),
     }

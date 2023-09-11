@@ -1,23 +1,21 @@
 """General methods used by e(BE:L) modules."""
-import re
-import gzip
-import shutil
-import hashlib
 import configparser
-
+import gzip
+import hashlib
 import os.path
-
+import re
+import shutil
 from types import GeneratorType
+from typing import Iterable, List, Union
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine.base import Engine
-from typing import Iterable, Union, List
+from sqlalchemy.orm import sessionmaker
 
 from ebel import defaults
-from ebel.config import write_to_config, get_config_value
-from ebel.defaults import CONN_STR_DEFAULT
+from ebel.config import get_config_value, write_to_config
 from ebel.constants import DATA_DIR
+from ebel.defaults import CONN_STR_DEFAULT
 
 
 class BelRdb(object):
@@ -31,7 +29,7 @@ class BelRdb(object):
             BelRdb.__instance = object.__new__(cls)
             connection_string = _get_connection_string()
             dialect = re.search(r"^(\w+)(\+\w+)?:", connection_string).group(1)
-            if dialect == 'mysql':
+            if dialect == "mysql":
                 utf8mb4 = "charset=utf8mb4"
                 if utf8mb4 not in connection_string:
                     connection_string = connection_string + f"?{utf8mb4}"
@@ -44,7 +42,7 @@ class BelRdb(object):
 
 def _get_connection_string():
     """Get the sqlalchemy connection string from config file, sets the default string if not there."""
-    return get_config_value('DATABASE', 'sqlalchemy_connection_string', CONN_STR_DEFAULT)
+    return get_config_value("DATABASE", "sqlalchemy_connection_string", CONN_STR_DEFAULT)
 
 
 def _get_engine() -> Engine:
@@ -81,8 +79,8 @@ def get_standard_name(name: str) -> str:
     """Return standard name."""
     part_of_name = [x for x in re.findall("[A-Z]*[a-z0-9]*", name) if x]
     new_name = "_".join(part_of_name).lower()
-    if re.search(r'^\d+', new_name):
-        new_name = '_' + new_name
+    if re.search(r"^\d+", new_name):
+        new_name = "_" + new_name
     return new_name
 
 
@@ -110,8 +108,8 @@ def get_file_name(url_or_path):
 
 def gunzip(file_path: str, file_path_gunzipped: str):
     """Gunzip a file."""
-    with gzip.open(file_path, 'rb') as f_in:
-        with open(file_path_gunzipped, 'wb') as f_out:
+    with gzip.open(file_path, "rb") as f_in:
+        with open(file_path_gunzipped, "wb") as f_out:
             shutil.copyfileobj(f_in, f_out)
 
 

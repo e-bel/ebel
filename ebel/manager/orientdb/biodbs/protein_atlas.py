@@ -1,15 +1,14 @@
 """Protein Atlas module."""
-import pandas as pd
-
-from pyorientdb import OrientDB
 from typing import Dict, Optional
 
-from ebel.tools import get_file_path
+import pandas as pd
+from pyorientdb import OrientDB
+from tqdm import tqdm
+
 from ebel.manager.orientdb import odb_meta, urls
 from ebel.manager.orientdb.constants import PROTEIN_ATLAS
-
 from ebel.manager.rdbms.models import protein_atlas
-from tqdm import tqdm
+from ebel.tools import get_file_path
 
 
 class ProteinAtlas(odb_meta.Graph):
@@ -27,16 +26,17 @@ class ProteinAtlas(odb_meta.Graph):
             protein_atlas.ProteinAtlasRnaBrainFantom.__tablename__: urls.PROTEIN_ATLAS_RNA_FANTOM_BRAIN,
             protein_atlas.ProteinAtlasRnaMouseBrainAllen.__tablename__: urls.PROTEIN_ATLAS_RNA_MOUSE_BRAIN_ALLEN,
         }
-        super().__init__(urls=self.urls,
-                         tables_base=protein_atlas.Base,
-                         biodb_name=self.biodb_name)
+        super().__init__(urls=self.urls, tables_base=protein_atlas.Base, biodb_name=self.biodb_name)
 
     def __len__(self):
         return self.session.query(protein_atlas.ProteinAtlasNormalTissue).count()
 
     def __contains__(self, ensembl_id) -> bool:
-        count = self.session.query(protein_atlas.ProteinAtlasNormalTissue).filter(
-            protein_atlas.ProteinAtlasNormalTissue.gene == ensembl_id).count()
+        count = (
+            self.session.query(protein_atlas.ProteinAtlasNormalTissue)
+            .filter(protein_atlas.ProteinAtlasNormalTissue.gene == ensembl_id)
+            .count()
+        )
         return bool(count)
 
     def insert_data(self) -> Dict[str, int]:
@@ -73,7 +73,7 @@ class ProteinAtlas(odb_meta.Graph):
         for df in dfs:
             self._standardize_dataframe(df)
             df.index += 1
-            df.index.rename('id', inplace=True)
+            df.index.rename("id", inplace=True)
             df.to_sql(table, self.engine, if_exists="append")
             number_of_inserts += df.shape[0]
 
@@ -123,14 +123,18 @@ class ProteinAtlas(odb_meta.Graph):
 
     def get_tissues_by_ensembl_id(self, ensembl_gene_id):
         """Return tissues for a given ensembl ID."""
-        level_exixs = protein_atlas.ProteinAtlasNormalTissue.level.in_(['Medium', 'High', 'Low'])
+        level_exixs = protein_atlas.ProteinAtlasNormalTissue.level.in_(["Medium", "High", "Low"])
         columns = (
             protein_atlas.ProteinAtlasNormalTissue.tissue,
             protein_atlas.ProteinAtlasNormalTissue.cell_type,
-            protein_atlas.ProteinAtlasNormalTissue.level
+            protein_atlas.ProteinAtlasNormalTissue.level,
         )
-        data = [x for x in self.session.query(*columns).filter(level_exixs).filter_by(gene=ensembl_gene_id,
-                                                                                      reliability='Approved')]
+        data = [
+            x
+            for x in self.session.query(*columns)
+            .filter(level_exixs)
+            .filter_by(gene=ensembl_gene_id, reliability="Approved")
+        ]
         tissues = {}
         for d in data:
             if d.tissue not in tissues:
@@ -160,26 +164,28 @@ class ProteinAtlas(odb_meta.Graph):
                 both('bel_relation').size()>=1 and
                 hgnc.ensembl_gene_id IS NOT NULL"""
 
-        rid_ensembl_gene_ids = {x.oRecordData['ensembl_gene_id']: x for x in self.execute(match)}
+        rid_ensembl_gene_ids = {x.oRecordData["ensembl_gene_id"]: x for x in self.execute(match)}
 
         self.execute("Delete EDGE has_located_protein where levels IS NOT NULL")
 
-        location_rid_cache = {x['bel']: x['rid'] for x in self.query_class('location', columns=['bel'])}
+        location_rid_cache = {x["bel"]: x["rid"] for x in self.query_class("location", columns=["bel"])}
 
         for ensembl_gene_id, data in tqdm(rid_ensembl_gene_ids.items()):
             ns_location = "PROTEIN_ATLAS"
             pure_protein = data.oRecordData
-            ns = pure_protein['namespace']
-            name = pure_protein['name']
+            ns = pure_protein["namespace"]
+            name = pure_protein["name"]
 
-            value_dict = {'namespace': ns,
-                          'name': name,
-                          'hgnc': pure_protein['hgnc_id'],
-                          'involved_genes': [pure_protein['name']],
-                          'involved_other': [],
-                          'species': 9606,
-                          'uniprot': pure_protein.get('uniprot'),
-                          'label': pure_protein.get('label')}
+            value_dict = {
+                "namespace": ns,
+                "name": name,
+                "hgnc": pure_protein["hgnc_id"],
+                "involved_genes": [pure_protein["name"]],
+                "involved_other": [],
+                "species": 9606,
+                "uniprot": pure_protein.get("uniprot"),
+                "label": pure_protein.get("label"),
+            }
 
             tissues = self.get_tissues_by_ensembl_id(ensembl_gene_id)
 
@@ -189,26 +195,28 @@ class ProteinAtlas(odb_meta.Graph):
                 bel = f'p({ns}:"{name}",{location_bel})'
                 value_dict_located.update(bel=bel)
                 protein_located_rid = self.get_create_rid(
-                    class_name='protein',
-                    value_dict=value_dict_located,
-                    check_for='bel'
+                    class_name="protein", value_dict=value_dict_located, check_for="bel"
                 )
 
-                self.create_edge(class_name='has_located_protein',
-                                 from_rid=pure_protein['rid'],
-                                 to_rid=protein_located_rid,
-                                 value_dict={'levels': levels})
+                self.create_edge(
+                    class_name="has_located_protein",
+                    from_rid=pure_protein["rid"],
+                    to_rid=protein_located_rid,
+                    value_dict={"levels": levels},
+                )
 
                 if location_bel in location_rid_cache:
                     location_rid = location_rid_cache[location_bel]
                 else:
-                    location_rid = self.get_create_rid(class_name='location',
-                                                       value_dict={
-                                                           'namespace': ns_location,
-                                                           'name': tissue,
-                                                           'bel': location_bel
-                                                       },
-                                                       check_for='bel')
+                    location_rid = self.get_create_rid(
+                        class_name="location",
+                        value_dict={
+                            "namespace": ns_location,
+                            "name": tissue,
+                            "bel": location_bel,
+                        },
+                        check_for="bel",
+                    )
                     location_rid_cache[location_bel] = location_rid
 
                 self.create_edge("has__location", from_rid=protein_located_rid, to_rid=location_rid)

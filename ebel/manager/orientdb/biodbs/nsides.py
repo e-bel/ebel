@@ -1,19 +1,19 @@
 """NSIDES module."""
 
-import tarfile
 import logging
+import os
+import tarfile
+from typing import Dict, Optional
+
 import pandas as pd
-
-from tqdm import tqdm
-from typing import Dict
 from pyorientdb import OrientDB
+from tqdm import tqdm
 
-from ebel.tools import get_file_path
 from ebel.constants import RID
+from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import OFFSIDES, ONSIDES
-from ebel.manager.orientdb import odb_meta, urls, odb_structure
-
 from ebel.manager.rdbms.models import nsides
+from ebel.tools import get_file_path
 
 logger = logging.getLogger(__name__)
 pd.options.mode.chained_assignment = None
@@ -39,13 +39,15 @@ class Nsides(odb_meta.Graph):
     def __init__(self, client: OrientDB = None):
         """Init nSIDES."""
         self.client = client
-        self.biodb_name = 'nsides'
+        self.biodb_name = "nsides"
         self.urls = {OFFSIDES: urls.OFFSIDES, ONSIDES: urls.ONSIDES}
-        super().__init__(edges=odb_structure.nsides_edges,
-                         nodes=odb_structure.nsides_nodes,
-                         tables_base=nsides.Base,
-                         urls=self.urls,
-                         biodb_name=self.biodb_name)
+        super().__init__(
+            edges=odb_structure.nsides_edges,
+            nodes=odb_structure.nsides_nodes,
+            tables_base=nsides.Base,
+            urls=self.urls,
+            biodb_name=self.biodb_name,
+        )
 
     def __len__(self):
         return self.number_of_generics
@@ -76,50 +78,60 @@ class Nsides(odb_meta.Graph):
         https://github.com/tatonetti-lab/nsides-release/blob/master/release-notes/v0.1.md
         """
         file_path = get_file_path(self.urls[OFFSIDES], self.biodb_name)
-        offsides_df = pd.read_csv(file_path, low_memory=False)
-        # Because of repeating header, we have to delete all rows which are equal to the columns
-        offsides_df = offsides_df[offsides_df.ne(offsides_df.columns).any(1)]
-        offsides_df.drop_duplicates(inplace=True)
-        offsides_df["source"] = "offsides"
-        offsides_df.columns = self._standardize_column_names(offsides_df.columns)
+        df = pd.read_csv(file_path, low_memory=False)
+        df.drop_duplicates(inplace=True)
+        df["source"] = "offsides"
+        df.columns = self._standardize_column_names(df.columns)
 
-        onsides_df = self.__import_onsides()
-        combined_df = pd.concat([offsides_df, onsides_df], ignore_index=True, sort=False)
-
-        combined_df.index += 1
-        combined_df.index.rename('id', inplace=True)
-        combined_df.to_sql(
+        df.index += 1
+        df.index.rename("id", inplace=True)
+        df[pd.to_numeric(df["condition_meddra_id"], errors="coerce").notnull()].to_sql(
             nsides.Nsides.__tablename__,
             self.engine,
-            if_exists='replace',
-            chunksize=10000
+            if_exists="append",
+            chunksize=100000,
         )
-        return {self.biodb_name: combined_df.shape[0]}
+        return {self.biodb_name: df.shape[0]}
 
-    def __import_onsides(self):
-        """Extract OnSIDES CSV file and format into a DF."""
-        file_path = get_file_path(self.urls[ONSIDES], self.biodb_name)
-        with tarfile.open(file_path, "r:*") as tar:
-            df = pd.read_csv(tar.extractfile("csv/adverse_reactions.csv"), header=0).drop_duplicates()
+    # TODO: Reimplement, but structure have changed
+    # def __import_onsides(self) -> Optional[pd.DataFrame]:
+    #     """Extract OnSIDES CSV file and format into a DF."""
+    #     file_path = get_file_path(self.urls[ONSIDES], self.biodb_name)
+    #     file_folder = os.path.dirname(file_path)
+    #     tar = tarfile.open(file_path, "r:gz")
+    #     folder_in_tar_file = tar.members[0].path
+    #     fd = tar.extractfile(f"{folder_in_tar_file}/adverse_reactions.csv.gz")
+    #     df = pd.read_csv(fd, compression="gzip", encoding="utf-8")
 
-        df.drop(  # Remove columns that aren't needed
-            ['xml_id', 'Unnamed: 10', "omop_concept_id", "drug_concept_ids", "concept_class_id"],
-            inplace=True,
-            axis=1,
-        )
+    #     df.drop(  # Remove columns that aren't needed
+    #         [
+    #             "xml_id",
+    #             "Unnamed: 10",
+    #             "omop_concept_id",
+    #             "drug_concept_ids",
+    #             "concept_class_id",
+    #         ],
+    #         inplace=True,
+    #         axis=1,
+    #     )
 
-        df.rename(columns={  # Rename columns to match OFFSIDES
-            "rxnorm_ids": "drug_rxnorn_id",
-            "concept_name": "condition_concept_name",
-            "meddra_id": "condition_meddra_id",
-            "ingredients": "drug_concept_name",
-        }, inplace=True)
+    #     df.rename(
+    #         columns={  # Rename columns to match OFFSIDES
+    #             "rxnorm_ids": "drug_rxnorn_id",
+    #             "pt_meddra_term": "condition_concept_name",
+    #             "pt_meddra_id": "condition_meddra_id",
+    #             "ingredients_names": "drug_concept_name",
+    #         },
+    #         inplace=True,
+    #     )
 
-        # Keep rows with only 1 ingredient/drug
-        single_value_mask = df['drug_concept_name'].apply(lambda x: len(x.split(",")) == 1)
-        pruned_df = df.loc[single_value_mask]
-        pruned_df["source"] = "onsides"
-        return pruned_df
+    #     # Keep rows with only 1 ingredient/drug
+    #     single_value_mask = df["drug_concept_name"].apply(
+    #         lambda x: len(x.split(",")) == 1
+    #     )
+    #     pruned_df = df.loc[single_value_mask]
+    #     pruned_df["source"] = "onsides"
+    #     return pruned_df
 
     def update_bel(self) -> int:
         """Create has_side_effect edges between drugs (drugbank) and side_effects.
@@ -127,8 +139,8 @@ class Nsides(odb_meta.Graph):
         RxCUI (https://rxnav.nlm.nih.gov/RxNormAPIs.html#) is used as the mapping identifier.
         """
         self.clear_edges()
-        self.delete_nodes_with_no_edges('side_effect')
-        self.delete_nodes_with_no_edges('drug')
+        self.delete_nodes_with_no_edges("side_effect")
+        self.delete_nodes_with_no_edges("drug")
 
         # TODO: Translate to sqlalchemy query
         sql_temp = """Select
@@ -150,40 +162,44 @@ class Nsides(odb_meta.Graph):
             o.mean_reporting_frequency
         """
 
-        drugbank_ids = self.query_class('drug', columns=['drugbank_id'], drugbank_id='notnull')
-        drugbank_id_rids = {d['drugbank_id']: d[RID] for d in drugbank_ids}
+        drugbank_ids = self.query_class("drug", columns=["drugbank_id"], drugbank_id="notnull")
+        drugbank_id_rids = {d["drugbank_id"]: d[RID] for d in drugbank_ids}
 
-        side_effects = self.query_class('side_effect', columns=['condition_meddra_id'])
-        side_effect_rids = {d['condition_meddra_id']: d[RID] for d in side_effects}
+        side_effects = self.query_class("side_effect", columns=["condition_meddra_id"])
+        side_effect_rids = {d["condition_meddra_id"]: d[RID] for d in side_effects}
 
         updated = 0
 
-        for drugbank_id, drugbank_rid in tqdm(drugbank_id_rids.items(), desc=f'Update {self.biodb_name.upper()}'):
+        for drugbank_id, drugbank_rid in tqdm(drugbank_id_rids.items(), desc=f"Update {self.biodb_name.upper()}"):
             for r in self.engine.execute(sql_temp.format(drugbank_id)):
-                (condition_meddra_id,
-                 condition_concept_name,
-                 prr,
-                 mean_reporting_frequency) = r
+                (
+                    condition_meddra_id,
+                    condition_concept_name,
+                    prr,
+                    mean_reporting_frequency,
+                ) = r
 
                 if condition_meddra_id not in side_effect_rids:
                     side_effect_rid = self.insert_record(
-                        'side_effect',
+                        "side_effect",
                         {
-                            'label': condition_concept_name,
-                            'condition_meddra_id': condition_meddra_id
-                        }
+                            "label": condition_concept_name,
+                            "condition_meddra_id": condition_meddra_id,
+                        },
                     )
                     side_effect_rids[condition_meddra_id] = side_effect_rid
 
                 value_dict = {
-                    'prr': prr,
-                    'mean_reporting_frequency': mean_reporting_frequency
+                    "prr": prr,
+                    "mean_reporting_frequency": mean_reporting_frequency,
                 }
                 side_effect_rid = side_effect_rids[condition_meddra_id]
-                self.create_edge(class_name='has_side_effect',
-                                 from_rid=drugbank_rid,
-                                 to_rid=side_effect_rid,
-                                 value_dict=value_dict)
+                self.create_edge(
+                    class_name="has_side_effect",
+                    from_rid=drugbank_rid,
+                    to_rid=side_effect_rid,
+                    value_dict=value_dict,
+                )
                 updated += 1
         return updated
 

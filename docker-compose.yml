@@ -5,8 +5,6 @@ services:
         container_name: ebel_ebel
         ports: 
             - 5000:5000
-        networks:
-            - ebel_network
         depends_on:
             - mysql
             - orientdb
@@ -23,8 +21,6 @@ services:
             MYSQL_USER: ebel
             MYSQL_PASSWORD: ebel
             MYSQL_DATABASE: ebel
-        networks:
-            - ebel_network
         volumes:
             - ebel_mysql:/var/lib/mysql
     orientdb:
@@ -36,8 +32,6 @@ services:
         ports:           
             - 2424:2424
             - 2480:2480
-        networks:
-            - ebel_network    
         volumes: 
             - ebel_orientdb_db:/orientdb/databases
             - ebel_orientdb_backup:/orientdb/backup
@@ -48,13 +42,10 @@ services:
         container_name: ebel_phpmyadmin
         ports:
             - 8089:80
-        networks:
-            - ebel_network
         environment:
             - PMA_ARBITRARY=1
-networks:
-    ebel_network:
-        driver: bridge
+            - PMA_HOST=mysql
+
 volumes:
     ebel_orientdb_db:
     ebel_orientdb_backup:

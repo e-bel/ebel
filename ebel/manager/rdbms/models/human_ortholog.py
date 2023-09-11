@@ -10,7 +10,7 @@ Base = declarative_base()
 class HumanOrtholog(Base):
     """Class definition for the human_ortholog table."""
 
-    __tablename__ = 'human_ortholog'
+    __tablename__ = "human_ortholog"
 
     id = Column(Integer, primary_key=True)
 

@@ -1,12 +1,13 @@
 """Error class definitions."""
-from lark.exceptions import UnexpectedToken, UnexpectedCharacters
-
-from collections import OrderedDict
 import re
 import sys
+from collections import OrderedDict
 
-TEMPLATE = '{error_class}\tkeyword:{keyword}\tentry:{entry}\tline:{line_number}\tcolumn:{column}' \
-           '\turl:{url}\thint:{hint}'
+from lark.exceptions import UnexpectedCharacters, UnexpectedToken
+
+TEMPLATE = (
+    "{error_class}\tkeyword:{keyword}\tentry:{entry}\tline:{line_number}\tcolumn:{column}" "\turl:{url}\thint:{hint}"
+)
 
 
 class _Error:
@@ -14,19 +15,21 @@ class _Error:
 
     def __init__(self):
         self.class_name = self.__class__.__name__
-        self.value_dict = OrderedDict([
-            ("error_class", self.class_name),
-            ("url", None),
-            ("keyword", None),
-            ("entry", None),
-            ("line_number", None),
-            ("column", None),
-            ("hint", None)
-        ])
+        self.value_dict = OrderedDict(
+            [
+                ("error_class", self.class_name),
+                ("url", None),
+                ("keyword", None),
+                ("entry", None),
+                ("line_number", None),
+                ("column", None),
+                ("hint", None),
+            ]
+        )
 
     def to_dict(self):
         """Format the properties of error into a dictionary."""
-        raise NotImplementedError('to_dict have to be implemented in {}'.format(self.__class__.__name__))
+        raise NotImplementedError("to_dict have to be implemented in {}".format(self.__class__.__name__))
 
     def to_string(self) -> str:
         """Format the output to a string."""
@@ -62,7 +65,7 @@ class NotInNamespacePattern(_Error):
             "keyword": self.ns_keyword,
             "entry": re.sub("[\n\r]", "", self.entry),
             "line_number": self.line_number,
-            "column": self.column
+            "column": self.column,
         }
 
 
@@ -91,7 +94,7 @@ class NotInAnnotationPattern(_Error):
             "keyword": self.ns_keyword,
             "entry": re.sub("[\n\r]", "", self.entry),
             "line_number": self.line_number,
-            "column": self.column
+            "column": self.column,
         }
 
 
@@ -120,7 +123,7 @@ class WithoutDefinedAnnotation(_Error):
             "keyword": self.keyword,
             "entry": re.sub("[\n\r]", "", self.entry),
             "line_number": self.line_number,
-            "column": self.column
+            "column": self.column,
         }
 
 
@@ -149,14 +152,22 @@ class WithoutDefinedNamespace(_Error):
             "keyword": self.keyword,
             "entry": re.sub("[\n\r]", "", self.entry),
             "line_number": self.line_number,
-            "column": self.column
+            "column": self.column,
         }
 
 
 class NotInNamespaceUrl(_Error):
     """Error in entry links to a namespace defined in the header but does not exist in namespace url."""
 
-    def __init__(self, keyword: str, url_or_path: str, entry: str, line_number: int, column: int, hint: str):
+    def __init__(
+        self,
+        keyword: str,
+        url_or_path: str,
+        entry: str,
+        line_number: int,
+        column: int,
+        hint: str,
+    ):
         """Initialize error class.
 
         :param keyword: Error class type.
@@ -184,14 +195,22 @@ class NotInNamespaceUrl(_Error):
             "entry": re.sub("[\n\r]", "", self.entry),
             "line_number": self.line_number,
             "column": self.column,
-            "hint": self.hint
+            "hint": self.hint,
         }
 
 
 class NotInAnnotationUrl(_Error):
     """Error in entry links to an annotation defined in the header but not exists in namespace url."""
 
-    def __init__(self, keyword: str, url_or_path: str, entry: str, line_number: int, column: int, hint: str):
+    def __init__(
+        self,
+        keyword: str,
+        url_or_path: str,
+        entry: str,
+        line_number: int,
+        column: int,
+        hint: str,
+    ):
         """Initialize error class.
 
         :param keyword: Error class type.
@@ -219,7 +238,7 @@ class NotInAnnotationUrl(_Error):
             "entry": re.sub("[\n\r]", "", self.entry),
             "line_number": self.line_number,
             "column": self.column,
-            "hint": self.hint
+            "hint": self.hint,
         }
 
 
@@ -299,32 +318,42 @@ class BelSyntaxError(_Error):
 
     def to_dict(self) -> dict:
         """Format the properties of error into a dictionary."""
-        hint = ("%s >>>>>> %s" % (self.line[:self.exception.column - 1],
-                                  self.line[self.exception.column - 1:])).strip()
+        hint = (
+            "%s >>>>>> %s"
+            % (
+                self.line[: self.exception.column - 1],
+                self.line[self.exception.column - 1 :],
+            )
+        ).strip()
 
         value_dict = {
             "line_number": self.line_number,
-            "hint": re.sub("[\n\r]", "", hint)
+            "hint": re.sub("[\n\r]", "", hint),
         }
 
         if isinstance(self.exception, UnexpectedCharacters):
-
             offset = self.exception.column
-            value_dict.update({
-                "error_class": self.__class__.__name__ + '_unexpected_input',
-                "entry": self.line[offset:(offset + 5)],
-                "column": self.exception.column,
-            })
+            value_dict.update(
+                {
+                    "error_class": self.__class__.__name__ + "_unexpected_input",
+                    "entry": self.line[offset : (offset + 5)],
+                    "column": self.exception.column,
+                }
+            )
 
         elif isinstance(self.exception, UnexpectedToken):
-
-            value_dict.update({
-                "error_class": self.__class__.__name__ + '_unexpected_token',
-                "entry": re.sub("[\n\r]", "", self.exception.token),
-                "column": self.exception.column,
-            })
+            value_dict.update(
+                {
+                    "error_class": self.__class__.__name__ + "_unexpected_token",
+                    "entry": re.sub("[\n\r]", "", self.exception.token),
+                    "column": self.exception.column,
+                }
+            )
         else:
-            print("Not covered by library: lark.expections type {}".format(type(self.exception)), sys.exc_info()[0])
+            print(
+                "Not covered by library: lark.expections type {}".format(type(self.exception)),
+                sys.exc_info()[0],
+            )
             raise
 
         return value_dict
@@ -333,7 +362,14 @@ class BelSyntaxError(_Error):
 class NotDownloadedFromUrl(_Error):
     """Error in entry links to an annotation defined in the header but not exists in namespace url."""
 
-    def __init__(self, keyword: str, url_or_path: str, hint: str, line: int = None, column: int = None):
+    def __init__(
+        self,
+        keyword: str,
+        url_or_path: str,
+        hint: str,
+        line: int = None,
+        column: int = None,
+    ):
         """Initialize error class.
 
         :param keyword: Error class type.

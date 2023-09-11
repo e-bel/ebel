@@ -1,6 +1,6 @@
 """IntAct RDBMS model definition."""
+from sqlalchemy import Column, Float, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float, Text
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -10,7 +10,7 @@ Base = declarative_base()
 class Intact(Base):
     """Class definition for the intact table."""
 
-    __tablename__ = 'intact'
+    __tablename__ = "intact"
     id = Column(Integer, primary_key=True)
     confidence_value = Column(Float, index=True)
     detection_method = Column(String(100), index=True)

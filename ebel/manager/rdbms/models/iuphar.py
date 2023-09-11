@@ -1,7 +1,8 @@
 """IUPHAR RDBMS model definition."""
-from sqlalchemy.orm import relationship
+from sqlalchemy import (BigInteger, Boolean, Column, ForeignKey, Integer,
+                        Numeric, String, Text)
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Boolean, Text, ForeignKey, BigInteger, Numeric
+from sqlalchemy.orm import relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -11,7 +12,7 @@ Base = declarative_base()
 class IupharLigand(Base):
     """Class definition for the iuphar_ligand table."""
 
-    __tablename__ = 'iuphar_ligand'
+    __tablename__ = "iuphar_ligand"
     id = Column(Integer, primary_key=True)
 
     name = Column(Text)
@@ -24,7 +25,7 @@ class IupharLigand(Base):
     pubchem_sid = Column(BigInteger)
     pubchem_cid = Column(Text)  # TODO: This is a integer, but for import reasons this changed to text
     uniprot_id = Column(Text)
-    ensembl_id = Column(BigInteger)
+    ensembl_id = Column(Text)
     ligand_subunit_ids = Column(Text)
     ligand_subunit_name = Column(Text)
     ligand_subunit_uni_prot_ids = Column(Text)
@@ -49,7 +50,7 @@ class IupharLigand(Base):
 class IupharInteraction(Base):
     """Class definition for the iuphar_interaction table."""
 
-    __tablename__ = 'iuphar_interaction'
+    __tablename__ = "iuphar_interaction"
     id = Column(Integer, primary_key=True)
 
     target = Column(String(255))
@@ -67,11 +68,12 @@ class IupharInteraction(Base):
     target_ligand_pubchem_sid = Column(Integer)
     target_species = Column(String(100))
     ligand = Column(String(255))
-    ligand_id = Column(Integer, ForeignKey('iuphar_ligand.id'), index=True)
+    ligand_id = Column(Integer, ForeignKey("iuphar_ligand.id"), index=True)
     ligand_subunit_ids = Column(Text)
     ligand_gene_symbol = Column(String(50))
     ligand_species = Column(String(50))
     ligand_pubchem_sid = Column(Integer)
+    ligand_type = Column(Text)
     approved = Column(Boolean)
     type = Column(String(100))
     action = Column(String(100))

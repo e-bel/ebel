@@ -1,6 +1,6 @@
 """NSIDES RDBMS model definition."""
 
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Float, Index, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 
 from ebel.manager.rdbms.models import object_as_dict
@@ -11,7 +11,16 @@ Base = declarative_base()
 class Nsides(Base):
     """Class definition for the nSIDES table."""
 
-    __tablename__ = 'nsides'
+    __tablename__ = "nsides"
+    __table_args__ = (
+        Index(
+            "idx_nsides_multi",
+            "condition_meddra_id",
+            "condition_concept_name",
+            "prr",
+            "mean_reporting_frequency",
+        ),
+    )
     id = Column(Integer, primary_key=True)
 
     drug_rxnorn_id = Column(String(20), index=True)  # This has to be a String because of mapping to drugbank ids
@@ -21,10 +30,6 @@ class Nsides(Base):
 
     condition_meddra_id = Column(Integer)
     condition_concept_name = Column(String(255), index=True)
-
-    # OnSIDES specific
-    vocabulary_id = Column(String(10))
-    domain_id = Column(String(10))
 
     # OFFSIDES specific
     a = Column(Integer)

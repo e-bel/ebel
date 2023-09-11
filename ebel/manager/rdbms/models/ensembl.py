@@ -11,7 +11,7 @@ Base = declarative_base()
 class Ensembl(Base):
     """Class definition for the ensembl table."""
 
-    __tablename__ = 'ensembl'
+    __tablename__ = "ensembl"
     id = Column(Integer, primary_key=True)
     enst = Column(String(20), index=True)
     version = Column(Integer)
