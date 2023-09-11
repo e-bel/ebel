@@ -11,19 +11,25 @@ from lark.lexer import Token
 from lark.tree import Tree
 
 from ebel.cache import logger
-from ebel.constants import (ALLOWED_TYPES, FILE, GRAMMAR_START_ANNO,
-                            GRAMMAR_START_NS, LIST, PATTERN, URL)
-from ebel.errors import (NotDownloadedFromUrl, NotInAnnotationList,
-                         NotInAnnotationPattern, NotInAnnotationUrl,
-                         NotInNamespaceList, NotInNamespacePattern,
-                         NotInNamespaceUrl, WithoutDefinedAnnotation,
-                         WithoutDefinedNamespace, _Error)
+from ebel.constants import ALLOWED_TYPES, FILE, GRAMMAR_START_ANNO, GRAMMAR_START_NS, LIST, PATTERN, URL
+from ebel.errors import (
+    NotDownloadedFromUrl,
+    NotInAnnotationList,
+    NotInAnnotationPattern,
+    NotInAnnotationUrl,
+    NotInNamespaceList,
+    NotInNamespacePattern,
+    NotInNamespaceUrl,
+    WithoutDefinedAnnotation,
+    WithoutDefinedNamespace,
+    _Error,
+)
 from ebel.manager.models import Annotation as AnnotationModel
 from ebel.manager.models import AnnotationEntry, AnnotationManager
 from ebel.manager.models import Namespace as NamespaceModel
 from ebel.manager.models import NamespaceEntry, NamespaceManager, reset_tables
 from ebel.tools import BelRdb
-from ebel.warnings import AlsoUsedInOtherNamespace, _Warning
+from ebel.warning_definitions import AlsoUsedInOtherNamespace, _Warning
 
 log = logging.getLogger(__name__)
 

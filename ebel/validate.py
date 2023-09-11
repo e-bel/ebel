@@ -13,8 +13,7 @@ import pandas as pd
 
 import ebel.database
 from ebel.errors import BelSyntaxError
-from ebel.parser import (bel_to_json, check_bel_script,
-                         check_bel_script_line_by_line)
+from ebel.parser import bel_to_json, check_bel_script, check_bel_script_line_by_line
 
 logger = logging.getLogger(__name__)
 
@@ -161,7 +160,7 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
     with open(bel_script_path, "r", encoding="utf-8") as belfile:
         content = belfile.read()
 
-    new_content = content
+    new_content = replace_ebel_relation_terms(content)
 
     for regex_pattern in re.findall(
         r"\n((SET\s+(DOCUMENT\s+Description|Evidence|SupportingText|Support)" r'\s*=\s*)"(((?<=\\)"|[^"])+)"\s*\n*)',
@@ -188,6 +187,45 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
         else:
             with open(bel_script_path, "w") as output_file:
                 output_file.write(new_content)
+
+
+def replace_ebel_relation_terms(bel_file_content: str):
+    """Replace the eBEL substituted relation terms for the proper BEL relation names e.g. directly_increases
+    to directlyIncreases."""
+    repaired_content = bel_file_content
+    ebel_to_bel_map = {
+        "analogous_to": "analogousTo",
+        "biomarker_for": "biomarkerFor",
+        "causes_no_change": "causesNoChange",
+        "directly_decreases": "directlyDecreases",
+        "directly_increases": "directlyIncreases",
+        "equivalent_to": "eq",
+        "has_component": "hasComponent",
+        "has_components": "hasComponents",
+        "has_member": "hasMember",
+        "has_members": "hasMembers",
+        "is_a": "isA",
+        "negative_correlation": "neg",
+        "positive_correlation": "pos",
+        "prognostic_biomarker_for": "prognosticBiomarkerFor",
+        "rate_limiting_step_of": "rateLimitingStepOf",
+        "sub_process_of": "subProcessOf",
+        "transcribed_to": "transcribedTo",
+        "translated_to": "translatedTo",
+    }
+
+    pattern = (
+        r"\)\s(analogous_to|biomarker_for|causes_no_change|directly_decreases|directly_increases"
+        r"|equivalent_to|has_component|has_components|has_member|has_members|is_a|negative_correlation|"
+        r"positive_correlation|prognostic_biomarker_for|rate_limiting_step_of|sub_process_of|transcribed_to"
+        r"|translated_to)"
+    )
+
+    # Can use simple string replace since eBEL terms are quite unique
+    for ebel_term, bel_term in ebel_to_bel_map.items():
+        repaired_content = repaired_content.replace(ebel_term, bel_term)
+
+    return repaired_content
 
 
 def _write_odb_json(bel_path: str, results: dict, bel_version: str) -> str:
@@ -229,7 +267,7 @@ def _write_report(reports: Union[Iterable[str], str], result: dict, report_type:
     Returns
     -------
     list
-        List of file paths for the reports written.
+        File paths for the reports written.
 
     """
     # TODO: report_type options should be constants
