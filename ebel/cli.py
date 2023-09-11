@@ -81,15 +81,17 @@ def validate(
 
 @main.command()
 @click.argument("bel_script_path")
+@click.argument("repaired_file_path")
 @click.option(
-    "-n",
-    "--new_file_path",
-    default=None,
-    help="Path to write repaired file to. If none passed, will overwrite original file.",
+    "-d",
+    "--diff",
+    is_flag=True,
+    default=False,
+    help="Also export a file showing the differences between the original and repaired file.",
 )
-def repair(bel_script_path: str, new_file_path: str):
+def repair(bel_script_path: str, repaired_file_path: str, diff: bool):
     """Repair the BEL file for common delimiters and line separations."""
-    repair_bel_file(bel_script_path, new_file_path)
+    repair_bel_file(bel_script_path, repaired_file_path, diff=diff)
 
 
 @main.command()
