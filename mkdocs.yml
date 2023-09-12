@@ -28,8 +28,10 @@ plugins:
     - render_swagger
     - autorefs
     - mkdocstrings:
+        default_handler: python
         handlers:
           python:
+            paths: [ebel]
             options:
               docstring_section_style: list
               members_order: source
