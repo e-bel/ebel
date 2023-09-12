@@ -12,7 +12,7 @@ extra:
 
 nav:
 #    - Home: index.md
-    - Home: README.md
+    - Home: index.md
     - User Guide:
         - API: api.md
         - CLI: cli.md
