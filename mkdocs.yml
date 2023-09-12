@@ -11,8 +11,8 @@ extra:
     version: 1.0.36
 
 nav:
-    - Home: index.md
-    - Getting Started: README.md
+#    - Home: index.md
+    - Home: README.md
     - User Guide:
         - API: api.md
         - CLI: cli.md

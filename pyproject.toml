@@ -60,6 +60,7 @@ cryptography = "^3.4.7"
 openpyxl = "^3.0.10"
 graphviz = "0.20"
 pyorientdb = "^1.0.0"
+PyMySQL = "^1.0.2"
 python = "^3.9"
 
 [tool.poetry.group.dev.dependencies]
