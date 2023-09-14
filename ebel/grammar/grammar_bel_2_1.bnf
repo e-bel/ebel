@@ -53,8 +53,8 @@ statement: ( subject
          | ( transc_subject transc_relation transc_object )
          | ( transl_subject transl_relation transl_object )
 	     | ( subject relation_basic "(" nested_subject nested_relation nested_object ")" )
-	     | ( complex_abundance has_component object )
-         | ( complex_abundance has_components list )
+	     | ( complex_obj has_component object )
+         | ( complex_obj has_components list )
 	     | ( subject has_members list )) [ statement_comment ] _EOL
 
 transc_relation: transcribed_to
@@ -73,6 +73,8 @@ ortho_subject: gene
 ortho_object: gene
 
 bio_obj: protein | rna | gene
+
+complex_obj: complex_abundance | complex_list
 
 subject: _sub_obj
 object: _sub_obj
@@ -270,7 +272,6 @@ UNDERSCORE: "_"
 // ref: http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#XcomplexA
 
 // TODO: add to complex_abundance location ! http://openbel.org/language/version_2.0/bel_specification_version_2.0.html#_location_loc
-// complex_abundance: _complex_function "(" nn [ loc ] ")" should be the solution
 complex_abundance: _complex_function "(" nn [ loc ] ")"
 complex_list: _complex_function "(" list_complex ")"
 _complex_function: "complexAbundance" | "complex"

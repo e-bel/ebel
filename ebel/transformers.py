@@ -283,6 +283,10 @@ class _BelTransformer(Transformer):
         """Return degradation."""
         return [self.nt_type("transformation", "degradation"), [n[0]]]
 
+    def complex_obj(self, n):
+        """Return correct complex type."""
+        return self.subject(n)
+
     def complex_abundance(self, n):
         """Return complex as abundance."""
         return [self.nt_type("abundance", "complex"), [n[0]]]
@@ -368,8 +372,18 @@ class _BelTransformer(Transformer):
         return self._get_rel(n)
 
     @staticmethod
+    def has_component(n):
+        """Return has_component relation."""
+        return {"relation": "has_component"}
+
+    @staticmethod
+    def has_components(n):
+        """Return has_components relation."""
+        return {"relation": "has_components"}
+
+    @staticmethod
     def has_members(n):
-        """Return relation."""
+        """Return has_member relation."""
         return {"relation": "has_members"}
 
     @staticmethod
@@ -594,7 +608,7 @@ class _BelTransformer(Transformer):
 
         return self.nt_nn(namespace=namespace, name=name)
 
-    def pmod(self, n) -> dict:
+    def pmod(self, n) -> tuple:
         """Transform tokens to dict(function_name: namedtuple)."""
         namespace, name = "", ""
 

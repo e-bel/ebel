@@ -222,11 +222,14 @@ def replace_ebel_relation_terms(bel_file_content: str):
     return repaired_content
 
 
-def _write_odb_json(bel_path: str, results: dict, bel_version: str) -> str:
-    json_path = bel_path + ".json"
+def _write_odb_json(bel_path: Union[str, Path], results: dict, bel_version: str) -> str:
+    if isinstance(bel_path, str):
+        bel_path = Path(bel_path)
+    json_path = bel_path.with_suffix(".bel.json")
     if int(bel_version[0]) > 1:
         json_tree = bel_to_json(results["tree"])
-        open(json_path, "w").write(json_tree)
+        with open(json_path, "w") as jf:
+            jf.write(json_tree)
 
     return json_path
 
