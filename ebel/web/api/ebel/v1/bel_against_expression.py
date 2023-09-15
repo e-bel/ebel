@@ -8,8 +8,7 @@ from flask import request
 from sqlalchemy.sql import func
 
 from ebel import Bel
-from ebel.manager.rdbms.models.expression_atlas import (Experiment, FoldChange,
-                                                        GroupComparison)
+from ebel.manager.rdbms.models.expression_atlas import Experiment, FoldChange, GroupComparison
 from ebel.web.api.ebel.v1 import _get_pagination
 
 Relation = namedtuple(

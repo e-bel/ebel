@@ -1,8 +1,7 @@
 """IUPHAR RDBMS model definition."""
 from typing import List
 
-from sqlalchemy import (BigInteger, Boolean, Column, ForeignKey, Integer,
-                        Numeric, String, Text)
+from sqlalchemy import BigInteger, Boolean, Column, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
@@ -25,7 +24,9 @@ class IupharLigand(Base):
     labelled: Mapped[bool] = mapped_column()
     radioactive: Mapped[bool] = mapped_column()
     pubchem_sid: Mapped[int] = mapped_column()
-    pubchem_cid: Mapped[str] = mapped_column(Text)  # TODO: This is a integer, but for import reasons this changed to text
+    pubchem_cid: Mapped[str] = mapped_column(
+        Text
+    )  # TODO: This is a integer, but for import reasons this changed to text
     uniprot_id: Mapped[str] = mapped_column(Text)
     ensembl_id: Mapped[str] = mapped_column(Text)
     ligand_subunit_ids: Mapped[str] = mapped_column(Text)

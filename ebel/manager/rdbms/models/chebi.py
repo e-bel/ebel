@@ -1,9 +1,8 @@
 """CHEBI RDBMS model definition."""
 import datetime
-from typing import List
+from typing import List, Optional
 
-from sqlalchemy import (DateTime, ForeignKey, Index, Integer, String,
-                        Text)
+from sqlalchemy import DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
@@ -16,7 +15,7 @@ class ChemicalData(Base):
     __tablename__ = "chebi_chemical_data"
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    chemical_data: Mapped[str] = mapped_column(Text, nullable=True)
+    chemical_data: Mapped[Optional[str]] = mapped_column(Text)
     source: Mapped[str] = mapped_column(Text, nullable=False)
     type: Mapped[str] = mapped_column(Text, nullable=False)
 
@@ -68,15 +67,15 @@ class Compound(Base):
     __tablename__ = "chebi_compound"
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    name: Mapped[str] = mapped_column(String(2000), nullable=True)
+    name: Mapped[Optional[str]] = mapped_column(String(2000))
     source: Mapped[str] = mapped_column(String(32), nullable=False)
-    parent_id: Mapped[int] = mapped_column(nullable=True)
+    parent_id: Mapped[Optional[int]] = mapped_column()
     chebi_accession: Mapped[str] = mapped_column(String(30), nullable=False)
     status: Mapped[str] = mapped_column(String(1), nullable=False)
-    definition: Mapped[str] = mapped_column(Text, nullable=True)
+    definition: Mapped[Optional[str]] = mapped_column(Text)
     star: Mapped[int] = mapped_column(nullable=False)
-    modified_on: Mapped[str] = mapped_column(Text, nullable=True)
-    created_by: Mapped[int] = mapped_column(Text, nullable=True)
+    modified_on: Mapped[Optional[str]] = mapped_column(Text)
+    created_by: Mapped[Optional[str]] = mapped_column(Text)
 
     chemicalData: Mapped[List["ChemicalData"]] = relationship("ChemicalData", back_populates="compounds")
     comments: Mapped[List["Comment"]] = relationship("Comment", back_populates="compounds")
@@ -136,7 +135,7 @@ class DatabaseAccession(Base):
     __tablename__ = "chebi_database_accession"
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    accession_number: Mapped[str] = mapped_column(String(255), nullable=True)
+    accession_number: Mapped[Optional[str]] = mapped_column(String(255))
     type: Mapped[str] = mapped_column(Text, nullable=False)
     source: Mapped[str] = mapped_column(Text, nullable=False)
 
@@ -161,7 +160,7 @@ class Name(Base):
     __tablename__ = "chebi_name"
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    name: Mapped[str] = mapped_column(Text, nullable=True)
+    name: Mapped[Optional[str]] = mapped_column(Text)
     type: Mapped[str] = mapped_column(Text, nullable=False)
     source: Mapped[str] = mapped_column(Text, nullable=False)
     adapted: Mapped[str] = mapped_column(Text, nullable=False)
@@ -193,8 +192,8 @@ class Reference(Base):
 
     reference_id: Mapped[str] = mapped_column(String(60), nullable=False, index=True)
     reference_db_name: Mapped[str] = mapped_column(String(60), nullable=False, index=True)
-    location_in_ref: Mapped[str] = mapped_column(String(90), nullable=True, index=True)
-    reference_name: Mapped[str] = mapped_column(String(1024), nullable=True)
+    location_in_ref: Mapped[Optional[str]] = mapped_column(String(90), index=True)
+    reference_name: Mapped[Optional[str]] = mapped_column(String(1024))
 
     compound_id: Mapped[int] = mapped_column(ForeignKey("chebi_compound.id"))
     compounds: Mapped[List["Compound"]] = relationship("Compound", back_populates="references")

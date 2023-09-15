@@ -21,9 +21,7 @@ import requests
 import sqlalchemy as sqla
 import xmltodict
 from pyorientdb import OrientDB, orient
-from pyorientdb.exceptions import (PyOrientCommandException,
-                                   PyOrientIndexException,
-                                   PyOrientSecurityAccessException)
+from pyorientdb.exceptions import PyOrientCommandException, PyOrientIndexException, PyOrientSecurityAccessException
 from pyorientdb.otypes import OrientRecord
 from sqlalchemy import text
 from sqlalchemy.sql.schema import Table
@@ -35,8 +33,7 @@ from ebel.cache import set_mysql_interactive
 from ebel.config import get_config_as_dict, get_config_value, write_to_config
 from ebel.constants import DEFAULT_ODB, RID
 from ebel.manager.orientdb import urls as default_urls
-from ebel.manager.orientdb.odb_structure import (Edge, Generic, Node, OClass,
-                                                 OIndex, OProperty)
+from ebel.manager.orientdb.odb_structure import Edge, Generic, Node, OClass, OIndex, OProperty
 from ebel.tools import BelRdb, chunks, get_file_path, get_standard_name
 
 type_map_inverse = {v: k for k, v in orient.type_map.items()}

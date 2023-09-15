@@ -1,9 +1,10 @@
 """UniProt RDBMS model definition."""
 from collections import defaultdict
+from typing import List
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, mapped_column
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 Base = declarative_base()
 
@@ -45,29 +46,33 @@ class Uniprot(Base):
 
     __tablename__ = "uniprot"
 
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[str] = mapped_column(primary_key=True)
 
-    accession = mapped_column(String(20), unique=True)
-    name = mapped_column(String(100), nullable=False, unique=True)
-    recommended_name = mapped_column(String(255), nullable=True)
+    accession: Mapped[str] = mapped_column(String(20), unique=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
+    recommended_name: Mapped[str] = mapped_column(String(255), nullable=True)
 
-    taxid = mapped_column(Integer, ForeignKey("uniprot_organism.taxid"), nullable=False, index=True)
-    organism = relationship("Organism")
+    taxid: Mapped[int] = mapped_column(ForeignKey("uniprot_organism.taxid"), nullable=False, index=True)
+    organism: Mapped["Organism"] = relationship("Organism")
 
-    function_id = mapped_column(Integer, ForeignKey("uniprot_function.id"), nullable=True)
-    function = relationship("Function")
+    function_id: Mapped[int] = mapped_column(ForeignKey("uniprot_function.id"), nullable=True)
+    function: Mapped["Function"] = relationship("Function")
 
-    gene_names = relationship("Gene", back_populates="uniprot")
+    gene_names: Mapped[List["Gene"]] = relationship("Gene", back_populates="uniprot")
 
-    gene_symbol = relationship("GeneSymbol", uselist=False, back_populates="uniprot")
+    gene_symbol: Mapped["GeneSymbol"] = relationship("GeneSymbol", uselist=False, back_populates="uniprot")
 
-    keywords = relationship("Keyword", secondary=uniprot__uniprot_keyword, back_populates="uniprots")
+    keywords: Mapped[List["Keyword"]] = relationship(
+        "Keyword", secondary=uniprot__uniprot_keyword, back_populates="uniprots"
+    )
 
-    hosts = relationship("Organism", secondary=uniprot__uniprot_host, back_populates="uniprots")
+    hosts: Mapped[List["Organism"]] = relationship(
+        "Organism", secondary=uniprot__uniprot_host, back_populates="uniprots"
+    )
 
-    xrefs = relationship("Xref", secondary=uniprot__uniprot_xref, back_populates="uniprots")
+    xrefs: Mapped[List["Xref"]] = relationship("Xref", secondary=uniprot__uniprot_xref, back_populates="uniprots")
 
-    subcellular_locations = relationship(
+    subcellular_locations: Mapped[List["SubcellularLocation"]] = relationship(
         "SubcellularLocation",
         secondary=uniprot__uniprot_subcellular_location,
         back_populates="uniprots",
@@ -103,10 +108,10 @@ class GeneSymbol(Base):
     """Class definition for the uniprot_gene_symbol table."""
 
     __tablename__ = "uniprot_gene_symbol"
-    id = mapped_column(Integer, primary_key=True)
-    symbol = mapped_column(String(100), nullable=False, index=True)
-    uniprot_id = mapped_column(Integer, ForeignKey("uniprot.id"))
-    uniprot = relationship("Uniprot", back_populates="gene_symbol")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    symbol: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    uniprot_id: Mapped[int] = mapped_column(ForeignKey("uniprot.id"))
+    uniprot: Mapped[Uniprot] = relationship("Uniprot", back_populates="gene_symbol")
 
     def __repr__(self):
         """Define repr."""
@@ -117,10 +122,10 @@ class Gene(Base):
     """Class definition for the uniprot_gene table."""
 
     __tablename__ = "uniprot_gene"
-    id = mapped_column(Integer, primary_key=True)
-    name = mapped_column(String(100), nullable=False, index=True)
-    uniprot_id = mapped_column(Integer, ForeignKey("uniprot.id"))
-    uniprot = relationship("Uniprot", back_populates="gene_names")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    uniprot_id: Mapped[int] = mapped_column(ForeignKey("uniprot.id"))
+    uniprot: Mapped[Uniprot] = relationship("Uniprot", back_populates="gene_names")
 
 
 class Keyword(Base):
@@ -128,10 +133,12 @@ class Keyword(Base):
 
     __tablename__ = "uniprot_keyword"
 
-    keywordid = mapped_column(Integer, primary_key=True)
-    keyword_name = mapped_column(String(100), index=True)
+    keywordid: Mapped[int] = mapped_column(primary_key=True)
+    keyword_name: Mapped[str] = mapped_column(String(100), index=True)
 
-    uniprots = relationship("Uniprot", secondary=uniprot__uniprot_keyword, back_populates="keywords")
+    uniprots: Mapped[List[Uniprot]] = relationship(
+        "Uniprot", secondary=uniprot__uniprot_keyword, back_populates="keywords"
+    )
 
     def __repr__(self):
         """Define repr."""
@@ -143,10 +150,10 @@ class Organism(Base):
 
     __tablename__ = "uniprot_organism"
 
-    taxid = mapped_column(Integer, primary_key=True)
-    scientific_name = mapped_column(String(255))  # TODO:Check if index=True with  is possible
+    taxid: Mapped[int] = mapped_column(primary_key=True)
+    scientific_name: Mapped[str] = mapped_column(String(255))  # TODO:Check if index=True with  is possible
 
-    uniprots = relationship("Uniprot", secondary=uniprot__uniprot_host, back_populates="hosts")
+    uniprots: Mapped[List[Uniprot]] = relationship("Uniprot", secondary=uniprot__uniprot_host, back_populates="hosts")
 
 
 class SubcellularLocation(Base):
@@ -154,11 +161,10 @@ class SubcellularLocation(Base):
 
     __tablename__ = "uniprot_subcellular_location"
 
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String(100), index=True)
 
-    name = mapped_column(String(100), index=True)
-
-    uniprots = relationship(
+    uniprots: Mapped[List[Uniprot]] = relationship(
         "Uniprot",
         secondary=uniprot__uniprot_subcellular_location,
         back_populates="subcellular_locations",
@@ -170,12 +176,12 @@ class Xref(Base):
 
     __tablename__ = "uniprot_xref"
 
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    db = mapped_column(String(50), index=True)
-    identifier = mapped_column(String(100), index=True)
+    db: Mapped[str] = mapped_column(String(50), index=True)
+    identifier: Mapped[str] = mapped_column(String(100), index=True)
 
-    uniprots = relationship("Uniprot", secondary=uniprot__uniprot_xref, back_populates="xrefs")
+    uniprots: Mapped[List[Uniprot]] = relationship("Uniprot", secondary=uniprot__uniprot_xref, back_populates="xrefs")
 
 
 class Function(Base):
@@ -183,8 +189,8 @@ class Function(Base):
 
     __tablename__ = "uniprot_function"
 
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    description = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text)
 
-    uniprots = relationship("Uniprot", back_populates="function")
+    uniprots: Mapped[List[Uniprot]] = relationship("Uniprot", back_populates="function")

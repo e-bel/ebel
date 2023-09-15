@@ -2,8 +2,7 @@
 import datetime
 from typing import List
 
-from sqlalchemy import (BigInteger, Column, Date, ForeignKey, Integer, String,
-                        Text)
+from sqlalchemy import BigInteger, Column, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 

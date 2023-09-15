@@ -24,7 +24,9 @@ class Nsides(Base):
     )
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    drug_rxnorn_id: Mapped[str] = mapped_column(String(20), index=True)  # This has to be a String because of mapping to drugbank ids
+    drug_rxnorn_id: Mapped[str] = mapped_column(
+        String(20), index=True
+    )  # This has to be a String because of mapping to drugbank ids
     drug_concept_name: Mapped[str] = mapped_column(String(255), index=True)
 
     source: Mapped[str] = mapped_column(String(10), index=True)

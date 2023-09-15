@@ -35,9 +35,15 @@ class Drugbank(Base):
     references: Mapped[List["Reference"]] = relationship("Reference", back_populates="drugbank", cascade="save-update")
     synonyms: Mapped[List["Synonym"]] = relationship("Synonym", back_populates="drugbank", cascade="save-update")
     targets: Mapped[List["Target"]] = relationship("Target", back_populates="drugbank", cascade="save-update")
-    external_identifiers: Mapped[List["ExternalIdentifier"]] = relationship("ExternalIdentifier", back_populates="drugbank", cascade="save-update")
-    product_names: Mapped[List["ProductName"]] = relationship("ProductName", back_populates="drugbank", cascade="save-update")
-    drug_interactions: Mapped[List["DrugInteraction"]] = relationship("DrugInteraction", back_populates="drugbank", cascade="save-update")
+    external_identifiers: Mapped[List["ExternalIdentifier"]] = relationship(
+        "ExternalIdentifier", back_populates="drugbank", cascade="save-update"
+    )
+    product_names: Mapped[List["ProductName"]] = relationship(
+        "ProductName", back_populates="drugbank", cascade="save-update"
+    )
+    drug_interactions: Mapped[List["DrugInteraction"]] = relationship(
+        "DrugInteraction", back_populates="drugbank", cascade="save-update"
+    )
     statuses: Mapped[List["Status"]] = relationship("Status", back_populates="drugbank", cascade="save-update")
     patents: Mapped[List["Patent"]] = relationship("Patent", back_populates="drugbank", cascade="save-update")
     pathways: Mapped[List["Pathway"]] = relationship("Pathway", back_populates="drugbank", cascade="save-update")

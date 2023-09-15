@@ -20,8 +20,7 @@ from sqlalchemy.sql.expression import func
 from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
 
-from ebel.constants import (FILE, GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_ANNO,
-                            GRAMMAR_START_NS, URL)
+from ebel.constants import FILE, GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_ANNO, GRAMMAR_START_NS, URL
 from ebel.tools import BelRdb
 
 Base = declarative_base()

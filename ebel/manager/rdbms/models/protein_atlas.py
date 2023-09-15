@@ -1,7 +1,7 @@
 """Protein Atlas RDBMS model definition."""
 from sqlalchemy import Column, Integer, Numeric, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import mapped_column, Mapped
 
 Base = declarative_base()
 
@@ -10,14 +10,14 @@ class ProteinAtlasNormalTissue(Base):
     """Class definition for the protein_atlas_normal_tissue table."""
 
     __tablename__ = "protein_atlas_normal_tissue"
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    gene = mapped_column(String(100), index=True)
-    gene_name = mapped_column(String(100))
-    tissue = mapped_column(String(100))
-    cell_type = mapped_column(String(100))
-    level = mapped_column(String(100), index=True)
-    reliability = mapped_column(String(100), index=True)
+    gene: Mapped[str] = mapped_column(String(100), index=True)
+    gene_name: Mapped[str] = mapped_column(String(100))
+    tissue: Mapped[str] = mapped_column(String(100))
+    cell_type: Mapped[str] = mapped_column(String(100))
+    level: Mapped[str] = mapped_column(String(100), index=True)
+    reliability: Mapped[str] = mapped_column(String(100), index=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -35,22 +35,22 @@ class ProteinAtlasSubcellularLocation(Base):
     """Class definition for the protein_atlas_subcellular_location table."""
 
     __tablename__ = "protein_atlas_subcellular_location"
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    gene = mapped_column(String(100))
-    gene_name = mapped_column(String(100))
-    reliability = mapped_column(String(100))
-    main_location = mapped_column(String(100))
-    additional_location = mapped_column(String(100))
-    extracellular_location = mapped_column(String(100))
-    enhanced = mapped_column(String(100))
-    supported = mapped_column(String(100))
-    approved = mapped_column(String(100))
-    uncertain = mapped_column(String(100))
-    single_cell_variation_intensity = mapped_column(String(100))
-    single_cell_variation_spatial = mapped_column(String(100))
-    cell_cycle_dependency = mapped_column(Text)
-    go_id = mapped_column(Text)
+    gene: Mapped[str] = mapped_column(String(100))
+    gene_name: Mapped[str] = mapped_column(String(100))
+    reliability: Mapped[str] = mapped_column(String(100))
+    main_location: Mapped[str] = mapped_column(String(100))
+    additional_location: Mapped[str] = mapped_column(String(100))
+    extracellular_location: Mapped[str] = mapped_column(String(100))
+    enhanced: Mapped[str] = mapped_column(String(100))
+    supported: Mapped[str] = mapped_column(String(100))
+    approved: Mapped[str] = mapped_column(String(100))
+    uncertain: Mapped[str] = mapped_column(String(100))
+    single_cell_variation_intensity: Mapped[str] = mapped_column(String(100))
+    single_cell_variation_spatial: Mapped[str] = mapped_column(String(100))
+    cell_cycle_dependency: Mapped[str] = mapped_column(Text)
+    go_id: Mapped[str] = mapped_column(Text)
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -76,12 +76,12 @@ class ProteinAtlasRnaTissueConsensus(Base):
     """Class definition for the protein_atlas_rna_tissue_consensus table."""
 
     __tablename__ = "protein_atlas_rna_tissue_consensus"
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    gene = mapped_column(String(100), index=True)
-    gene_name = mapped_column(String(100), index=True)
-    tissue = mapped_column(String(100), index=True)
-    n_tpm = mapped_column(Numeric(8, 1))
+    gene: Mapped[str] = mapped_column(String(100), index=True)
+    gene_name: Mapped[str] = mapped_column(String(100), index=True)
+    tissue: Mapped[str] = mapped_column(String(100), index=True)
+    n_tpm: Mapped[float] = mapped_column(Numeric(8, 1))
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -97,14 +97,14 @@ class ProteinAtlasRnaBrainGtex(Base):
     """Class definition for the protein_atlas_rna_brain_gtex table."""
 
     __tablename__ = "protein_atlas_rna_brain_gtex"
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    gene = mapped_column(String(100), index=True)
-    gene_name = mapped_column(String(100), index=True)
-    brain_region = mapped_column(String(100), index=True)
-    tpm = mapped_column(Numeric(8, 1))
-    p_tpm = mapped_column(Numeric(8, 1))
-    n_tpm = mapped_column(Numeric(8, 1))
+    gene: Mapped[str] = mapped_column(String(100), index=True)
+    gene_name: Mapped[str] = mapped_column(String(100), index=True)
+    brain_region: Mapped[str] = mapped_column(String(100), index=True)
+    tpm: Mapped[float] = mapped_column(Numeric(8, 1))
+    p_tpm: Mapped[float] = mapped_column(Numeric(8, 1))
+    n_tpm: Mapped[float] = mapped_column(Numeric(8, 1))
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -122,14 +122,14 @@ class ProteinAtlasRnaBrainFantom(Base):
     """Class definition for the protein_atlas_rna_brain_fantom table."""
 
     __tablename__ = "protein_atlas_rna_brain_fantom"
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    gene = mapped_column(String(100))
-    gene_name = mapped_column(String(100))
-    brain_region = mapped_column(String(100))
-    tags_per_million = mapped_column(String(100))
-    scaled_tags_per_million = mapped_column(String(100))
-    n_tpm = mapped_column(String(100))
+    gene: Mapped[str] = mapped_column(String(100))
+    gene_name: Mapped[str] = mapped_column(String(100))
+    brain_region: Mapped[str] = mapped_column(String(100))
+    tags_per_million: Mapped[str] = mapped_column(String(100))
+    scaled_tags_per_million: Mapped[str] = mapped_column(String(100))
+    n_tpm: Mapped[str] = mapped_column(String(100))
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -147,12 +147,12 @@ class ProteinAtlasRnaMouseBrainAllen(Base):
     """Class definition for the protein_atlas_rna_mouse_brain_allen table."""
 
     __tablename__ = "protein_atlas_rna_mouse_brain_allen"
-    id = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    gene = mapped_column(String(100))
-    gene_name = mapped_column(String(100))
-    brain_region = mapped_column(String(100))
-    expression_energy = mapped_column(Numeric(8, 1))
+    gene: Mapped[str] = mapped_column(String(100))
+    gene_name: Mapped[str] = mapped_column(String(100))
+    brain_region: Mapped[str] = mapped_column(String(100))
+    expression_energy: Mapped[float] = mapped_column(Numeric(8, 1))
 
     def as_dict(self):
         """Convert object values to dictionary."""

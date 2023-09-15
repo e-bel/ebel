@@ -1,6 +1,6 @@
 """ClinicalTrials.gov RDBMS model definition."""
 import re
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import ForeignKey, Integer, String, Table, Text, Column
 from sqlalchemy.ext.declarative import declarative_base
@@ -86,24 +86,24 @@ class ClinicalTrialGov(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     nct_id = mapped_column(String(100), index=True)
-    org_study_id: Mapped[str] = mapped_column(Text)
-    brief_title: Mapped[str] = mapped_column(Text)
-    official_title: Mapped[str] = mapped_column(Text)
-    is_fda_regulated_drug: Mapped[str] = mapped_column(Text)
-    brief_summary: Mapped[str] = mapped_column(Text)
-    detailed_description: Mapped[str] = mapped_column(Text)
-    overall_status: Mapped[str] = mapped_column(Text)
-    start_date: Mapped[str] = mapped_column(Text)
-    completion_date: Mapped[str] = mapped_column(Text)
-    phase: Mapped[str] = mapped_column(Text)
-    study_type: Mapped[str] = mapped_column(Text)
-    study_design_intervention_model: Mapped[str] = mapped_column(Text)
-    study_design_primary_purpose: Mapped[str] = mapped_column(Text)
-    study_design_masking: Mapped[str] = mapped_column(Text)
+    org_study_id: Mapped[Optional[str]] = mapped_column(Text)
+    brief_title: Mapped[Optional[str]] = mapped_column(Text)
+    official_title: Mapped[Optional[str]] = mapped_column(Text)
+    is_fda_regulated_drug: Mapped[Optional[str]] = mapped_column(Text)
+    brief_summary: Mapped[Optional[str]] = mapped_column(Text)
+    detailed_description: Mapped[Optional[str]] = mapped_column(Text)
+    overall_status: Mapped[Optional[str]] = mapped_column(Text)
+    start_date: Mapped[Optional[str]] = mapped_column(Text)
+    completion_date: Mapped[Optional[str]] = mapped_column(Text)
+    phase: Mapped[Optional[str]] = mapped_column(Text)
+    study_type: Mapped[Optional[str]] = mapped_column(Text)
+    study_design_intervention_model: Mapped[Optional[str]] = mapped_column(Text)
+    study_design_primary_purpose: Mapped[Optional[str]] = mapped_column(Text)
+    study_design_masking: Mapped[Optional[str]] = mapped_column(Text)
     # primary_outcomes
     # secondary_outcomes
-    patient_data_sharing_ipd: Mapped[str] = mapped_column(Text)
-    patient_data_ipd_description: Mapped[str] = mapped_column(Text)
+    patient_data_sharing_ipd: Mapped[Optional[str]] = mapped_column(Text)
+    patient_data_ipd_description: Mapped[Optional[str]] = mapped_column(Text)
 
     keywords: Mapped[List["Keyword"]] = relationship(
         "Keyword",

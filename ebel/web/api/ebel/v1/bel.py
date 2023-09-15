@@ -17,8 +17,7 @@ from flask import make_response, request, send_file, send_from_directory
 from graphviz import Digraph
 
 from ebel import Bel
-from ebel.manager.orientdb.odb_structure import (get_columns,
-                                                 get_node_view_labels)
+from ebel.manager.orientdb.odb_structure import get_columns, get_node_view_labels
 from ebel.validate import validate_bel_file
 from ebel.web.api.ebel.v1 import DataType, OrientDbSqlOperator, _get_pagination
 

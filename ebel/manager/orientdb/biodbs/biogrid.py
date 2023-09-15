@@ -21,6 +21,7 @@ STANDARD_NAMESPACES = {9606: "HGNC", 10090: "MGI", 10116: "RGD"}
 
 logger = logging.getLogger(__name__)
 
+
 class BioGridNode:
     """Custom class definition for BioGRID nodes."""
 
