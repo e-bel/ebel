@@ -2,6 +2,7 @@
 
 from sqlalchemy import Column, Float, Index, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import mapped_column, Mapped
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -21,24 +22,24 @@ class Nsides(Base):
             "mean_reporting_frequency",
         ),
     )
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    drug_rxnorn_id = Column(String(20), index=True)  # This has to be a String because of mapping to drugbank ids
-    drug_concept_name = Column(String(255), index=True)
+    drug_rxnorn_id: Mapped[str] = mapped_column(String(20), index=True)  # This has to be a String because of mapping to drugbank ids
+    drug_concept_name: Mapped[str] = mapped_column(String(255), index=True)
 
-    source = Column(String(10), index=True)
+    source: Mapped[str] = mapped_column(String(10), index=True)
 
-    condition_meddra_id = Column(Integer)
-    condition_concept_name = Column(String(255), index=True)
+    condition_meddra_id: Mapped[int] = mapped_column()
+    condition_concept_name: Mapped[str] = mapped_column(String(255), index=True)
 
     # OFFSIDES specific
-    a = Column(Integer)
-    b = Column(Integer)
-    c = Column(Integer)
-    d = Column(Integer)
-    prr = Column(Float)
-    prr_error = Column(Float)
-    mean_reporting_frequency = Column(Float, index=True)
+    a = mapped_column(Integer)
+    b = mapped_column(Integer)
+    c = mapped_column(Integer)
+    d = mapped_column(Integer)
+    prr = mapped_column(Float)
+    prr_error = mapped_column(Float)
+    mean_reporting_frequency = mapped_column(Float, index=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""

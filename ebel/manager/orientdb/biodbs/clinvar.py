@@ -5,6 +5,7 @@ from typing import Dict, List
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -176,7 +177,7 @@ class ClinVar(odb_meta.Graph):
         results = dict()
         for kwd in disease_keywords:
             sql = sql_temp.format(keyword=kwd)
-            rows = self.engine.execute(sql)
+            rows = self.session.execute(text(sql))
             results[kwd] = [Snp(*x) for x in rows.fetchall()]
 
         return results

@@ -1,5 +1,5 @@
 """BioGrid."""
-
+import logging
 import typing
 from enum import Enum
 from typing import Dict, Tuple
@@ -7,6 +7,7 @@ from typing import Dict, Tuple
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import text
 from tqdm import tqdm
 
 from ebel import tools
@@ -17,6 +18,8 @@ from ebel.manager.rdbms.models import biogrid
 
 STANDARD_NAMESPACES = {9606: "HGNC", 10090: "MGI", 10116: "RGD"}
 
+
+logger = logging.getLogger(__name__)
 
 class BioGridNode:
     """Custom class definition for BioGRID nodes."""
@@ -311,6 +314,8 @@ class BioGrid(odb_meta.Graph):
         df.index += 1
         df.index.rename("id", inplace=True)
 
+        logger.info("Insert BIOGRID data")
+
         df.to_sql(biogrid.Biogrid.__tablename__, self.engine, if_exists="append")
 
         return {self.biodb_name: df.shape[0]}
@@ -469,13 +474,14 @@ class BioGrid(odb_meta.Graph):
         where
             m.modification != 'No Modification' and ia.uniprot IS NOT NULL and ib.uniprot IS NOT NULL
         group by
-            ia.symbol,
-            ia.uniprot,
-            ia.taxonomy_id,
-            ib.symbol,
-            ib.uniprot,
-            ib.taxonomy_id"""
-        return [dict(x) for x in self.engine.execute(sql).fetchall()]
+            subject_symbol,
+            subject_uniprot,
+            subject_taxonomy_id,
+            object_symbol,
+            object_uniprot,
+            object_taxonomy_id"""
+        results = self.session.execute(text(sql)).fetchall()
+        return [x._asdict() for x in results]
 
     def get_create_pure_protein_rid_by_uniprot(self, taxonomy_id, symbol, uniprot):
         """Get pure protein rid by UniProt accession ID if the protein is involved in a BEL statement."""
@@ -561,8 +567,8 @@ class BioGrid(odb_meta.Graph):
                     object_uniprot=e["object_uniprot"],
                 )
 
-                for row in self.engine.execute(sql).fetchall():
-                    row_dict = dict(row)
+                for row in self.session.execute(text(sql)).fetchall():
+                    row_dict = row._asdict()
                     be = BioGridEdge(subject_rid=subj_pure_rid, object_rid=obj_pure_rid, **row_dict)
                     edge_value_dict = be.get_edge_value_dict()
 
@@ -620,4 +626,4 @@ class BioGrid(odb_meta.Graph):
                 biogrid_modification m on (m.id=b.modification_id) left join
                 biogrid_source s on (s.id=b.source_id) left join
                 biogrid_publication p on (p.id=b.publication_id)"""
-        self.engine.execute(sql)
+        self.session.execute(text(sql))

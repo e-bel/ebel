@@ -3,6 +3,7 @@ from typing import Dict
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -70,7 +71,7 @@ class MirTarBase(odb_meta.Graph):
                 species_target_gene='Homo sapiens' and
                 support_type in ('Functional MTI', 'Non-Functional MTI')"""
         cols = ["mi_rna", "symbol", "support_type", "pmid", "experiments"]
-        df_mirtarbase = pd.DataFrame(self.engine.execute(sql).fetchall(), columns=cols)
+        df_mirtarbase = pd.DataFrame(self.session.execute(text(sql)).fetchall(), columns=cols)
         df_mirtarbase.experiments = df_mirtarbase.experiments.str.split("//")
         df_join = df_mirtarbase.set_index("symbol").join(df_symbol_rid.set_index("symbol"), how="inner")
 

@@ -25,6 +25,7 @@ from pyorientdb.exceptions import (PyOrientCommandException,
                                    PyOrientIndexException,
                                    PyOrientSecurityAccessException)
 from pyorientdb.otypes import OrientRecord
+from sqlalchemy import text
 from sqlalchemy.sql.schema import Table
 from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
@@ -240,12 +241,12 @@ class Graph(abc.ABC):
         return inserted
 
     def create_index_rdbms(self, table_name: str, columns):
-        """Creates index on column(s) in RDBMS."""
+        """Creates index on mapped_column(s) in RDBMS."""
         if isinstance(columns, str):
             columns = [columns]
         sql_columns = ",".join(columns)
         index_name = f"idx_{table_name}_" + "_".join(columns)
-        self.engine.execute(f"CREATE INDEX {index_name} ON {table_name} ({sql_columns})")
+        self.session.execute(f"CREATE INDEX {index_name} ON {table_name} ({sql_columns})")
 
     def clear_edges_by_bel_doc_rid(self, bel_document_rid: str, even_if_other_doc_rids_exists=True):
         """Delete all edges linked to a specified BEL document rID."""
@@ -819,7 +820,7 @@ class Graph(abc.ABC):
             for table_name, table in self.tables_base.metadata.tables.items():
                 if self.table_exists(table_name):
                     sql = f"Select count(*) from `{table_name}`"
-                    numbers[table_name] = self.engine.execute(sql).fetchone()[0]
+                    numbers[table_name] = self.session.execute(text(sql)).fetchone()[0]
                 else:
                     numbers[table_name] = 0
         elif self.generic_classes:
@@ -1348,7 +1349,7 @@ class Graph(abc.ABC):
 
         for gene_type, sql in sqls.items():
             if gene_type in gene_types:
-                results = self.engine.execute(sql)
+                results = self.session.execute(sql)
                 for (symbol,) in results.fetchall():
                     bel = f'g(HGNC:"{symbol}")'
                     data = {

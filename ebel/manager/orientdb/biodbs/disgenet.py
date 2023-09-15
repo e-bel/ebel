@@ -4,6 +4,7 @@ from typing import Dict, Optional
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -202,7 +203,7 @@ class DisGeNet(odb_meta.Graph):
         results = dict()
         for kwd in self.disease_keywords:
             sql = sql_temp.format(kwd)
-            rows = self.engine.execute(sql)
+            rows = self.session.execute(text(sql))
             results[kwd] = rows
 
         inserted = 0

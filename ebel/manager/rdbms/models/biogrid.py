@@ -1,7 +1,7 @@
 """BioGRID RDBMS model definition."""
-from sqlalchemy import Column, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Float, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -12,26 +12,28 @@ class Biogrid(Base):
     """Class definition for the biogrid table."""
 
     __tablename__ = "biogrid"
-    id = Column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True)
 
-    biogrid_a_id = Column(Integer, ForeignKey("biogrid_interactor.biogrid_id"))
-    biogrid_a = relationship("Interactor", foreign_keys=[biogrid_a_id])
-    biogrid_b_id = Column(Integer, ForeignKey("biogrid_interactor.biogrid_id"))
-    biogrid_b = relationship("Interactor", foreign_keys=[biogrid_b_id])
-    biogrid_id = Column(Integer, nullable=True)
-    experimental_system_id = Column(Integer, ForeignKey("biogrid_experimental_system.id"))
-    experimental_system = relationship("ExperimentalSystem", foreign_keys=[experimental_system_id])
-    throughput_id = Column(Integer, ForeignKey("biogrid_throughput.id"))
-    throughput = relationship("Throughput", foreign_keys=[throughput_id])
-    score = Column(Float, nullable=True)
-    modification_id = Column(Integer, ForeignKey("biogrid_modification.id"))
-    modification = relationship("Modification", foreign_keys=[modification_id])
-    qualifications = Column(String(255), nullable=True)
-    source_id = Column(Integer, ForeignKey("biogrid_source.id"))
-    source = relationship("Source", foreign_keys=[source_id])
-    publication_id = Column(Integer, ForeignKey("biogrid_publication.id"))
-    publication = relationship("Publication", foreign_keys=[publication_id])
-    qualification = Column(Text, nullable=True)
+    biogrid_a_id: Mapped[int] = mapped_column(ForeignKey("biogrid_interactor.biogrid_id"))
+    biogrid_a: Mapped["Interactor"] = relationship("Interactor", foreign_keys=[biogrid_a_id])
+    biogrid_b_id: Mapped[int] = mapped_column(ForeignKey("biogrid_interactor.biogrid_id"))
+    biogrid_b: Mapped["Interactor"] = relationship("Interactor", foreign_keys=[biogrid_b_id])
+    biogrid_id: Mapped[int] = mapped_column(nullable=True)
+    experimental_system_id: Mapped[int] = mapped_column(ForeignKey("biogrid_experimental_system.id"))
+    experimental_system: Mapped["ExperimentalSystem"] = relationship(
+        "ExperimentalSystem", foreign_keys=[experimental_system_id]
+    )
+    throughput_id: Mapped[int] = mapped_column(ForeignKey("biogrid_throughput.id"))
+    throughput: Mapped["Throughput"] = relationship("Throughput", foreign_keys=[throughput_id])
+    score: Mapped[float] = mapped_column(nullable=True)
+    modification_id: Mapped[int] = mapped_column(ForeignKey("biogrid_modification.id"), nullable=True)
+    modification: Mapped["Modification"] = relationship("Modification", foreign_keys=[modification_id])
+    qualifications: Mapped[str] = mapped_column(String(255), nullable=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey("biogrid_source.id"))
+    source: Mapped["Source"] = relationship("Source", foreign_keys=[source_id])
+    publication_id: Mapped[int] = mapped_column(ForeignKey("biogrid_publication.id"))
+    publication: Mapped["Publication"] = relationship("Publication", foreign_keys=[publication_id])
+    qualification: Mapped[str] = mapped_column(Text, nullable=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -53,11 +55,11 @@ class Publication(Base):
     """Class definition for the biogrid_publication table."""
 
     __tablename__ = "biogrid_publication"
-    id = Column(Integer, primary_key=True)
-    author_name = Column(String(255), nullable=True)
-    publication_year = Column(Integer, nullable=True)
-    source = Column(String(255), nullable=True)
-    source_identifier = Column(String(255), nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    author_name: Mapped[str] = mapped_column(String(255), nullable=True)
+    publication_year: Mapped[int] = mapped_column(nullable=True)
+    source: Mapped[str] = mapped_column(String(255), nullable=True)
+    source_identifier: Mapped[str] = mapped_column(String(255), nullable=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -68,9 +70,9 @@ class Throughput(Base):
     """Class definition for the biogrid_throughput table."""
 
     __tablename__ = "biogrid_throughput"
-    id = Column(Integer, primary_key=True)
-    throughput = Column(String(255))
-    frequency = Column(Integer)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    throughput: Mapped[str] = mapped_column(String(255))
+    frequency: Mapped[int] = mapped_column()
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -81,8 +83,8 @@ class Taxonomy(Base):
     """Class definition for the biogrid_taxonomy table."""
 
     __tablename__ = "biogrid_taxonomy"
-    taxonomy_id = Column(Integer, primary_key=True)  # == NCBI Taxonomy ID
-    organism_name = Column(String(1000))
+    taxonomy_id: Mapped[int] = mapped_column(primary_key=True)  # == NCBI Taxonomy ID
+    organism_name: Mapped[str] = mapped_column(String(1000))
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -93,10 +95,10 @@ class ExperimentalSystem(Base):
     """Class definition for the biogrid_experimental_system table."""
 
     __tablename__ = "biogrid_experimental_system"
-    id = Column(Integer, primary_key=True)
-    experimental_system = Column(String(255), nullable=True)
-    experimental_system_type = Column(String(255), nullable=True)
-    frequency = Column(Integer)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    experimental_system: Mapped[str] = mapped_column(String(255), nullable=True)
+    experimental_system_type: Mapped[str] = mapped_column(String(255), nullable=True)
+    frequency: Mapped[int] = mapped_column()
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -107,15 +109,15 @@ class Interactor(Base):
     """Class definition for the biogrid_interactor table."""
 
     __tablename__ = "biogrid_interactor"
-    biogrid_id = Column(Integer, primary_key=True)
+    biogrid_id: Mapped[int] = mapped_column(primary_key=True)
 
-    entrez = Column(Integer, nullable=True, index=True)
-    systematic_name = Column(String(255), nullable=True, index=True)
-    symbol = Column(String(255), nullable=True, index=True)
-    taxonomy_id = Column(Integer, ForeignKey("biogrid_taxonomy.taxonomy_id"))
-    taxonomy = relationship("Taxonomy", foreign_keys=[taxonomy_id])
-    uniprot = Column(String(255), nullable=True, index=True)
-    trembl = Column(String(1000), nullable=True)
+    entrez: Mapped[int] = mapped_column(nullable=True, index=True)
+    systematic_name: Mapped[str] = mapped_column(String(255), nullable=True, index=True)
+    symbol: Mapped[str] = mapped_column(String(255), nullable=True, index=True)
+    taxonomy_id: Mapped[int] = mapped_column(ForeignKey("biogrid_taxonomy.taxonomy_id"))
+    taxonomy: Mapped["Taxonomy"] = relationship("Taxonomy", foreign_keys=[taxonomy_id])
+    uniprot: Mapped[str] = mapped_column(String(255), nullable=True, index=True)
+    trembl: Mapped[str] = mapped_column(String(1000), nullable=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -133,8 +135,8 @@ class Source(Base):
     """Class definition for the biogrid_source table."""
 
     __tablename__ = "biogrid_source"
-    id = Column(Integer, primary_key=True)
-    source = Column(String(255), nullable=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source: Mapped[str] = mapped_column(String(255), nullable=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -145,9 +147,9 @@ class Modification(Base):
     """Class definition for the biogrid_modification table."""
 
     __tablename__ = "biogrid_modification"
-    id = Column(Integer, primary_key=True)
-    modification = Column(String(255), nullable=True)
-    frequency = Column(Integer)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    modification: Mapped[str] = mapped_column(String(255), nullable=True)
+    frequency: Mapped[int] = mapped_column()
 
     def as_dict(self):
         """Convert object values to dictionary."""

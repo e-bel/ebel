@@ -1,8 +1,10 @@
 """DrugBank RDBMS model definition."""
+import datetime
+from typing import List
 
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 Base = declarative_base()
 
@@ -11,34 +13,34 @@ class Drugbank(Base):
     """Class definition for the drugbank table."""
 
     __tablename__ = "drugbank"
-    id = Column(Integer, primary_key=True)
-    drugbank_id = Column(String(10), index=True)
-    name = Column(String(255))
-    description = Column(Text)
-    cas_number = Column(String(20))
-    unii = Column(String(20))
-    state = Column(String(20))
-    indication = Column(Text)
-    pharmacodynamics = Column(Text)
-    toxicity = Column(Text)
-    metabolism = Column(Text)
-    absorption = Column(Text)
-    half_life = Column(Text)
-    route_of_elimination = Column(Text)
-    volume_of_distribution = Column(Text)
-    clearance = Column(Text)
-    mechanism_of_action = Column(Text)
-    fda_label = Column(Text)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    drugbank_id: Mapped[str] = mapped_column(String(10), index=True)
+    name: Mapped[str] = mapped_column(String(255))
+    description: Mapped[str] = mapped_column(Text)
+    cas_number: Mapped[str] = mapped_column(String(20))
+    unii: Mapped[str] = mapped_column(String(20))
+    state: Mapped[str] = mapped_column(String(20))
+    indication: Mapped[str] = mapped_column(Text)
+    pharmacodynamics: Mapped[str] = mapped_column(Text)
+    toxicity: Mapped[str] = mapped_column(Text)
+    metabolism: Mapped[str] = mapped_column(Text)
+    absorption: Mapped[str] = mapped_column(Text)
+    half_life: Mapped[str] = mapped_column(Text)
+    route_of_elimination: Mapped[str] = mapped_column(Text)
+    volume_of_distribution: Mapped[str] = mapped_column(Text)
+    clearance: Mapped[str] = mapped_column(Text)
+    mechanism_of_action: Mapped[str] = mapped_column(Text)
+    fda_label: Mapped[str] = mapped_column(Text)
 
-    references = relationship("Reference", back_populates="drugbank", cascade="save-update")
-    synonyms = relationship("Synonym", back_populates="drugbank", cascade="save-update")
-    targets = relationship("Target", back_populates="drugbank", cascade="save-update")
-    external_identifiers = relationship("ExternalIdentifier", back_populates="drugbank", cascade="save-update")
-    product_names = relationship("ProductName", back_populates="drugbank", cascade="save-update")
-    drug_interactions = relationship("DrugInteraction", back_populates="drugbank", cascade="save-update")
-    statuses = relationship("Status", back_populates="drugbank", cascade="save-update")
-    patents = relationship("Patent", back_populates="drugbank", cascade="save-update")
-    pathways = relationship("Pathway", back_populates="drugbank", cascade="save-update")
+    references: Mapped[List["Reference"]] = relationship("Reference", back_populates="drugbank", cascade="save-update")
+    synonyms: Mapped[List["Synonym"]] = relationship("Synonym", back_populates="drugbank", cascade="save-update")
+    targets: Mapped[List["Target"]] = relationship("Target", back_populates="drugbank", cascade="save-update")
+    external_identifiers: Mapped[List["ExternalIdentifier"]] = relationship("ExternalIdentifier", back_populates="drugbank", cascade="save-update")
+    product_names: Mapped[List["ProductName"]] = relationship("ProductName", back_populates="drugbank", cascade="save-update")
+    drug_interactions: Mapped[List["DrugInteraction"]] = relationship("DrugInteraction", back_populates="drugbank", cascade="save-update")
+    statuses: Mapped[List["Status"]] = relationship("Status", back_populates="drugbank", cascade="save-update")
+    patents: Mapped[List["Patent"]] = relationship("Patent", back_populates="drugbank", cascade="save-update")
+    pathways: Mapped[List["Pathway"]] = relationship("Pathway", back_populates="drugbank", cascade="save-update")
 
     def __str__(self):
         """Class string definition."""
@@ -77,11 +79,11 @@ class Pathway(Base):
     """Class definition for the drugbank_pathway table."""
 
     __tablename__ = "drugbank_pathway"
-    id = Column(Integer, primary_key=True)
-    smpdb_id = Column(String(255))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    smpdb_id: Mapped[str] = mapped_column(String(255))
 
-    drugbank_id = Column(Integer, ForeignKey("drugbank.id"))
-    drugbank = relationship("Drugbank", back_populates="pathways")
+    drugbank_id: Mapped[str] = mapped_column(ForeignKey("drugbank.id"))
+    drugbank: Mapped["Drugbank"] = relationship("Drugbank", back_populates="pathways")
 
     def __str__(self):
         return self.smpdb_id
@@ -95,15 +97,15 @@ class Patent(Base):
     """Class definition for the drugbank_patent table."""
 
     __tablename__ = "drugbank_patent"
-    id = Column(Integer, primary_key=True)
-    number = Column(String(255))
-    country = Column(String(255))
-    approved = Column(Date)
-    expires = Column(Date)
-    pediatric_extension = Column(String(255))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    number: Mapped[str] = mapped_column(String(255))
+    country: Mapped[str] = mapped_column(String(255))
+    approved: Mapped[datetime.date] = mapped_column(Date)
+    expires: Mapped[datetime.date] = mapped_column(Date)
+    pediatric_extension: Mapped[str] = mapped_column(String(255))
 
-    drugbank_id = Column(Integer, ForeignKey("drugbank.id"))
-    drugbank = relationship("Drugbank", back_populates="patents")
+    drugbank_id: Mapped[int] = mapped_column(ForeignKey("drugbank.id"))
+    drugbank: Mapped[Drugbank] = relationship("Drugbank", back_populates="patents")
 
     def __str__(self):
         return self.number
@@ -124,11 +126,11 @@ class Status(Base):
     """Class definition for the drugbank_status table."""
 
     __tablename__ = "drugbank_status"
-    id = Column(Integer, primary_key=True)
-    status = Column(String(20), index=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    status: Mapped[str] = mapped_column(String(20), index=True)
 
-    drugbank_id = Column(Integer, ForeignKey("drugbank.id"))
-    drugbank = relationship("Drugbank", back_populates="statuses")
+    drugbank_id: Mapped[int] = mapped_column(ForeignKey("drugbank.id"))
+    drugbank: Mapped[Drugbank] = relationship("Drugbank", back_populates="statuses")
 
     def __str__(self):
         return self.status
@@ -142,12 +144,12 @@ class ExternalIdentifier(Base):
     """Class definition for the drugbank_external_identifier table."""
 
     __tablename__ = "drugbank_external_identifier"
-    id = Column(Integer, primary_key=True)
-    resource = Column(String(255), index=True)
-    identifier = Column(String(255), index=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    resource: Mapped[str] = mapped_column(String(255), index=True)
+    identifier: Mapped[str] = mapped_column(String(255), index=True)
 
-    drugbank_id = Column(Integer, ForeignKey("drugbank.id"))
-    drugbank = relationship("Drugbank", back_populates="external_identifiers")
+    drugbank_id: Mapped[int] = mapped_column(ForeignKey("drugbank.id"))
+    drugbank: Mapped[Drugbank] = relationship("Drugbank", back_populates="external_identifiers")
 
     def __str__(self):
         return self.identifier
@@ -165,11 +167,11 @@ class Reference(Base):
     """Class definition for the drugbank_reference table."""
 
     __tablename__ = "drugbank_reference"
-    id = Column(Integer, primary_key=True)
-    pmid = Column(Integer)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    pmid: Mapped[int] = mapped_column()
 
-    drugbank_id = Column(Integer, ForeignKey("drugbank.id"))
-    drugbank = relationship("Drugbank", back_populates="references")
+    drugbank_id: Mapped[int] = mapped_column(ForeignKey("drugbank.id"))
+    drugbank: Mapped[Drugbank] = relationship("Drugbank", back_populates="references")
 
     def __str__(self):
         return self.pmid
@@ -183,13 +185,13 @@ class Target(Base):
     """Class definition for the drugbank_target table."""
 
     __tablename__ = "drugbank_target"
-    id = Column(Integer, primary_key=True)
-    uniprot = Column(String(20), index=True)
-    action = Column(String(50), index=True)
-    known_action = Column(String(20), index=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    uniprot: Mapped[str] = mapped_column(String(20), index=True)
+    action: Mapped[str] = mapped_column(String(50), index=True)
+    known_action: Mapped[str] = mapped_column(String(20), index=True)
 
-    drugbank_id = Column(Integer, ForeignKey("drugbank.id"))
-    drugbank = relationship("Drugbank", back_populates="targets")
+    drugbank_id: Mapped[int] = mapped_column(ForeignKey("drugbank.id"))
+    drugbank: Mapped[Drugbank] = relationship("Drugbank", back_populates="targets")
 
     def __str__(self):
         return self.uniprot
@@ -208,13 +210,13 @@ class DrugInteraction(Base):
     """Class definition for the drugbank_drug_interaction table."""
 
     __tablename__ = "drugbank_drug_interaction"
-    id = Column(Integer, primary_key=True)
-    drugbank_id = Column(String(10), index=True)
-    name = Column(Text)
-    description = Column(Text)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    drugbank_id: Mapped[str] = mapped_column(String(10), index=True)
+    name: Mapped[str] = mapped_column(Text)
+    description: Mapped[str] = mapped_column(Text)
 
-    db_id = Column(Integer, ForeignKey("drugbank.id"))  # exception because drugbank_id is already a field
-    drugbank = relationship("Drugbank", back_populates="drug_interactions")
+    db_id: Mapped[str] = mapped_column(ForeignKey("drugbank.id"))  # exception because drugbank_id is already a field
+    drugbank: Mapped[Drugbank] = relationship("Drugbank", back_populates="drug_interactions")
 
     def __str__(self):
         return self.drugbank_id
@@ -233,11 +235,11 @@ class ProductName(Base):
     """Class definition for the drugbank_product_name table."""
 
     __tablename__ = "drugbank_product_name"
-    id = Column(Integer, primary_key=True)
-    name = Column(Text)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(Text)
 
-    drugbank_id = Column(Integer, ForeignKey("drugbank.id"))
-    drugbank = relationship("Drugbank", back_populates="product_names")
+    drugbank_id: Mapped[int] = mapped_column(ForeignKey("drugbank.id"))
+    drugbank: Mapped[Drugbank] = relationship("Drugbank", back_populates="product_names")
 
     def __str__(self):
         return self.name
@@ -251,11 +253,11 @@ class Synonym(Base):
     """Class definition for the drugbank_synonym table."""
 
     __tablename__ = "drugbank_synonym"
-    id = Column(Integer, primary_key=True)
-    synonym = Column(Text)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    synonym: Mapped[str] = mapped_column(Text)
 
-    drugbank_id = Column(Integer, ForeignKey("drugbank.id"))
-    drugbank = relationship("Drugbank", back_populates="synonyms")
+    drugbank_id: Mapped[int] = mapped_column(ForeignKey("drugbank.id"))
+    drugbank: Mapped[Drugbank] = relationship("Drugbank", back_populates="synonyms")
 
     def __str__(self):
         return self.synonym

@@ -9,6 +9,7 @@ from typing import Dict, List, Tuple, Union
 import pandas as pd
 from lxml.etree import iterparse
 from pyorientdb import OrientDB
+from sqlalchemy import text
 from tqdm import tqdm
 
 from ebel.defaults import default_tax_ids
@@ -145,14 +146,14 @@ class UniProt(odb_meta.Graph):
         """Insert UniProt data depending on NCBI taxonomy identifier."""
         dialect = self.session.bind.dialect.name
         if dialect == "mysql":
-            self.engine.execute("SET FOREIGN_KEY_CHECKS=0")
+            self.session.execute(text("SET FOREIGN_KEY_CHECKS=0"))
 
         inserted = self.insert_uniprot()
         self.add_gene_symbols()
         self.session.commit()
 
         if dialect == "mysql":
-            self.engine.execute("SET FOREIGN_KEY_CHECKS=1")
+            self.session.execute(text("SET FOREIGN_KEY_CHECKS=1"))
 
         return {self.biodb_name: inserted}
 
@@ -311,7 +312,7 @@ class UniProt(odb_meta.Graph):
             f"Select accession, recommended_name from uniprot as u inner join uniprot_gene_symbol as gs "
             f'on (u.id=gs.uniprot_id) where u.taxid={taxid} and gs.symbol="{gene_symbol}" limit 1'
         )
-        results = self.engine.execute(sql)
+        results = self.session.execute(text(sql))
         return results.fetchone() if results else None
 
     def _update_proteins(self, namespace, taxid) -> int:
@@ -338,7 +339,7 @@ class UniProt(odb_meta.Graph):
     def _get_recname_taxid_by_accession_from_uniprot_api(self, accession) -> Tuple[str, int]:
         """Fetch uniprot entry by accession and adds to the database. Returns recommended name."""
         sql = f"Select recommended_name,taxid from uniprot where accession='{accession}' limit 1"
-        result = self.engine.execute(sql).fetchone()
+        result = self.session.execute(text(sql)).fetchone()
         if result:
             return result
 
@@ -353,7 +354,7 @@ class UniProt(odb_meta.Graph):
         )
         for protein in self.query(sql_uniprot).itertuples(index=False):
             sql = sql_temp.format(protein.accession)
-            found = self.engine.execute(sql).fetchone()
+            found = self.session.execute(text(sql)).fetchone()
             if found:
                 recommended_name, taxid = found
                 num_updated = self.execute(sql_update.format(recommended_name, taxid, protein.accession))[0]

@@ -3,7 +3,7 @@ from collections import defaultdict
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column
 
 Base = declarative_base()
 
@@ -45,16 +45,16 @@ class Uniprot(Base):
 
     __tablename__ = "uniprot"
 
-    id = Column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True)
 
-    accession = Column(String(20), unique=True)
-    name = Column(String(100), nullable=False, unique=True)
-    recommended_name = Column(String(255), nullable=True)
+    accession = mapped_column(String(20), unique=True)
+    name = mapped_column(String(100), nullable=False, unique=True)
+    recommended_name = mapped_column(String(255), nullable=True)
 
-    taxid = Column(Integer, ForeignKey("uniprot_organism.taxid"), nullable=False, index=True)
+    taxid = mapped_column(Integer, ForeignKey("uniprot_organism.taxid"), nullable=False, index=True)
     organism = relationship("Organism")
 
-    function_id = Column(Integer, ForeignKey("uniprot_function.id"), nullable=True)
+    function_id = mapped_column(Integer, ForeignKey("uniprot_function.id"), nullable=True)
     function = relationship("Function")
 
     gene_names = relationship("Gene", back_populates="uniprot")
@@ -103,9 +103,9 @@ class GeneSymbol(Base):
     """Class definition for the uniprot_gene_symbol table."""
 
     __tablename__ = "uniprot_gene_symbol"
-    id = Column(Integer, primary_key=True)
-    symbol = Column(String(100), nullable=False, index=True)
-    uniprot_id = Column(Integer, ForeignKey("uniprot.id"))
+    id = mapped_column(Integer, primary_key=True)
+    symbol = mapped_column(String(100), nullable=False, index=True)
+    uniprot_id = mapped_column(Integer, ForeignKey("uniprot.id"))
     uniprot = relationship("Uniprot", back_populates="gene_symbol")
 
     def __repr__(self):
@@ -117,9 +117,9 @@ class Gene(Base):
     """Class definition for the uniprot_gene table."""
 
     __tablename__ = "uniprot_gene"
-    id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False, index=True)
-    uniprot_id = Column(Integer, ForeignKey("uniprot.id"))
+    id = mapped_column(Integer, primary_key=True)
+    name = mapped_column(String(100), nullable=False, index=True)
+    uniprot_id = mapped_column(Integer, ForeignKey("uniprot.id"))
     uniprot = relationship("Uniprot", back_populates="gene_names")
 
 
@@ -128,8 +128,8 @@ class Keyword(Base):
 
     __tablename__ = "uniprot_keyword"
 
-    keywordid = Column(Integer, primary_key=True)
-    keyword_name = Column(String(100), index=True)
+    keywordid = mapped_column(Integer, primary_key=True)
+    keyword_name = mapped_column(String(100), index=True)
 
     uniprots = relationship("Uniprot", secondary=uniprot__uniprot_keyword, back_populates="keywords")
 
@@ -143,8 +143,8 @@ class Organism(Base):
 
     __tablename__ = "uniprot_organism"
 
-    taxid = Column(Integer, primary_key=True)
-    scientific_name = Column(String(255))  # TODO:Check if index=True with  is possible
+    taxid = mapped_column(Integer, primary_key=True)
+    scientific_name = mapped_column(String(255))  # TODO:Check if index=True with  is possible
 
     uniprots = relationship("Uniprot", secondary=uniprot__uniprot_host, back_populates="hosts")
 
@@ -154,9 +154,9 @@ class SubcellularLocation(Base):
 
     __tablename__ = "uniprot_subcellular_location"
 
-    id = Column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True)
 
-    name = Column(String(100), index=True)
+    name = mapped_column(String(100), index=True)
 
     uniprots = relationship(
         "Uniprot",
@@ -170,10 +170,10 @@ class Xref(Base):
 
     __tablename__ = "uniprot_xref"
 
-    id = Column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True)
 
-    db = Column(String(50), index=True)
-    identifier = Column(String(100), index=True)
+    db = mapped_column(String(50), index=True)
+    identifier = mapped_column(String(100), index=True)
 
     uniprots = relationship("Uniprot", secondary=uniprot__uniprot_xref, back_populates="xrefs")
 
@@ -183,8 +183,8 @@ class Function(Base):
 
     __tablename__ = "uniprot_function"
 
-    id = Column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True)
 
-    description = Column(Text)
+    description = mapped_column(Text)
 
     uniprots = relationship("Uniprot", back_populates="function")

@@ -7,6 +7,7 @@ from typing import Dict, Optional
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import text
 from tqdm import tqdm
 
 from ebel.constants import RID
@@ -171,7 +172,8 @@ class Nsides(odb_meta.Graph):
         updated = 0
 
         for drugbank_id, drugbank_rid in tqdm(drugbank_id_rids.items(), desc=f"Update {self.biodb_name.upper()}"):
-            for r in self.engine.execute(sql_temp.format(drugbank_id)):
+            sql = sql_temp.format(drugbank_id)
+            for r in self.session.execute(text(sql)):
                 (
                     condition_meddra_id,
                     condition_concept_name,

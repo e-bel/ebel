@@ -5,6 +5,7 @@ from typing import Dict
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -142,7 +143,7 @@ class IntAct(odb_meta.Graph):
         return_value = ()
         sql = f"""Select s.symbol, u.taxid from uniprot u inner join uniprot_gene_symbol s
                   on (u.id=s.uniprot_id) where u.accession='{uniprot_accession}' limit 1"""
-        result = self.engine.execute(sql).fetchone()
+        result = self.session.execute(text(sql)).fetchone()
         taxid_to_namespace = {9606: "HGNC", 10090: "MGI", 10116: "RGD"}
         if result:
             name, taxid = result
@@ -191,7 +192,7 @@ class IntAct(odb_meta.Graph):
 
         for uniprot_accession in tqdm(uniprot_accessions, desc="Update IntAct interactions"):
             sql = sql_temp.format(uniprot_accession=uniprot_accession)
-            result = self.engine.execute(sql)
+            result = self.session.execute(text(sql))
 
             for (
                 up_a,

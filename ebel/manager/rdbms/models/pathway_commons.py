@@ -1,7 +1,9 @@
 """Pathway Commons RDBMS model definition."""
+from typing import List
+
 from sqlalchemy import BigInteger, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -36,21 +38,23 @@ class PathwayCommons(Base):
     """Class definition for the pathway_commons table."""
 
     __tablename__ = "pathway_commons"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    participant_a = Column(String(50), index=True)
-    interaction_type = Column(String(50), index=True)
-    participant_b = Column(String(50), index=True)
+    participant_a: Mapped[str] = mapped_column(String(50), index=True)
+    interaction_type: Mapped[str] = mapped_column(String(50), index=True)
+    participant_b: Mapped[str] = mapped_column(String(50), index=True)
 
-    pmids = relationship("Pmid", back_populates="pathway_commons")
+    pmids: Mapped[List["Pmid"]] = relationship("Pmid", back_populates="pathway_commons")
 
-    pathway_names = relationship(
+    pathway_names: Mapped[List["PathwayName"]] = relationship(
         "PathwayName",
         secondary=pathway_commons__pathway_name,
         back_populates="pathway_commonses",
     )
 
-    sources = relationship("Source", secondary=pathway_commons__source, back_populates="pathway_commonses")
+    sources: Mapped[List["Source"]] = relationship(
+        "Source", secondary=pathway_commons__source, back_populates="pathway_commonses"
+    )
 
     def __str__(self):
         return f"{self.participant_a} {self.interaction_type} {self.participant_b}"
@@ -68,11 +72,11 @@ class PathwayName(Base):
     """Class definition for the pathway_commons_pathway_name table."""
 
     __tablename__ = "pathway_commons_pathway_name"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    name = Column(String(255), index=True)
+    name: Mapped[str] = mapped_column(String(255), index=True)
 
-    pathway_commonses = relationship(
+    pathway_commonses: Mapped[List[PathwayCommons]] = relationship(
         "PathwayCommons",
         secondary=pathway_commons__pathway_name,
         back_populates="pathway_names",
@@ -87,12 +91,12 @@ class Pmid(Base):
     """Class definition for the pathway_commons_pmid table."""
 
     __tablename__ = "pathway_commons_pmid"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    pmid = Column(BigInteger, index=True)
+    pmid: Mapped[int] = mapped_column(index=True)
 
-    pathway_commons_id = Column(Integer, ForeignKey("pathway_commons.id"), index=True)
-    pathway_commons = relationship("PathwayCommons", back_populates="pmids")
+    pathway_commons_id: Mapped[int] = mapped_column(ForeignKey("pathway_commons.id"), index=True)
+    pathway_commons: Mapped[List[PathwayCommons]] = relationship("PathwayCommons", back_populates="pmids")
 
     def __str__(self):
         """Class string definition."""
@@ -103,11 +107,13 @@ class Source(Base):
     """Class definition for the pathway_commons_source table."""
 
     __tablename__ = "pathway_commons_source"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    source = Column(String(50))
+    source: Mapped[str] = mapped_column(String(50))
 
-    pathway_commonses = relationship("PathwayCommons", secondary=pathway_commons__source, back_populates="sources")
+    pathway_commonses: Mapped[List[PathwayCommons]] = relationship(
+        "PathwayCommons", secondary=pathway_commons__source, back_populates="sources"
+    )
 
     def __str__(self):
         """Class string definition."""

@@ -79,7 +79,7 @@ IUPHAR_INT = "https://www.guidetopharmacology.org/DATA/interactions.csv"
 IUPHAR_LIGANDS = "https://www.guidetopharmacology.org/DATA/ligands.csv"
 
 # CHEBI #
-CHEBI_BASE = "ftp://ftp.ebi.ac.uk/pub/databases/chebi/Flat_file_tab_delimited/"
+CHEBI_BASE = "https://ftp.ebi.ac.uk/pub/databases/chebi/Flat_file_tab_delimited/"
 CHEBI_CHEMICALDATA = f"{CHEBI_BASE}chemical_data.tsv"
 CHEBI_COMMENT = f"{CHEBI_BASE}comments.tsv"
 CHEBI_COMPOUND = f"{CHEBI_BASE}compounds.tsv.gz"

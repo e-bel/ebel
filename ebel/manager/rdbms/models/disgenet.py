@@ -1,7 +1,9 @@
 """DisGeNet RDBMS model definition."""
-from sqlalchemy import BigInteger, Column, Float, ForeignKey, Integer, String
+from typing import List
+
+from sqlalchemy import BigInteger, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column, Mapped
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -12,16 +14,18 @@ class DisgenetGene(Base):
     """Class definition for the disgenet_gene table."""
 
     __tablename__ = "disgenet_gene"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    gene_id = Column(Integer, ForeignKey("disgenet_gene_symbol.gene_id"))
-    gene_symbol = relationship("DisgenetGeneSymbol", back_populates="gene_disease_pmid_associations")
-    disease_id = Column(String(100), ForeignKey("disgenet_disease.disease_id"))
-    disease = relationship("DisgenetDisease", foreign_keys=[disease_id])
-    score = Column(Float)
-    pmid = Column(BigInteger)
-    source_id = Column(Integer, ForeignKey("disgenet_source.id"))
-    source = relationship("DisgenetSource", foreign_keys=[source_id])
+    gene_id: Mapped[int] = mapped_column(ForeignKey("disgenet_gene_symbol.gene_id"))
+    gene_symbol: Mapped["DisgenetGeneSymbol"] = relationship(
+        "DisgenetGeneSymbol", back_populates="gene_disease_pmid_associations"
+    )
+    disease_id: Mapped[str] = mapped_column(String(100), ForeignKey("disgenet_disease.disease_id"))
+    disease: Mapped["DisgenetDisease"] = relationship("DisgenetDisease", foreign_keys=[disease_id])
+    score: Mapped[float] = mapped_column()
+    pmid: Mapped[int] = mapped_column()
+    source_id: Mapped[int] = mapped_column(ForeignKey("disgenet_source.id"))
+    source: Mapped["DisgenetSource"] = relationship("DisgenetSource", foreign_keys=[source_id])
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -40,10 +44,12 @@ class DisgenetGeneSymbol(Base):
     """Class definition for the disgenet_gene_symbol table."""
 
     __tablename__ = "disgenet_gene_symbol"
-    gene_id = Column(Integer, primary_key=True)
-    gene_symbol = Column(String(50), index=True)
+    gene_id: Mapped[int] = mapped_column(primary_key=True)
+    gene_symbol: Mapped[str] = mapped_column(String(50), index=True)
 
-    gene_disease_pmid_associations = relationship("DisgenetGene", back_populates="gene_symbol")
+    gene_disease_pmid_associations: Mapped[List["DisgenetGene"]] = relationship(
+        "DisgenetGene", back_populates="gene_symbol"
+    )
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -54,17 +60,17 @@ class DisgenetVariant(Base):
     """Class definition for the disgenet_variant table."""
 
     __tablename__ = "disgenet_variant"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    snp_id = Column(String(20), index=True)
-    chromosome = Column(String(2))
-    position = Column(BigInteger)
-    disease_id = Column(String(100), ForeignKey("disgenet_disease.disease_id"))
-    disease = relationship("DisgenetDisease", foreign_keys=[disease_id])
-    score = Column(Float)
-    pmid = Column(BigInteger, index=True)
-    source_id = Column(Integer, ForeignKey("disgenet_source.id"))
-    source = relationship("DisgenetSource", foreign_keys=[source_id])
+    snp_id: Mapped[str] = mapped_column(String(20), index=True)
+    chromosome: Mapped[str] = mapped_column(String(2))
+    position: Mapped[int] = mapped_column()
+    disease_id: Mapped[str] = mapped_column(String(100), ForeignKey("disgenet_disease.disease_id"))
+    disease: Mapped["DisgenetDisease"] = relationship("DisgenetDisease", foreign_keys=[disease_id])
+    score: Mapped[float] = mapped_column()
+    pmid: Mapped[int] = mapped_column(index=True)
+    source_id: Mapped[int] = mapped_column(ForeignKey("disgenet_source.id"))
+    source: Mapped["DisgenetSource"] = relationship("DisgenetSource", foreign_keys=[source_id])
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -77,8 +83,8 @@ class DisgenetDisease(Base):
     """Class definition for the disgenet_disease table."""
 
     __tablename__ = "disgenet_disease"
-    disease_id = Column(String(100), primary_key=True)
-    disease_name = Column(String(255), index=True)
+    disease_id: Mapped[str] = mapped_column(String(100), primary_key=True)
+    disease_name: Mapped[str] = mapped_column(String(255), index=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -89,8 +95,8 @@ class DisgenetSource(Base):
     """Class definition for the disgenet_source table."""
 
     __tablename__ = "disgenet_source"
-    id = Column(Integer, primary_key=True)
-    source = Column(String(100), index=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source: Mapped[str] = mapped_column(String(100), index=True)
 
     def as_dict(self):
         """Convert object values to dictionary."""

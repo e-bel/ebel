@@ -6,6 +6,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -161,7 +162,7 @@ class StringDb(odb_meta.Graph):
         """Get unique HGNC symbols from stringdb_actions table."""
         sql = f"""(Select distinct( symbol1 ) from {self.table_action})
                 union (Select distinct( symbol2 ) from {self.table_action})"""
-        return set([x[0] for x in self.engine.execute(sql).fetchall()])
+        return set([x[0] for x in self.session.execute(text(sql)).fetchall()])
 
     def update_interactions(self) -> Dict[str, int]:
         """Update the edges with StringDB metadata."""
@@ -294,7 +295,8 @@ class StringDb(odb_meta.Graph):
 
         updated = 0
         for symbol in tqdm(symbols, desc="Update has_action_st edges"):
-            rows = self.engine.execute(sql_temp.format(symbol=symbol))
+            sql = sql_temp.format(symbol=symbol)
+            rows = self.engine.execute(text(sql))
             for row in rows.fetchall():
                 action = Action(*row)
 
