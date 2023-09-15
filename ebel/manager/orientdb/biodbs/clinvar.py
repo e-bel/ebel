@@ -57,6 +57,7 @@ class ClinVar(odb_meta.Graph):
     def insert_data(self) -> Dict[str, int]:
         """Insert data."""
         inserted = {}
+        logger.info("Insert data for ClinVar")
         self.recreate_tables()
         df = pd.read_csv(self.file_path, sep="\t", low_memory=False)
         self._standardize_dataframe(df)

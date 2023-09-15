@@ -1,5 +1,5 @@
 """ClinVar RDBMS model definition."""
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import ForeignKey, Index, Integer, String, Table, Text, Column
 from sqlalchemy.ext.declarative import declarative_base
@@ -58,7 +58,7 @@ class Clinvar(Base):
     hgnc_id: Mapped[str] = mapped_column(String(100))
     clinical_significance: Mapped[str] = mapped_column(String(100))
     clin_sig_simple: Mapped[int] = mapped_column()
-    last_evaluated: Mapped[str] = mapped_column(String(100))
+    last_evaluated: Mapped[Optional[str]] = mapped_column(String(100))
     rs_db_snp: Mapped[int] = mapped_column(index=True)
     nsv_esv_db_var: Mapped[str] = mapped_column(String(100))
     rcvaccession: Mapped[str] = mapped_column(String(1000))
