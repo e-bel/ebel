@@ -1,4 +1,6 @@
 """Protein Atlas RDBMS model definition."""
+from typing import Optional
+
 from sqlalchemy import Column, Integer, Numeric, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import mapped_column, Mapped
@@ -14,9 +16,9 @@ class ProteinAtlasNormalTissue(Base):
 
     gene: Mapped[str] = mapped_column(String(100), index=True)
     gene_name: Mapped[str] = mapped_column(String(100))
-    tissue: Mapped[str] = mapped_column(String(100))
-    cell_type: Mapped[str] = mapped_column(String(100))
-    level: Mapped[str] = mapped_column(String(100), index=True)
+    tissue: Mapped[Optional[str]] = mapped_column(String(100))
+    cell_type: Mapped[Optional[str]] = mapped_column(String(100))
+    level: Mapped[Optional[str]] = mapped_column(String(100), index=True)
     reliability: Mapped[str] = mapped_column(String(100), index=True)
 
     def as_dict(self):
@@ -40,16 +42,16 @@ class ProteinAtlasSubcellularLocation(Base):
     gene: Mapped[str] = mapped_column(String(100))
     gene_name: Mapped[str] = mapped_column(String(100))
     reliability: Mapped[str] = mapped_column(String(100))
-    main_location: Mapped[str] = mapped_column(String(100))
-    additional_location: Mapped[str] = mapped_column(String(100))
-    extracellular_location: Mapped[str] = mapped_column(String(100))
-    enhanced: Mapped[str] = mapped_column(String(100))
-    supported: Mapped[str] = mapped_column(String(100))
-    approved: Mapped[str] = mapped_column(String(100))
-    uncertain: Mapped[str] = mapped_column(String(100))
-    single_cell_variation_intensity: Mapped[str] = mapped_column(String(100))
-    single_cell_variation_spatial: Mapped[str] = mapped_column(String(100))
-    cell_cycle_dependency: Mapped[str] = mapped_column(Text)
+    main_location: Mapped[Optional[str]] = mapped_column(String(100))
+    additional_location: Mapped[Optional[str]] = mapped_column(String(100))
+    extracellular_location: Mapped[Optional[str]] = mapped_column(String(100))
+    enhanced: Mapped[Optional[str]] = mapped_column(String(100))
+    supported: Mapped[Optional[str]] = mapped_column(String(100))
+    approved: Mapped[Optional[str]] = mapped_column(String(100))
+    uncertain: Mapped[Optional[str]] = mapped_column(String(100))
+    single_cell_variation_intensity: Mapped[Optional[str]] = mapped_column(String(100))
+    single_cell_variation_spatial: Mapped[Optional[str]] = mapped_column(String(100))
+    cell_cycle_dependency: Mapped[Optional[str]] = mapped_column(Text)
     go_id: Mapped[str] = mapped_column(Text)
 
     def as_dict(self):
