@@ -24,7 +24,7 @@ class DisgenetGene(Base):
     disease: Mapped["DisgenetDisease"] = relationship("DisgenetDisease", foreign_keys=[disease_id])
     score: Mapped[float] = mapped_column()
     pmid: Mapped[Optional[int]] = mapped_column()
-    source_id: Mapped[int] = mapped_column(ForeignKey("disgenet_source.id"))
+    source_id: Mapped[Optional[int]] = mapped_column(ForeignKey("disgenet_source.id"))
     source: Mapped["DisgenetSource"] = relationship("DisgenetSource", foreign_keys=[source_id])
 
     def as_dict(self):
@@ -69,7 +69,7 @@ class DisgenetVariant(Base):
     disease: Mapped["DisgenetDisease"] = relationship("DisgenetDisease", foreign_keys=[disease_id])
     score: Mapped[float] = mapped_column()
     pmid: Mapped[Optional[int]] = mapped_column(index=True)
-    source_id: Mapped[int] = mapped_column(ForeignKey("disgenet_source.id"))
+    source_id: Mapped[Optional[int]] = mapped_column(ForeignKey("disgenet_source.id"))
     source: Mapped["DisgenetSource"] = relationship("DisgenetSource", foreign_keys=[source_id])
 
     def as_dict(self):

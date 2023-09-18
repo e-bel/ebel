@@ -1346,7 +1346,7 @@ class Graph(abc.ABC):
 
         for gene_type, sql in sqls.items():
             if gene_type in gene_types:
-                results = self.session.execute(sql)
+                results = self.session.execute(text(sql))
                 for (symbol,) in results.fetchall():
                     bel = f'g(HGNC:"{symbol}")'
                     data = {
