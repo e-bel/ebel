@@ -9,11 +9,32 @@ from typing import Dict, Optional
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import select
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import HGNC
 from ebel.manager.rdbms.models import hgnc
+from ebel.manager.rdbms.models.hgnc import (
+    Hgnc as HgncDb,
+    PrevSymbol,
+    AliasSymbol,
+    AliasName,
+    Ccds,
+    Ena,
+    Enzyme,
+    GeneGroupName,
+    GeneGroupId,
+    UniProt,
+    RnaCentral,
+    Rgd,
+    RefSeq,
+    PubMed,
+    PrevName,
+    Omim,
+    Mgd,
+    Lsdb,
+)
 from ebel.tools import get_file_path
 
 logger = logging.getLogger(__name__)
@@ -117,28 +138,28 @@ class Hgnc(odb_meta.Graph):
 
         df["id"] = pd.to_numeric(df.hgnc_id.str.split(":").str[1])
         df.set_index("id", inplace=True)
-        df[columns].to_sql(hgnc.Hgnc.__tablename__, self.engine, if_exists="append")
+        df[columns].to_sql(HgncDb.__tablename__, self.engine, if_exists="append")
 
         df.hgnc_id = pd.to_numeric(df.hgnc_id.str.split(":").str[1])
 
         for df_col, model, m_col in (
-            ("prev_symbol", hgnc.PrevSymbol, None),
-            ("alias_symbol", hgnc.AliasSymbol, None),
-            ("alias_name", hgnc.AliasName, None),
-            ("ccds_id", hgnc.Ccds, "identifier"),
-            ("ena", hgnc.Ena, "identifier"),
-            ("enzyme_id", hgnc.Enzyme, "ec_number"),
-            ("gene_group", hgnc.GeneGroupName, "name"),
-            ("gene_group_id", hgnc.GeneGroupId, "identifier"),
-            ("uniprot_ids", hgnc.UniProt, "accession"),
-            ("rna_central_id", hgnc.RnaCentral, "identifier"),
-            ("rgd_id", hgnc.Rgd, "identifier"),
-            ("refseq_accession", hgnc.RefSeq, "accession"),
-            ("pubmed_id", hgnc.PubMed, "pmid"),
-            ("prev_name", hgnc.PrevName, None),
-            ("omim_id", hgnc.Omim, "identifier"),
-            ("mgd_id", hgnc.Mgd, "identifier"),
-            ("lsdb", hgnc.Lsdb, "identifier"),
+            ("prev_symbol", PrevSymbol, None),
+            ("alias_symbol", AliasSymbol, None),
+            ("alias_name", AliasName, None),
+            ("ccds_id", Ccds, "identifier"),
+            ("ena", Ena, "identifier"),
+            ("enzyme_id", Enzyme, "ec_number"),
+            ("gene_group", GeneGroupName, "name"),
+            ("gene_group_id", GeneGroupId, "identifier"),
+            ("uniprot_ids", UniProt, "accession"),
+            ("rna_central_id", RnaCentral, "identifier"),
+            ("rgd_id", Rgd, "identifier"),
+            ("refseq_accession", RefSeq, "accession"),
+            ("pubmed_id", PubMed, "pmid"),
+            ("prev_name", PrevName, None),
+            ("omim_id", Omim, "identifier"),
+            ("mgd_id", Mgd, "identifier"),
+            ("lsdb", Lsdb, "identifier"),
         ):
             df_1n_table = df[[df_col, "hgnc_id"]].explode(df_col).dropna()
             if m_col:
@@ -264,11 +285,10 @@ class Hgnc(odb_meta.Graph):
 
     def get_correct_symbol(self, symbol: str):
         """Checks if symbol is valid otherwise checks previsous symbols."""
-        result_in_symbol = self.session.query(hgnc.Hgnc).filter(hgnc.Hgnc.symbol == symbol).first()
+        symbol_query = select(HgncDb).where(HgncDb.symbol == symbol)
+        result_in_symbol = self.session.execute(symbol_query).first()
         if not result_in_symbol:
-            result_in_prev_symbol = (
-                self.session.query(hgnc.PrevSymbol).filter(hgnc.PrevSymbol.prev_symbol == symbol).first()
-            )
+            result_in_prev_symbol = self.session.query(PrevSymbol).filter(PrevSymbol.prev_symbol == symbol).first()
             if result_in_prev_symbol:
                 symbol = result_in_prev_symbol.hgnc.symbol
             else:
@@ -277,7 +297,7 @@ class Hgnc(odb_meta.Graph):
 
     def correct_wrong_symbol(self, symbol, bel_symbols_all: set):
         """Corrects the symbol of the node and relinks all edges to existing node if needed."""
-        result = self.session.query(hgnc.PrevSymbol).filter_by(prev_symbol=symbol).first()
+        result = self.session.query(PrevSymbol).filter_by(prev_symbol=symbol).first()
         if result:
             correct_symbol = result.hgnc.symbol
             if correct_symbol not in bel_symbols_all:
@@ -300,7 +320,10 @@ class Hgnc(odb_meta.Graph):
 
         bel_symbols_all = self.get_bel_symbols_all()
         symbols_without_hgnc = self.get_bel_symbols_without_hgnc_link()
-        hgnc_symbols = {x[0] for x in self.session.query(hgnc.Hgnc.symbol).all()}
+
+        symbol_query = select(HgncDb.symbol)
+        symbol_results = self.session.execute(symbol_query).all()
+        hgnc_symbols = {x[0] for x in symbol_results}
 
         for wrong_symbol in symbols_without_hgnc - hgnc_symbols:
             self.correct_wrong_symbol(wrong_symbol, bel_symbols_all)
@@ -377,28 +400,28 @@ class Hgnc(odb_meta.Graph):
 
     def update_nodes_by_symbol(self, symbol) -> dict:
         """Update all nodes by HGNC symbol."""
-        hgnc = self.get_basic_entry_by_symbol(symbol)
+        hgnc_results = self.get_basic_entry_by_symbol(symbol)
 
-        if hgnc:
-            suggest = json.dumps(hgnc.suggested_corrections) if hgnc.suggested_corrections else None
+        if hgnc_results:
+            suggest = json.dumps(hgnc_results.suggested_corrections) if hgnc_results.suggested_corrections else None
 
             num_update_genes = self.update_gene(
-                hgnc_symbol=hgnc.symbol,
-                hgnc_rid=hgnc.hgnc_rid,
-                label=hgnc.label,
-                location=hgnc.location,
+                hgnc_symbol=hgnc_results.symbol,
+                hgnc_rid=hgnc_results.hgnc_rid,
+                label=hgnc_results.label,
+                location=hgnc_results.location,
                 suggested_corrections=suggest,
             )
             num_update_rnas = self.update_rna(
-                hgnc_symbol=hgnc.symbol,
-                hgnc_rid=hgnc.hgnc_rid,
-                label=hgnc.label,
+                hgnc_symbol=hgnc_results.symbol,
+                hgnc_rid=hgnc_results.hgnc_rid,
+                label=hgnc_results.label,
                 suggested_corrections=suggest,
             )
             num_update_proteins = self.update_protein(
-                hgnc_symbol=hgnc.symbol,
-                hgnc_rid=hgnc.hgnc_rid,
-                label=hgnc.label,
+                hgnc_symbol=hgnc_results.symbol,
+                hgnc_rid=hgnc_results.hgnc_rid,
+                label=hgnc_results.label,
                 suggested_corrections=suggest,
             )
             return {
@@ -409,9 +432,15 @@ class Hgnc(odb_meta.Graph):
 
     def get_symbol_entrez_dict(self) -> Dict[str, int]:
         """Return dictionary with gene symbols as keys and entrez IDs as values."""
-        query = self.session.query(hgnc.Hgnc.symbol, hgnc.Hgnc.entrez_id).filter(hgnc.Hgnc.entrez_id.isnot(None))
+        query = self.session.query(HgncDb.symbol, HgncDb.entrez_id).filter(HgncDb.entrez_id.isnot(None))
         return {r.symbol: r.entrez_id for r in query.all()}
 
     def update_interactions(self) -> int:
         """Abstract method."""
         pass
+
+
+if __name__ == "__main__":
+    hgncdb = Hgnc()
+    hgncdb.recreate_tables()
+    hgncdb.update()

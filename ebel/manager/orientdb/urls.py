@@ -1,9 +1,9 @@
 """URLs to download files."""
 
 # HGNC #
-HGNC_JSON = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/new/json/hgnc_complete_set.json"
-HGNC_TSV = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/hgnc_complete_set.txt"
-HCOP_GZIP = "ftp://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_all_hcop_sixteen_column.txt.gz"
+HGNC_JSON = "https://ftp.ebi.ac.uk/pub/databases/genenames/new/json/hgnc_complete_set.json"
+HGNC_TSV = "https://ftp.ebi.ac.uk/pub/databases/genenames/hgnc/tsv/hgnc_complete_set.txt"
+HCOP_GZIP = "https://ftp.ebi.ac.uk/pub/databases/genenames/hcop/human_all_hcop_sixteen_column.txt.gz"
 
 # UniProt #
 UNIPROT_SPROT = (
