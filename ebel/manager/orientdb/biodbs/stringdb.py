@@ -6,7 +6,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text
+from sqlalchemy import text, select, or_
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -280,13 +280,10 @@ class StringDb(odb_meta.Graph):
             ("inhibition", "inhibition"): "inhibits_st",
         }
 
+        sdbaction = stringdb.StringDbAction
         Action = namedtuple("Action", ("symbol1", "symbol2", "mode", "action", "score"))
 
-        columns = ", ".join(Action._fields)
-        sql_temp = f"""Select {columns} from {self.table_action}
-                       where mode in ('activation', 'inhibition', 'ptmod', 'expression')
-                       and (symbol1='{{symbol}}' or symbol2='{{symbol}}')
-                       and is_directional=1 and a_is_acting=1"""
+        modes = ("activation", "inhibition", "ptmod", "expression")
 
         symbols_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(namespace="HGNC")
         symbols = tuple(symbols_rid_dict.keys())
@@ -295,8 +292,14 @@ class StringDb(odb_meta.Graph):
 
         updated = 0
         for symbol in tqdm(symbols, desc="Update has_action_st edges"):
-            sql = sql_temp.format(symbol=symbol)
-            rows = self.engine.execute(text(sql))
+            sql = (
+                select(sdbaction.symbol1, sdbaction.symbol2, sdbaction.mode, sdbaction.action, sdbaction.score)
+                .where(sdbaction.mode.in_(modes))
+                .where(or_(sdbaction.symbol1 == symbol, sdbaction.symbol2 == symbol))
+                .where(sdbaction.is_directional == 1)
+                .where(sdbaction.a_is_acting == 1)
+            )
+            rows = self.session.execute(sql)
             for row in rows.fetchall():
                 action = Action(*row)
 

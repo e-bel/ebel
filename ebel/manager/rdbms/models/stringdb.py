@@ -1,4 +1,5 @@
 """StringDB RDBMS model definition."""
+from typing import Optional
 
 from sqlalchemy import Boolean, Column, Integer, SmallInteger, String
 from sqlalchemy.ext.declarative import declarative_base
@@ -64,7 +65,7 @@ class StringDbAction(Base):
     symbol1: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     symbol2: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     mode: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
-    action: Mapped[str] = mapped_column(String(20))
+    action: Mapped[Optional[str]] = mapped_column(String(20))
     is_directional: Mapped[bool] = mapped_column(Boolean, nullable=False, index=True)
     a_is_acting: Mapped[bool] = mapped_column(Boolean, nullable=False, index=True)
     score: Mapped[int] = mapped_column(SmallInteger)
