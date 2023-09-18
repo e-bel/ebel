@@ -1,4 +1,6 @@
 """IntAct RDBMS model definition."""
+from typing import Optional
+
 from sqlalchemy import Column, Float, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import mapped_column, Mapped
@@ -21,7 +23,7 @@ class Intact(Base):
     interaction_ids: Mapped[str] = mapped_column(Text)
     interaction_type: Mapped[str] = mapped_column(String(100), index=True)
     interaction_type_psimi_id: Mapped[int] = mapped_column()
-    pmid: Mapped[int] = mapped_column()
+    pmid: Mapped[Optional[int]] = mapped_column()
 
     def as_dict(self):
         """Convert object values to dictionary."""
