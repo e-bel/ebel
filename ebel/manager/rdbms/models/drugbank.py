@@ -1,6 +1,6 @@
 """DrugBank RDBMS model definition."""
 import datetime
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import Column, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
@@ -13,24 +13,25 @@ class Drugbank(Base):
     """Class definition for the drugbank table."""
 
     __tablename__ = "drugbank"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     drugbank_id: Mapped[str] = mapped_column(String(10), index=True)
     name: Mapped[str] = mapped_column(String(255))
-    description: Mapped[str] = mapped_column(Text)
-    cas_number: Mapped[str] = mapped_column(String(20))
-    unii: Mapped[str] = mapped_column(String(20))
-    state: Mapped[str] = mapped_column(String(20))
-    indication: Mapped[str] = mapped_column(Text)
-    pharmacodynamics: Mapped[str] = mapped_column(Text)
-    toxicity: Mapped[str] = mapped_column(Text)
-    metabolism: Mapped[str] = mapped_column(Text)
-    absorption: Mapped[str] = mapped_column(Text)
-    half_life: Mapped[str] = mapped_column(Text)
-    route_of_elimination: Mapped[str] = mapped_column(Text)
-    volume_of_distribution: Mapped[str] = mapped_column(Text)
-    clearance: Mapped[str] = mapped_column(Text)
-    mechanism_of_action: Mapped[str] = mapped_column(Text)
-    fda_label: Mapped[str] = mapped_column(Text)
+    description: Mapped[Optional[str]] = mapped_column(Text)
+    cas_number: Mapped[Optional[str]] = mapped_column(String(20))
+    unii: Mapped[Optional[str]] = mapped_column(String(20))
+    state: Mapped[Optional[str]] = mapped_column(String(20))
+    indication: Mapped[Optional[str]] = mapped_column(Text)
+    pharmacodynamics: Mapped[Optional[str]] = mapped_column(Text)
+    toxicity: Mapped[Optional[str]] = mapped_column(Text)
+    metabolism: Mapped[Optional[str]] = mapped_column(Text)
+    absorption: Mapped[Optional[str]] = mapped_column(Text)
+    half_life: Mapped[Optional[str]] = mapped_column(Text)
+    route_of_elimination: Mapped[Optional[str]] = mapped_column(Text)
+    volume_of_distribution: Mapped[Optional[str]] = mapped_column(Text)
+    clearance: Mapped[Optional[str]] = mapped_column(Text)
+    mechanism_of_action: Mapped[Optional[str]] = mapped_column(Text)
+    fda_label: Mapped[Optional[str]] = mapped_column(Text)
 
     references: Mapped[List["Reference"]] = relationship("Reference", back_populates="drugbank", cascade="save-update")
     synonyms: Mapped[List["Synonym"]] = relationship("Synonym", back_populates="drugbank", cascade="save-update")
@@ -85,6 +86,7 @@ class Pathway(Base):
     """Class definition for the drugbank_pathway table."""
 
     __tablename__ = "drugbank_pathway"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     smpdb_id: Mapped[str] = mapped_column(String(255))
 
@@ -103,6 +105,7 @@ class Patent(Base):
     """Class definition for the drugbank_patent table."""
 
     __tablename__ = "drugbank_patent"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     number: Mapped[str] = mapped_column(String(255))
     country: Mapped[str] = mapped_column(String(255))
@@ -132,6 +135,7 @@ class Status(Base):
     """Class definition for the drugbank_status table."""
 
     __tablename__ = "drugbank_status"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     status: Mapped[str] = mapped_column(String(20), index=True)
 
@@ -150,6 +154,7 @@ class ExternalIdentifier(Base):
     """Class definition for the drugbank_external_identifier table."""
 
     __tablename__ = "drugbank_external_identifier"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     resource: Mapped[str] = mapped_column(String(255), index=True)
     identifier: Mapped[str] = mapped_column(String(255), index=True)
@@ -173,6 +178,7 @@ class Reference(Base):
     """Class definition for the drugbank_reference table."""
 
     __tablename__ = "drugbank_reference"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     pmid: Mapped[int] = mapped_column()
 
@@ -191,9 +197,10 @@ class Target(Base):
     """Class definition for the drugbank_target table."""
 
     __tablename__ = "drugbank_target"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     uniprot: Mapped[str] = mapped_column(String(20), index=True)
-    action: Mapped[str] = mapped_column(String(50), index=True)
+    action: Mapped[Optional[str]] = mapped_column(String(50), index=True)
     known_action: Mapped[str] = mapped_column(String(20), index=True)
 
     drugbank_id: Mapped[int] = mapped_column(ForeignKey("drugbank.id"))
@@ -216,6 +223,7 @@ class DrugInteraction(Base):
     """Class definition for the drugbank_drug_interaction table."""
 
     __tablename__ = "drugbank_drug_interaction"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     drugbank_id: Mapped[str] = mapped_column(String(10), index=True)
     name: Mapped[str] = mapped_column(Text)
@@ -241,6 +249,7 @@ class ProductName(Base):
     """Class definition for the drugbank_product_name table."""
 
     __tablename__ = "drugbank_product_name"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(Text)
 
@@ -259,6 +268,7 @@ class Synonym(Base):
     """Class definition for the drugbank_synonym table."""
 
     __tablename__ = "drugbank_synonym"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     synonym: Mapped[str] = mapped_column(Text)
 

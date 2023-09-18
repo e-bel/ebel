@@ -438,9 +438,3 @@ class Hgnc(odb_meta.Graph):
     def update_interactions(self) -> int:
         """Abstract method."""
         pass
-
-
-if __name__ == "__main__":
-    hgncdb = Hgnc()
-    hgncdb.recreate_tables()
-    hgncdb.update()
