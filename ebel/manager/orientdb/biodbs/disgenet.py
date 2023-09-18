@@ -4,10 +4,11 @@ from typing import Dict, Optional
 
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text
+from sqlalchemy import text, select
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
+from ebel.manager.orientdb.biodbs.ensembl import Ensembl
 from ebel.manager.orientdb.constants import DISGENET
 from ebel.manager.rdbms.models import disgenet
 from ebel.tools import get_disease_trait_keywords_from_config, get_file_path
@@ -51,6 +52,12 @@ class DisGeNet(odb_meta.Graph):
     def insert_data(self) -> Dict[str, int]:
         """Insert data into database."""
         logger.info(f"Import {self.biodb_name.upper()}")
+
+        # Update EnSembl first since DisGeNet is dependent on it
+        ens = Ensembl()
+        ens.update()
+
+        # Insert data
         inserted = dict()
         inserted["sources"] = self._insert_sources()
         inserted["gene_symbols"] = self._insert_gene_symbols()
@@ -74,8 +81,8 @@ class DisGeNet(odb_meta.Graph):
         return self.__get_file_for_model(disgenet.DisgenetVariant)
 
     def _insert_sources(self):
-        df_g = pd.read_csv(self.file_path_gene, sep="\t", usecols=["source"]).drop_duplicates()
-        df_v = pd.read_csv(self.file_path_variant, sep="\t", usecols=["source"]).drop_duplicates()
+        df_g = pd.read_csv(self.file_path_gene, sep="\t", usecols=["source"])
+        df_v = pd.read_csv(self.file_path_variant, sep="\t", usecols=["source"])
         df = pd.concat([df_g, df_v]).drop_duplicates()
         df.reset_index(inplace=True, drop=True)
         df.index += 1
@@ -116,9 +123,10 @@ class DisGeNet(odb_meta.Graph):
         return df.shape[0]
 
     def _merge_with_source(self, df):
-        df_sources = pd.read_sql_table(disgenet.DisgenetSource.__tablename__, self.engine).rename(
-            columns={"id": "source_id"}
-        )
+        with self.engine.connect() as conn:
+            stmt = select(disgenet.DisgenetSource)
+            df_sources = pd.read_sql(stmt, conn).rename(columns={"id": "source_id"})
+
         return pd.merge(df, df_sources, on="source").drop(columns=["source"])
 
     def _insert_gene_disease_pmid_associations(self) -> int:
@@ -245,3 +253,8 @@ class DisGeNet(odb_meta.Graph):
                 inserted += 1
 
         return inserted
+
+
+if __name__ == "__main__":
+    dis = DisGeNet()
+    dis.update()

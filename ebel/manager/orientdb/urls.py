@@ -52,8 +52,8 @@ REACTOME = "https://reactome.org/download/current/UniProt2Reactome.txt"
 WIKIPATHWAYS = "http://data.wikipathways.org/20180710/gpml/wikipathways-20180710-gpml-Homo_sapiens.zip"
 
 # Ensembl #
-ENSEMBL_FASTA_PEP = "ftp://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz"
-ENSEMBL_CDS = "ftp://ftp.ensembl.org/pub/release-96/fasta/homo_sapiens/cds/Homo_sapiens.GRCh38.cds.all.fa.gz"
+ENSEMBL_FASTA_PEP = "https://ftp.ensembl.org/pub/release-94/fasta/homo_sapiens/pep/Homo_sapiens.GRCh38.pep.all.fa.gz"
+ENSEMBL_CDS = "https://ftp.ensembl.org/pub/release-96/fasta/homo_sapiens/cds/Homo_sapiens.GRCh38.cds.all.fa.gz"
 
 # SIDER #
 SIDER_ATC = "http://sideeffects.embl.de/media/download/drug_atc.tsv"

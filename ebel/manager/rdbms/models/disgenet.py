@@ -1,5 +1,5 @@
 """DisGeNet RDBMS model definition."""
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import BigInteger, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
@@ -23,7 +23,7 @@ class DisgenetGene(Base):
     disease_id: Mapped[str] = mapped_column(String(100), ForeignKey("disgenet_disease.disease_id"))
     disease: Mapped["DisgenetDisease"] = relationship("DisgenetDisease", foreign_keys=[disease_id])
     score: Mapped[float] = mapped_column()
-    pmid: Mapped[int] = mapped_column()
+    pmid: Mapped[Optional[int]] = mapped_column()
     source_id: Mapped[int] = mapped_column(ForeignKey("disgenet_source.id"))
     source: Mapped["DisgenetSource"] = relationship("DisgenetSource", foreign_keys=[source_id])
 
@@ -68,7 +68,7 @@ class DisgenetVariant(Base):
     disease_id: Mapped[str] = mapped_column(String(100), ForeignKey("disgenet_disease.disease_id"))
     disease: Mapped["DisgenetDisease"] = relationship("DisgenetDisease", foreign_keys=[disease_id])
     score: Mapped[float] = mapped_column()
-    pmid: Mapped[int] = mapped_column(index=True)
+    pmid: Mapped[Optional[int]] = mapped_column(index=True)
     source_id: Mapped[int] = mapped_column(ForeignKey("disgenet_source.id"))
     source: Mapped["DisgenetSource"] = relationship("DisgenetSource", foreign_keys=[source_id])
 
