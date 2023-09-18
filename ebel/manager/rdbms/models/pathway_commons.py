@@ -1,5 +1,5 @@
 """Pathway Commons RDBMS model definition."""
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import BigInteger, Column, ForeignKey, Integer, String, Table
 from sqlalchemy.ext.declarative import declarative_base

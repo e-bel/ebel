@@ -5,6 +5,7 @@ from typing import Dict
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import select
 from tqdm import tqdm
 
 from ebel.constants import RID
@@ -104,13 +105,16 @@ class PathwayCommons(odb_meta.Graph):
             inplace=True,
         )
         df_pmids.pmid = pd.to_numeric(df_pmids.pmid, errors="coerce")
-        df_pmids.to_sql(
-            pc.Pmid.__tablename__,
-            con=self.engine,
-            index=False,
-            if_exists="append",
-            chunksize=10000,
-        )
+        df_pmids = df_pmids[df_pmids.pmid.notna()]
+
+        with self.engine.connect() as conn:
+            df_pmids.to_sql(
+                pc.Pmid.__tablename__,
+                con=conn,
+                index=False,
+                if_exists="append",
+                chunksize=10000,
+            )
         del df_pmids
 
     def create_joining_table_names(self, df, df_pc_names):
@@ -232,9 +236,13 @@ class PathwayCommons(odb_meta.Graph):
         for edge_type in edge_types:
             inserted[edge_type] = 0
 
-            sql = f"""Select id, participant_a, participant_b from
-                pathway_commons where interaction_type='{edge_type}'"""
-            df_ppi_of = pd.read_sql(sql, self.engine)
+            sql = select(pc.PathwayCommons.id, pc.PathwayCommons.participant_a, pc.PathwayCommons.participant_b).where(
+                pc.PathwayCommons.interaction_type == edge_type
+            )
+
+            with self.engine.connect() as conn:
+                df_ppi_of = pd.read_sql(sql, conn)
+
             df_join = (
                 df_ppi_of.set_index("participant_a")
                 .join(df_all.set_index("symbol"))
@@ -289,7 +297,7 @@ class PathwayCommons(odb_meta.Graph):
 
     def get_pathway_pmids_sources(self, pc_id, pc_pathway_name_rid_dict) -> tuple:
         """Return all pathway, PMIDs, and their sources."""
-        pc_obj = self.session.query(pc.PathwayCommons).get(pc_id)
+        pc_obj = self.session.get(pc.PathwayCommons, pc_id)
         sources = [x.source for x in pc_obj.sources]
         pmids = [x.pmid for x in pc_obj.pmids]
         pathways = [pc_pathway_name_rid_dict[x.name] for x in pc_obj.pathway_names]
