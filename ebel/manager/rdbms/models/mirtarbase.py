@@ -1,4 +1,6 @@
 """KEGG RDBMS model definition."""
+from typing import Optional
+
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import mapped_column, Mapped
@@ -21,7 +23,7 @@ class Mirtarbase(Base):
     target_gene_entrez_id: Mapped[int] = mapped_column()
     species_target_gene: Mapped[str] = mapped_column(String(50), index=True)
     experiments: Mapped[str] = mapped_column(Text)
-    support_type: Mapped[str] = mapped_column(String(50), index=True)
+    support_type: Mapped[Optional[str]] = mapped_column(String(50), index=True)
     references_pmid: Mapped[int] = mapped_column()
 
     def as_dict(self):
