@@ -2,38 +2,36 @@
 # -*- coding: utf-8 -*-
 
 import os
+from pathlib import Path
 
-THIS_DIR = os.path.dirname(__file__)
+THIS_DIR = Path(__file__)
 PROJECT_NAME = "ebel"
 
-HOME = os.path.expanduser("~")
+HOME = Path.home()
 LIBRARY_NAME = PROJECT_NAME
 
 # Path to folder
-PROJECT_DIR = os.path.join(HOME, f".{PROJECT_NAME}")
-if not os.path.exists(PROJECT_DIR):
-    os.mkdir(PROJECT_DIR)
+PROJECT_DIR = Path(HOME, f".{PROJECT_NAME}")
+PROJECT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Path to data folder
-DATA_DIR = os.path.join(PROJECT_DIR, "data")
-if not os.path.exists(DATA_DIR):
-    os.mkdir(DATA_DIR)
+DATA_DIR = Path(PROJECT_DIR, "data")
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Path to logs folder
-LOG_DIR = os.path.join(PROJECT_DIR, "logs")
-if not os.path.exists(LOG_DIR):
-    os.mkdir(LOG_DIR)
+LOG_DIR = Path(PROJECT_DIR, "logs")
+LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Default database name and location
-DB_NAME = "{}.db".format(PROJECT_NAME)
-DB_PATH = os.path.join(DATA_DIR, DB_NAME)
+DB_NAME = f"{PROJECT_NAME}.db"
+DB_PATH = Path(DATA_DIR, DB_NAME)
 
 GRAMMAR_BEL_PATH = {
-    "2": os.path.join(THIS_DIR, "grammar", "grammar_bel_2.bnf"),
-    "2_1": os.path.join(THIS_DIR, "grammar", "grammar_bel_2_1.bnf"),
+    "2": THIS_DIR.joinpath("grammar", "grammar_bel_2.bnf"),
+    "2_1": THIS_DIR.joinpath("grammar", "grammar_bel_2_1.bnf"),
 }
 
-GRAMMAR_NS_ANNO_PATH = os.path.join(THIS_DIR, "grammar", "grammar_belns_belanno_1__2.bnf")
+GRAMMAR_NS_ANNO_PATH = THIS_DIR.joinpath("grammar", "grammar_belns_belanno_1__2.bnf")
 GRAMMAR_START_NS = "belns"
 GRAMMAR_START_ANNO = "belanno"
 GRAMMAR_START_LINE = "script_line_by_line"

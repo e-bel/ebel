@@ -1,5 +1,5 @@
 """NCBI RDBMS model definition."""
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
@@ -19,10 +19,10 @@ class NcbiGeneInfo(Base):
     tax_id: Mapped[int] = mapped_column(index=True)
     symbol: Mapped[str] = mapped_column(String(100), index=True)
     type_of_gene: Mapped[str] = mapped_column(String(100), index=True)
-    locus_tag: Mapped[str] = mapped_column(String(100))
-    chromosome: Mapped[str] = mapped_column(String(100))
-    map_location: Mapped[str] = mapped_column(String(100))
-    description_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info_description.id"))
+    locus_tag: Mapped[Optional[str]] = mapped_column(String(100))
+    chromosome: Mapped[Optional[str]] = mapped_column(String(100))
+    map_location: Mapped[Optional[str]] = mapped_column(String(100))
+    description_id: Mapped[Optional[int]] = mapped_column(ForeignKey("ncbi_gene_info_description.id"))
     description: Mapped["NcbiGeneInfoDescription"] = relationship(
         "NcbiGeneInfoDescription", foreign_keys=[description_id]
     )

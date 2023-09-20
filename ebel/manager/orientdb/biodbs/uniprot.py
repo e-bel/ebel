@@ -4,6 +4,7 @@ import logging
 import os
 import re
 from collections import namedtuple
+from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
 import pandas as pd
@@ -479,10 +480,13 @@ class UniProt(odb_meta.Graph):
         logger.info("Drop and create Uniprot table in RDBMS")
 
         logger.info("Insert data linked to Uniprot entry into RDBMS")
-        # avoid to use old gunzipped file
-        if os.path.exists(self.file_path_gunzipped):
-            os.remove(self.file_path_gunzipped)
-        if not os.path.exists(self.file_path_gunzipped):
+
+        gunzipped_file = Path(self.file_path_gunzipped)
+        # Remove previous gunzipped file if present
+        if gunzipped_file.is_file():
+            gunzipped_file.unlink()
+
+        if not gunzipped_file.is_file():  # Gunzip compressed uniprot file
             gunzip(self.file_path, self.file_path_gunzipped)
 
         (
@@ -496,9 +500,9 @@ class UniProt(odb_meta.Graph):
         self.__insert_linked_data(keywords, hosts, xrefs, functions, sclocations)
         inserted = self.__insert_uniprot_data(xrefs, functions, sclocations, number_of_entries)
 
-        # save storage space
-        if os.path.exists(self.file_path_gunzipped):
-            os.remove(self.file_path_gunzipped)
+        # save storage space by deleting uncompressed XML file
+        if gunzipped_file.is_file():
+            gunzipped_file.unlink()
 
         # return number_of_entries
         return inserted

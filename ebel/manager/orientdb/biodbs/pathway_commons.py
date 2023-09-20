@@ -63,12 +63,12 @@ class PathwayCommons(odb_meta.Graph):
             "INTERACTION_PUBMED_ID",
             "PATHWAY_NAMES",
         ]
-
         df = pd.read_csv(self.file_path, sep="\t", low_memory=True, usecols=usecols)
         # Because 2 tables are in file, we have to identify where second table starts and slice the dataframe
         df = df.iloc[: df[df["PARTICIPANT_A"] == "PARTICIPANT"].index[0]]
 
         df.columns = self._standardize_column_names(df.columns)
+
         df.pathway_names = df.pathway_names.str.split(";")
         df.interaction_data_source = df.interaction_data_source.str.split(";")
         df.interaction_pubmed_id = df.interaction_pubmed_id.str.split(";")
@@ -104,7 +104,7 @@ class PathwayCommons(odb_meta.Graph):
             columns={"id": "pathway_commons_id", "interaction_pubmed_id": "pmid"},
             inplace=True,
         )
-        df_pmids.pmid = pd.to_numeric(df_pmids.pmid, errors="coerce")
+        df_pmids.pmid = pd.to_numeric(df_pmids.pmid, errors="coerce", downcast="integer")
         df_pmids = df_pmids[df_pmids.pmid.notna()]
 
         with self.engine.connect() as conn:
@@ -216,6 +216,9 @@ class PathwayCommons(odb_meta.Graph):
         inserted = {}
 
         pc_pathway_name_rid_dict = self.get_pathway_name_rid_dict()
+
+        # Update HGNC in case not in DB
+        self.hgnc.update()
         valid_hgnc_symbols = {x[0] for x in self.session.query(hgnc.Hgnc).with_entities(hgnc.Hgnc.symbol).all()}
 
         cols = ["symbol", "rid"]

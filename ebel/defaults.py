@@ -24,16 +24,16 @@ default_tax_ids = [
 
 SQLITE_DATABASE_NAME = "ebel.db"
 SQLITE_TEST_DATABASE_NAME = "ebel_test.db"
-DATABASE_LOCATION = os.path.join(DATA_DIR, SQLITE_DATABASE_NAME)
-DEFAULT_TEST_DATABASE_LOCATION = os.path.join(DATA_DIR, SQLITE_TEST_DATABASE_NAME)
+DATABASE_LOCATION = DATA_DIR.joinpath(SQLITE_DATABASE_NAME)
+DEFAULT_TEST_DATABASE_LOCATION = DATA_DIR.joinpath(SQLITE_TEST_DATABASE_NAME)
 
 ###############################################################################
 # SQLAlchemy connection strings
 # =============================
 # SQLite
 # ------
-CONN_STR_DEFAULT = "sqlite:///" + DATABASE_LOCATION
-CONN_STR_TESTS = "sqlite:///" + SQLITE_TEST_DATABASE_NAME
+CONN_STR_DEFAULT = "sqlite:///" + DATABASE_LOCATION.name
+CONN_STR_TESTS = "sqlite:///" + DEFAULT_TEST_DATABASE_LOCATION.name
 # MySQL
 # -----
 CONN_STR_MYSQL_PREFIX = "mysql+pymysql://ebel:ebel@localhost/"
@@ -42,12 +42,12 @@ CONN_STR_MYSQL_TESTS = CONN_STR_MYSQL_PREFIX + "ebel_test?charset=utf8"
 
 ###############################################################################
 # Config
-config_file_path = os.path.join(PROJECT_DIR, "config.ini")
+config_file_path = PROJECT_DIR.joinpath("config.ini")
 
 ###############################################################################
 # Log Handling
 logHandler = handlers.RotatingFileHandler(
-    filename=os.path.join(LOG_DIR, "ebel.log"),
+    filename=LOG_DIR.joinpath("ebel.log"),
     mode="a",
     maxBytes=4098 * 10,  # 4MB file max
     backupCount=0,

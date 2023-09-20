@@ -2,7 +2,7 @@
 import datetime
 from typing import List, Optional
 
-from sqlalchemy import BigInteger, Column, Date, ForeignKey, Integer, String, Text
+from sqlalchemy import BigInteger, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, mapped_column, Mapped
 
@@ -18,7 +18,7 @@ class Hgnc(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     hgnc_id: Mapped[str] = mapped_column(String(20))
-    version: Mapped[int] = mapped_column()
+    version: Mapped[int] = mapped_column(BigInteger)
     bioparadigms_slc: Mapped[Optional[str]] = mapped_column(String(20))
     cd: Mapped[Optional[str]] = mapped_column(String(20))
     cosmic: Mapped[Optional[str]] = mapped_column(String(50))

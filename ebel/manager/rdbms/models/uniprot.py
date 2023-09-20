@@ -46,7 +46,7 @@ class Uniprot(Base):
 
     __tablename__ = "uniprot"
 
-    id: Mapped[str] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
     accession: Mapped[str] = mapped_column(String(20), unique=True)
     name: Mapped[str] = mapped_column(String(100), nullable=False, unique=True)
