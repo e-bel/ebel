@@ -17,8 +17,8 @@ class NcbiGeneInfo(Base):
     gene_id: Mapped[int] = mapped_column(primary_key=True)
 
     tax_id: Mapped[int] = mapped_column(index=True)
-    symbol: Mapped[str] = mapped_column(String(100), index=True)
-    type_of_gene: Mapped[str] = mapped_column(String(100), index=True)
+    symbol: Mapped[Optional[str]] = mapped_column(String(100), index=True)
+    type_of_gene: Mapped[Optional[str]] = mapped_column(String(100), index=True)
     locus_tag: Mapped[Optional[str]] = mapped_column(String(100))
     chromosome: Mapped[Optional[str]] = mapped_column(String(100))
     map_location: Mapped[Optional[str]] = mapped_column(String(100))
