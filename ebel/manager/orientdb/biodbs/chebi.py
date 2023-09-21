@@ -104,7 +104,7 @@ class Chebi(odb_meta.Graph):
                         .reset_index()
                     )
 
-                df.to_sql(table_name, self.engine, index=False, if_exists="append")
+                df.to_sql(table_name, self.engine, index=False, if_exists="replace")
 
                 inserted[table_name] += df.shape[0]
         self.session.commit()
