@@ -110,9 +110,3 @@ class MirTarBase(odb_meta.Graph):
             updated += 1
 
         return updated
-
-
-if __name__ == "__main__":
-    hgncdb = MirTarBase()
-    # hgncdb.recreate_tables()
-    hgncdb.update()
