@@ -3,7 +3,7 @@ from typing import Optional
 
 from sqlalchemy import Boolean, Column, Integer, SmallInteger, String
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import Mapped, mapped_column
 
 from ebel.manager.rdbms.models import object_as_dict
 

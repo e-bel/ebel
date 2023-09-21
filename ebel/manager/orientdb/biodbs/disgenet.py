@@ -4,7 +4,7 @@ from typing import Dict, Optional
 
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text, select
+from sqlalchemy import select, text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls

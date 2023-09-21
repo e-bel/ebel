@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from sqlalchemy import BigInteger, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, mapped_column, Mapped
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 

@@ -15,25 +15,19 @@ from tqdm import tqdm
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import HGNC
 from ebel.manager.rdbms.models import hgnc
+from ebel.manager.rdbms.models.hgnc import AliasName, AliasSymbol, Ccds, Ena, Enzyme, GeneGroupId, GeneGroupName
+from ebel.manager.rdbms.models.hgnc import Hgnc as HgncDb
 from ebel.manager.rdbms.models.hgnc import (
-    Hgnc as HgncDb,
-    PrevSymbol,
-    AliasSymbol,
-    AliasName,
-    Ccds,
-    Ena,
-    Enzyme,
-    GeneGroupName,
-    GeneGroupId,
-    UniProt,
-    RnaCentral,
-    Rgd,
-    RefSeq,
-    PubMed,
-    PrevName,
-    Omim,
-    Mgd,
     Lsdb,
+    Mgd,
+    Omim,
+    PrevName,
+    PrevSymbol,
+    PubMed,
+    RefSeq,
+    Rgd,
+    RnaCentral,
+    UniProt,
 )
 from ebel.tools import get_file_path
 

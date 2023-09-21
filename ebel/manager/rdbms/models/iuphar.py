@@ -1,8 +1,7 @@
 """IUPHAR RDBMS model definition."""
 from typing import List, Optional
 
-from sqlalchemy import (BigInteger, Boolean, Column, ForeignKey, Integer,
-                        Numeric, String, Text)
+from sqlalchemy import BigInteger, Boolean, Column, ForeignKey, Integer, Numeric, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

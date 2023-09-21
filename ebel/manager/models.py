@@ -15,7 +15,7 @@ import sqlalchemy
 from lark import Lark, Token, Tree
 from sqlalchemy import Boolean, ForeignKey, Index, Integer, String
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import relationship, mapped_column
+from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy.sql.expression import func
 from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
