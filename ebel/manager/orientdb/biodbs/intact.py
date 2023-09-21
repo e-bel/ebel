@@ -5,7 +5,7 @@ from typing import Dict
 
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text
+from sqlalchemy import select, or_
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -77,18 +77,22 @@ class IntAct(odb_meta.Graph):
 
         df = pd.read_csv(zf.open("intact.txt"), sep="\t", usecols=usecols.keys())
         df.rename(columns=usecols, inplace=True)
+
         regex_accession = r"uniprotkb:([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})"
         df.int_a_uniprot_id = df.int_a_uniprot_id.str.extract(regex_accession)[0]
         df.int_b_uniprot_id = df.int_b_uniprot_id.str.extract(regex_accession)[0]
         df = df[(pd.notnull(df.int_a_uniprot_id) & pd.notnull(df.int_b_uniprot_id))]
+
         regex_detection_method = r"psi-mi:\"MI:0*(?P<detection_method_psimi_id>\d+)\"\((?P<detection_method>[^)]+)\)"
         df = df.join(df.dm.str.extract(regex_detection_method), how="left")
         df.drop(columns=["dm"], inplace=True)
         df.pmid = df.pmid.str.extract(r"pubmed:(\d+)")
+
         regex_interaction_type = r"psi-mi:\"MI:0*(?P<interaction_type_psimi_id>\d+)\"\((?P<interaction_type>[^)]+)\)"
         df = df.join(df.it.str.extract(regex_interaction_type), how="left")
         df.drop(columns=["it"], inplace=True)
         df.confidence_value = df.confidence_value.str.extract(r"intact-miscore:(\d+(\.\d+)?)")[0]
+
         df.index += 1
         df.index.rename("id", inplace=True)
 
@@ -141,9 +145,14 @@ class IntAct(odb_meta.Graph):
             namespace, value
         """
         return_value = ()
-        sql = f"""Select s.symbol, u.taxid from uniprot u inner join uniprot_gene_symbol s
-                  on (u.id=s.uniprot_id) where u.accession='{uniprot_accession}' limit 1"""
-        result = self.session.execute(text(sql)).fetchone()
+
+        sql = (
+            select(uniprot.GeneSymbol.symbol, uniprot.Uniprot.taxid)
+            .join(uniprot.Uniprot)
+            .where(uniprot.Uniprot.accession == uniprot_accession)
+        )
+
+        result = self.session.execute(sql).fetchone()
         taxid_to_namespace = {9606: "HGNC", 10090: "MGI", 10116: "RGD"}
         if result:
             name, taxid = result
@@ -161,38 +170,64 @@ class IntAct(odb_meta.Graph):
 
         uniprot_rid_dict = uniprot.get_pure_uniprot_rid_dict_in_bel_context()
 
-        sql_temp = """SELECT
-            int_a_uniprot_id,
-            int_b_uniprot_id,
-            pmid,
-            interaction_ids,
-            interaction_type,
-            interaction_type_psimi_id,
-            detection_method,
-            detection_method_psimi_id,
-            confidence_value
-        FROM
-            intact
-        WHERE
-            int_a_uniprot_id = '{uniprot_accession}' or int_b_uniprot_id = '{uniprot_accession}'
-        GROUP BY
-            int_a_uniprot_id,
-            int_b_uniprot_id,
-            pmid,
-            interaction_ids,
-            interaction_type,
-            interaction_type_psimi_id,
-            detection_method,
-            detection_method_psimi_id,
-            confidence_value"""
+        # sql_temp = """SELECT
+        #     int_a_uniprot_id,
+        #     int_b_uniprot_id,
+        #     pmid,
+        #     interaction_ids,
+        #     interaction_type,
+        #     interaction_type_psimi_id,
+        #     detection_method,
+        #     detection_method_psimi_id,
+        #     confidence_value
+        # FROM
+        #     intact
+        # WHERE
+        #     int_a_uniprot_id = '{uniprot_accession}' or int_b_uniprot_id = '{uniprot_accession}'
+        # GROUP BY
+        #     int_a_uniprot_id,
+        #     int_b_uniprot_id,
+        #     pmid,
+        #     interaction_ids,
+        #     interaction_type,
+        #     interaction_type_psimi_id,
+        #     detection_method,
+        #     detection_method_psimi_id,
+        #     confidence_value"""
 
         updated = 0
 
         uniprot_accessions = tuple(uniprot_rid_dict.keys())
+        it = intact.Intact
 
         for uniprot_accession in tqdm(uniprot_accessions, desc="Update IntAct interactions"):
-            sql = sql_temp.format(uniprot_accession=uniprot_accession)
-            result = self.session.execute(text(sql))
+            # sql = sql_temp.format(uniprot_accession=uniprot_accession)
+            sql = (
+                select(
+                    it.int_a_uniprot_id,
+                    it.int_b_uniprot_id,
+                    it.pmid,
+                    it.interaction_ids,
+                    it.interaction_type,
+                    it.interaction_type_psimi_id,
+                    it.detection_method,
+                    it.detection_method_psimi_id,
+                    it.confidence_value,
+                )
+                .where(or_(it.int_a_uniprot_id == uniprot_accession, it.int_b_uniprot_id == uniprot_accession))
+                .group_by(
+                    it.int_a_uniprot_id,
+                    it.int_b_uniprot_id,
+                    it.pmid,
+                    it.interaction_ids,
+                    it.interaction_type,
+                    it.interaction_type_psimi_id,
+                    it.detection_method,
+                    it.detection_method_psimi_id,
+                    it.confidence_value,
+                )
+            )
+            result = self.session.execute(sql)
 
             for (
                 up_a,
@@ -229,3 +264,9 @@ class IntAct(odb_meta.Graph):
                     updated += 1
 
         return updated
+
+
+if __name__ == "__main__":
+    hgncdb = IntAct()
+    hgncdb.recreate_tables()
+    hgncdb.update()

@@ -209,13 +209,4 @@ class Iuphar(odb_meta.Graph):
             edge_class = iuphar_edge_type_mapper.get(data.type, "iuphar_interaction")
             self.create_edge(edge_class, from_rid=a_rid, to_rid=data.rid, value_dict=i_value_dict)
 
-        # not sure if this is really needed
-        # Hgnc(self.client).update_bel()
-
         return df_join.shape[0]
-
-
-if __name__ == "__main__":
-    hgncdb = Iuphar()
-    # hgncdb.recreate_tables()
-    hgncdb.update()
