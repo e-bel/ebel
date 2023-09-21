@@ -264,9 +264,3 @@ class IntAct(odb_meta.Graph):
                     updated += 1
 
         return updated
-
-
-if __name__ == "__main__":
-    hgncdb = IntAct()
-    hgncdb.recreate_tables()
-    hgncdb.update()
