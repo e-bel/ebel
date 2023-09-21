@@ -60,7 +60,7 @@ SIDER_ATC = "http://sideeffects.embl.de/media/download/drug_atc.tsv"
 SIDER_SE = "http://sideeffects.embl.de/media/download/meddra_all_se.tsv.gz"
 
 # Expression Atlas #
-EXPRESSION_ATLAS_BASE = "ftp://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/"
+EXPRESSION_ATLAS_BASE = "https://ftp.ebi.ac.uk/pub/databases/microarray/data/atlas/experiments/"
 EXPRESSION_ATLAS_EXPERIMENTS = EXPRESSION_ATLAS_BASE + "atlas-latest-data.tar.gz"
 
 # DisGeNet #

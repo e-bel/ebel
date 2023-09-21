@@ -6,6 +6,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import select
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -132,13 +133,30 @@ class Iuphar(odb_meta.Graph):
             "Gating inhibitor": "inhibits_gating__iu",
         }
 
-        sql = """select i.pubmed_id, i.assay_description, i.affinity_units, i.affinity_low, i.affinity_median,
-        i.affinity_high, i.type,
-        i.action,i.target_uniprot, l.name as ligand_name, l.pubchem_sid, i.ligand_gene_symbol, i.ligand_species
-        from iuphar_interaction as i inner join iuphar_ligand as l
-        on (i.ligand_id=l.id) where i.target_uniprot IS NOT NULL and pubchem_sid IS NOT NULL"""
+        i_int = iuphar.IupharInteraction
+        lig = iuphar.IupharLigand
+        sql = (
+            select(
+                i_int.pubmed_id,
+                i_int.assay_description,
+                i_int.affinity_units,
+                i_int.affinity_low,
+                i_int.affinity_median,
+                i_int.affinity_high,
+                i_int.type,
+                i_int.action,
+                i_int.target_uniprot,
+                lig.name.label("ligand_name"),
+                lig.pubchem_sid,
+            )
+            .join(lig)
+            .where(i_int.target_uniprot.isnot(None))
+            .where(lig.pubchem_sid.isnot(None))
+        )
 
-        df_iuphar = pd.read_sql(sql, self.engine).replace({np.nan: None})
+        with self.engine.connect() as conn:
+            df_iuphar = pd.read_sql(sql, conn).replace({np.nan: None})
+
         df_iuphar.set_index("target_uniprot", inplace=True)
         df_graph = pd.DataFrame(
             uniprot.get_pure_uniprot_rid_dict_in_bel_context().items(),
@@ -152,7 +170,11 @@ class Iuphar(odb_meta.Graph):
             total=df_join.shape[0],
             desc=f"Update {self.biodb_name.upper()} interactions",
         ):
-            if data.ligand_gene_symbol and data.ligand_species and "Human" in data.ligand_species:
+            if (
+                "ligand_gene_symbol" in data.index
+                and "ligand_species" in data.index
+                and "Human" in data.ligand_species
+            ):
                 symbol = data.ligand_gene_symbol.split("|")[0]  # human seems to always the first
                 a_value_dict = {
                     "pure": True,
@@ -161,6 +183,7 @@ class Iuphar(odb_meta.Graph):
                     "name": symbol,
                 }
                 a_class = "protein"
+
             else:
                 a_value_dict = {
                     "pure": True,
@@ -170,6 +193,7 @@ class Iuphar(odb_meta.Graph):
                     "label": data.ligand_name,
                 }
                 a_class = "abundance"
+
             a_rid = self.get_create_rid(a_class, value_dict=a_value_dict, check_for="bel")
 
             i_value_dict = {
@@ -189,3 +213,9 @@ class Iuphar(odb_meta.Graph):
         # Hgnc(self.client).update_bel()
 
         return df_join.shape[0]
+
+
+if __name__ == "__main__":
+    hgncdb = Iuphar()
+    # hgncdb.recreate_tables()
+    hgncdb.update()
