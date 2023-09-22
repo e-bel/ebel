@@ -79,7 +79,7 @@ class GwasCatalog(odb_meta.Graph):
 
         table_name = gwas_catalog.GwasCatalog.__tablename__
 
-        df[columns_main_table].to_sql(table_name, self.engine, if_exists="append")
+        df[columns_main_table].to_sql(table_name, self.engine, if_exists="replace")
 
         df.snp_gene_ids = df.snp_gene_ids.str.strip().str.split(", ")
         df[table_name + "_id"] = df.index
@@ -89,7 +89,7 @@ class GwasCatalog(odb_meta.Graph):
         df_snp_gene_ids.index = range(1, df_snp_gene_ids.shape[0] + 1)
         df_snp_gene_ids.rename(columns={"snp_gene_ids": "ensembl_identifier"}, inplace=True)
         df_snp_gene_ids.index.rename("id", inplace=True)
-        df_snp_gene_ids.to_sql(gwas_catalog.SnpGene.__tablename__, self.engine, if_exists="append")
+        df_snp_gene_ids.to_sql(gwas_catalog.SnpGene.__tablename__, self.engine, if_exists="replace")
 
         self.session.commit()
 

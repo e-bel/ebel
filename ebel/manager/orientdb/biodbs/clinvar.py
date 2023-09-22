@@ -63,9 +63,9 @@ class ClinVar(odb_meta.Graph):
         self._standardize_dataframe(df)
         df.index += 1
         df.index.rename("id", inplace=True)
-        df.drop(columns=["phenotype_ids", "phenotype_list", "other_ids"]).to_sql(
-            self.biodb_name, self.engine, if_exists="append", chunksize=10000
-        )
+
+        df_base = df.drop(columns=["phenotype_ids", "phenotype_list", "other_ids"])
+        df_base.to_sql(clinvar.Clinvar.__tablename__, con=self.engine, if_exists="append", chunksize=10000)
 
         df_clinvar__phenotype = (
             df["phenotype_list"]
