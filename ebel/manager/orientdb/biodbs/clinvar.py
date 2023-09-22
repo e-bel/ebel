@@ -11,6 +11,7 @@ from tqdm import tqdm
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import CLINVAR
 from ebel.manager.rdbms.models import clinvar
+from ebel.manager.orientdb.biodbs.ensembl import Ensembl
 from ebel.tools import get_disease_trait_keywords_from_config, get_file_path
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,12 @@ class ClinVar(odb_meta.Graph):
         """Insert data."""
         inserted = {}
         logger.info("Insert data for ClinVar")
+
+        # Depends on Ensembl
+        Ensembl().update()
+
         self.recreate_tables()
+
         df = pd.read_csv(self.file_path, sep="\t", low_memory=False)
         self._standardize_dataframe(df)
         df.index += 1
