@@ -323,9 +323,3 @@ class StringDb(odb_meta.Graph):
                         updated += 1
 
         return updated
-
-
-if __name__ == "__main__":
-    a = StringDb()
-    # a.recreate_tables()
-    a.update()
