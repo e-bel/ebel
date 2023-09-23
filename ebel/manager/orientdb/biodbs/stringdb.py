@@ -6,7 +6,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import or_, select, text
+from sqlalchemy import or_, select, text, and_
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -167,6 +167,7 @@ class StringDb(odb_meta.Graph):
     def update_interactions(self) -> Dict[str, int]:
         """Update the edges with StringDB metadata."""
         hgnc = Hgnc(self.client)
+        hgnc.update()  # If users haven't run Hgnc yet
         updated = dict()
         updated["interactions"] = self.update_stringdb_interactions(hgnc)
         updated["actions"] = self.update_action_interactions(hgnc)
@@ -322,3 +323,9 @@ class StringDb(odb_meta.Graph):
                         updated += 1
 
         return updated
+
+
+if __name__ == "__main__":
+    a = StringDb()
+    # a.recreate_tables()
+    a.update()
