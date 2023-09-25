@@ -4,7 +4,7 @@
 import os
 from pathlib import Path
 
-THIS_DIR = Path(__file__)
+THIS_DIR = Path(__file__).parent
 PROJECT_NAME = "ebel"
 
 HOME = Path.home()
