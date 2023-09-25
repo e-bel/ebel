@@ -29,6 +29,7 @@ from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
 
 import ebel.database
+import ebel.defaults
 from ebel.cache import set_mysql_interactive
 from ebel.config import get_config_as_dict, get_config_value, write_to_config
 from ebel.constants import DEFAULT_ODB, RID
