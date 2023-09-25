@@ -7,7 +7,7 @@ from typing import Dict, Tuple
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text
+from sqlalchemy import text, select, func, cast, Integer
 from tqdm import tqdm
 
 from ebel import tools
@@ -516,8 +516,9 @@ class BioGrid(odb_meta.Graph):
             ib.uniprot as object_uniprot,
             ib.taxonomy_id as object_taxonomy_id,
             es.experimental_system,
-            group_concat( distinct b.biogrid_id) as biogrid_ids,
-            group_concat( distinct if(p.source='PUBMED',CAST(p.source_identifier AS UNSIGNED),NULL)) as pmids,
+            group_concat( distinct b.biogrid_id) as biogrid_ids, group_concat( 
+            distinct if(p.source='PUBMED',CAST(p.source_identifier AS UNSIGNED),NULL)
+            ) as pmids,
             count(distinct p.source_identifier) as num_pubs,
             group_concat( distinct if(p.source='DOI',CAST(p.source_identifier AS UNSIGNED),NULL)) as dois
         from
@@ -539,6 +540,13 @@ class BioGrid(odb_meta.Graph):
             ib.uniprot,
             ib.taxonomy_id,
             es.experimental_system"""
+
+        b = biogrid.Biogrid
+        ia = biogrid.Interactor
+        ib = biogrid.Interactor
+        m = biogrid.Modification
+        p = biogrid.Publication
+        es = biogrid.ExperimentalSystem
 
         uniprots_in_bel_set = self.get_pure_uniprots_in_bel_context()
         uniprot_modification_pairs = self.get_uniprot_modification_pairs()
@@ -568,7 +576,38 @@ class BioGrid(odb_meta.Graph):
                     object_uniprot=e["object_uniprot"],
                 )
 
-                for row in self.session.execute(text(sql)).fetchall():
+                sql = (
+                    select(
+                        ia.symbol.label("subject_symbol"),
+                        ia.uniprot.label("subject_uniprot"),
+                        ia.taxonomy_id.label("subject_taxonomy_id"),
+                        m.modification,
+                        ib.symbol.label("object_symbol"),
+                        ib.uniprot.label("object_uniprot"),
+                        ib.taxonomy_id.label("object_taxonomy_id"),
+                        es.experimental_system,
+                        func.group_concat(
+                            b.biogrid_id.distinct().label("biogrid_ids"),
+                            func.group_concat(
+                                func.IF(p.source == "PUBMED", cast(p.source_identifier, Integer), None).distinct()
+                            ).label("pmids"),
+                        ),
+                        p.source_identifier.count().label("num_pubs"),
+                        func.group_concat(func.IF(p.source == "DOI", cast(p.source_identifier, Integer), None)).label(
+                            "dois"
+                        ),
+                    )
+                    .join(ia)
+                    .join(ib)
+                    .join(m)
+                    .join(p)
+                    .join(es)
+                    .where(ia.uniprot == e["subject_uniprot"])
+                    .where(ib.uniprot == e["object_uniprot"])
+                    .where(m.modification != "No Modification")
+                )
+
+                for row in self.session.execute(sql).fetchall():
                     row_dict = row._asdict()
                     be = BioGridEdge(subject_rid=subj_pure_rid, object_rid=obj_pure_rid, **row_dict)
                     edge_value_dict = be.get_edge_value_dict()
