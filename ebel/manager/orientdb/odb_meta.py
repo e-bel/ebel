@@ -94,12 +94,17 @@ class Graph(abc.ABC):
         self.engine = rdb.engine
         self.session = rdb.session
 
-        if not (get_config_value("DATABASE", "sqlalchemy_connection_string") or database_exists(self.engine.url)):
+        conn = get_config_value("DATABASE", "sqlalchemy_connection_string")
+
+        if not (conn or database_exists(self.engine.url)):
             if str(self.engine.url).startswith("mysql"):
                 set_mysql_interactive()
 
             else:
                 create_database(self.engine.url)
+
+        if not database_exists(self.engine.url):
+            create_database(self.engine.url)
 
     def __config_params_check(self, overwrite_config: bool = False):
         """Go through passed/available configuration params."""
