@@ -1,7 +1,8 @@
 """BioGRID RDBMS model definition."""
-from sqlalchemy import Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Float, ForeignKey, Integer, String, Text, select
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship, aliased
+from sqlalchemy_utils import create_view
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -154,3 +155,49 @@ class Modification(Base):
     def as_dict(self):
         """Convert object values to dictionary."""
         return object_as_dict(self, exclude=["id"])
+
+
+class BiogridView(Base):
+    """SQL view for Biogrid."""
+
+    b = Biogrid
+    ia = aliased(Interactor)
+    ib = aliased(Interactor)
+    m = Modification
+    p = Publication
+    es = ExperimentalSystem
+    ta = aliased(Taxonomy)
+    tb = aliased(Taxonomy)
+    s = Source
+
+    stmt = (
+        select(
+            b.biogrid_id,
+            ia.symbol.label("symbol_a"),
+            ia.uniprot.label("uniprot_a"),
+            ta.taxonomy_id.label("tax_id_a"),
+            ta.organism_name.label("organism_a"),
+            ib.symbol.label("symbol_b"),
+            ib.uniprot.label("uniprot_b"),
+            tb.taxonomy_id.label("tax_id_b"),
+            tb.organism_name.label("organism_b"),
+            es.experimental_system,
+            m.modification,
+            s.source,
+            b.qualification,
+            p.source.label("publication_source"),
+            p.source_identifier.label("publication_identifier"),
+        )
+        .join(ia, b.biogrid_a_id == ia.biogrid_id)
+        .join(ib, b.biogrid_b_id == ib.biogrid_id)
+        .join(ta, ia.taxonomy_id == ta.taxonomy_id)
+        .join(tb, ib.taxonomy_id == tb.taxonomy_id)
+        .join(es, b.experimental_system_id == es.id, isouter=True)
+        .join(m, m.id == b.modification_id, isouter=True)
+        .join(s, b.source_id == s.id, isouter=True)
+        .join(p, b.publication_id == p.id, isouter=True)
+    )
+
+    view = create_view(name="biogrid_view", selectable=stmt, metadata=Base.metadata)
+
+    __table__ = view

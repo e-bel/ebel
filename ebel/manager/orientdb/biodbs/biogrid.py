@@ -7,7 +7,7 @@ from typing import Dict, Tuple
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text, select, func, cast, Integer
+from sqlalchemy import select, func, cast, Integer
 from sqlalchemy.orm import aliased
 from tqdm import tqdm
 
@@ -460,29 +460,31 @@ class BioGrid(odb_meta.Graph):
 
     def get_uniprot_modification_pairs(self):
         """Return all UniProt modification pairs."""
-        # TODO: sql as sqlalchemy query
-        sql = """Select
-            ia.symbol as subject_symbol,
-            ia.uniprot as subject_uniprot,
-            ia.taxonomy_id as subject_taxonomy_id,
-            ib.symbol as object_symbol,
-            ib.uniprot as object_uniprot,
-            ib.taxonomy_id as object_taxonomy_id
-        from
-            biogrid b
-            inner join biogrid_interactor ia on (b.biogrid_a_id=ia.biogrid_id)
-            inner join biogrid_interactor ib on (b.biogrid_b_id=ib.biogrid_id)
-            inner join biogrid_modification m on (m.id=b.modification_id)
-        where
-            m.modification != 'No Modification' and ia.uniprot IS NOT NULL and ib.uniprot IS NOT NULL
-        group by
-            subject_symbol,
-            subject_uniprot,
-            subject_taxonomy_id,
-            object_symbol,
-            object_uniprot,
-            object_taxonomy_id"""
-        results = self.session.execute(text(sql)).fetchall()
+        b = biogrid.Biogrid
+        ia = aliased(biogrid.Interactor)
+        ib = aliased(biogrid.Interactor)
+        m = biogrid.Modification
+
+        sql = (
+            (
+                select(
+                    ia.symbol.label("subject_symbol"),
+                    ia.uniprot.label("subject_uniprot"),
+                    ia.taxonomy_id.label("subject_taxonomy_id"),
+                    ib.symbol.label("object_symbol"),
+                    ib.uniprot.label("object_uniprot"),
+                    ib.taxonomy_id.label("object_taxonomy_id"),
+                )
+                .join(ia, b.biogrid_a_id == ia.biogrid_id)
+                .join(ib, b.biogrid_b_id == ib.biogrid_id)
+                .join(m, b.modification_id == m.id)
+            )
+            .where(m.modification == "No Modification")
+            .where(ia.uniprot.isnot(None))
+            .where(ib.uniprot.isnot(None))
+            .group_by(ia.symbol, ia.uniprot, ia.taxonomy_id, ib.symbol, ib.uniprot, ib.taxonomy_id)
+        )
+        results = self.session.execute(sql).fetchall()
         return [x._asdict() for x in results]
 
     def get_create_pure_protein_rid_by_uniprot(self, taxonomy_id, symbol, uniprot):
@@ -601,34 +603,3 @@ class BioGrid(odb_meta.Graph):
                         )
                         counter += 1
         return counter
-
-    def create_view(self):
-        """Create SQL view of BioGRID data."""
-        sql = """create view if not exists biogrid_view as
-            select
-                b.biogrid_id,
-                ia.symbol as symbol_a,
-                ia.uniprot as uniprot_a,
-                ta.taxonomy_id as tax_id_a,
-                ta.organism_name as organism_a,
-                ib.symbol as symbol_b,
-                ib.uniprot as uniprot_b,
-                tb.taxonomy_id as tax_id_b,
-                tb.organism_name as organism_b,
-                es.experimental_system,
-                m.modification,
-                s.source,
-                b.qualification,
-                p.source as publication_source,
-                p.source_identifier as publication_identifier
-            from
-                biogrid b inner join
-                biogrid_interactor ia on (ia.biogrid_id=b.biogrid_a_id) inner join
-                biogrid_interactor ib on (ib.biogrid_id=b.biogrid_b_id) inner join
-                biogrid_taxonomy ta on (ia.taxonomy_id=ta.taxonomy_id) inner join
-                biogrid_taxonomy tb on (ib.taxonomy_id=tb.taxonomy_id) left join
-                biogrid_experimental_system es on (b.experimental_system_id=es.id) left join
-                biogrid_modification m on (m.id=b.modification_id) left join
-                biogrid_source s on (s.id=b.source_id) left join
-                biogrid_publication p on (p.id=b.publication_id)"""
-        self.session.execute(text(sql))
