@@ -243,8 +243,7 @@ class PathwayCommons(odb_meta.Graph):
                 pc.PathwayCommons.interaction_type == edge_type
             )
 
-            with self.engine.connect() as conn:
-                df_ppi_of = pd.read_sql(sql, conn)
+            df_ppi_of = pd.read_sql(sql, self.engine)
 
             df_join = (
                 df_ppi_of.set_index("participant_a")
@@ -252,13 +251,13 @@ class PathwayCommons(odb_meta.Graph):
                 .rename(columns={"rid": "rid_a_all"})
                 .join(df_bel.set_index("symbol"))
                 .reset_index()
-                .rename(columns={"rid": "rid_a_bel", "index": "a"})
+                .rename(columns={"rid": "rid_a_bel", "participant_a": "a"})
                 .set_index("participant_b")
                 .join(df_all.set_index("symbol"))
                 .rename(columns={"rid": "rid_b_all"})
                 .join(df_bel.set_index("symbol"))
                 .reset_index()
-                .rename(columns={"rid": "rid_b_bel", "index": "b"})
+                .rename(columns={"rid": "rid_b_bel", "participant_b": "b"})
                 .set_index("id")
             )
 
@@ -305,3 +304,8 @@ class PathwayCommons(odb_meta.Graph):
         pmids = [x.pmid for x in pc_obj.pmids]
         pathways = [pc_pathway_name_rid_dict[x.name] for x in pc_obj.pathway_names]
         return pathways, pmids, sources
+
+
+if __name__ == "__main__":
+    foo = PathwayCommons()
+    foo.update_interactions()
