@@ -72,7 +72,7 @@ class Throughput(Base):
     __tablename__ = "biogrid_throughput"
     id: Mapped[int] = mapped_column(primary_key=True)
     throughput: Mapped[str] = mapped_column(String(255))
-    frequency: Mapped[int] = mapped_column()
+    count: Mapped[int] = mapped_column()
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -98,7 +98,7 @@ class ExperimentalSystem(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     experimental_system: Mapped[str] = mapped_column(String(255), nullable=True)
     experimental_system_type: Mapped[str] = mapped_column(String(255), nullable=True)
-    frequency: Mapped[int] = mapped_column()
+    count: Mapped[int] = mapped_column()
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -149,7 +149,7 @@ class Modification(Base):
     __tablename__ = "biogrid_modification"
     id: Mapped[int] = mapped_column(primary_key=True)
     modification: Mapped[str] = mapped_column(String(255), nullable=True)
-    frequency: Mapped[int] = mapped_column()
+    count: Mapped[int] = mapped_column()
 
     def as_dict(self):
         """Convert object values to dictionary."""

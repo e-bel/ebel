@@ -56,8 +56,14 @@ logh_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(mess
 logHandler.setFormatter(logh_format)
 logHandler.setLevel(logging.DEBUG)
 
+
 # Console Handler
 ch = logging.StreamHandler()
 ch_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 ch.setFormatter(ch_format)
 ch.setLevel(logging.WARNING)
+
+logging.basicConfig(
+    handlers=[logHandler, ch],
+    encoding="utf-8",
+)

@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
 from sqlalchemy import text, select, func, cast, Integer
+from sqlalchemy.orm import aliased
 from tqdm import tqdm
 
 from ebel import tools
@@ -286,7 +287,7 @@ class BioGrid(odb_meta.Graph):
         }
 
         # main table
-        df = pd.read_csv(self.file_path, usecols=use_columns.keys(), sep="\t", low_memory=False)
+        df = pd.read_csv(self.file_path, usecols=list(use_columns.keys()), sep="\t", low_memory=False)
         df.rename(columns=use_columns, inplace=True)
         df.replace("-", np.nan, inplace=True)
 
@@ -505,45 +506,9 @@ class BioGrid(odb_meta.Graph):
 
     def update_interactions(self) -> int:
         """Updates all BioGrid interactions."""
-        # TODO: sql_temp as sqlalchemy query
-        sql_temp = """
-        Select
-            ia.symbol as subject_symbol,
-            ia.uniprot as subject_uniprot,
-            ia.taxonomy_id as subject_taxonomy_id,
-            m.modification,
-            ib.symbol as object_symbol,
-            ib.uniprot as object_uniprot,
-            ib.taxonomy_id as object_taxonomy_id,
-            es.experimental_system,
-            group_concat( distinct b.biogrid_id) as biogrid_ids, group_concat( 
-            distinct if(p.source='PUBMED',CAST(p.source_identifier AS UNSIGNED),NULL)
-            ) as pmids,
-            count(distinct p.source_identifier) as num_pubs,
-            group_concat( distinct if(p.source='DOI',CAST(p.source_identifier AS UNSIGNED),NULL)) as dois
-        from
-            biogrid b
-            inner join biogrid_interactor ia on (b.biogrid_a_id=ia.biogrid_id)
-            inner join biogrid_interactor ib on (b.biogrid_b_id=ib.biogrid_id)
-            inner join biogrid_modification m on (m.id=b.modification_id)
-            inner join biogrid_publication p on (b.publication_id=p.id)
-            inner join biogrid_experimental_system es on (b.experimental_system_id=es.id)
-        where
-            (ia.uniprot = '{subject_uniprot}' and ib.uniprot = '{object_uniprot}') and
-            m.modification != 'No Modification'
-        group by
-            ia.symbol,
-            ia.uniprot,
-            ia.taxonomy_id,
-            m.modification,
-            ib.symbol,
-            ib.uniprot,
-            ib.taxonomy_id,
-            es.experimental_system"""
-
         b = biogrid.Biogrid
-        ia = biogrid.Interactor
-        ib = biogrid.Interactor
+        ia = aliased(biogrid.Interactor)
+        ib = aliased(biogrid.Interactor)
         m = biogrid.Modification
         p = biogrid.Publication
         es = biogrid.ExperimentalSystem
@@ -553,6 +518,10 @@ class BioGrid(odb_meta.Graph):
 
         counter = 0
         self.clear_edges()
+
+        if_func = func.iif if self.engine.dialect.name == "sqlite" else func.IF
+
+        logging.info("Update BioGRID")
 
         for e in tqdm(
             uniprot_modification_pairs,
@@ -571,10 +540,8 @@ class BioGrid(odb_meta.Graph):
                     uniprot=e["object_uniprot"],
                 )
 
-                sql = sql_temp.format(
-                    subject_uniprot=e["subject_uniprot"],
-                    object_uniprot=e["object_uniprot"],
-                )
+                subject_uniprot = e["subject_uniprot"]
+                object_uniprot = e["object_uniprot"]
 
                 sql = (
                     select(
@@ -586,24 +553,22 @@ class BioGrid(odb_meta.Graph):
                         ib.uniprot.label("object_uniprot"),
                         ib.taxonomy_id.label("object_taxonomy_id"),
                         es.experimental_system,
+                        func.group_concat(b.biogrid_id.distinct()).label("biogrid_ids"),
                         func.group_concat(
-                            b.biogrid_id.distinct().label("biogrid_ids"),
-                            func.group_concat(
-                                func.IF(p.source == "PUBMED", cast(p.source_identifier, Integer), None).distinct()
-                            ).label("pmids"),
-                        ),
-                        p.source_identifier.count().label("num_pubs"),
-                        func.group_concat(func.IF(p.source == "DOI", cast(p.source_identifier, Integer), None)).label(
-                            "dois"
-                        ),
+                            if_func(p.source == "PUBMED", cast(p.source_identifier, Integer), None).distinct()
+                        ).label("pmids"),
+                        func.count(p.source_identifier).label("num_pubs"),
+                        func.group_concat(
+                            if_func(p.source == "DOI", cast(p.source_identifier, Integer), None).distinct()
+                        ).label("dois"),
                     )
-                    .join(ia)
-                    .join(ib)
-                    .join(m)
-                    .join(p)
-                    .join(es)
-                    .where(ia.uniprot == e["subject_uniprot"])
-                    .where(ib.uniprot == e["object_uniprot"])
+                    .join(ia, b.biogrid_a_id == ia.biogrid_id)
+                    .join(ib, b.biogrid_b_id == ib.biogrid_id)
+                    .join(m, m.id == b.modification_id)
+                    .join(p, b.publication_id == p.id)
+                    .join(es, b.experimental_system_id == es.id)
+                    .where(ia.uniprot == subject_uniprot)
+                    .where(ib.uniprot == object_uniprot)
                     .where(m.modification != "No Modification")
                 )
 
