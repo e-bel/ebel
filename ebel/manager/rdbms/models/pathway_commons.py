@@ -93,7 +93,7 @@ class Pmid(Base):
     __tablename__ = "pathway_commons_pmid"
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    pmid: Mapped[int] = mapped_column(index=True)
+    pmid: Mapped[int] = mapped_column(BigInteger, index=True)
 
     pathway_commons_id: Mapped[int] = mapped_column(ForeignKey("pathway_commons.id"), index=True)
     pathway_commons: Mapped[List[PathwayCommons]] = relationship("PathwayCommons", back_populates="pmids")
