@@ -104,9 +104,6 @@ class Graph(abc.ABC):
             else:
                 create_database(self.engine.url)
 
-        if not database_exists(self.engine.url):
-            create_database(self.engine.url)
-
     def __config_params_check(self, overwrite_config: bool = False):
         """Go through passed/available configuration params."""
         # Set the client
