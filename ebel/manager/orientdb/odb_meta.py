@@ -23,7 +23,7 @@ import xmltodict
 from pyorientdb import OrientDB, orient
 from pyorientdb.exceptions import PyOrientCommandException, PyOrientIndexException, PyOrientSecurityAccessException
 from pyorientdb.otypes import OrientRecord
-from sqlalchemy import text
+from sqlalchemy import text, select, func
 from sqlalchemy.sql.schema import Table
 from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
@@ -34,6 +34,7 @@ from ebel.cache import set_mysql_interactive
 from ebel.config import get_config_as_dict, get_config_value, write_to_config
 from ebel.constants import DEFAULT_ODB, RID
 from ebel.manager.orientdb import urls as default_urls
+from ebel.manager.rdbms.models.ensembl import Ensembl as ens
 from ebel.manager.orientdb.odb_structure import Edge, Generic, Node, OClass, OIndex, OProperty
 from ebel.tools import BelRdb, chunks, get_file_path, get_standard_name
 
@@ -97,12 +98,13 @@ class Graph(abc.ABC):
 
         conn = get_config_value("DATABASE", "sqlalchemy_connection_string")
 
-        if not (conn or database_exists(self.engine.url)):
-            if str(self.engine.url).startswith("mysql"):
+        if not conn:
+            dialect = self.session.bind.dialect.name
+            if dialect == "mysql":
                 set_mysql_interactive()
 
-            else:
-                create_database(self.engine.url)
+        if not database_exists(self.engine.url):
+            create_database(self.engine.url)
 
     def __config_params_check(self, overwrite_config: bool = False):
         """Go through passed/available configuration params."""
@@ -819,8 +821,9 @@ class Graph(abc.ABC):
         if self.tables_base:
             for table_name, table in self.tables_base.metadata.tables.items():
                 if self.table_exists(table_name):
-                    sql = f"Select count(*) from `{table_name}`"
-                    numbers[table_name] = self.session.execute(text(sql)).fetchone()[0]
+                    # sql = f"Select count(*) from `{table_name}`"
+                    sql = select(func.count(table_name))
+                    numbers[table_name] = self.session.execute(sql).fetchone()[0]
                 else:
                     numbers[table_name] = 0
         elif self.generic_classes:
@@ -1320,36 +1323,57 @@ class Graph(abc.ABC):
         gene_rids = defaultdict(list)
         sqls = dict()
 
-        sqls[
-            "mapped"
-        ] = f"""Select symbol
-                            from ensembl
-                            where
-                                start < {position} and
-                                stop > {position} and
-                                chromosome='{chromosome}' group by symbol"""
+        # sqls[
+        #     "mapped"
+        # ] = f"""Select symbol
+        #                     from ensembl
+        #                     where
+        #                         start < {position} and
+        #                         stop > {position} and
+        #                         chromosome='{chromosome}' group by symbol"""
+        sqls["mapped"] = (
+            select(ens.symbol)
+            .where(ens.start < position)
+            .where(ens.stop > position)
+            .where(ens.chromosome == chromosome)
+            .group_by(ens.symbol)
+        )
 
-        sqls[
-            "downstream"
-        ] = f"""Select symbol
-                            from ensembl
-                            where
-                                start > {position} and
-                                chromosome='{chromosome}'
-                            order by start limit 1"""
+        # sqls[
+        #     "downstream"
+        # ] = f"""Select symbol
+        #                     from ensembl
+        #                     where
+        #                         start > {position} and
+        #                         chromosome='{chromosome}'
+        #                     order by start limit 1"""
+        sqls["downstream"] = (
+            select(ens.symbol)
+            .where(ens.start > position)
+            .where(ens.chromosome == chromosome)
+            .limit(1)
+            .order_by(ens.start.asc())
+        )
 
-        sqls[
-            "upstream"
-        ] = f"""Select symbol
-                            from ensembl
-                            where
-                                stop < {position} and
-                                chromosome='{chromosome}'
-                            order by stop desc limit 1"""
+        # sqls[
+        #     "upstream"
+        # ] = f"""Select symbol
+        #                     from ensembl
+        #                     where
+        #                         stop < {position} and
+        #                         chromosome='{chromosome}'
+        #                     order by stop desc limit 1"""
+        sqls["upstream"] = (
+            select(ens.symbol)
+            .where(ens.stop < position)
+            .where(ens.chromosome == chromosome)
+            .limit(1)
+            .order_by(ens.stop.desc())
+        )
 
         for gene_type, sql in sqls.items():
             if gene_type in gene_types:
-                results = self.session.execute(text(sql))
+                results = self.session.execute(sql)
                 for (symbol,) in results.fetchall():
                     bel = f'g(HGNC:"{symbol}")'
                     data = {

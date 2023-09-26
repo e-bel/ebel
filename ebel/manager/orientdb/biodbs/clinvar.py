@@ -19,7 +19,6 @@ logger = logging.getLogger(__name__)
 Snp = namedtuple(
     "Snp",
     (
-        "keyword",
         "phenotype",
         "rs_number",
         "hgnc_id",
@@ -180,13 +179,12 @@ class ClinVar(odb_meta.Graph):
                     cv.start.label("position"),
                     cv.clinical_significance,
                 )
-                .join(cv, cp.clinvars)
+                .join(cp, cv.phenotypes)
                 .where(cv.rs_db_snp != -1)
                 .where(cp.phenotype.like(f"%{kwd}%"))
             )
-            print(sql)
-            rows = self.session.execute(sql)
-            results[kwd] = [Snp(*x) for x in rows.fetchall()]
+            rows = self.session.execute(sql).fetchall()
+            results[kwd] = [Snp(*x) for x in rows]
 
         return results
 
@@ -268,25 +266,4 @@ class ClinVar(odb_meta.Graph):
 
 if __name__ == "__main__":
     c = ClinVar()
-    cv = clinvar.Clinvar
-    cp = clinvar.ClinvarPhenotype
-    kwd = "Depression"
-
-    sql = (
-        select(
-            cp.phenotype,
-            cv.rs_db_snp.label("rs_number"),
-            cv.hgnc_id,
-            cv.chromosome,
-            cv.start.label("position"),
-            cv.clinical_significance,
-        )
-        .join(cp, cv.phenotypes)
-        .where(cv.rs_db_snp != -1)
-        .where(cp.phenotype.like(f"%{kwd}%"))
-    )
-    rows = c.session.execute(sql)
-    amt = 0
-    for x in rows:
-        amt += 1
-    print(amt)
+    c.update()

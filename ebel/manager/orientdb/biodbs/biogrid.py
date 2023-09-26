@@ -475,13 +475,13 @@ class BioGrid(odb_meta.Graph):
                     ib.uniprot.label("object_uniprot"),
                     ib.taxonomy_id.label("object_taxonomy_id"),
                 )
+                .select_from(b)
                 .join(ia, b.biogrid_a_id == ia.biogrid_id)
                 .join(ib, b.biogrid_b_id == ib.biogrid_id)
                 .join(m, b.modification_id == m.id)
             )
             .where(m.modification == "No Modification")
             .where(ia.uniprot.isnot(None))
-            .where(ib.uniprot.isnot(None))
             .group_by(ia.symbol, ia.uniprot, ia.taxonomy_id, ib.symbol, ib.uniprot, ib.taxonomy_id)
         )
         results = self.session.execute(sql).fetchall()
@@ -559,7 +559,7 @@ class BioGrid(odb_meta.Graph):
                         func.group_concat(
                             if_func(p.source == "PUBMED", cast(p.source_identifier, Integer), None).distinct()
                         ).label("pmids"),
-                        func.count(p.source_identifier).label("num_pubs"),
+                        func.count(p.source_identifier.distinct()).label("num_pubs"),
                         func.group_concat(
                             if_func(p.source == "DOI", cast(p.source_identifier, Integer), None).distinct()
                         ).label("dois"),
@@ -574,32 +574,35 @@ class BioGrid(odb_meta.Graph):
                     .where(m.modification != "No Modification")
                 )
 
-                for row in self.session.execute(sql).fetchall():
-                    row_dict = row._asdict()
-                    be = BioGridEdge(subject_rid=subj_pure_rid, object_rid=obj_pure_rid, **row_dict)
-                    edge_value_dict = be.get_edge_value_dict()
+                results = self.session.execute(sql).fetchall()
 
-                    if be.modConfig.bg_mod_name == "Proteolytic Processing":
-                        self.create_edge(
-                            "decreases_bg",
-                            from_rid=subj_pure_rid,
-                            to_rid=obj_pure_rid,
-                            value_dict=edge_value_dict,
-                        )
-                        counter += 1
-                    else:
-                        obj_pmod_value_dict = be.obj.get_pmod_protein_as_value_dict()
-                        pmod_protein_rid = self.node_exists("protein", obj_pmod_value_dict, check_for="bel")
-                        if not pmod_protein_rid:
-                            pmod_protein_rid = self.get_create_rid("protein", obj_pmod_value_dict, check_for="bel")
-                            self.create_edge("has_modified_protein", obj_pure_rid, pmod_protein_rid)
-                            pmod_rid = self.insert_record("pmod", be.get_pmod_as_value_dict())
-                            self.create_edge("has__pmod", pmod_protein_rid, pmod_rid)
-                        self.create_edge(
-                            be.edge_name,
-                            subj_pure_rid,
-                            pmod_protein_rid,
-                            edge_value_dict,
-                        )
-                        counter += 1
+                for row in results:
+                    if row[0] is not None:  # No results for uniprot ID combo
+                        row_dict = row._asdict()  # If no modification then no results were returned
+                        be = BioGridEdge(subject_rid=subj_pure_rid, object_rid=obj_pure_rid, **row_dict)
+                        edge_value_dict = be.get_edge_value_dict()
+
+                        if be.modConfig.bg_mod_name == "Proteolytic Processing":
+                            self.create_edge(
+                                "decreases_bg",
+                                from_rid=subj_pure_rid,
+                                to_rid=obj_pure_rid,
+                                value_dict=edge_value_dict,
+                            )
+                            counter += 1
+                        else:
+                            obj_pmod_value_dict = be.obj.get_pmod_protein_as_value_dict()
+                            pmod_protein_rid = self.node_exists("protein", obj_pmod_value_dict, check_for="bel")
+                            if not pmod_protein_rid:
+                                pmod_protein_rid = self.get_create_rid("protein", obj_pmod_value_dict, check_for="bel")
+                                self.create_edge("has_modified_protein", obj_pure_rid, pmod_protein_rid)
+                                pmod_rid = self.insert_record("pmod", be.get_pmod_as_value_dict())
+                                self.create_edge("has__pmod", pmod_protein_rid, pmod_rid)
+                            self.create_edge(
+                                be.edge_name,
+                                subj_pure_rid,
+                                pmod_protein_rid,
+                                edge_value_dict,
+                            )
+                            counter += 1
         return counter

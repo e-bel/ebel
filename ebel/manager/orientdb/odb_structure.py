@@ -462,8 +462,8 @@ bel_edges: Tuple[Edge, ...] = (
 
 bel_indices = (
     OIndex(bel, ("bel",), OIndexType.NOTUNIQUE_HASH_INDEX),
-    OIndex(bel, ("involved_genes",), OIndexType.NOTUNIQUE_HASH_INDEX),
-    OIndex(bel, ("involved_other",), OIndexType.NOTUNIQUE_HASH_INDEX),
+    # OIndex(bel, ("involved_genes",), OIndexType.NOTUNIQUE_HASH_INDEX),
+    # OIndex(bel, ("involved_other",), OIndexType.NOTUNIQUE_HASH_INDEX),
     OIndex(bel_relation, ("evidence",), OIndexType.NOTUNIQUE_HASH_INDEX),
     OIndex(protein, ("uniprot",), OIndexType.NOTUNIQUE_HASH_INDEX),
     OIndex(bel_relation, ("annotation",), OIndexType.DICTIONARY),

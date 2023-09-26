@@ -160,9 +160,15 @@ class StringDb(odb_meta.Graph):
 
     def get_stringdb_action_hgnc_set(self):
         """Get unique HGNC symbols from stringdb_actions table."""
-        sql = f"""(Select distinct( symbol1 ) from {self.table_action})
-                union (Select distinct( symbol2 ) from {self.table_action})"""
-        return set([x[0] for x in self.session.execute(text(sql)).fetchall()])
+        # sql = f"""(Select distinct( symbol1 ) from {self.table_action})
+        #         union (Select distinct( symbol2 ) from {self.table_action})"""
+
+        stmt1 = select(stringdb.StringDbAction.symbol1).distinct()
+        stmt2 = select(stringdb.StringDbAction.symbol2).distinct()
+        sql = stmt1.union(stmt2).alias("combined")
+        print(sql)
+
+        return set([x[0] for x in self.session.execute(sql).fetchall()])
 
     def update_interactions(self) -> Dict[str, int]:
         """Update the edges with StringDB metadata."""

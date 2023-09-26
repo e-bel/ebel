@@ -278,9 +278,9 @@ class Kegg(odb_meta.Graph):
             "phosphorylation": ("pho", "increases", BelPmod.PHO),
             "ubiquitination": ("ubi", "increases", BelPmod.UBI),
         }
-        post_translational_modifications = ",".join([f"'{x}'" for x in pmods.keys()])
+        # post_translational_modifications = ",".join([f"'{x}'" for x in pmods.keys()])
 
-        species_ids = ",".join([f"'{x}'" for x in self.species])
+        # species_ids = ",".join([f"'{x}'" for x in self.species])
 
         # sql_temp = f"""Select
         #         interaction_type,
@@ -317,8 +317,8 @@ class Kegg(odb_meta.Graph):
                     kg.kegg_species_id,
                 )
                 .where(or_(kg.gene_symbol_a == symbol, kg.gene_symbol_b == symbol))
-                .where(kg.kegg_species_id.in_(species_ids))
-                .where(kg.interaction_type.in_(post_translational_modifications))
+                .where(kg.kegg_species_id.in_(self.species))
+                .where(kg.interaction_type.in_(list(pmods.keys())))
                 .group_by(
                     kg.interaction_type,
                     kg.pathway_identifier,
@@ -387,3 +387,8 @@ class Kegg(odb_meta.Graph):
         self.hgnc.update_bel()
 
         return inserted
+
+
+if __name__ == "__main__":
+    k = Kegg()
+    k.update()
