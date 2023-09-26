@@ -47,7 +47,7 @@ class ClinicalTrials(odb_meta.Graph):
 
     def add_link_to_drugbank(self, data_dict: dict, trial_rid: str):
         """Create LINKSET in drugbank table for associated clinical trials."""
-        # Can't check synonyms untils OrientDB 3.0, need to be able to index on collections
+        # Can't check synonyms until OrientDB 3.0, need to be able to index on collections
         # update_sql = 'UPDATE drugbank ADD clinical_trials = {} WHERE name = "{}" OR "{}" in synonyms'
         # TODO index drugbank.synonyms
 

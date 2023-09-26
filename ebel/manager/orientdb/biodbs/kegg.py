@@ -9,6 +9,7 @@ from typing import Dict
 import pandas as pd
 import requests
 from pyorientdb import OrientDB
+from sqlalchemy import select, or_
 from tqdm import tqdm
 
 from ebel.config import get_config_value
@@ -281,29 +282,53 @@ class Kegg(odb_meta.Graph):
 
         species_ids = ",".join([f"'{x}'" for x in self.species])
 
-        sql_temp = f"""Select
-                interaction_type,
-                pathway_identifier,
-                pathway_name,
-                gene_symbol_a,
-                gene_symbol_b,
-                kegg_species_id
-            from
-                kegg
-            where
-                (gene_symbol_a='{{symbol}}' or gene_symbol_a='{{symbol}}') and
-                kegg_species_id in ({species_ids}) and
-                interaction_type in ({{interaction_types}})
-            group by
-                interaction_type,
-                pathway_identifier,
-                pathway_name,
-                gene_symbol_a,
-                gene_symbol_b,
-                kegg_species_id"""
+        # sql_temp = f"""Select
+        #         interaction_type,
+        #         pathway_identifier,
+        #         pathway_name,
+        #         gene_symbol_a,
+        #         gene_symbol_b,
+        #         kegg_species_id
+        #     from
+        #         kegg
+        #     where
+        #         (gene_symbol_a='{{symbol}}' or gene_symbol_a='{{symbol}}') and
+        #         kegg_species_id in ({species_ids}) and
+        #         interaction_type in ({{interaction_types}})
+        #     group by
+        #         interaction_type,
+        #         pathway_identifier,
+        #         pathway_name,
+        #         gene_symbol_a,
+        #         gene_symbol_b,
+        #         kegg_species_id"""
 
+        kg = kegg.Kegg
         for symbol, rid in tqdm(symbol_rids_dict.items(), desc="Update KEGG posttranslational modifications"):
-            sql = sql_temp.format(symbol=symbol, interaction_types=post_translational_modifications)
+            # sql = sql_temp.format(symbol=symbol, interaction_types=post_translational_modifications)
+
+            sql = (
+                select(
+                    kg.interaction_type,
+                    kg.pathway_identifier,
+                    kg.pathway_name,
+                    kg.gene_symbol_a,
+                    kg.gene_symbol_b,
+                    kg.kegg_species_id,
+                )
+                .where(or_(kg.gene_symbol_a == symbol, kg.gene_symbol_b == symbol))
+                .where(kg.kegg_species_id.in_(species_ids))
+                .where(kg.interaction_type.in_(post_translational_modifications))
+                .group_by(
+                    kg.interaction_type,
+                    kg.pathway_identifier,
+                    kg.pathway_name,
+                    kg.gene_symbol_a,
+                    kg.gene_symbol_b,
+                    kg.kegg_species_id,
+                )
+            )
+
             df = pd.read_sql(sql, self.engine)
             keys = (
                 "interaction_type",

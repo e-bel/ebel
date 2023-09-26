@@ -8,7 +8,7 @@ from typing import Dict, Optional
 
 import numpy as np
 import pandas as pd
-from pyorientdb import OrientDB
+from pyorientdb import OrientDB, OrientRecord
 from sqlalchemy import select
 from tqdm import tqdm
 
@@ -267,26 +267,29 @@ class Hgnc(odb_meta.Graph):
             location_dict = {"unknown_schema": location}
         return location_dict
 
-    def get_bel_symbols_without_hgnc_link(self):
+    def get_bel_symbols_without_hgnc_link(self) -> set:
         """Return set of all gene symbols in database without a link to HGNC."""
         sql_symbols = "Select distinct(name) as symbol from bio_object where namespace='HGNC' and hgnc IS NULL"
         return {x.oRecordData["symbol"] for x in self.execute(sql_symbols)}
 
-    def get_bel_symbols_all(self):
+    def get_bel_symbols_all(self) -> set:
         """Return set of all gene symbols in database."""
         sql_symbols = "Select distinct(name) as symbol from bio_object where namespace='HGNC'"
         return {x.oRecordData["symbol"] for x in self.execute(sql_symbols)}
 
-    def get_correct_symbol(self, symbol: str):
+    def get_correct_symbol(self, symbol: str) -> str:
         """Checks if symbol is valid otherwise checks previsous symbols."""
         symbol_query = select(HgncDb).where(HgncDb.symbol == symbol)
         result_in_symbol = self.session.execute(symbol_query).first()
         if not result_in_symbol:
             result_in_prev_symbol = self.session.query(PrevSymbol).filter(PrevSymbol.prev_symbol == symbol).first()
+
             if result_in_prev_symbol:
                 symbol = result_in_prev_symbol.hgnc.symbol
+
             else:
                 symbol = None
+
         return symbol
 
     def correct_wrong_symbol(self, symbol, bel_symbols_all: set):
@@ -337,7 +340,7 @@ class Hgnc(odb_meta.Graph):
         location: str,
         hgnc_symbol: str,
         suggested_corrections: str,
-    ) -> int:
+    ) -> OrientRecord:
         """Update genes in OrientDB and returns number of updates."""
         suggest = (
             ", suggested_corrections={{'wrong name': {}}}".format(suggested_corrections)
@@ -358,7 +361,7 @@ class Hgnc(odb_meta.Graph):
         )
         return self.execute(sql)[0]
 
-    def update_rna(self, hgnc_rid: str, label: str, hgnc_symbol: str, suggested_corrections: str) -> int:
+    def update_rna(self, hgnc_rid: str, label: str, hgnc_symbol: str, suggested_corrections: str) -> OrientRecord:
         """Update RNAs in OrientDB and returns number of updates."""
         suggest = (
             ", suggested_corrections={{'wrong name': {}}}".format(suggested_corrections)
@@ -375,7 +378,7 @@ class Hgnc(odb_meta.Graph):
         )
         return self.execute(sql)[0]
 
-    def update_protein(self, hgnc_rid: str, label: str, hgnc_symbol: str, suggested_corrections: str) -> int:
+    def update_protein(self, hgnc_rid: str, label: str, hgnc_symbol: str, suggested_corrections: str) -> OrientRecord:
         """Update proteins in OrientDB and returns number of updates."""
         suggest = (
             ", suggested_corrections={{'wrong name': {}}}".format(suggested_corrections)

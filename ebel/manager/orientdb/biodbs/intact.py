@@ -154,46 +154,24 @@ class IntAct(odb_meta.Graph):
 
         result = self.session.execute(sql).fetchone()
         taxid_to_namespace = {9606: "HGNC", 10090: "MGI", 10116: "RGD"}
+
         if result:
             name, taxid = result
             namespace = taxid_to_namespace.get(taxid, "UNIPROT")
             return_value = (namespace, name)
+
         else:
             if self.session.query(uniprot.Uniprot).filter(uniprot.Uniprot.accession == uniprot_accession).first():
                 return_value = ("UNIPROT", uniprot_accession)
+
         return return_value
 
     def update_interactions(self) -> int:
         """Update intact interactions to graph."""
-        uniprot = UniProt(self.client)
-        uniprot.update()
+        up = UniProt(self.client)
+        up.update()
 
-        uniprot_rid_dict = uniprot.get_pure_uniprot_rid_dict_in_bel_context()
-
-        # sql_temp = """SELECT
-        #     int_a_uniprot_id,
-        #     int_b_uniprot_id,
-        #     pmid,
-        #     interaction_ids,
-        #     interaction_type,
-        #     interaction_type_psimi_id,
-        #     detection_method,
-        #     detection_method_psimi_id,
-        #     confidence_value
-        # FROM
-        #     intact
-        # WHERE
-        #     int_a_uniprot_id = '{uniprot_accession}' or int_b_uniprot_id = '{uniprot_accession}'
-        # GROUP BY
-        #     int_a_uniprot_id,
-        #     int_b_uniprot_id,
-        #     pmid,
-        #     interaction_ids,
-        #     interaction_type,
-        #     interaction_type_psimi_id,
-        #     detection_method,
-        #     detection_method_psimi_id,
-        #     confidence_value"""
+        uniprot_rid_dict = up.get_pure_uniprot_rid_dict_in_bel_context()
 
         updated = 0
 
@@ -201,7 +179,6 @@ class IntAct(odb_meta.Graph):
         it = intact.Intact
 
         for uniprot_accession in tqdm(uniprot_accessions, desc="Update IntAct interactions"):
-            # sql = sql_temp.format(uniprot_accession=uniprot_accession)
             sql = (
                 select(
                     it.int_a_uniprot_id,

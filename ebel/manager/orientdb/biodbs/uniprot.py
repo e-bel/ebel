@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple, Union
 import pandas as pd
 from lxml.etree import iterparse
 from pyorientdb import OrientDB
-from sqlalchemy import text
+from sqlalchemy import text, select
 from tqdm import tqdm
 
 from ebel.defaults import default_tax_ids
@@ -309,11 +309,17 @@ class UniProt(odb_meta.Graph):
         """
         # TODO: This is in general a dangerous method because it selects the first accession number, but there could
         # be more than one
+        # sql = (
+        #     f"Select accession, recommended_name from uniprot as u inner join uniprot_gene_symbol as gs "
+        #     f'on (u.id=gs.uniprot_id) where u.taxid={taxid} and gs.symbol="{gene_symbol}" limit 1'
+        # )
         sql = (
-            f"Select accession, recommended_name from uniprot as u inner join uniprot_gene_symbol as gs "
-            f'on (u.id=gs.uniprot_id) where u.taxid={taxid} and gs.symbol="{gene_symbol}" limit 1'
+            select(up.Uniprot.accession, up.Uniprot.recommended_name)
+            .join(up.GeneSymbol)
+            .where(up.Uniprot.taxid == taxid)
+            .where(up.GeneSymbol.symbol == gene_symbol)
         )
-        results = self.session.execute(text(sql))
+        results = self.session.execute(sql)
         return results.fetchone() if results else None
 
     def _update_proteins(self, namespace, taxid) -> int:
@@ -339,33 +345,36 @@ class UniProt(odb_meta.Graph):
 
     def _get_recname_taxid_by_accession_from_uniprot_api(self, accession) -> Tuple[str, int]:
         """Fetch uniprot entry by accession and adds to the database. Returns recommended name."""
-        sql = f"Select recommended_name,taxid from uniprot where accession='{accession}' limit 1"
-        result = self.session.execute(text(sql)).fetchone()
+        # sql = f"Select recommended_name,taxid from uniprot where accession='{accession}' limit 1"
+        sql = select(up.Uniprot.recommended_name, up.Uniprot.taxid).where(up.Uniprot.accession == accession)
+        result = self.session.execute(sql).fetchone()
         if result:
             return result
 
     def _update_uniprot_proteins(self) -> int:
         """Update all proteins using UNIPROT as namespace. Returns number of updated proteins."""
         updated = 0
-        sql_temp = "Select recommended_name, taxid from uniprot where accession='{}' limit 1"
+
         sql_uniprot = 'SELECT distinct(name) as accession from protein WHERE namespace="UNIPROT"'
         sql_update = (
             'Update protein set uniprot = name, label = "{}", species = {} '
             'where namespace = "UNIPROT" and name = "{}"'
         )
+
         for protein in self.query(sql_uniprot).itertuples(index=False):
-            sql = sql_temp.format(protein.accession)
-            found = self.session.execute(text(sql)).fetchone()
+            found = self._get_recname_taxid_by_accession_from_uniprot_api(protein.accession)
             if found:
                 recommended_name, taxid = found
                 num_updated = self.execute(sql_update.format(recommended_name, taxid, protein.accession))[0]
                 updated += num_updated
+
             else:
                 recname_taxid = self._get_recname_taxid_by_accession_from_uniprot_api(protein.accession)
                 if recname_taxid:
                     recommended_name, taxid = recname_taxid
                     num_updated = self.execute(sql_update.format(recommended_name, taxid, protein.accession))[0]
                     updated += num_updated
+
         return updated
 
     def __read_linked_tables(

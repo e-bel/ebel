@@ -183,35 +183,47 @@ class DisGeNet(odb_meta.Graph):
             "downstream": "upstream",
             "upstream": "downstream",
         }
-        # TODO: replace SQL with SQL Alchemy statement
-        sql_temp = """Select
-                snp_id,
-                chromosome,
-                position,
-                disease_name,
-                pmid,
-                score,
-                source
-            FROM
-                disgenet_variant v INNER JOIN
-                disgenet_source s on (v.source_id=s.id) INNER JOIN
-                disgenet_disease d on (v.disease_id=d.disease_id)
-            WHERE
-                disease_name like '%%{}%%' and
-                source!='BEFREE'
-            GROUP BY
-                snp_id,
-                chromosome,
-                position,
-                disease_name,
-                pmid,
-                score,
-                source"""
+        # # TODO: replace SQL with SQL Alchemy statement
+        # sql_temp = """Select
+        #         snp_id,
+        #         chromosome,
+        #         position,
+        #         disease_name,
+        #         pmid,
+        #         score,
+        #         source
+        #     FROM
+        #         disgenet_variant v INNER JOIN
+        #         disgenet_source s on (v.source_id=s.id) INNER JOIN
+        #         disgenet_disease d on (v.disease_id=d.disease_id)
+        #     WHERE
+        #         disease_name like '%%{}%%' and
+        #         source!='BEFREE'
+        #     GROUP BY
+        #         snp_id,
+        #         chromosome,
+        #         position,
+        #         disease_name,
+        #         pmid,
+        #         score,
+        #         source"""
+
+        dv = disgenet.DisgenetVariant
+        ds = disgenet.DisgenetSource
+        dd = disgenet.DisgenetDisease
 
         results = dict()
         for kwd in self.disease_keywords:
-            sql = sql_temp.format(kwd)
-            rows = self.session.execute(text(sql))
+            sql = (
+                select(dv.snp_id, dv.chromosome, dv.position, dd.disease_name, dv.pmid, dv.score, ds.source)
+                .join(ds)
+                .join(dd)
+                .where(dd.disease_name.like(f"%{kwd}%"))
+                .where(ds.source != "BEFREE")
+                .group_by(dv.snp_id, dv.chromosome, dv.position, dd.disease_name, dv.pmid, dv.score, ds.source)
+            )
+
+            rows = self.session.execute(sql)
             results[kwd] = rows
 
         inserted = 0

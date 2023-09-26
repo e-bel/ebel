@@ -58,19 +58,6 @@ class MirTarBase(odb_meta.Graph):
         self.clear_edges()
         df_symbol_rid = self.get_pure_symbol_rid_df_in_bel_context(class_name="rna", namespace="HGNC")
 
-        # sql = f"""Select
-        #         mi_rna,
-        #         target_gene as symbol,
-        #         support_type,
-        #         references_pmid as pmid,
-        #         experiments
-        #     from
-        #         {mirtarbase.Mirtarbase.__tablename__}
-        #     where
-        #         species_mi_rna='Homo sapiens' and
-        #         species_target_gene='Homo sapiens' and
-        #         support_type in ()"""
-
         mtb = mirtarbase.Mirtarbase
         sql = (
             select(

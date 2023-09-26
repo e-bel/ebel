@@ -7,13 +7,13 @@ from typing import Dict, Optional
 
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text
+from sqlalchemy import text, select, or_
 from tqdm import tqdm
 
 from ebel.constants import RID
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import OFFSIDES, ONSIDES
-from ebel.manager.rdbms.models import nsides
+from ebel.manager.rdbms.models import nsides, drugbank
 from ebel.tools import get_file_path
 
 logger = logging.getLogger(__name__)
@@ -143,25 +143,25 @@ class Nsides(odb_meta.Graph):
         self.delete_nodes_with_no_edges("side_effect")
         self.delete_nodes_with_no_edges("drug")
 
-        # TODO: Translate to sqlalchemy query
-        sql_temp = """Select
-            o.condition_meddra_id,
-            o.condition_concept_name,
-            o.prr,
-            o.mean_reporting_frequency
-        from
-            drugbank as d inner join
-            drugbank_external_identifier as dei on (d.id=dei.drugbank_id) inner join
-            nsides as o on (dei.identifier=o.drug_rxnorn_id)
-        where
-            d.drugbank_id='{}' and resource='RxCUI'
-            and (mean_reporting_frequency>=0.01 OR mean_reporting_frequency is NULL)
-        group by
-            o.condition_meddra_id,
-            o.condition_concept_name,
-            o.prr,
-            o.mean_reporting_frequency
-        """
+        # # TODO: Translate to sqlalchemy query
+        # sql_temp = """Select
+        #     o.condition_meddra_id,
+        #     o.condition_concept_name,
+        #     o.prr,
+        #     o.mean_reporting_frequency
+        # from
+        #     drugbank as d inner join
+        #     drugbank_external_identifier as dei on (d.id=dei.drugbank_id) inner join
+        #     nsides as o on (dei.identifier=o.drug_rxnorn_id)
+        # where
+        #     d.drugbank_id='{}' and resource='RxCUI'
+        #     and (mean_reporting_frequency>=0.01 OR mean_reporting_frequency is NULL)
+        # group by
+        #     o.condition_meddra_id,
+        #     o.condition_concept_name,
+        #     o.prr,
+        #     o.mean_reporting_frequency
+        # """
 
         drugbank_ids = self.query_class("drug", columns=["drugbank_id"], drugbank_id="notnull")
         drugbank_id_rids = {d["drugbank_id"]: d[RID] for d in drugbank_ids}
@@ -171,9 +171,27 @@ class Nsides(odb_meta.Graph):
 
         updated = 0
 
+        d = drugbank.Drugbank
+        dei = drugbank.ExternalIdentifier
+        o = nsides.Nsides
+
         for drugbank_id, drugbank_rid in tqdm(drugbank_id_rids.items(), desc=f"Update {self.biodb_name.upper()}"):
-            sql = sql_temp.format(drugbank_id)
-            for r in self.session.execute(text(sql)):
+            # sql = sql_temp.format(drugbank_id)
+            sql = (
+                (
+                    select(o.condition_meddra_id, o.condition_concept_name, o.prr, o.mean_reporting_frequency)
+                    .join(dei, dei.identifier == o.drug_rxnorn_id)
+                    .join(d, d.id == dei.drugbank_id)
+                )
+                .where(d.drugbank_id == drugbank_id)
+                .where(dei.resource == "RxCUI")
+                .where(or_(o.mean_reporting_frequency >= 0.01, o.mean_reporting_frequency.is_(None)))
+                .group_by(o.condition_meddra_id, o.condition_concept_name, o.prr, o.mean_reporting_frequency)
+            )
+
+            results = self.session.execute(sql)
+
+            for r in results:
                 (
                     condition_meddra_id,
                     condition_concept_name,

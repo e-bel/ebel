@@ -5,7 +5,7 @@ from typing import Dict, List
 
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text
+from sqlalchemy import text, select
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -166,25 +166,26 @@ class ClinVar(odb_meta.Graph):
         """Get a dictionary {'disease':[snp,snp,... ]} by disease names."""
         disease_keywords = get_disease_trait_keywords_from_config()
 
-        sql_temp = """Select
-            '{keyword}',
-            phenotype,
-            rs_db_snp as rs_number,
-            hgnc_id,
-            chromosome,
-            start as position,
-            clinical_significance
-                from clinvar c inner join
-                clinvar__phenotype cp on (c.id=cp.clinvar_id) inner JOIN
-                clinvar_phenotype p on (cp.clinvar_phenotype_id=p.id)
-            where
-                p.phenotype like '%%{keyword}%%'
-                and rs_db_snp != -1"""
+        cv = clinvar.Clinvar
+        cp = clinvar.ClinvarPhenotype
 
         results = dict()
         for kwd in disease_keywords:
-            sql = sql_temp.format(keyword=kwd)
-            rows = self.session.execute(text(sql))
+            sql = (
+                select(
+                    cp.phenotype,
+                    cv.rs_db_snp.label("rs_number"),
+                    cv.hgnc_id,
+                    cv.chromosome,
+                    cv.start.label("position"),
+                    cv.clinical_significance,
+                )
+                .join(cv, cp.clinvars)
+                .where(cv.rs_db_snp != -1)
+                .where(cp.phenotype.like(f"%{kwd}%"))
+            )
+            print(sql)
+            rows = self.session.execute(sql)
             results[kwd] = [Snp(*x) for x in rows.fetchall()]
 
         return results
@@ -205,6 +206,7 @@ class ClinVar(odb_meta.Graph):
             for snp in tqdm(rows, desc=f"Add has_X_snp_cv edges to BEL for {disease}"):
                 if snp.hgnc_id in hgnc_id_gene_rid_cache:
                     gene_mapped_rid = hgnc_id_gene_rid_cache[snp.hgnc_id]
+
                 else:
                     gene_mapped_rid = self._get_set_gene_rid(hgnc_id=snp.hgnc_id)
                     hgnc_id_gene_rid_cache[snp.hgnc_id] = gene_mapped_rid
@@ -214,7 +216,7 @@ class ClinVar(odb_meta.Graph):
                     value_dict = {
                         "clinical_significance": snp.clinical_significance,
                         "phenotype": snp.phenotype,
-                        "keyword": snp.keyword,
+                        "keyword": disease,
                     }
                     self.create_edge(
                         class_name="has_mapped_snp_cv",
@@ -262,3 +264,29 @@ class ClinVar(odb_meta.Graph):
             gene_rid = self.get_create_rid("gene", data, check_for="bel")
 
         return gene_rid
+
+
+if __name__ == "__main__":
+    c = ClinVar()
+    cv = clinvar.Clinvar
+    cp = clinvar.ClinvarPhenotype
+    kwd = "Depression"
+
+    sql = (
+        select(
+            cp.phenotype,
+            cv.rs_db_snp.label("rs_number"),
+            cv.hgnc_id,
+            cv.chromosome,
+            cv.start.label("position"),
+            cv.clinical_significance,
+        )
+        .join(cp, cv.phenotypes)
+        .where(cv.rs_db_snp != -1)
+        .where(cp.phenotype.like(f"%{kwd}%"))
+    )
+    rows = c.session.execute(sql)
+    amt = 0
+    for x in rows:
+        amt += 1
+    print(amt)

@@ -274,6 +274,7 @@ class Ncbi(odb_meta.Graph):
             "type_of_gene",
             "dbXrefs",
         }
+
         for df in tqdm(
             pd.read_csv(
                 file_path,
