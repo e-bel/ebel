@@ -265,8 +265,3 @@ class DisGeNet(odb_meta.Graph):
                 inserted += 1
 
         return inserted
-
-
-if __name__ == "__main__":
-    d = DisGeNet()
-    d.update()

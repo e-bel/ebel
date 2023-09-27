@@ -304,8 +304,3 @@ class PathwayCommons(odb_meta.Graph):
         pmids = [x.pmid for x in pc_obj.pmids]
         pathways = [pc_pathway_name_rid_dict[x.name] for x in pc_obj.pathway_names]
         return pathways, pmids, sources
-
-
-if __name__ == "__main__":
-    foo = PathwayCommons()
-    foo.update_interactions()

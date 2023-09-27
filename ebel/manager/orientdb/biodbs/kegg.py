@@ -387,8 +387,3 @@ class Kegg(odb_meta.Graph):
         self.hgnc.update_bel()
 
         return inserted
-
-
-if __name__ == "__main__":
-    k = Kegg()
-    k.update()

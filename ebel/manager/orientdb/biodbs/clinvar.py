@@ -262,8 +262,3 @@ class ClinVar(odb_meta.Graph):
             gene_rid = self.get_create_rid("gene", data, check_for="bel")
 
         return gene_rid
-
-
-if __name__ == "__main__":
-    c = ClinVar()
-    c.update()
