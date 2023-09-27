@@ -171,7 +171,7 @@ class Graph(abc.ABC):
             self.client.close()
             self.client = self.get_client()
             # print(command_str)
-            return self.client.command(command_str)
+            return self.execute(command_str)
 
     def set_configuration_parameters(self):
         """Set configuration for OrientDB database client instance using configuration file or passed params."""
@@ -359,7 +359,7 @@ class Graph(abc.ABC):
         class_name: str,
         limit: int = 0,
         skip: int = 0,
-        columns: Iterable[str] = None,
+        columns: Iterable[str] = [],
         with_rid=True,
         with_class=False,
         print_sql: bool = False,
@@ -406,7 +406,7 @@ class Graph(abc.ABC):
         if distinct and len(cols) == 1:
             sql_cols = "distinct({})".format(sql_cols)
 
-        sql_temp = "SELECT {sql_cols} FROM `{class_name}` {where} {group_by} {sql_limit} {sql_skip}"
+        sql_temp = "SELECT {sql_cols} FROM {class_name} {where} {group_by} {sql_limit} {sql_skip}"
 
         sql = sql_temp.format(
             sql_cols=sql_cols,
@@ -842,16 +842,21 @@ class Graph(abc.ABC):
         for column, value in params.items():
             if isinstance(value, (str, list, dict)):
                 if value == "notnull":
-                    where_list.append("`{}` IS NOT NULL".format(column))
+                    where_list.append("{} IS NOT NULL".format(column))
+
                 else:
-                    where_list.append("`{}` = {}".format(column, json.dumps(value)))
+                    where_list.append("{} = {}".format(column, json.dumps(value)))
+
             elif isinstance(value, (int, float)):
-                where_list.append("`{}` = {}".format(column, value))
+                where_list.append("{} = {}".format(column, value))
+
             elif value is None:
-                where_list.append("`{}` IS NULL".format(column))
+                where_list.append("{` IS NULL".format(column))
+
         where = ""
         if where_list:
             where = "WHERE " + " AND ".join(where_list)
+
         return where
 
     def get_number_of_class(self, class_name, distinct_column_name: str = None, **params):
@@ -947,7 +952,9 @@ class Graph(abc.ABC):
         if check_for:
             check_for = [check_for] if isinstance(check_for, str) else check_for
             check_for_dict = {k: v for k, v in check_for_dict.items() if k in check_for}
-        result = self.query_class(class_name=class_name, limit=1, print_sql=print_sql, **check_for_dict)
+        result = self.query_class(
+            class_name=class_name, columns=[], limit=1, with_rid=True, print_sql=print_sql, **check_for_dict
+        )
         if result:
             return result[0][RID]
 
@@ -987,8 +994,10 @@ class Graph(abc.ABC):
             check_for=check_for,
             print_sql=print_sql,
         )
+
         if not rid:
             rid = self.insert_record(class_name=class_name, value_dict=value_dict, print_sql=print_sql)
+
         return rid
 
     def update_correlative_edges(self) -> List[str]:
