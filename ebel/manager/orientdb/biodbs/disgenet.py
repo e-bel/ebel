@@ -223,7 +223,7 @@ class DisGeNet(odb_meta.Graph):
                 .group_by(dv.snp_id, dv.chromosome, dv.position, dd.disease_name, dv.pmid, dv.score, ds.source)
             )
 
-            rows = self.session.execute(sql)
+            rows = self.session.execute(sql).fetchall()
             results[kwd] = rows
 
         inserted = 0
@@ -234,7 +234,7 @@ class DisGeNet(odb_meta.Graph):
             for r in tqdm(
                 kwd_disease_results,
                 desc=f"Update DisGeNET variant interactions for {trait}",
-                total=kwd_disease_results.rowcount,
+                total=len(kwd_disease_results),
             ):
                 snp_id, chromosome, position, disease_name, pmid, score, source = r
 

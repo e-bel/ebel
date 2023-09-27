@@ -180,10 +180,10 @@ class NcbiGeneEnsembl(Base):
     tax_id: Mapped[int] = mapped_column(index=True)
     gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
     ensembl_gene_identifier: Mapped[str] = mapped_column(String(100))
-    rna_nucleotide_accession_version: Mapped[str] = mapped_column(String(100))
-    ensembl_rna_identifier: Mapped[str] = mapped_column(String(100))
-    protein_accession_version: Mapped[str] = mapped_column(String(100))
-    ensembl_protein_identifier: Mapped[str] = mapped_column(String(100))
+    rna_nucleotide_accession_version: Mapped[Optional[str]] = mapped_column(String(100))
+    ensembl_rna_identifier: Mapped[Optional[str]] = mapped_column(String(100))
+    protein_accession_version: Mapped[Optional[str]] = mapped_column(String(100))
+    ensembl_protein_identifier: Mapped[Optional[str]] = mapped_column(String(100))
 
     genes: Mapped[NcbiGeneInfo] = relationship("NcbiGeneInfo", back_populates="ensembl_ids")
 
