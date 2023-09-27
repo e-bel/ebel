@@ -36,8 +36,8 @@ class IntAct(odb_meta.Graph):
             biodb_name=self.biodb_name,
         )
 
-        up = UniProt()
-        up.update()
+        # up = UniProt()
+        # up.update()
 
         self.uniprot_rid_dict = self.get_pure_uniprot_rid_dict_in_bel_context()
 
@@ -81,7 +81,7 @@ class IntAct(odb_meta.Graph):
             "Interaction detection method(s)": "dm",
         }
 
-        df = pd.read_csv(zf.open("intact.txt"), sep="\t", usecols=usecols.keys())
+        df = pd.read_csv(zf.open("intact.txt"), sep="\t", usecols=list(usecols.keys()))
         df.rename(columns=usecols, inplace=True)
 
         regex_accession = r"uniprotkb:([OPQ][0-9][A-Z0-9]{3}[0-9]|[A-NR-Z][0-9]([A-Z][A-Z0-9]{2}[0-9]){1,2})"
