@@ -2,11 +2,9 @@
 
 """This file contains default values for configurations and parameters."""
 
-import logging
-import logging.handlers as handlers
-import os
+import logging.config
 
-from .constants import DATA_DIR, LOG_DIR, PROJECT_DIR
+from ebel.constants import DATA_DIR, PROJECT_DIR, THIS_DIR, LOG_DIR
 
 ###############################################################################
 # UNIPROT taxonomy IDs to import
@@ -46,24 +44,4 @@ config_file_path = PROJECT_DIR.joinpath("config.ini")
 
 ###############################################################################
 # Log Handling
-logHandler = handlers.RotatingFileHandler(
-    filename=LOG_DIR.joinpath("ebel.log"),
-    mode="a",
-    maxBytes=4098 * 10,  # 4MB file max
-    backupCount=0,
-)
-logh_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-logHandler.setFormatter(logh_format)
-logHandler.setLevel(logging.DEBUG)
-
-
-# Console Handler
-ch = logging.StreamHandler()
-ch_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-ch.setFormatter(ch_format)
-ch.setLevel(logging.WARNING)
-
-logging.basicConfig(
-    handlers=[logHandler, ch],
-    encoding="utf-8",
-)
+logging.config.fileConfig(THIS_DIR.joinpath("logging.conf"), defaults={"logfilename": LOG_DIR.joinpath("ebel.log")})

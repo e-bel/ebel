@@ -1,6 +1,6 @@
 """Root init for eBEL."""
-from . import cache, constants, errors, parser, transformers
-from .manager.orientdb.biodbs.bel import Bel
+from ebel import cache, constants, errors, parser, transformers
+from ebel.manager.orientdb.biodbs.bel import Bel
 
 __version__ = "1.0.37"
 
@@ -12,7 +12,7 @@ __author__ = "Christian Ebeling"
 __email__ = "christian.ebeling@scai.fraunhofer.de"
 
 __license__ = "?"
-__copyright__ = """Copyright (c) 2021 Christian Ebeling, Fraunhofer Institute for Algorithms and Scientific
+__copyright__ = """Copyright (c) 2023 Christian Ebeling, Fraunhofer Institute for Algorithms and Scientific
 Computing SCAI, Schloss Birlinghoven, 53754 Sankt Augustin, Germany"""
 
 project_name = __title__
