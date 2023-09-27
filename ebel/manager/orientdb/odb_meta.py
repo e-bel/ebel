@@ -359,7 +359,7 @@ class Graph(abc.ABC):
         class_name: str,
         limit: int = 0,
         skip: int = 0,
-        columns: Iterable[str] = [],
+        columns: Iterable[str] = None,
         with_rid=True,
         with_class=False,
         print_sql: bool = False,
