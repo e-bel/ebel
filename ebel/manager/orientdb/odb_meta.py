@@ -21,7 +21,12 @@ import requests
 import sqlalchemy as sqla
 import xmltodict
 from pyorientdb import OrientDB, orient
-from pyorientdb.exceptions import PyOrientCommandException, PyOrientIndexException, PyOrientSecurityAccessException
+from pyorientdb.exceptions import (
+    PyOrientCommandException,
+    PyOrientIndexException,
+    PyOrientSecurityAccessException,
+    PyOrientBadMethodCallException,
+)
 from pyorientdb.otypes import OrientRecord
 from sqlalchemy import text, select, func
 from sqlalchemy.sql.schema import Table
@@ -160,13 +165,11 @@ class Graph(abc.ABC):
         try:
             return self.client.command(command_str)
 
-        # TODO: following exceptions seems not to cover connection error
-        # except (PyOrientCommandException, PyOrientSecurityAccessException):
-        except:
+        except (PyOrientCommandException, PyOrientSecurityAccessException, PyOrientBadMethodCallException) as e:
+            logger.error(e)
             # Try to reconnect
             self.client.close()
             self.client = self.get_client()
-            # self.client.db_open(self.odb_name, self.odb_user, self.odb_password)
             # print(command_str)
             return self.client.command(command_str)
 
@@ -848,7 +851,7 @@ class Graph(abc.ABC):
                 where_list.append("`{}` IS NULL".format(column))
         where = ""
         if where_list:
-            where = " WHERE " + " AND ".join(where_list)
+            where = "WHERE " + " AND ".join(where_list)
         return where
 
     def get_number_of_class(self, class_name, distinct_column_name: str = None, **params):
@@ -1463,6 +1466,7 @@ class Graph(abc.ABC):
             )
             logger.warning(wtext)
             return 0
+
         else:
             class_name = class_name if class_name is not None else "V"
             return self.execute(f"Delete VERTEX {class_name} where both().size() = 0")[0]
@@ -1524,9 +1528,8 @@ class Graph(abc.ABC):
         # only include proteins which are also part of a BEL statement to avoid explosion of graph
 
         sql = """Select uniprot, @rid.asString() as rid from protein where pure=true and uniprot in (
-        Select unionall(uniprot_list).asSet() as all_uniprots from (select unionall(in.uniprot, out.uniprot).asSet() as
-        uniprot_list from bel_relation where document IS NOT NULL
-        and (in.uniprot IS NOT NULL or out.uniprot IS NOT NULL)))"""
+        select set(unionall(in.uniprot, out.uniprot)) as all_uniprots from bel_relation where document IS NOT NULL)"""
+        # sql = "select uniprot, @rid.asString() as rid from protein where pure = true and uniprot is not null"
 
         return {r["uniprot"]: r["rid"] for r in self.query_get_dict(sql)}
 

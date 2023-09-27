@@ -523,7 +523,7 @@ class BioGrid(odb_meta.Graph):
 
         if_func = func.iif if self.engine.dialect.name == "sqlite" else func.IF
 
-        logging.info("Update BioGRID")
+        logger.info("Update BioGRID")
 
         for e in tqdm(
             uniprot_modification_pairs,

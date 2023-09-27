@@ -1,5 +1,6 @@
 """IntAct module."""
 import logging
+import time
 import zipfile
 from typing import Dict
 
@@ -34,6 +35,11 @@ class IntAct(odb_meta.Graph):
             urls=self.urls,
             biodb_name=self.biodb_name,
         )
+
+        up = UniProt()
+        up.update()
+
+        self.uniprot_rid_dict = self.get_pure_uniprot_rid_dict_in_bel_context()
 
     def __len__(self):
         return self.number_of_generics
@@ -102,22 +108,20 @@ class IntAct(odb_meta.Graph):
 
         return {self.biodb_name: df.shape[0]}
 
-    def get_create_rid_by_uniprot(self, uniprot_accession: str, uniprot_rid_dict: dict) -> str:
+    def get_create_rid_by_uniprot(self, uniprot_accession: str) -> str:
         """Create or get rID entry for a given UniProt ID.
 
         Parameters
         ----------
         uniprot_accession: str
             UniProt accession number.
-        uniprot_rid_dict: dict
-            Entry parameters matching those of the desired rID entry.
 
         Returns
         -------
         str
             UniProt accession ID.
         """
-        if uniprot_accession not in uniprot_rid_dict:
+        if uniprot_accession not in self.uniprot_rid_dict:
             nn = self.get_namespace_name_by_uniprot(uniprot_accession)
             if nn:
                 namespace, name = nn
@@ -128,8 +132,9 @@ class IntAct(odb_meta.Graph):
                     "bel": f'p({namespace}:"{name}")',
                     "uniprot": uniprot_accession,
                 }
-                uniprot_rid_dict[uniprot_accession] = self.get_create_rid("protein", value_dict, check_for="bel")
-        return uniprot_rid_dict.get(uniprot_accession)
+                self.uniprot_rid_dict[uniprot_accession] = self.get_create_rid("protein", value_dict, check_for="bel")
+
+        return self.uniprot_rid_dict.get(uniprot_accession)
 
     def get_namespace_name_by_uniprot(self, uniprot_accession: str) -> tuple:
         """Get the namespace of a given UniProt ID.
@@ -168,14 +173,11 @@ class IntAct(odb_meta.Graph):
 
     def update_interactions(self) -> int:
         """Update intact interactions to graph."""
-        up = UniProt(self.client)
-        up.update()
-
-        uniprot_rid_dict = up.get_pure_uniprot_rid_dict_in_bel_context()
+        logger.info("Update IntAct interactions")
 
         updated = 0
 
-        uniprot_accessions = tuple(uniprot_rid_dict.keys())
+        uniprot_accessions = tuple(self.uniprot_rid_dict.keys())
         it = intact.Intact
 
         for uniprot_accession in tqdm(uniprot_accessions, desc="Update IntAct interactions"):
@@ -204,7 +206,7 @@ class IntAct(odb_meta.Graph):
                     it.confidence_value,
                 )
             )
-            result = self.session.execute(sql)
+            results = self.session.execute(sql).fetchall()
 
             for (
                 up_a,
@@ -216,9 +218,9 @@ class IntAct(odb_meta.Graph):
                 d_method,
                 d_method_id,
                 c_value,
-            ) in result.fetchall():
-                from_rid = self.get_create_rid_by_uniprot(up_a, uniprot_rid_dict)
-                to_rid = self.get_create_rid_by_uniprot(up_b, uniprot_rid_dict)
+            ) in results:
+                from_rid = self.get_create_rid_by_uniprot(up_a)
+                to_rid = self.get_create_rid_by_uniprot(up_b)
 
                 if from_rid and to_rid:
                     value_dict = {
