@@ -183,30 +183,6 @@ class DisGeNet(odb_meta.Graph):
             "downstream": "upstream",
             "upstream": "downstream",
         }
-        # # TODO: replace SQL with SQL Alchemy statement
-        # sql_temp = """Select
-        #         snp_id,
-        #         chromosome,
-        #         position,
-        #         disease_name,
-        #         pmid,
-        #         score,
-        #         source
-        #     FROM
-        #         disgenet_variant v INNER JOIN
-        #         disgenet_source s on (v.source_id=s.id) INNER JOIN
-        #         disgenet_disease d on (v.disease_id=d.disease_id)
-        #     WHERE
-        #         disease_name like '%%{}%%' and
-        #         source!='BEFREE'
-        #     GROUP BY
-        #         snp_id,
-        #         chromosome,
-        #         position,
-        #         disease_name,
-        #         pmid,
-        #         score,
-        #         source"""
 
         dv = disgenet.DisgenetVariant
         ds = disgenet.DisgenetSource

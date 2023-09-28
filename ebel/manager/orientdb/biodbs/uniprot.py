@@ -308,11 +308,6 @@ class UniProt(odb_meta.Graph):
         If this has no result it tries uniprot by gene symbol and NCBI taxonomy ID.
         """
         # TODO: This is in general a dangerous method because it selects the first accession number, but there could
-        # be more than one
-        # sql = (
-        #     f"Select accession, recommended_name from uniprot as u inner join uniprot_gene_symbol as gs "
-        #     f'on (u.id=gs.uniprot_id) where u.taxid={taxid} and gs.symbol="{gene_symbol}" limit 1'
-        # )
         sql = (
             select(up.Uniprot.accession, up.Uniprot.recommended_name)
             .join(up.GeneSymbol)

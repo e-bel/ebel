@@ -278,30 +278,6 @@ class Kegg(odb_meta.Graph):
             "phosphorylation": ("pho", "increases", BelPmod.PHO),
             "ubiquitination": ("ubi", "increases", BelPmod.UBI),
         }
-        # post_translational_modifications = ",".join([f"'{x}'" for x in pmods.keys()])
-
-        # species_ids = ",".join([f"'{x}'" for x in self.species])
-
-        # sql_temp = f"""Select
-        #         interaction_type,
-        #         pathway_identifier,
-        #         pathway_name,
-        #         gene_symbol_a,
-        #         gene_symbol_b,
-        #         kegg_species_id
-        #     from
-        #         kegg
-        #     where
-        #         (gene_symbol_a='{{symbol}}' or gene_symbol_a='{{symbol}}') and
-        #         kegg_species_id in ({species_ids}) and
-        #         interaction_type in ({{interaction_types}})
-        #     group by
-        #         interaction_type,
-        #         pathway_identifier,
-        #         pathway_name,
-        #         gene_symbol_a,
-        #         gene_symbol_b,
-        #         kegg_species_id"""
 
         kg = kegg.Kegg
         for symbol, rid in tqdm(symbol_rids_dict.items(), desc="Update KEGG posttranslational modifications"):
