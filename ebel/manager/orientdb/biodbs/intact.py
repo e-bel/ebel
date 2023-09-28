@@ -41,6 +41,7 @@ class IntAct(odb_meta.Graph):
         # up.update()
 
         self.uniprot_rid_dict = self.get_pure_uniprot_rid_dict_in_bel_context()
+        self.bel_rid_dict = self.get_pure_bel_rid_dict()
 
     def __len__(self):
         return self.number_of_generics
@@ -126,14 +127,22 @@ class IntAct(odb_meta.Graph):
             nn = self.get_namespace_name_by_uniprot(uniprot_accession)
             if nn:
                 namespace, name = nn
-                value_dict = {
-                    "name": name,
-                    "namespace": namespace,
-                    "pure": True,
-                    "bel": f'p({namespace}:"{name}")',
-                    "uniprot": uniprot_accession,
-                }
-                self.uniprot_rid_dict[uniprot_accession] = self.get_create_rid("protein", value_dict, check_for="bel")
+                bel = f'p({namespace}:"{name}")'
+
+                if bel in self.bel_rid_dict:
+                    self.uniprot_rid_dict[uniprot_accession] = self.bel_rid_dict[bel]
+
+                else:
+                    value_dict = {
+                        "name": name,
+                        "namespace": namespace,
+                        "pure": True,
+                        "bel": bel,
+                        "uniprot": uniprot_accession,
+                    }
+                    new_rid = self.insert_record("protein", value_dict=value_dict)
+                    self.bel_rid_dict[bel] = new_rid
+                    self.uniprot_rid_dict[uniprot_accession] = new_rid
 
         return self.uniprot_rid_dict.get(uniprot_accession)
 

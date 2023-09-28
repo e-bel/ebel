@@ -1542,6 +1542,12 @@ class Graph(abc.ABC):
 
         return {r["uniprot"]: r["rid"] for r in self.query_get_dict(sql)}
 
+    def get_pure_bel_rid_dict(self) -> Dict[str, str]:
+        """Return a dictionary of pure bel representation and it's rid."""
+        sql = "SELECT bel, @rid.asString() as rid from protein where pure=true"
+        results = self.query_get_dict(sql)
+        return {r["bel"]: r["rid"] for r in results}
+
     def get_pure_uniprot_rids_dict(self):
         """Return dictionary with UniProt IDs as keys and node rIDs as values."""
         sql = "Select uniprot, @rid.asString() as rid from protein where uniprot IS NOT NULL and pure=true"
