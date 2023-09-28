@@ -180,34 +180,34 @@ class IntAct(odb_meta.Graph):
         uniprot_accessions = tuple(self.uniprot_rid_dict.keys())
         it = intact.Intact
 
-        for uniprot_accession in tqdm(uniprot_accessions, desc="Update IntAct interactions"):
-            sql = (
-                select(
-                    it.int_a_uniprot_id,
-                    it.int_b_uniprot_id,
-                    it.pmid,
-                    it.interaction_ids,
-                    it.interaction_type,
-                    it.interaction_type_psimi_id,
-                    it.detection_method,
-                    it.detection_method_psimi_id,
-                    it.confidence_value,
-                )
-                .where(or_(it.int_a_uniprot_id == uniprot_accession, it.int_b_uniprot_id == uniprot_accession))
-                .group_by(
-                    it.int_a_uniprot_id,
-                    it.int_b_uniprot_id,
-                    it.pmid,
-                    it.interaction_ids,
-                    it.interaction_type,
-                    it.interaction_type_psimi_id,
-                    it.detection_method,
-                    it.detection_method_psimi_id,
-                    it.confidence_value,
-                )
-            )
-            results = self.session.execute(sql).fetchall()
+        sql = select(
+            it.int_a_uniprot_id,
+            it.int_b_uniprot_id,
+            it.pmid,
+            it.interaction_ids,
+            it.interaction_type,
+            it.interaction_type_psimi_id,
+            it.detection_method,
+            it.detection_method_psimi_id,
+            it.confidence_value,
+        ).group_by(
+            it.int_a_uniprot_id,
+            it.int_b_uniprot_id,
+            it.pmid,
+            it.interaction_ids,
+            it.interaction_type,
+            it.interaction_type_psimi_id,
+            it.detection_method,
+            it.detection_method_psimi_id,
+            it.confidence_value,
+        )
 
+        intact_df = pd.read_sql(sql, self.engine)
+
+        for uniprot_accession in tqdm(uniprot_accessions, desc="Update IntAct interactions"):
+            filtered_df = intact_df[
+                (intact_df.int_a_uniprot_id == uniprot_accession) | (intact_df.int_b_uniprot_id == uniprot_accession)
+            ]
             for (
                 up_a,
                 up_b,
@@ -218,7 +218,7 @@ class IntAct(odb_meta.Graph):
                 d_method,
                 d_method_id,
                 c_value,
-            ) in results:
+            ) in filtered_df.iterrows(index=False):
                 from_rid = self.get_create_rid_by_uniprot(up_a)
                 to_rid = self.get_create_rid_by_uniprot(up_b)
 
