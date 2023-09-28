@@ -39,6 +39,7 @@ from ebel.cache import set_mysql_interactive
 from ebel.config import get_config_as_dict, get_config_value, write_to_config
 from ebel.constants import DEFAULT_ODB, RID
 from ebel.manager.orientdb import urls as default_urls
+from ebel.manager.rdbms.models import uniprot
 from ebel.manager.rdbms.models.ensembl import Ensembl as ens
 from ebel.manager.orientdb.odb_structure import Edge, Generic, Node, OClass, OIndex, OProperty
 from ebel.tools import BelRdb, chunks, get_file_path, get_standard_name
@@ -1553,3 +1554,20 @@ class Graph(abc.ABC):
         sql = "Select uniprot, @rid.asString() as rid from protein where uniprot IS NOT NULL and pure=true"
         results = self.query_get_dict(sql)
         return {r["uniprot"]: r["rid"] for r in results}
+
+    def get_uniprot_accession_namespaces(self) -> Dict[str, Tuple[str, str]]:
+        """Return a dictionary of uniprot accession keys and namespace and values."""
+        sql = (
+            select(uniprot.Uniprot.accession, uniprot.GeneSymbol.symbol, uniprot.Uniprot.taxid)
+            .join(uniprot.Uniprot)
+        )
+        results = self.session.execute(sql).fetchall()
+
+        acc_dict = dict()
+        taxid_to_namespace = {9606: "HGNC", 10090: "MGI", 10116: "RGD"}
+        for r in results:
+            accession, name, taxid = r
+            namespace = taxid_to_namespace.get(taxid, "UNIPROT")
+            acc_dict[accession] = (namespace, name)
+
+        return acc_dict

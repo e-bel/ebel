@@ -42,6 +42,7 @@ class IntAct(odb_meta.Graph):
 
         self.uniprot_rid_dict = self.get_pure_uniprot_rid_dict_in_bel_context()
         self.bel_rid_dict = self.get_pure_bel_rid_dict()
+        self.acc_nn = self.get_uniprot_accession_namespaces()
 
     def __len__(self):
         return self.number_of_generics
@@ -159,27 +160,17 @@ class IntAct(odb_meta.Graph):
         tuple
             namespace, value
         """
-        return_value = ()
-
-        sql = (
-            select(uniprot.GeneSymbol.symbol, uniprot.Uniprot.taxid)
-            .join(uniprot.Uniprot)
-            .where(uniprot.Uniprot.accession == uniprot_accession)
-        )
-
-        result = self.session.execute(sql).fetchone()
-        taxid_to_namespace = {9606: "HGNC", 10090: "MGI", 10116: "RGD"}
-
-        if result:
-            name, taxid = result
-            namespace = taxid_to_namespace.get(taxid, "UNIPROT")
-            return_value = (namespace, name)
+        if uniprot_accession in self.acc_nn:
+            return self.acc_nn[uniprot_accession]
 
         else:
-            if self.session.query(uniprot.Uniprot).filter(uniprot.Uniprot.accession == uniprot_accession).first():
-                return_value = ("UNIPROT", uniprot_accession)
+            up_r = self.session.query(uniprot.Uniprot).filter(uniprot.Uniprot.accession == uniprot_accession).first()
 
-        return return_value
+            if up_r:
+                return "UNIPROT", uniprot_accession
+
+            else:
+                return ()
 
     def update_interactions(self) -> int:
         """Update intact interactions to graph."""
