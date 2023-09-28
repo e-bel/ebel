@@ -9,7 +9,7 @@ from typing import Dict
 import pandas as pd
 import requests
 from pyorientdb import OrientDB
-from sqlalchemy import select, or_
+from sqlalchemy import or_, select
 from tqdm import tqdm
 
 from ebel.config import get_config_value

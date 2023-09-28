@@ -7,13 +7,13 @@ from typing import Dict, Optional
 
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text, select, or_
+from sqlalchemy import or_, select, text
 from tqdm import tqdm
 
 from ebel.constants import RID
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
 from ebel.manager.orientdb.constants import OFFSIDES, ONSIDES
-from ebel.manager.rdbms.models import nsides, drugbank
+from ebel.manager.rdbms.models import drugbank, nsides
 from ebel.tools import get_file_path
 
 logger = logging.getLogger(__name__)

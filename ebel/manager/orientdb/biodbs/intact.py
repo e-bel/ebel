@@ -7,7 +7,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import select, or_
+from sqlalchemy import or_, select
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls

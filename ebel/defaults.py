@@ -5,7 +5,7 @@
 import logging
 import logging.handlers as handlers
 
-from ebel.constants import DATA_DIR, PROJECT_DIR, LOG_DIR
+from ebel.constants import DATA_DIR, LOG_DIR, PROJECT_DIR
 
 ###############################################################################
 # UNIPROT taxonomy IDs to import

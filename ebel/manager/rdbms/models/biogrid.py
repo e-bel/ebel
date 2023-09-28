@@ -1,7 +1,7 @@
 """BioGRID RDBMS model definition."""
 from sqlalchemy import Float, ForeignKey, Integer, String, Text, select
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Mapped, mapped_column, relationship, aliased
+from sqlalchemy.orm import Mapped, aliased, mapped_column, relationship
 from sqlalchemy_utils import create_view
 
 from ebel.manager.rdbms.models import object_as_dict

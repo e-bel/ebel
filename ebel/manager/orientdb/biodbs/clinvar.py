@@ -5,13 +5,13 @@ from typing import Dict, List
 
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import text, select
+from sqlalchemy import select, text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
+from ebel.manager.orientdb.biodbs.ensembl import Ensembl
 from ebel.manager.orientdb.constants import CLINVAR
 from ebel.manager.rdbms.models import clinvar
-from ebel.manager.orientdb.biodbs.ensembl import Ensembl
 from ebel.tools import get_disease_trait_keywords_from_config, get_file_path
 
 logger = logging.getLogger(__name__)

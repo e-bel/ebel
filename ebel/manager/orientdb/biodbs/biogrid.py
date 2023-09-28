@@ -7,7 +7,7 @@ from typing import Dict, Tuple
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
-from sqlalchemy import select, func, cast, Integer
+from sqlalchemy import Integer, cast, func, select
 from sqlalchemy.orm import aliased
 from tqdm import tqdm
 

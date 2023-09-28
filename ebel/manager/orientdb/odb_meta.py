@@ -22,13 +22,14 @@ import sqlalchemy as sqla
 import xmltodict
 from pyorientdb import OrientDB, orient
 from pyorientdb.exceptions import (
+    PyOrientBadMethodCallException,
     PyOrientCommandException,
     PyOrientIndexException,
     PyOrientSecurityAccessException,
-    PyOrientBadMethodCallException,
+    PyOrientSecurityException,
 )
 from pyorientdb.otypes import OrientRecord
-from sqlalchemy import text, select, func
+from sqlalchemy import func, select, text
 from sqlalchemy.sql.schema import Table
 from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
@@ -39,9 +40,9 @@ from ebel.cache import set_mysql_interactive
 from ebel.config import get_config_as_dict, get_config_value, write_to_config
 from ebel.constants import DEFAULT_ODB, RID
 from ebel.manager.orientdb import urls as default_urls
+from ebel.manager.orientdb.odb_structure import Edge, Generic, Node, OClass, OIndex, OProperty
 from ebel.manager.rdbms.models import uniprot
 from ebel.manager.rdbms.models.ensembl import Ensembl as ens
-from ebel.manager.orientdb.odb_structure import Edge, Generic, Node, OClass, OIndex, OProperty
 from ebel.tools import BelRdb, chunks, get_file_path, get_standard_name
 
 type_map_inverse = {v: k for k, v in orient.type_map.items()}
@@ -166,7 +167,12 @@ class Graph(abc.ABC):
         try:
             return self.client.command(command_str)
 
-        except (PyOrientCommandException, PyOrientSecurityAccessException, PyOrientBadMethodCallException) as e:
+        except (
+            PyOrientCommandException,
+            PyOrientSecurityAccessException,
+            PyOrientBadMethodCallException,
+            PyOrientSecurityException,
+        ) as e:
             logger.error(e)
             # Try to reconnect
             self.client.close()

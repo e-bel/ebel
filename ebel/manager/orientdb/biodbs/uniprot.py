@@ -10,7 +10,7 @@ from typing import Dict, List, Tuple, Union
 import pandas as pd
 from lxml.etree import iterparse
 from pyorientdb import OrientDB
-from sqlalchemy import text, select
+from sqlalchemy import select, text
 from tqdm import tqdm
 
 from ebel.defaults import default_tax_ids
