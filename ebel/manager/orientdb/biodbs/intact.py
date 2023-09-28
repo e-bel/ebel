@@ -218,7 +218,7 @@ class IntAct(odb_meta.Graph):
                 d_method,
                 d_method_id,
                 c_value,
-            ) in filtered_df.iterrows(index=False):
+            ) in filtered_df.itertuples(index=False):
                 from_rid = self.get_create_rid_by_uniprot(up_a)
                 to_rid = self.get_create_rid_by_uniprot(up_b)
 
