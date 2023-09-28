@@ -40,6 +40,9 @@ class StringDb(odb_meta.Graph):
             biodb_name=self.biodb_name,
         )
 
+        self.symbol_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(namespace="HGNC")
+        self.bel_rid_dict = self.get_pure_bel_rid_dict()
+
     def __len__(self) -> dict:
         """Get number of 'biogrid_interaction' graph edges."""
         pass
@@ -202,10 +205,9 @@ class StringDb(odb_meta.Graph):
             "combined_score",
         )
 
-        bel_hgnc_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(namespace="HGNC")
-        bel_hgncs = set(bel_hgnc_rid_dict.keys())
+        symbols = set(self.symbol_rid_dict.keys())
         strdb_hgncs = self.get_stringdb_symbols()
-        shared_hgncs = bel_hgncs & strdb_hgncs
+        shared_hgncs = symbols & strdb_hgncs
 
         updated = 0
         already_inserted = set()
@@ -222,8 +224,8 @@ class StringDb(odb_meta.Graph):
                 if sorted_combi not in already_inserted:
                     value_dict = {k: v for k, v in row.__dict__.items() if k in columns}
 
-                    from_rid = self.get_create_rid_by_symbol(row.symbol1, bel_hgnc_rid_dict, hgnc)
-                    to_rid = self.get_create_rid_by_symbol(row.symbol2, bel_hgnc_rid_dict, hgnc)
+                    from_rid = self.get_create_rid_by_symbol(row.symbol1, hgnc)
+                    to_rid = self.get_create_rid_by_symbol(row.symbol2, hgnc)
 
                     if from_rid and to_rid:
                         self.create_edge(
@@ -237,15 +239,13 @@ class StringDb(odb_meta.Graph):
 
         return updated
 
-    def get_create_rid_by_symbol(self, symbol: str, symbol_rid_dict: dict, hgnc: Hgnc) -> str:
+    def get_create_rid_by_symbol(self, symbol: str, hgnc: Hgnc) -> str:
         """Create or get rID entry for a given gene symbol.
 
         Parameters
         ----------
         symbol: str
             Gene symbol.
-        symbol_rid_dict: dict
-            Entry parameters matching those of the desired rID entry.
         hgnc: Hgnc
             Hgnc model definition.
 
@@ -254,17 +254,26 @@ class StringDb(odb_meta.Graph):
         str
             rID.
         """
-        if symbol not in symbol_rid_dict:
+        if symbol not in self.symbol_rid_dict:
             symbol = hgnc.get_correct_symbol(symbol)
             if symbol:
-                value_dict = {
-                    "name": symbol,
-                    "namespace": "HGNC",
-                    "pure": True,
-                    "bel": f'p(HGNC:"{symbol}")',
-                }
-                symbol_rid_dict[symbol] = self.get_create_rid("protein", value_dict, check_for="bel")
-        return symbol_rid_dict.get(symbol)
+                bel = f'p(HGNC:"{symbol}")'
+
+                if bel in self.bel_rid_dict:
+                    self.symbol_rid_dict[symbol] = self.bel_rid_dict[bel]
+
+                else:
+                    value_dict = {
+                        "name": symbol,
+                        "namespace": "HGNC",
+                        "pure": True,
+                        "bel": bel,
+                    }
+                    new_rid = self.insert_record("protein", value_dict)
+                    self.symbol_rid_dict[symbol] = new_rid
+                    self.bel_rid_dict[bel] = new_rid
+
+        return self.symbol_rid_dict.get(symbol)
 
     def update_action_interactions(self, hgnc: Hgnc) -> int:
         """Iterate through BEL proteins and add stringdb_action edges to existing proteins in KG.
@@ -292,8 +301,7 @@ class StringDb(odb_meta.Graph):
 
         modes = ("activation", "inhibition", "ptmod", "expression")
 
-        symbols_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(namespace="HGNC")
-        symbols = tuple(symbols_rid_dict.keys())
+        symbols = tuple(self.symbol_rid_dict.keys())
 
         already_inserted = set()
 
@@ -313,8 +321,8 @@ class StringDb(odb_meta.Graph):
                 sorted_combi = tuple(sorted([action.symbol1, action.symbol2]))
 
                 if sorted_combi not in already_inserted:
-                    from_rid = self.get_create_rid_by_symbol(action.symbol1, symbols_rid_dict, hgnc)
-                    to_rid = self.get_create_rid_by_symbol(action.symbol2, symbols_rid_dict, hgnc)
+                    from_rid = self.get_create_rid_by_symbol(action.symbol1, hgnc)
+                    to_rid = self.get_create_rid_by_symbol(action.symbol2, hgnc)
 
                     if from_rid and to_rid:
                         class_name = translator[(action.mode, action.action)]

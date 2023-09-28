@@ -1557,10 +1557,7 @@ class Graph(abc.ABC):
 
     def get_uniprot_accession_namespaces(self) -> Dict[str, Tuple[str, str]]:
         """Return a dictionary of uniprot accession keys and namespace and values."""
-        sql = (
-            select(uniprot.Uniprot.accession, uniprot.GeneSymbol.symbol, uniprot.Uniprot.taxid)
-            .join(uniprot.Uniprot)
-        )
+        sql = select(uniprot.Uniprot.accession, uniprot.GeneSymbol.symbol, uniprot.Uniprot.taxid).join(uniprot.Uniprot)
         results = self.session.execute(sql).fetchall()
 
         acc_dict = dict()

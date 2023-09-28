@@ -167,10 +167,13 @@ class IntAct(odb_meta.Graph):
             up_r = self.session.query(uniprot.Uniprot).filter(uniprot.Uniprot.accession == uniprot_accession).first()
 
             if up_r:
-                return "UNIPROT", uniprot_accession
+                return_value = "UNIPROT", uniprot_accession
 
             else:
-                return ()
+                return_value = ()
+
+            self.acc_nn[uniprot_accession] = return_value
+            return return_value
 
     def update_interactions(self) -> int:
         """Update intact interactions to graph."""
