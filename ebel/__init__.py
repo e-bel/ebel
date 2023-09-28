@@ -2,7 +2,7 @@
 from ebel import cache, constants, errors, parser, transformers
 from ebel.manager.orientdb.biodbs.bel import Bel
 
-__version__ = "1.0.37"
+__version__ = "1.1.0"
 
 __title__ = "e(BE:L)"
 __description__ = "Validation and extension of biomedical knowledge graphs"
