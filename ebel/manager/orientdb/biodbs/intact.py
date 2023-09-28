@@ -4,6 +4,7 @@ import time
 import zipfile
 from typing import Dict
 
+import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
 from sqlalchemy import select, or_
@@ -202,7 +203,7 @@ class IntAct(odb_meta.Graph):
             it.confidence_value,
         )
 
-        intact_df = pd.read_sql(sql, self.engine)
+        intact_df = pd.read_sql(sql, self.engine).replace({np.nan: None})
 
         for uniprot_accession in tqdm(uniprot_accessions, desc="Update IntAct interactions"):
             filtered_df = intact_df[
