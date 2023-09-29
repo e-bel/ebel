@@ -221,10 +221,12 @@ class PathwayCommons(odb_meta.Graph):
         self.hgnc.update()
         valid_hgnc_symbols = {x[0] for x in self.session.query(hgnc.Hgnc).with_entities(hgnc.Hgnc.symbol).all()}
 
+        pure_symbol_rids_dict = self.get_pure_symbol_rids_dict()
+        symbol_rids_bel_context_dict = self.get_pure_symbol_rids_dict_in_bel_context()
+
         cols = ["symbol", "rid"]
-        pure_symbol_rids_dict = self.hgnc.get_pure_symbol_rids_dict()
         df_all = pd.DataFrame(pure_symbol_rids_dict.items(), columns=cols)
-        df_bel = pd.DataFrame(self.hgnc.get_pure_symbol_rids_dict_in_bel_context().items(), columns=cols)
+        df_bel = pd.DataFrame(symbol_rids_bel_context_dict.items(), columns=cols)
 
         # skip here if there is no pure symbols with or without BEL context
         if any([df_all.empty, df_bel.empty]):
@@ -304,3 +306,9 @@ class PathwayCommons(odb_meta.Graph):
         pmids = [x.pmid for x in pc_obj.pmids]
         pathways = [pc_pathway_name_rid_dict[x.name] for x in pc_obj.pathway_names]
         return pathways, pmids, sources
+
+
+if __name__ == "__main__":
+    p = PathwayCommons()
+    foo = p.get_pure_symbol_rids_dict()
+    a = 2

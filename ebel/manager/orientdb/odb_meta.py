@@ -1525,7 +1525,7 @@ class Graph(abc.ABC):
 
     def get_pure_symbol_rids_dict(self, class_name="protein", namespace="HGNC") -> Dict[str, str]:
         """Return dictionary with protein name as keys and node rIDs as values."""
-        results = self.query_class(class_name, pure=True, namespace=namespace)
+        results = self.query_class(class_name, pure=True, namespace=namespace, columns=["name"], with_rid=True)
         return {r["name"]: r["rid"] for r in results}
 
     def get_pure_rid_by_uniprot(self, uniprot: str):
