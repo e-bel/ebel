@@ -1,12 +1,18 @@
 """Unit tests for checking the URLs."""
 
 import ftplib
+
 import requests
 
+from ebel.manager.orientdb.constants import (BIOGRID, CHEBI, CLINICAL_TRIALS,
+                                             CLINVAR, DISGENET, DRUGBANK,
+                                             ENSEMBL, GWAS_CATALOG, HGNC,
+                                             INTACT, IUPHAR, KEGG, MIRTARBASE,
+                                             NCBI, NSIDES, PATHWAY_COMMONS,
+                                             PROTEIN_ATLAS, REACTOME, STRINGDB,
+                                             UNIPROT)
+
 from ..constants import test_client
-from ebel.manager.orientdb.constants import DRUGBANK, HGNC, CHEBI, ENSEMBL, GWAS_CATALOG, CLINVAR, UNIPROT, REACTOME, \
-    STRINGDB, INTACT, BIOGRID, MIRTARBASE, PATHWAY_COMMONS, DISGENET, KEGG, IUPHAR, NSIDES, CLINICAL_TRIALS, \
-    PROTEIN_ATLAS, NCBI
 
 bel = test_client
 
@@ -33,14 +39,14 @@ class TestUrls:
                     continue
 
                 headers = requests.head(url, allow_redirects=True).headers
-                if 'Content-disposition' in headers:  # Check file attachment
-                    assert "filename" in headers.get('Content-disposition')
+                if "Content-disposition" in headers:  # Check file attachment
+                    assert "filename" in headers.get("Content-disposition")
 
                 elif "Content-Encoding" in headers:
                     assert headers.get("Content-Encoding") == "gzip"  # Check if it's a gzip file
 
                 else:
-                    file_size = int(headers.get('Content-Length'))
+                    file_size = int(headers.get("Content-Length"))
                     assert file_size > 0
 
     def test_urls(self):

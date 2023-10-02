@@ -1,8 +1,7 @@
 """NCBI API unit tests."""
 
 from .conftest import format_response_data
-from .constants import RESULTS, NUM_RESULTS, PAGE_SIZE
-
+from .constants import NUM_RESULTS, PAGE_SIZE, RESULTS
 
 # class TestNcbi:
 #     def test_get_gene_by_go(self, client):

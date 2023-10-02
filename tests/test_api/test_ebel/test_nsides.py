@@ -1,14 +1,14 @@
 """NSIDES API unit tests."""
 
 from .conftest import format_response_data
-from .constants import RESULTS, NUM_RESULTS, PAGE_SIZE
+from .constants import NUM_RESULTS, PAGE_SIZE, RESULTS
 
 
 class TestNsides:
     def test_get_nsides(self, client):
         response = client.get(
-            'api/v1/nsides?drug_rxnorn_id=4024&drug_concept_name=ergoloid%20mesylates%2C%20USP&condition_meddra_id=10002034&condition_concept_name=Anaemia&a=6&b=126&c=21&d=1299&prr=2.85714&prr_error=0.45382&mean_reporting_frequency=0.0454545&page_size=10&page=1',
-            content_type='application/json'
+            "api/v1/nsides?drug_rxnorn_id=4024&drug_concept_name=ergoloid%20mesylates%2C%20USP&condition_meddra_id=10002034&condition_concept_name=Anaemia&a=6&b=126&c=21&d=1299&prr=2.85714&prr_error=0.45382&mean_reporting_frequency=0.0454545&page_size=10&page=1",
+            content_type="application/json",
         )
         output = format_response_data(response)
         expected_results = {
@@ -24,7 +24,7 @@ class TestNsides:
             "mean_reporting_frequency": 0.0454545,
             "prr": 2.85714,
             "prr_error": 0.45382,
-            "source": "offsides"
+            "source": "offsides",
         }
         assert output[NUM_RESULTS] == 1
         assert output[PAGE_SIZE] == 10

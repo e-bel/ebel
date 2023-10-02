@@ -2,10 +2,10 @@
 
 import os
 import pathlib
+
 import pandas as pd
 
 from ebel.validate import validate_bel_file
-
 
 VALIDATION_TEST_DIR = pathlib.Path(__file__).parent.absolute()
 TEST_DATA_DIR = os.path.join(VALIDATION_TEST_DIR, "..", "data")

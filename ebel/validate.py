@@ -145,7 +145,7 @@ def validate_bel_file(
                     _write_report(reports, result, report_type="errors")
 
 
-def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
+def repair_bel_file(bel_script_path: str, new_file_path: str, diff: bool = False):
     """Repair a BEL document.
 
     Parameters
@@ -154,6 +154,8 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
         Path to the BEL file.
     new_file_path : str (optional)
         Export repaired version of file to new path.
+    diff : bool (optional)
+        Also export a file showing the differences between the original and the repaired files.
     """
     # if evidence:
     # regular expression for missing continuous line (\ at the end of line)
@@ -180,13 +182,12 @@ def repair_bel_file(bel_script_path: str, new_file_path: Optional[str] = None):
         new_content = new_content.replace(regex_pattern[0], new_evidence)
 
     if content != new_content:
-        if new_file_path:
-            with open(new_file_path + ".diff2repaired", "w", encoding="utf-8") as new_file:
+        if diff:
+            with open(bel_script_path + ".diff2repaired", "w", encoding="utf-8") as new_file:
                 new_file.write("\n".join(list(difflib.ndiff(content.split("\n"), new_content.split("\n")))))
 
-        else:
-            with open(bel_script_path, "w", encoding="utf-8") as output_file:
-                output_file.write(new_content)
+        with open(new_file_path, "w", encoding="utf-8") as output_file:
+            output_file.write(new_content)
 
 
 def replace_ebel_relation_terms(bel_file_content: str):
@@ -221,11 +222,14 @@ def replace_ebel_relation_terms(bel_file_content: str):
     return repaired_content
 
 
-def _write_odb_json(bel_path: str, results: dict, bel_version: str) -> str:
-    json_path = bel_path + ".json"
+def _write_odb_json(bel_path: Union[str, Path], results: dict, bel_version: str) -> str:
+    if isinstance(bel_path, str):
+        bel_path = Path(bel_path)
+    json_path = bel_path.with_suffix(".bel.json")
     if int(bel_version[0]) > 1:
         json_tree = bel_to_json(results["tree"])
-        open(json_path, "w").write(json_tree)
+        with open(json_path, "w") as jf:
+            jf.write(json_tree)
 
     return json_path
 

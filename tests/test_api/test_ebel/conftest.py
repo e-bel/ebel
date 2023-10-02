@@ -1,9 +1,9 @@
 """Init API unit tests."""
 
 import json
-import pytest
-
 from typing import Union
+
+import pytest
 
 from ebel.web.app import application
 

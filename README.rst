@@ -5,7 +5,7 @@ e(BE:L) is a Python package built for both validating and modeling information e
 This software package serves a comprehensive tool for all of your BEL needs and serves to create enriched knowledge graphs
 for developing and testing new theories and hypotheses.
 
-**e(BE:L)** have implemented several other knowledge bases to extend the BEL knowledge graph or map identifiers.
+**e(BE:L)** has implemented several other knowledge bases to extend the BEL knowledge graph or map identifiers:
 
 * `BioGrid <https://thebiogrid.org/>`_
 * `ChEBI <https://www.ebi.ac.uk/chebi/>`_
@@ -43,6 +43,53 @@ The easiest way to install ebel is to use `docker-compose`. See below instructio
 But we want to encourage you to use the latest development version which can be installed with::
 
     $ pip install git+https://github.com/e-bel/ebel
+
+
+Docker Installation
+-------------------
+
+Make sure `docker <https://docs.docker.com/get-docker/>`_ and `docker-compose <https://docs.docker.com/compose/install/>`_ are installed.
+
+.. code-block::
+
+    docker-compose up --build -d
+    docker exec -it ebel_ebel ebel settings
+
+Several question will follow. You can accept the default values (just press RETURN) except the following questions:
+
+.. code-block::
+
+    OrientDB server [localhost] ?
+    ebel_orientdb
+    OrientDB root password (to create database and users)
+    ebel
+    MySQL/MariaDB sever name [localhost]
+    ebel_mysql
+    MySQL root password (will be not stored) to create database and user
+    ebel
+
+It's strongly recommended, if you are using ebel in the production environment, to change the
+standard root MySQL and OrientDB passwords in the docker-compose.yml file.
+
+To load example files in container and import.
+
+.. code-block::
+
+    docker exec -it ebel_ebel git clone https://github.com/e-bel/example_json_bel_files.git
+    docker exec -it ebel_ebel ebel import-json example_json_bel_files/phago.bel.json -e
+
+
+To enrich the network:
+
+.. code-block::
+
+    docker exec -it ebel_ebel ebel enrich
+
+Following services are now available:
+
+1. `OrientDB Studio <http://localhost:2480/studio/index.html#/>`_
+2. `e(BE:L) REST server <http://localhost:5000/ui/>`_
+3. `phpMyAdmin <http://localhost:8089>`_
 
 Package Requirements
 ====================
@@ -235,51 +282,6 @@ To specify a different graph database to connect to than the one in your config 
     # To overwrite your default values in the config file
     bel = Bel(graph_config=config_params, overwrite_config=True)
 
-Docker installation
-===================
-
-Make sure `docker <https://docs.docker.com/get-docker/>`_ and `docker-compose <https://docs.docker.com/compose/install/>`_ are installed.
-
-.. code-block::
-
-    docker-compose up --build -d
-    docker exec -it ebel_ebel ebel settings
-
-Several question will follow. You can accept the default values (just press RETURN) except the following questions:
-
-.. code-block::
-
-    OrientDB server [localhost] ?
-    ebel_orientdb
-    OrientDB root password (to create database and users)
-    ebel
-    MySQL/MariaDB sever name [localhost]
-    ebel_mysql
-    MySQL root password (will be not stored) to create database and user
-    ebel
-
-It's strongly recommended, if you are using ebel in the production environment, to change the
-standard root MySQL and OrientDB passwords in the docker-compose.yml file.
-
-To load example files in container and import.
-
-.. code-block::
-
-    docker exec -it ebel_ebel git clone https://github.com/e-bel/example_json_bel_files.git
-    docker exec -it ebel_ebel ebel import-json example_json_bel_files/phago.bel.json -e
-
-
-To enrich the network:
-
-.. code-block::
-
-    docker exec -it ebel_ebel ebel enrich
-
-Following services are now available:
-
-1. `OrientDB Studio <http://localhost:2480/studio/index.html#/>`_
-2. `e(BE:L) REST server <http://localhost:5000/ui/>`_
-3. `phpMyAdmin <http://localhost:8089>`_
 
 API
 ===

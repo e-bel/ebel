@@ -4,16 +4,15 @@ site_description: Creation and enrichment of BEL networks.
 site_author: Bruce Schultz
 
 repo_url: https://github.com/e-bel/ebel
-#edit_uri: blob/master/docs/
 
 theme: readthedocs
 
 extra:
-    version: 1.0.35
+    version: 1.0.37
 
 nav:
+#    - Home: index.md
     - Home: index.md
-#    - Getting Started: ../README.rst
     - User Guide:
         - API: api.md
         - CLI: cli.md
@@ -22,26 +21,20 @@ nav:
 markdown_extensions:
     - mkdocs-click
 
-copyright: Copyright &copy; 2022
+copyright: Copyright &copy; 2023
 
 plugins:
     - search
     - render_swagger
-#    - redirects:
-#        redirect_maps:
-#            user-guide/plugins.md: dev-guide/plugins.md
-#            user-guide/custom-themes.md: dev-guide/themes.md
-#            user-guide/styling-your-docs.md: user-guide/choosing-your-theme.md
     - autorefs
     - mkdocstrings:
+        default_handler: python
         handlers:
           python:
+            paths: [ebel]
             options:
               docstring_section_style: list
               members_order: source
               show_root_heading: true
               show_source: false
               show_signature_annotations: true
-
-#watch:
-#    - mkdocs
