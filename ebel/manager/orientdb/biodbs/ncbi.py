@@ -274,6 +274,7 @@ class Ncbi(odb_meta.Graph):
             "type_of_gene",
             "dbXrefs",
         }
+
         for df in tqdm(
             pd.read_csv(
                 file_path,
@@ -298,3 +299,8 @@ class Ncbi(odb_meta.Graph):
     def update_interactions(self) -> int:
         """Abstract method."""
         pass
+
+
+if __name__ == "__main__":
+    n = Ncbi()
+    n._insert_medgen()

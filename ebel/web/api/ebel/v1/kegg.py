@@ -5,8 +5,7 @@ from sqlalchemy import or_
 
 from ebel.manager.rdbms.models.kegg import Kegg
 from ebel.web.api import RDBMS
-from ebel.web.api.ebel.v1 import (_get_data, _get_paginated_ebel_query_result,
-                                  _get_paginated_query_result)
+from ebel.web.api.ebel.v1 import _get_data, _get_paginated_ebel_query_result, _get_paginated_query_result
 
 
 def get_kegg():

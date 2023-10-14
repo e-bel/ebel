@@ -6,6 +6,7 @@ from typing import Dict
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import and_, or_, select, text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -38,6 +39,9 @@ class StringDb(odb_meta.Graph):
             tables_base=stringdb.Base,
             biodb_name=self.biodb_name,
         )
+
+        self.symbol_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(namespace="HGNC")
+        self.bel_rid_dict = self.get_pure_bel_rid_dict()
 
     def __len__(self) -> dict:
         """Get number of 'biogrid_interaction' graph edges."""
@@ -159,13 +163,20 @@ class StringDb(odb_meta.Graph):
 
     def get_stringdb_action_hgnc_set(self):
         """Get unique HGNC symbols from stringdb_actions table."""
-        sql = f"""(Select distinct( symbol1 ) from {self.table_action})
-                union (Select distinct( symbol2 ) from {self.table_action})"""
-        return set([x[0] for x in self.engine.execute(sql).fetchall()])
+        # sql = f"""(Select distinct( symbol1 ) from {self.table_action})
+        #         union (Select distinct( symbol2 ) from {self.table_action})"""
+
+        stmt1 = select(stringdb.StringDbAction.symbol1).distinct()
+        stmt2 = select(stringdb.StringDbAction.symbol2).distinct()
+        sql = stmt1.union(stmt2).alias("combined")
+        print(sql)
+
+        return set([x[0] for x in self.session.execute(sql).fetchall()])
 
     def update_interactions(self) -> Dict[str, int]:
         """Update the edges with StringDB metadata."""
         hgnc = Hgnc(self.client)
+        hgnc.update()  # If users haven't run Hgnc yet
         updated = dict()
         updated["interactions"] = self.update_stringdb_interactions(hgnc)
         updated["actions"] = self.update_action_interactions(hgnc)
@@ -194,10 +205,9 @@ class StringDb(odb_meta.Graph):
             "combined_score",
         )
 
-        bel_hgnc_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(namespace="HGNC")
-        bel_hgncs = set(bel_hgnc_rid_dict.keys())
+        symbols = set(self.symbol_rid_dict.keys())
         strdb_hgncs = self.get_stringdb_symbols()
-        shared_hgncs = bel_hgncs & strdb_hgncs
+        shared_hgncs = symbols & strdb_hgncs
 
         updated = 0
         already_inserted = set()
@@ -214,8 +224,8 @@ class StringDb(odb_meta.Graph):
                 if sorted_combi not in already_inserted:
                     value_dict = {k: v for k, v in row.__dict__.items() if k in columns}
 
-                    from_rid = self.get_create_rid_by_symbol(row.symbol1, bel_hgnc_rid_dict, hgnc)
-                    to_rid = self.get_create_rid_by_symbol(row.symbol2, bel_hgnc_rid_dict, hgnc)
+                    from_rid = self.get_create_rid_by_symbol(row.symbol1, hgnc)
+                    to_rid = self.get_create_rid_by_symbol(row.symbol2, hgnc)
 
                     if from_rid and to_rid:
                         self.create_edge(
@@ -229,15 +239,13 @@ class StringDb(odb_meta.Graph):
 
         return updated
 
-    def get_create_rid_by_symbol(self, symbol: str, symbol_rid_dict: dict, hgnc: Hgnc) -> str:
+    def get_create_rid_by_symbol(self, symbol: str, hgnc: Hgnc) -> str:
         """Create or get rID entry for a given gene symbol.
 
         Parameters
         ----------
         symbol: str
             Gene symbol.
-        symbol_rid_dict: dict
-            Entry parameters matching those of the desired rID entry.
         hgnc: Hgnc
             Hgnc model definition.
 
@@ -246,17 +254,26 @@ class StringDb(odb_meta.Graph):
         str
             rID.
         """
-        if symbol not in symbol_rid_dict:
+        if symbol not in self.symbol_rid_dict:
             symbol = hgnc.get_correct_symbol(symbol)
             if symbol:
-                value_dict = {
-                    "name": symbol,
-                    "namespace": "HGNC",
-                    "pure": True,
-                    "bel": f'p(HGNC:"{symbol}")',
-                }
-                symbol_rid_dict[symbol] = self.get_create_rid("protein", value_dict, check_for="bel")
-        return symbol_rid_dict.get(symbol)
+                bel = f'p(HGNC:"{symbol}")'
+
+                if bel in self.bel_rid_dict:
+                    self.symbol_rid_dict[symbol] = self.bel_rid_dict[bel]
+
+                else:
+                    value_dict = {
+                        "name": symbol,
+                        "namespace": "HGNC",
+                        "pure": True,
+                        "bel": bel,
+                    }
+                    new_rid = self.insert_record("protein", value_dict)
+                    self.symbol_rid_dict[symbol] = new_rid
+                    self.bel_rid_dict[bel] = new_rid
+
+        return self.symbol_rid_dict.get(symbol)
 
     def update_action_interactions(self, hgnc: Hgnc) -> int:
         """Iterate through BEL proteins and add stringdb_action edges to existing proteins in KG.
@@ -279,30 +296,33 @@ class StringDb(odb_meta.Graph):
             ("inhibition", "inhibition"): "inhibits_st",
         }
 
+        sdbaction = stringdb.StringDbAction
         Action = namedtuple("Action", ("symbol1", "symbol2", "mode", "action", "score"))
 
-        columns = ", ".join(Action._fields)
-        sql_temp = f"""Select {columns} from {self.table_action}
-                       where mode in ('activation', 'inhibition', 'ptmod', 'expression')
-                       and (symbol1='{{symbol}}' or symbol2='{{symbol}}')
-                       and is_directional=1 and a_is_acting=1"""
+        modes = ("activation", "inhibition", "ptmod", "expression")
 
-        symbols_rid_dict = self.get_pure_symbol_rids_dict_in_bel_context(namespace="HGNC")
-        symbols = tuple(symbols_rid_dict.keys())
+        symbols = tuple(self.symbol_rid_dict.keys())
 
         already_inserted = set()
 
         updated = 0
         for symbol in tqdm(symbols, desc="Update has_action_st edges"):
-            rows = self.engine.execute(sql_temp.format(symbol=symbol))
+            sql = (
+                select(sdbaction.symbol1, sdbaction.symbol2, sdbaction.mode, sdbaction.action, sdbaction.score)
+                .where(sdbaction.mode.in_(modes))
+                .where(or_(sdbaction.symbol1 == symbol, sdbaction.symbol2 == symbol))
+                .where(sdbaction.is_directional == 1)
+                .where(sdbaction.a_is_acting == 1)
+            )
+            rows = self.session.execute(sql)
             for row in rows.fetchall():
                 action = Action(*row)
 
                 sorted_combi = tuple(sorted([action.symbol1, action.symbol2]))
 
                 if sorted_combi not in already_inserted:
-                    from_rid = self.get_create_rid_by_symbol(action.symbol1, symbols_rid_dict, hgnc)
-                    to_rid = self.get_create_rid_by_symbol(action.symbol2, symbols_rid_dict, hgnc)
+                    from_rid = self.get_create_rid_by_symbol(action.symbol1, hgnc)
+                    to_rid = self.get_create_rid_by_symbol(action.symbol2, hgnc)
 
                     if from_rid and to_rid:
                         class_name = translator[(action.mode, action.action)]

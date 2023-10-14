@@ -1,5 +1,5 @@
 """BioGrid."""
-
+import logging
 import typing
 from enum import Enum
 from typing import Dict, Tuple
@@ -7,6 +7,8 @@ from typing import Dict, Tuple
 import numpy as np
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import Integer, cast, func, select
+from sqlalchemy.orm import aliased
 from tqdm import tqdm
 
 from ebel import tools
@@ -16,6 +18,9 @@ from ebel.manager.orientdb.odb_defaults import BelPmod, normalized_pmod_reverse
 from ebel.manager.rdbms.models import biogrid
 
 STANDARD_NAMESPACES = {9606: "HGNC", 10090: "MGI", 10116: "RGD"}
+
+
+logger = logging.getLogger(__name__)
 
 
 class BioGridNode:
@@ -282,7 +287,7 @@ class BioGrid(odb_meta.Graph):
         }
 
         # main table
-        df = pd.read_csv(self.file_path, usecols=use_columns.keys(), sep="\t", low_memory=False)
+        df = pd.read_csv(self.file_path, usecols=list(use_columns.keys()), sep="\t", low_memory=False)
         df.rename(columns=use_columns, inplace=True)
         df.replace("-", np.nan, inplace=True)
 
@@ -310,6 +315,8 @@ class BioGrid(odb_meta.Graph):
         # save main
         df.index += 1
         df.index.rename("id", inplace=True)
+
+        logger.info("Insert BIOGRID data")
 
         df.to_sql(biogrid.Biogrid.__tablename__, self.engine, if_exists="append")
 
@@ -453,29 +460,32 @@ class BioGrid(odb_meta.Graph):
 
     def get_uniprot_modification_pairs(self):
         """Return all UniProt modification pairs."""
-        # TODO: sql as sqlalchemy query
-        sql = """Select
-            ia.symbol as subject_symbol,
-            ia.uniprot as subject_uniprot,
-            ia.taxonomy_id as subject_taxonomy_id,
-            ib.symbol as object_symbol,
-            ib.uniprot as object_uniprot,
-            ib.taxonomy_id as object_taxonomy_id
-        from
-            biogrid b
-            inner join biogrid_interactor ia on (b.biogrid_a_id=ia.biogrid_id)
-            inner join biogrid_interactor ib on (b.biogrid_b_id=ib.biogrid_id)
-            inner join biogrid_modification m on (m.id=b.modification_id)
-        where
-            m.modification != 'No Modification' and ia.uniprot IS NOT NULL and ib.uniprot IS NOT NULL
-        group by
-            ia.symbol,
-            ia.uniprot,
-            ia.taxonomy_id,
-            ib.symbol,
-            ib.uniprot,
-            ib.taxonomy_id"""
-        return [dict(x) for x in self.engine.execute(sql).fetchall()]
+        b = biogrid.Biogrid
+        ia = aliased(biogrid.Interactor)
+        ib = aliased(biogrid.Interactor)
+        m = biogrid.Modification
+
+        sql = (
+            (
+                select(
+                    ia.symbol.label("subject_symbol"),
+                    ia.uniprot.label("subject_uniprot"),
+                    ia.taxonomy_id.label("subject_taxonomy_id"),
+                    ib.symbol.label("object_symbol"),
+                    ib.uniprot.label("object_uniprot"),
+                    ib.taxonomy_id.label("object_taxonomy_id"),
+                )
+                .select_from(b)
+                .join(ia, b.biogrid_a_id == ia.biogrid_id)
+                .join(ib, b.biogrid_b_id == ib.biogrid_id)
+                .join(m, b.modification_id == m.id)
+            )
+            .where(m.modification == "No Modification")
+            .where(ia.uniprot.isnot(None))
+            .group_by(ia.symbol, ia.uniprot, ia.taxonomy_id, ib.symbol, ib.uniprot, ib.taxonomy_id)
+        )
+        results = self.session.execute(sql).fetchall()
+        return [x._asdict() for x in results]
 
     def get_create_pure_protein_rid_by_uniprot(self, taxonomy_id, symbol, uniprot):
         """Get pure protein rid by UniProt accession ID if the protein is involved in a BEL statement."""
@@ -498,46 +508,22 @@ class BioGrid(odb_meta.Graph):
 
     def update_interactions(self) -> int:
         """Updates all BioGrid interactions."""
-        # TODO: sql_temp as sqlalchemy query
-        sql_temp = """
-        Select
-            ia.symbol as subject_symbol,
-            ia.uniprot as subject_uniprot,
-            ia.taxonomy_id as subject_taxonomy_id,
-            m.modification,
-            ib.symbol as object_symbol,
-            ib.uniprot as object_uniprot,
-            ib.taxonomy_id as object_taxonomy_id,
-            es.experimental_system,
-            group_concat( distinct b.biogrid_id) as biogrid_ids,
-            group_concat( distinct if(p.source='PUBMED',CAST(p.source_identifier AS UNSIGNED),NULL)) as pmids,
-            count(distinct p.source_identifier) as num_pubs,
-            group_concat( distinct if(p.source='DOI',CAST(p.source_identifier AS UNSIGNED),NULL)) as dois
-        from
-            biogrid b
-            inner join biogrid_interactor ia on (b.biogrid_a_id=ia.biogrid_id)
-            inner join biogrid_interactor ib on (b.biogrid_b_id=ib.biogrid_id)
-            inner join biogrid_modification m on (m.id=b.modification_id)
-            inner join biogrid_publication p on (b.publication_id=p.id)
-            inner join biogrid_experimental_system es on (b.experimental_system_id=es.id)
-        where
-            (ia.uniprot = '{subject_uniprot}' and ib.uniprot = '{object_uniprot}') and
-            m.modification != 'No Modification'
-        group by
-            ia.symbol,
-            ia.uniprot,
-            ia.taxonomy_id,
-            m.modification,
-            ib.symbol,
-            ib.uniprot,
-            ib.taxonomy_id,
-            es.experimental_system"""
+        b = biogrid.Biogrid
+        ia = aliased(biogrid.Interactor)
+        ib = aliased(biogrid.Interactor)
+        m = biogrid.Modification
+        p = biogrid.Publication
+        es = biogrid.ExperimentalSystem
 
         uniprots_in_bel_set = self.get_pure_uniprots_in_bel_context()
         uniprot_modification_pairs = self.get_uniprot_modification_pairs()
 
         counter = 0
         self.clear_edges()
+
+        if_func = func.iif if self.engine.dialect.name == "sqlite" else func.IF
+
+        logger.info("Update BioGRID")
 
         for e in tqdm(
             uniprot_modification_pairs,
@@ -556,68 +542,67 @@ class BioGrid(odb_meta.Graph):
                     uniprot=e["object_uniprot"],
                 )
 
-                sql = sql_temp.format(
-                    subject_uniprot=e["subject_uniprot"],
-                    object_uniprot=e["object_uniprot"],
+                subject_uniprot = e["subject_uniprot"]
+                object_uniprot = e["object_uniprot"]
+
+                sql = (
+                    select(
+                        ia.symbol.label("subject_symbol"),
+                        ia.uniprot.label("subject_uniprot"),
+                        ia.taxonomy_id.label("subject_taxonomy_id"),
+                        m.modification,
+                        ib.symbol.label("object_symbol"),
+                        ib.uniprot.label("object_uniprot"),
+                        ib.taxonomy_id.label("object_taxonomy_id"),
+                        es.experimental_system,
+                        func.group_concat(b.biogrid_id.distinct()).label("biogrid_ids"),
+                        func.group_concat(
+                            if_func(p.source == "PUBMED", cast(p.source_identifier, Integer), None).distinct()
+                        ).label("pmids"),
+                        func.count(p.source_identifier.distinct()).label("num_pubs"),
+                        func.group_concat(
+                            if_func(p.source == "DOI", cast(p.source_identifier, Integer), None).distinct()
+                        ).label("dois"),
+                    )
+                    .join(ia, b.biogrid_a_id == ia.biogrid_id)
+                    .join(ib, b.biogrid_b_id == ib.biogrid_id)
+                    .join(m, m.id == b.modification_id)
+                    .join(p, b.publication_id == p.id)
+                    .join(es, b.experimental_system_id == es.id)
+                    .where(ia.uniprot == subject_uniprot)
+                    .where(ib.uniprot == object_uniprot)
+                    .where(m.modification != "No Modification")
                 )
 
-                for row in self.engine.execute(sql).fetchall():
-                    row_dict = dict(row)
-                    be = BioGridEdge(subject_rid=subj_pure_rid, object_rid=obj_pure_rid, **row_dict)
-                    edge_value_dict = be.get_edge_value_dict()
+                results = self.session.execute(sql).fetchall()
 
-                    if be.modConfig.bg_mod_name == "Proteolytic Processing":
-                        self.create_edge(
-                            "decreases_bg",
-                            from_rid=subj_pure_rid,
-                            to_rid=obj_pure_rid,
-                            value_dict=edge_value_dict,
-                        )
-                        counter += 1
-                    else:
-                        obj_pmod_value_dict = be.obj.get_pmod_protein_as_value_dict()
-                        pmod_protein_rid = self.node_exists("protein", obj_pmod_value_dict, check_for="bel")
-                        if not pmod_protein_rid:
-                            pmod_protein_rid = self.get_create_rid("protein", obj_pmod_value_dict, check_for="bel")
-                            self.create_edge("has_modified_protein", obj_pure_rid, pmod_protein_rid)
-                            pmod_rid = self.insert_record("pmod", be.get_pmod_as_value_dict())
-                            self.create_edge("has__pmod", pmod_protein_rid, pmod_rid)
-                        self.create_edge(
-                            be.edge_name,
-                            subj_pure_rid,
-                            pmod_protein_rid,
-                            edge_value_dict,
-                        )
-                        counter += 1
+                for row in results:
+                    if row[0] is not None:  # No results for uniprot ID combo
+                        row_dict = row._asdict()  # If no modification then no results were returned
+                        be = BioGridEdge(subject_rid=subj_pure_rid, object_rid=obj_pure_rid, **row_dict)
+                        edge_value_dict = be.get_edge_value_dict()
+
+                        if be.modConfig.bg_mod_name == "Proteolytic Processing":
+                            self.create_edge(
+                                "decreases_bg",
+                                from_rid=subj_pure_rid,
+                                to_rid=obj_pure_rid,
+                                value_dict=edge_value_dict,
+                            )
+                            counter += 1
+                        else:
+                            obj_pmod_value_dict = be.obj.get_pmod_protein_as_value_dict()
+                            pmod_protein_rid = self.node_exists("protein", obj_pmod_value_dict, check_for="bel")
+                            if not pmod_protein_rid:
+                                pmod_protein_rid = self.get_create_rid("protein", obj_pmod_value_dict, check_for="bel")
+                                self.create_edge("has_modified_protein", obj_pure_rid, pmod_protein_rid)
+                                pmod_rid = self.insert_record("pmod", be.get_pmod_as_value_dict())
+                                self.create_edge("has__pmod", pmod_protein_rid, pmod_rid)
+                            self.create_edge(
+                                be.edge_name,
+                                subj_pure_rid,
+                                pmod_protein_rid,
+                                edge_value_dict,
+                            )
+                            counter += 1
         return counter
-
-    def create_view(self):
-        """Create SQL view of BioGRID data."""
-        sql = """create view if not exists biogrid_view as
-            select
-                b.biogrid_id,
-                ia.symbol as symbol_a,
-                ia.uniprot as uniprot_a,
-                ta.taxonomy_id as tax_id_a,
-                ta.organism_name as organism_a,
-                ib.symbol as symbol_b,
-                ib.uniprot as uniprot_b,
-                tb.taxonomy_id as tax_id_b,
-                tb.organism_name as organism_b,
-                es.experimental_system,
-                m.modification,
-                s.source,
-                b.qualification,
-                p.source as publication_source,
-                p.source_identifier as publication_identifier
-            from
-                biogrid b inner join
-                biogrid_interactor ia on (ia.biogrid_id=b.biogrid_a_id) inner join
-                biogrid_interactor ib on (ib.biogrid_id=b.biogrid_b_id) inner join
-                biogrid_taxonomy ta on (ia.taxonomy_id=ta.taxonomy_id) inner join
-                biogrid_taxonomy tb on (ib.taxonomy_id=tb.taxonomy_id) left join
-                biogrid_experimental_system es on (b.experimental_system_id=es.id) left join
-                biogrid_modification m on (m.id=b.modification_id) left join
-                biogrid_source s on (s.id=b.source_id) left join
-                biogrid_publication p on (p.id=b.publication_id)"""
-        self.engine.execute(sql)

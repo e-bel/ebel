@@ -4,9 +4,8 @@
 
 import logging
 import logging.handlers as handlers
-import os
 
-from .constants import DATA_DIR, LOG_DIR, PROJECT_DIR
+from ebel.constants import DATA_DIR, LOG_DIR, PROJECT_DIR
 
 ###############################################################################
 # UNIPROT taxonomy IDs to import
@@ -24,16 +23,16 @@ default_tax_ids = [
 
 SQLITE_DATABASE_NAME = "ebel.db"
 SQLITE_TEST_DATABASE_NAME = "ebel_test.db"
-DATABASE_LOCATION = os.path.join(DATA_DIR, SQLITE_DATABASE_NAME)
-DEFAULT_TEST_DATABASE_LOCATION = os.path.join(DATA_DIR, SQLITE_TEST_DATABASE_NAME)
+DATABASE_LOCATION = DATA_DIR.joinpath(SQLITE_DATABASE_NAME)
+DEFAULT_TEST_DATABASE_LOCATION = DATA_DIR.joinpath(SQLITE_TEST_DATABASE_NAME)
 
 ###############################################################################
 # SQLAlchemy connection strings
 # =============================
 # SQLite
 # ------
-CONN_STR_DEFAULT = "sqlite:///" + DATABASE_LOCATION
-CONN_STR_TESTS = "sqlite:///" + SQLITE_TEST_DATABASE_NAME
+CONN_STR_DEFAULT = "sqlite:///" + DATABASE_LOCATION.name
+CONN_STR_TESTS = "sqlite:///" + DEFAULT_TEST_DATABASE_LOCATION.name
 # MySQL
 # -----
 CONN_STR_MYSQL_PREFIX = "mysql+pymysql://ebel:ebel@localhost/"
@@ -42,22 +41,24 @@ CONN_STR_MYSQL_TESTS = CONN_STR_MYSQL_PREFIX + "ebel_test?charset=utf8"
 
 ###############################################################################
 # Config
-config_file_path = os.path.join(PROJECT_DIR, "config.ini")
+config_file_path = PROJECT_DIR.joinpath("config.ini")
 
 ###############################################################################
 # Log Handling
 logHandler = handlers.RotatingFileHandler(
-    filename=os.path.join(LOG_DIR, "ebel.log"),
+    filename=LOG_DIR.joinpath("ebel.log"),
     mode="a",
     maxBytes=4098 * 10,  # 4MB file max
-    backupCount=0,
+    backupCount=3,
 )
 logh_format = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logHandler.setFormatter(logh_format)
 logHandler.setLevel(logging.DEBUG)
 
 # Console Handler
-ch = logging.StreamHandler()
-ch_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-ch.setFormatter(ch_format)
-ch.setLevel(logging.WARNING)
+streamHandler = logging.StreamHandler()
+stream_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+streamHandler.setFormatter(stream_format)
+streamHandler.setLevel(logging.WARNING)
+
+logging.basicConfig(level=logging.INFO, handlers=[logHandler, streamHandler])

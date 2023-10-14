@@ -3,9 +3,11 @@ from flask import request
 
 from ebel.manager.rdbms.models import disgenet
 from ebel.web.api import RDBMS
-from ebel.web.api.ebel.v1 import (_get_paginated_ebel_query_result,
-                                  _get_paginated_query_result,
-                                  _get_terms_from_model_starts_with)
+from ebel.web.api.ebel.v1 import (
+    _get_paginated_ebel_query_result,
+    _get_paginated_query_result,
+    _get_terms_from_model_starts_with,
+)
 
 
 def get_sources():

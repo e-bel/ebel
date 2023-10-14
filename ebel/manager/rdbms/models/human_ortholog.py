@@ -1,6 +1,7 @@
 """HGNC Human Ortholog RDBMS model definition."""
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Mapped, mapped_column
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -12,18 +13,18 @@ class HumanOrtholog(Base):
 
     __tablename__ = "human_ortholog"
 
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    hgnc_id = Column(String(20), index=True)
-    human_entrez_gene = Column(Integer)
-    human_ensembl_gene = Column(String(20))
-    human_symbol = Column(String(50), index=True)
-    ortholog_species = Column(Integer, index=True)
-    ortholog_species_entrez_gene = Column(Integer)
-    ortholog_species_ensembl_gene = Column(String(50))
-    ortholog_species_db_id = Column(String(50))
-    ortholog_species_symbol = Column(String(50), index=True)
-    support = Column(Text)
+    hgnc_id: Mapped[str] = mapped_column(String(20), index=True)
+    human_entrez_gene: Mapped[int] = mapped_column()
+    human_ensembl_gene: Mapped[str] = mapped_column(String(20))
+    human_symbol: Mapped[str] = mapped_column(String(50), index=True)
+    ortholog_species: Mapped[int] = mapped_column(index=True)
+    ortholog_species_entrez_gene: Mapped[int] = mapped_column()
+    ortholog_species_ensembl_gene: Mapped[str] = mapped_column(String(50))
+    ortholog_species_db_id: Mapped[str] = mapped_column(String(50))
+    ortholog_species_symbol: Mapped[str] = mapped_column(String(50), index=True)
+    support: Mapped[str] = mapped_column(Text)
 
     def as_dict(self):
         """Convert object values to dictionary."""

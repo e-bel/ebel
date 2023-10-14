@@ -6,9 +6,11 @@ from typing import Optional, Union
 
 import pymysql
 from pyorientdb import OrientDB
-from pyorientdb.exceptions import (PyOrientCommandException,
-                                   PyOrientConnectionException,
-                                   PyOrientSecurityAccessException)
+from pyorientdb.exceptions import (
+    PyOrientCommandException,
+    PyOrientConnectionException,
+    PyOrientSecurityAccessException,
+)
 
 from ebel.config import get_config_as_dict, write_to_config
 from ebel.constants import TerminalFormatting as TF

@@ -170,7 +170,9 @@ class ProteinAtlas(odb_meta.Graph):
 
         location_rid_cache = {x["bel"]: x["rid"] for x in self.query_class("location", columns=["bel"])}
 
-        for ensembl_gene_id, data in tqdm(rid_ensembl_gene_ids.items()):
+        for ensembl_gene_id, data in tqdm(
+            rid_ensembl_gene_ids.items(), desc=f"Update {self.biodb_name.upper()} interactions"
+        ):
             ns_location = "PROTEIN_ATLAS"
             pure_protein = data.oRecordData
             ns = pure_protein["namespace"]

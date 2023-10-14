@@ -5,6 +5,7 @@ import hashlib
 import os.path
 import re
 import shutil
+from os import PathLike
 from types import GeneratorType
 from typing import Iterable, List, Union
 
@@ -93,7 +94,7 @@ def md5(file_path):
     return hash_md5.hexdigest()
 
 
-def get_file_path(url: str, biodb: str):
+def get_file_path(url: str, biodb: str) -> str:
     """Get standard file path by file_name and DATADIR."""
     file_name = os.path.basename(url)
     bio_db_dir = os.path.join(DATA_DIR, biodb)

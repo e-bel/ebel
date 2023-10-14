@@ -4,8 +4,7 @@ from sqlalchemy.orm.attributes import InstrumentedAttribute
 
 from ebel.manager.rdbms.models import drugbank
 from ebel.web.api import RDBMS
-from ebel.web.api.ebel.v1 import (_get_data, _get_paginated_ebel_query_result,
-                                  _get_paginated_query_result)
+from ebel.web.api.ebel.v1 import _get_data, _get_paginated_ebel_query_result, _get_paginated_query_result
 
 
 def get_by_id():

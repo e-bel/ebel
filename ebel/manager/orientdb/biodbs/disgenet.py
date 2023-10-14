@@ -4,9 +4,11 @@ from typing import Dict, Optional
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import select, text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
+from ebel.manager.orientdb.biodbs.ensembl import Ensembl
 from ebel.manager.orientdb.constants import DISGENET
 from ebel.manager.rdbms.models import disgenet
 from ebel.tools import get_disease_trait_keywords_from_config, get_file_path
@@ -50,6 +52,12 @@ class DisGeNet(odb_meta.Graph):
     def insert_data(self) -> Dict[str, int]:
         """Insert data into database."""
         logger.info(f"Import {self.biodb_name.upper()}")
+
+        # Update EnSembl first since DisGeNet is dependent on it
+        ens = Ensembl()
+        ens.update()
+
+        # Insert data
         inserted = dict()
         inserted["sources"] = self._insert_sources()
         inserted["gene_symbols"] = self._insert_gene_symbols()
@@ -73,8 +81,8 @@ class DisGeNet(odb_meta.Graph):
         return self.__get_file_for_model(disgenet.DisgenetVariant)
 
     def _insert_sources(self):
-        df_g = pd.read_csv(self.file_path_gene, sep="\t", usecols=["source"]).drop_duplicates()
-        df_v = pd.read_csv(self.file_path_variant, sep="\t", usecols=["source"]).drop_duplicates()
+        df_g = pd.read_csv(self.file_path_gene, sep="\t", usecols=["source"])
+        df_v = pd.read_csv(self.file_path_variant, sep="\t", usecols=["source"])
         df = pd.concat([df_g, df_v]).drop_duplicates()
         df.reset_index(inplace=True, drop=True)
         df.index += 1
@@ -115,9 +123,10 @@ class DisGeNet(odb_meta.Graph):
         return df.shape[0]
 
     def _merge_with_source(self, df):
-        df_sources = pd.read_sql_table(disgenet.DisgenetSource.__tablename__, self.engine).rename(
-            columns={"id": "source_id"}
-        )
+        with self.engine.connect() as conn:
+            stmt = select(disgenet.DisgenetSource)
+            df_sources = pd.read_sql(stmt, conn).rename(columns={"id": "source_id"})
+
         return pd.merge(df, df_sources, on="source").drop(columns=["source"])
 
     def _insert_gene_disease_pmid_associations(self) -> int:
@@ -174,35 +183,23 @@ class DisGeNet(odb_meta.Graph):
             "downstream": "upstream",
             "upstream": "downstream",
         }
-        # TODO: replace SQL with SQL Alchemy statement
-        sql_temp = """Select
-                snp_id,
-                chromosome,
-                position,
-                disease_name,
-                pmid,
-                score,
-                source
-            FROM
-                disgenet_variant v INNER JOIN
-                disgenet_source s on (v.source_id=s.id) INNER JOIN
-                disgenet_disease d on (v.disease_id=d.disease_id)
-            WHERE
-                disease_name like '%%{}%%' and
-                source!='BEFREE'
-            GROUP BY
-                snp_id,
-                chromosome,
-                position,
-                disease_name,
-                pmid,
-                score,
-                source"""
+
+        dv = disgenet.DisgenetVariant
+        ds = disgenet.DisgenetSource
+        dd = disgenet.DisgenetDisease
 
         results = dict()
         for kwd in self.disease_keywords:
-            sql = sql_temp.format(kwd)
-            rows = self.engine.execute(sql)
+            sql = (
+                select(dv.snp_id, dv.chromosome, dv.position, dd.disease_name, dv.pmid, dv.score, ds.source)
+                .join(ds)
+                .join(dd)
+                .where(dd.disease_name.like(f"%{kwd}%"))
+                .where(ds.source != "BEFREE")
+                .group_by(dv.snp_id, dv.chromosome, dv.position, dd.disease_name, dv.pmid, dv.score, ds.source)
+            )
+
+            rows = self.session.execute(sql).fetchall()
             results[kwd] = rows
 
         inserted = 0
@@ -213,7 +210,7 @@ class DisGeNet(odb_meta.Graph):
             for r in tqdm(
                 kwd_disease_results,
                 desc=f"Update DisGeNET variant interactions for {trait}",
-                total=kwd_disease_results.rowcount,
+                total=len(kwd_disease_results),
             ):
                 snp_id, chromosome, position, disease_name, pmid, score, source = r
 

@@ -9,8 +9,7 @@ from copy import deepcopy
 from enum import Enum
 from typing import Dict, List, Optional, Tuple
 
-from ebel.manager.orientdb.odb_defaults import (ODataType, OIndexType,
-                                                normalized_pmod)
+from ebel.manager.orientdb.odb_defaults import ODataType, OIndexType, normalized_pmod
 
 
 class OClassType(Enum):
@@ -463,8 +462,8 @@ bel_edges: Tuple[Edge, ...] = (
 
 bel_indices = (
     OIndex(bel, ("bel",), OIndexType.NOTUNIQUE_HASH_INDEX),
-    OIndex(bel, ("involved_genes",), OIndexType.NOTUNIQUE_HASH_INDEX),
-    OIndex(bel, ("involved_other",), OIndexType.NOTUNIQUE_HASH_INDEX),
+    # OIndex(bel, ("involved_genes",), OIndexType.NOTUNIQUE_HASH_INDEX),
+    # OIndex(bel, ("involved_other",), OIndexType.NOTUNIQUE_HASH_INDEX),
     OIndex(bel_relation, ("evidence",), OIndexType.NOTUNIQUE_HASH_INDEX),
     OIndex(protein, ("uniprot",), OIndexType.NOTUNIQUE_HASH_INDEX),
     OIndex(bel_relation, ("annotation",), OIndexType.DICTIONARY),

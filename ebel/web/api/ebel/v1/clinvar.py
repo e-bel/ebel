@@ -7,9 +7,12 @@ from flask import request
 from ebel import Bel
 from ebel.manager.rdbms.models import clinvar
 from ebel.web.api import RDBMS
-from ebel.web.api.ebel.v1 import (_get_data, _get_paginated_query_result,
-                                  _get_pagination,
-                                  _get_terms_from_model_starts_with)
+from ebel.web.api.ebel.v1 import (
+    _get_data,
+    _get_paginated_query_result,
+    _get_pagination,
+    _get_terms_from_model_starts_with,
+)
 
 
 def get_clinvar():

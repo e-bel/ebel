@@ -1,9 +1,10 @@
 """ClinicalTrials.gov RDBMS model definition."""
 import re
+from typing import List, Optional
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Table, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -83,49 +84,49 @@ class ClinicalTrialGov(Base):
 
     __tablename__ = "clinical_trials_gov"
 
-    id = Column(Integer, primary_key=True)
-    nct_id = Column(String(100), index=True)
-    org_study_id = Column(Text)
-    brief_title = Column(Text)
-    official_title = Column(Text)
-    is_fda_regulated_drug = Column(Text)
-    brief_summary = Column(Text)
-    detailed_description = Column(Text)
-    overall_status = Column(Text)
-    start_date = Column(Text)
-    completion_date = Column(Text)
-    phase = Column(Text)
-    study_type = Column(Text)
-    study_design_intervention_model = Column(Text)
-    study_design_primary_purpose = Column(Text)
-    study_design_masking = Column(Text)
+    id: Mapped[int] = mapped_column(primary_key=True)
+    nct_id = mapped_column(String(100), index=True)
+    org_study_id: Mapped[Optional[str]] = mapped_column(Text)
+    brief_title: Mapped[Optional[str]] = mapped_column(Text)
+    official_title: Mapped[Optional[str]] = mapped_column(Text)
+    is_fda_regulated_drug: Mapped[Optional[str]] = mapped_column(Text)
+    brief_summary: Mapped[Optional[str]] = mapped_column(Text)
+    detailed_description: Mapped[Optional[str]] = mapped_column(Text)
+    overall_status: Mapped[Optional[str]] = mapped_column(Text)
+    start_date: Mapped[Optional[str]] = mapped_column(Text)
+    completion_date: Mapped[Optional[str]] = mapped_column(Text)
+    phase: Mapped[Optional[str]] = mapped_column(Text)
+    study_type: Mapped[Optional[str]] = mapped_column(Text)
+    study_design_intervention_model: Mapped[Optional[str]] = mapped_column(Text)
+    study_design_primary_purpose: Mapped[Optional[str]] = mapped_column(Text)
+    study_design_masking: Mapped[Optional[str]] = mapped_column(Text)
     # primary_outcomes
     # secondary_outcomes
-    patient_data_sharing_ipd = Column(Text)
-    patient_data_ipd_description = Column(Text)
+    patient_data_sharing_ipd: Mapped[Optional[str]] = mapped_column(Text)
+    patient_data_ipd_description: Mapped[Optional[str]] = mapped_column(Text)
 
-    keywords = relationship(
+    keywords: Mapped[List["Keyword"]] = relationship(
         "Keyword",
         secondary=ctg_keyword_n2m,
         back_populates="trials",
         cascade="save-update",
     )
 
-    conditions = relationship(
+    conditions: Mapped[List["Condition"]] = relationship(
         "Condition",
         secondary=ctg_condition_n2m,
         back_populates="trials",
         cascade="save-update",
     )
 
-    mesh_terms = relationship(
+    mesh_terms: Mapped[List["MeshTerm"]] = relationship(
         "MeshTerm",
         secondary=ctg_mesh_term_n2m,
         back_populates="trials",
         cascade="save-update",
     )
 
-    interventions = relationship(
+    interventions: Mapped[List["Intervention"]] = relationship(
         "Intervention",
         secondary=ctg_intervention_n2m,
         back_populates="trials",
@@ -157,9 +158,11 @@ class Keyword(Base):
     """Class definition for the clinical_trials_gov_keyword table."""
 
     __tablename__ = "clinical_trials_gov_keyword"
-    id = Column(Integer, primary_key=True)
-    keyword = Column(String(255), index=True)
-    trials = relationship("ClinicalTrialGov", secondary=ctg_keyword_n2m, back_populates="keywords")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    keyword: Mapped[str] = mapped_column(String(255), index=True)
+    trials: Mapped[List["ClinicalTrialGov"]] = relationship(
+        "ClinicalTrialGov", secondary=ctg_keyword_n2m, back_populates="keywords"
+    )
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -170,9 +173,11 @@ class Condition(Base):
     """Class definition for the clinical_trials_gov_condition table."""
 
     __tablename__ = "clinical_trials_gov_condition"
-    id = Column(Integer, primary_key=True)
-    condition = Column(Text)
-    trials = relationship("ClinicalTrialGov", secondary=ctg_condition_n2m, back_populates="conditions")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    condition: Mapped[str] = mapped_column(Text)
+    trials: Mapped[List["ClinicalTrialGov"]] = relationship(
+        "ClinicalTrialGov", secondary=ctg_condition_n2m, back_populates="conditions"
+    )
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -183,9 +188,11 @@ class MeshTerm(Base):
     """Class definition for the clinical_trials_gov_mesh_term table."""
 
     __tablename__ = "clinical_trials_gov_mesh_term"
-    id = Column(Integer, primary_key=True)
-    mesh_term = Column(String(100), unique=True)
-    trials = relationship("ClinicalTrialGov", secondary=ctg_mesh_term_n2m, back_populates="mesh_terms")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    mesh_term: Mapped[str] = mapped_column(String(100), unique=True)
+    trials: Mapped[List["ClinicalTrialGov"]] = relationship(
+        "ClinicalTrialGov", secondary=ctg_mesh_term_n2m, back_populates="mesh_terms"
+    )
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -200,10 +207,10 @@ class Intervention(Base):
     """Class definition for the clinical_trials_gov_intervention table."""
 
     __tablename__ = "clinical_trials_gov_intervention"
-    id = Column(Integer, primary_key=True)
-    intervention_type = Column(String(100), index=True)
-    intervention_name = Column(String(255), index=True)
-    trials = relationship(
+    id: Mapped[int] = mapped_column(primary_key=True)
+    intervention_type: Mapped[str] = mapped_column(String(100), index=True)
+    intervention_name: Mapped[str] = mapped_column(String(255), index=True)
+    trials: Mapped[List["ClinicalTrialGov"]] = relationship(
         "ClinicalTrialGov",
         secondary=ctg_intervention_n2m,
         back_populates="interventions",
