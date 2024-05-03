@@ -1148,7 +1148,7 @@ class _BelScript:
                         if not successful:
                             import_success = False
                             error_args = error.args[0].split("\n")
-                            string_error = error_args[2] if len(error_args) > 1 else error_args[0]
+                            string_error = error_args[1] if len(error_args) > 1 else error_args[0]
                             logger.error(
                                 f"Annotation {anno.keyword} failed to be added from {anno.value}",
                                 exc_info=False,
