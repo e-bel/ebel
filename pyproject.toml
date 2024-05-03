@@ -57,14 +57,14 @@ flask_cors = "^3.0.10"
 connexion = {version = "^2.14.1", extras = ["swagger-ui"]}
 cryptography = "^3.4.7"
 openpyxl = "^3.0.10"
-graphviz = "0.19.1"
+graphviz = "0.20"
 pyorientdb = "^1.0.0"
 PyMySQL = "^1.0.2"
 python = "^3.9"
 mkdocstrings = {version = "^0.18", extras = ["python"]}
 
-#[tool.poetry.group.dev.dependencies]
-#black = "^23.7.0"
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
 
 [tool.poetry.scripts]
 ebel = "ebel.cli:main"
