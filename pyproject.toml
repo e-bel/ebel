@@ -63,8 +63,8 @@ PyMySQL = "^1.0.2"
 python = "^3.9"
 mkdocstrings = {version = "^0.18", extras = ["python"]}
 
-[tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
+#[tool.poetry.group.dev.dependencies]
+#black = "^23.7.0"
 
 [tool.poetry.scripts]
 ebel = "ebel.cli:main"
