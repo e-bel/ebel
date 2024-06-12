@@ -1,7 +1,9 @@
 """NCBI RDBMS model definition."""
+from typing import List, Optional
+
 from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from . import object_as_dict
 
@@ -12,27 +14,35 @@ class NcbiGeneInfo(Base):
     """Class definition for the ncbi_gene_info table."""
 
     __tablename__ = "ncbi_gene_info"
-    gene_id = Column(Integer, primary_key=True)
+    gene_id: Mapped[int] = mapped_column(primary_key=True)
 
-    tax_id = Column(Integer, index=True)
-    symbol = Column(String(100), index=True)
-    type_of_gene = Column(String(100), index=True)
-    locus_tag = Column(String(100))
-    chromosome = Column(String(100))
-    map_location = Column(String(100))
-    description_id = Column(Integer, ForeignKey("ncbi_gene_info_description.id"))
-    description = relationship("NcbiGeneInfoDescription", foreign_keys=[description_id])
-    xrefs = relationship("NcbiGeneInfoXref", back_populates="gene")
-    mims = relationship("NcbiGeneMim", foreign_keys="NcbiGeneMim.gene_id", back_populates="gene")
-    orthologs = relationship(
+    tax_id: Mapped[int] = mapped_column(index=True)
+    symbol: Mapped[Optional[str]] = mapped_column(String(100), index=True)
+    type_of_gene: Mapped[Optional[str]] = mapped_column(String(100), index=True)
+    locus_tag: Mapped[Optional[str]] = mapped_column(String(100))
+    chromosome: Mapped[Optional[str]] = mapped_column(String(100))
+    map_location: Mapped[Optional[str]] = mapped_column(String(100))
+    description_id: Mapped[Optional[int]] = mapped_column(ForeignKey("ncbi_gene_info_description.id"))
+    description: Mapped["NcbiGeneInfoDescription"] = relationship(
+        "NcbiGeneInfoDescription", foreign_keys=[description_id]
+    )
+    xrefs: Mapped[List["NcbiGeneInfoXref"]] = relationship("NcbiGeneInfoXref", back_populates="gene")
+    mims: Mapped[List["NcbiGeneMim"]] = relationship(
+        "NcbiGeneMim", foreign_keys="NcbiGeneMim.gene_id", back_populates="gene"
+    )
+    orthologs: Mapped[List["NcbiGeneOrtholog"]] = relationship(
         "NcbiGeneOrtholog",
         foreign_keys="NcbiGeneOrtholog.gene_id",
         back_populates="gene",
     )
-    ensembl_ids = relationship("NcbiGeneEnsembl", back_populates="genes")
-    gene_ids_right = relationship("NcbiGeneOnRight", foreign_keys="NcbiGeneOnRight.gene_id", back_populates="gene")
-    gene_ids_left = relationship("NcbiGeneOnLeft", foreign_keys="NcbiGeneOnLeft.gene_id", back_populates="gene")
-    gene_ids_overlapping = relationship(
+    ensembl_ids: Mapped[List["NcbiGeneEnsembl"]] = relationship("NcbiGeneEnsembl", back_populates="genes")
+    gene_ids_right: Mapped["NcbiGeneOnRight"] = relationship(
+        "NcbiGeneOnRight", foreign_keys="NcbiGeneOnRight.gene_id", back_populates="gene"
+    )
+    gene_ids_left: Mapped["NcbiGeneOnLeft"] = relationship(
+        "NcbiGeneOnLeft", foreign_keys="NcbiGeneOnLeft.gene_id", back_populates="gene"
+    )
+    gene_ids_overlapping: Mapped["NcbiGeneOverlapping"] = relationship(
         "NcbiGeneOverlapping",
         foreign_keys="NcbiGeneOverlapping.gene_id",
         back_populates="gene",
@@ -60,76 +70,76 @@ class NcbiGeneInfoDescription(Base):
     """Class definition for the ncbi_gene_info_description table."""
 
     __tablename__ = "ncbi_gene_info_description"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    description = Column(Text)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    description: Mapped[str] = mapped_column(Text)
 
 
 class NcbiGeneOnRight(Base):
     """Class definition for the ncbi_gene_on_right table."""
 
     __tablename__ = "ncbi_gene_on_right"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
-    gene_id_on_right = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
+    gene_id_on_right: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
 
-    gene = relationship("NcbiGeneInfo", foreign_keys=[gene_id])
+    gene: Mapped[NcbiGeneInfo] = relationship("NcbiGeneInfo", foreign_keys=[gene_id])
 
 
 class NcbiGeneOnLeft(Base):
     """Class definition for the ncbi_gene_on_left table."""
 
     __tablename__ = "ncbi_gene_on_left"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
-    gene_id_on_left = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
+    gene_id_on_left: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
 
-    gene = relationship("NcbiGeneInfo", foreign_keys=[gene_id])
+    gene: Mapped[NcbiGeneInfo] = relationship("NcbiGeneInfo", foreign_keys=[gene_id])
 
 
 class NcbiGeneOverlapping(Base):
     """Class definition for the ncbi_gene_overlapping table."""
 
     __tablename__ = "ncbi_gene_overlapping"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    gene_id = gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
-    overlapping_gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
+    overlapping_gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
 
-    gene = relationship("NcbiGeneInfo", foreign_keys=[gene_id])
+    gene: Mapped[NcbiGeneInfo] = relationship("NcbiGeneInfo", foreign_keys=[gene_id])
 
 
 class NcbiGeneOrtholog(Base):
     """Class definition for the ncbi_gene_ortholog table."""
 
     __tablename__ = "ncbi_gene_ortholog"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    tax_id = Column(Integer, index=True)
-    gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
-    other_tax_id = Column(Integer, index=True)
-    other_gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    tax_id: Mapped[int] = mapped_column(index=True)
+    gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
+    other_tax_id: Mapped[int] = mapped_column(index=True)
+    other_gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
 
-    gene = relationship("NcbiGeneInfo", foreign_keys=[gene_id])
+    gene: Mapped[NcbiGeneInfo] = relationship("NcbiGeneInfo", foreign_keys=[gene_id])
 
 
 class NcbiGenePubmed(Base):
     """Class definition for the ncbi_gene_pubmed table."""
 
     __tablename__ = "ncbi_gene_pubmed"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    tax_id = Column(Integer, index=True)
-    gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
-    pub_med_id = Column(Integer)
+    tax_id: Mapped[int] = mapped_column(index=True)
+    gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
+    pub_med_id: Mapped[int] = mapped_column()
 
 
 class NcbiGeneInfoXref(Base):
     """Class definition for the ncbi_gene_info_xref table."""
 
     __tablename__ = "ncbi_gene_info_xref"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    db = Column(String(100), index=True)
-    dbid = Column(String(100), index=True)
-    gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
+    db: Mapped[str] = mapped_column(String(100), index=True)
+    dbid: Mapped[str] = mapped_column(String(100), index=True)
+    gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
 
     gene = relationship("NcbiGeneInfo", back_populates="xrefs")
 
@@ -138,16 +148,16 @@ class NcbiGeneMim(Base):
     """Class definition for the ncbi_gene_mim table."""
 
     __tablename__ = "ncbi_gene_mim"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    mim_number = Column(Integer)
-    gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
-    type = Column(String(100))
-    source = Column(String(100))
-    med_gen_cui = Column(String(100), index=True)
-    comment = Column(String(100))
+    mim_number: Mapped[int] = mapped_column()
+    gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
+    type: Mapped[str] = mapped_column(String(100))
+    source: Mapped[str] = mapped_column(String(100))
+    med_gen_cui: Mapped[str] = mapped_column(String(100), index=True)
+    comment: Mapped[str] = mapped_column(String(100))
 
-    gene = relationship("NcbiGeneInfo", back_populates="mims")
+    gene: Mapped[NcbiGeneInfo] = relationship("NcbiGeneInfo", back_populates="mims")
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -165,17 +175,17 @@ class NcbiGeneEnsembl(Base):
     """Class definition for the ncbi_gene_ensembl table."""
 
     __tablename__ = "ncbi_gene_ensembl"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    tax_id = Column(Integer, index=True)
-    gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
-    ensembl_gene_identifier = Column(String(100))
-    rna_nucleotide_accession_version = Column(String(100))
-    ensembl_rna_identifier = Column(String(100))
-    protein_accession_version = Column(String(100))
-    ensembl_protein_identifier = Column(String(100))
+    tax_id: Mapped[int] = mapped_column(index=True)
+    gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
+    ensembl_gene_identifier: Mapped[str] = mapped_column(String(100))
+    rna_nucleotide_accession_version: Mapped[Optional[str]] = mapped_column(String(100))
+    ensembl_rna_identifier: Mapped[Optional[str]] = mapped_column(String(100))
+    protein_accession_version: Mapped[Optional[str]] = mapped_column(String(100))
+    ensembl_protein_identifier: Mapped[Optional[str]] = mapped_column(String(100))
 
-    genes = relationship("NcbiGeneInfo", back_populates="ensembl_ids")
+    genes: Mapped[NcbiGeneInfo] = relationship("NcbiGeneInfo", back_populates="ensembl_ids")
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -194,15 +204,15 @@ class NcbiGeneGo(Base):
     """Class definition for the ncbi_gene_go table."""
 
     __tablename__ = "ncbi_gene_go"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    tax_id = Column(Integer, index=True)
-    gene_id = Column(Integer, ForeignKey("ncbi_gene_info.gene_id"))
-    go_id = Column(String(100), index=True)
-    evidence = Column(String(10))
-    qualifier = Column(String(100))
-    go_term = Column(String(255))
-    category = Column(String(10))
+    tax_id: Mapped[int] = mapped_column(index=True)
+    gene_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_info.gene_id"))
+    go_id: Mapped[str] = mapped_column(String(100), index=True)
+    evidence: Mapped[str] = mapped_column(String(10))
+    qualifier: Mapped[str] = mapped_column(String(100))
+    go_term: Mapped[str] = mapped_column(String(255))
+    category: Mapped[str] = mapped_column(String(10))
 
     pmids = relationship("NcbiGeneGoPmid", back_populates="gos")
 
@@ -224,25 +234,25 @@ class NcbiGeneGoPmid(Base):
     """Class definition for the ncbi_gene_go_pmid table."""
 
     __tablename__ = "ncbi_gene_go_pmid"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    ncbi_gene_go_id = Column(Integer, ForeignKey("ncbi_gene_go.id"))
-    pmid = Column(Integer)
+    ncbi_gene_go_id: Mapped[int] = mapped_column(ForeignKey("ncbi_gene_go.id"))
+    pmid: Mapped[int] = mapped_column()
 
-    gos = relationship("NcbiGeneGo", back_populates="pmids")
+    gos: Mapped[List[NcbiGeneGo]] = relationship("NcbiGeneGo", back_populates="pmids")
 
 
 class NcbiMedGenName(Base):
     """Class definition for the ncbi_medgen_name table."""
 
     __tablename__ = "ncbi_medgen_name"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    cui = Column(String(100))
-    name = Column(Text)
-    source = Column(String(100))
-    suppress = Column(String(1))
-    pmids = relationship("NcbiMedGenPmid", back_populates="med_gen_name")
+    cui: Mapped[str] = mapped_column(String(100))
+    name: Mapped[str] = mapped_column(Text)
+    source: Mapped[str] = mapped_column(String(100))
+    suppress: Mapped[str] = mapped_column(String(1))
+    pmids: Mapped[List["NcbiMedGenPmid"]] = relationship("NcbiMedGenPmid", back_populates="med_gen_name")
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -255,10 +265,10 @@ class NcbiMedGenPmid(Base):
     """Class definition for the ncbi_medgen_pmid table."""
 
     __tablename__ = "ncbi_medgen_pmid"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    ncbi_medgen_name_id = Column(Integer, ForeignKey("ncbi_medgen_name.id"))
-    pmid = Column(Integer, index=True)
+    ncbi_medgen_name_id: Mapped[int] = mapped_column(ForeignKey("ncbi_medgen_name.id"))
+    pmid: Mapped[int] = mapped_column(index=True)
 
     med_gen_name = relationship("NcbiMedGenName", back_populates="pmids")
 

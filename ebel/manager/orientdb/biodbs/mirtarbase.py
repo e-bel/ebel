@@ -3,6 +3,7 @@ from typing import Dict
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import select, text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
@@ -36,7 +37,7 @@ class MirTarBase(odb_meta.Graph):
 
     def insert_data(self) -> Dict[str, int]:
         """Insert mirtarbase data into database."""
-        # TODO Fix download error -
+        # TODO: Fix download error -
         #  ssl.SSLError: [SSL: SSLV3_ALERT_HANDSHAKE_FAILURE] sslv3 alert handshake failure (_ssl.c:997)
         df = pd.read_excel(self.file_path)
         df.columns = self._standardize_column_names(df.columns)
@@ -57,20 +58,22 @@ class MirTarBase(odb_meta.Graph):
         self.clear_edges()
         df_symbol_rid = self.get_pure_symbol_rid_df_in_bel_context(class_name="rna", namespace="HGNC")
 
-        sql = f"""Select
-                mi_rna,
-                target_gene as symbol,
-                support_type,
-                references_pmid as pmid,
-                experiments
-            from
-                {mirtarbase.Mirtarbase.__tablename__}
-            where
-                species_mi_rna='Homo sapiens' and
-                species_target_gene='Homo sapiens' and
-                support_type in ('Functional MTI', 'Non-Functional MTI')"""
+        mtb = mirtarbase.Mirtarbase
+        sql = (
+            select(
+                mtb.mi_rna,
+                mtb.target_gene.label("symbol"),
+                mtb.support_type,
+                mtb.references_pmid.label("pmid"),
+                mtb.experiments,
+            )
+            .where(mtb.species_mi_rna == "Homo sapiens")
+            .where(mtb.species_target_gene == "Homo sapiens")
+            .where(mtb.support_type.in_(["Functional MTI", "Non-Functional MTI"]))
+        )
+
         cols = ["mi_rna", "symbol", "support_type", "pmid", "experiments"]
-        df_mirtarbase = pd.DataFrame(self.engine.execute(sql).fetchall(), columns=cols)
+        df_mirtarbase = pd.DataFrame(self.session.execute(sql).fetchall(), columns=cols)
         df_mirtarbase.experiments = df_mirtarbase.experiments.str.split("//")
         df_join = df_mirtarbase.set_index("symbol").join(df_symbol_rid.set_index("symbol"), how="inner")
 

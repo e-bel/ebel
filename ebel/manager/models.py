@@ -13,15 +13,14 @@ import pandas as pd
 import requests
 import sqlalchemy
 from lark import Lark, Token, Tree
-from sqlalchemy import Boolean, Column, ForeignKey, Index, Integer, String
+from sqlalchemy import Boolean, ForeignKey, Index, Integer, String
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy.sql.expression import func
 from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
 
-from ebel.constants import (FILE, GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_ANNO,
-                            GRAMMAR_START_NS, URL)
+from ebel.constants import FILE, GRAMMAR_NS_ANNO_PATH, GRAMMAR_START_ANNO, GRAMMAR_START_NS, URL
 from ebel.tools import BelRdb
 
 Base = declarative_base()
@@ -43,6 +42,7 @@ def reset_tables(engine: sqlalchemy.engine.Engine, force_new_db: bool) -> None:
 
     if force_new_db:
         Base.metadata.drop_all(bind=engine)
+
     Base.metadata.create_all(bind=engine, checkfirst=True)
 
 
@@ -55,7 +55,7 @@ def foreign_key_to(table_name):
     :rtype: sqlalchemy.Column
     """
     foreign_column = table_name + ".id"
-    return Column(Integer, ForeignKey(foreign_column))
+    return mapped_column(Integer, ForeignKey(foreign_column))
 
 
 class MasterModel(object):
@@ -71,7 +71,7 @@ class MasterModel(object):
 
     __mapper_args__ = {"always_refresh": True}
 
-    id = Column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True)
 
     def _to_dict(self):
         """Protected method for converting values to dictionary."""
@@ -94,10 +94,10 @@ class Namespace(Base, MasterModel):
     __tablename__ = "namespace"
     __table_args__ = (Index("idx_url", "url", mysql_length=100),)
 
-    url = Column(String(2048), nullable=False)
-    keyword = Column(String(255), index=True)
-    cacheable = Column(Boolean)
-    case_sensitive = Column(Boolean)
+    url = mapped_column(String(2048), nullable=False)
+    keyword = mapped_column(String(255), index=True)
+    cacheable = mapped_column(Boolean)
+    case_sensitive = mapped_column(Boolean)
 
     entries = relationship("NamespaceEntry", back_populates="namespace")
 
@@ -108,8 +108,8 @@ class NamespaceEntry(Base, MasterModel):
     __tablename__ = "namespace_entry"
     __table_args__ = (Index("idx_name", "name", mysql_length=100),)
 
-    name = Column(String(2048), nullable=True)
-    encoding = Column(String(8), nullable=True)
+    name = mapped_column(String(2048), nullable=True)
+    encoding = mapped_column(String(8), nullable=True)
 
     namespace__id = foreign_key_to("namespace")
     namespace = relationship("Namespace", back_populates="entries")
@@ -121,10 +121,10 @@ class Annotation(Base, MasterModel):
     __tablename__ = "annotation"
     __table_args__ = (Index("idx_url2", "url", mysql_length=100),)
 
-    url = Column(String(2048), nullable=False)
-    keyword = Column(String(255), index=True)
-    cacheable = Column(Boolean)
-    case_sensitive = Column(Boolean)
+    url = mapped_column(String(2048), nullable=False)
+    keyword = mapped_column(String(255), index=True)
+    cacheable = mapped_column(Boolean)
+    case_sensitive = mapped_column(Boolean)
 
     entries = relationship("AnnotationEntry", back_populates="annotation", cascade="all, delete-orphan")
 
@@ -135,8 +135,8 @@ class AnnotationEntry(Base, MasterModel):
     __tablename__ = "annotation_entry"
     __table_args__ = (Index("idx_identifier", "identifier", mysql_length=100),)
 
-    name = Column(String(2048), nullable=True)
-    identifier = Column(String(255), nullable=True)
+    name = mapped_column(String(2048), nullable=True)
+    identifier = mapped_column(String(255), nullable=True)
 
     annotation__id = foreign_key_to("annotation")
     annotation = relationship("Annotation", back_populates="entries")

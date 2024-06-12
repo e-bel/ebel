@@ -9,9 +9,15 @@ from sqlalchemy import and_, or_
 
 from ebel import Bel
 from ebel.manager.orientdb.biodbs.biogrid import MODIFICATIONS
-from ebel.manager.rdbms.models.biogrid import (Biogrid, ExperimentalSystem,
-                                               Interactor, Modification,
-                                               Publication, Source, Taxonomy)
+from ebel.manager.rdbms.models.biogrid import (
+    Biogrid,
+    ExperimentalSystem,
+    Interactor,
+    Modification,
+    Publication,
+    Source,
+    Taxonomy,
+)
 from ebel.web.api import RDBMS
 from ebel.web.api.ebel.v1 import _get_data
 

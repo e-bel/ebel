@@ -30,14 +30,29 @@ from ebel.manager.orientdb.biodbs.protein_atlas import ProteinAtlas
 from ebel.manager.orientdb.biodbs.reactome import Reactome
 from ebel.manager.orientdb.biodbs.stringdb import StringDb
 from ebel.manager.orientdb.biodbs.uniprot import UniProt
-from ebel.manager.orientdb.constants import (BIOGRID, CHEBI, CLINICAL_TRIALS,
-                                             CLINVAR, DISGENET, DRUGBANK,
-                                             ENSEMBL, EXPRESSION_ATLAS,
-                                             GWAS_CATALOG, HGNC, INTACT,
-                                             IUPHAR, KEGG, MIRTARBASE, NCBI,
-                                             NSIDES, PATHWAY_COMMONS,
-                                             PROTEIN_ATLAS, REACTOME, STRINGDB,
-                                             UNIPROT)
+from ebel.manager.orientdb.constants import (
+    BIOGRID,
+    CHEBI,
+    CLINICAL_TRIALS,
+    CLINVAR,
+    DISGENET,
+    DRUGBANK,
+    ENSEMBL,
+    EXPRESSION_ATLAS,
+    GWAS_CATALOG,
+    HGNC,
+    INTACT,
+    IUPHAR,
+    KEGG,
+    MIRTARBASE,
+    NCBI,
+    NSIDES,
+    PATHWAY_COMMONS,
+    PROTEIN_ATLAS,
+    REACTOME,
+    STRINGDB,
+    UNIPROT,
+)
 from ebel.manager.orientdb.importer import _BelImporter
 from ebel.manager.orientdb.odb_defaults import bel_func_short
 from ebel.manager.orientdb.odb_meta import Graph

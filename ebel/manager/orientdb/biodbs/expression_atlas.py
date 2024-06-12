@@ -341,7 +341,7 @@ class ExpressionAtlas(odb_meta.Graph):
                 values = [x.strip() for x in line_splitted[1:] if x.strip()]
                 rows.append((key_name, values))
 
-        df = pd.DataFrame(rows, columns=("key_name", "value")).explode("value")
+        df = pd.DataFrame(rows, columns=["key_name", "value"]).explode("value")
         return df
 
     def get_sdrf_condensed(self, experiment_name: str) -> Optional[pd.DataFrame]:

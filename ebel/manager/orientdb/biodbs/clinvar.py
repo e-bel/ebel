@@ -5,9 +5,11 @@ from typing import Dict, List
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import select, text
 from tqdm import tqdm
 
 from ebel.manager.orientdb import odb_meta, odb_structure, urls
+from ebel.manager.orientdb.biodbs.ensembl import Ensembl
 from ebel.manager.orientdb.constants import CLINVAR
 from ebel.manager.rdbms.models import clinvar
 from ebel.tools import get_disease_trait_keywords_from_config, get_file_path
@@ -17,7 +19,6 @@ logger = logging.getLogger(__name__)
 Snp = namedtuple(
     "Snp",
     (
-        "keyword",
         "phenotype",
         "rs_number",
         "hgnc_id",
@@ -56,14 +57,20 @@ class ClinVar(odb_meta.Graph):
     def insert_data(self) -> Dict[str, int]:
         """Insert data."""
         inserted = {}
+        logger.info("Insert data for ClinVar")
+
+        # Depends on Ensembl
+        Ensembl().update()
+
         self.recreate_tables()
+
         df = pd.read_csv(self.file_path, sep="\t", low_memory=False)
         self._standardize_dataframe(df)
         df.index += 1
         df.index.rename("id", inplace=True)
-        df.drop(columns=["phenotype_ids", "phenotype_list", "other_ids"]).to_sql(
-            self.biodb_name, self.engine, if_exists="append", chunksize=10000
-        )
+
+        df_base = df.drop(columns=["phenotype_ids", "phenotype_list", "other_ids"])
+        df_base.to_sql(clinvar.Clinvar.__tablename__, con=self.engine, if_exists="append", chunksize=10000)
 
         df_clinvar__phenotype = (
             df["phenotype_list"]
@@ -158,26 +165,26 @@ class ClinVar(odb_meta.Graph):
         """Get a dictionary {'disease':[snp,snp,... ]} by disease names."""
         disease_keywords = get_disease_trait_keywords_from_config()
 
-        sql_temp = """Select
-            '{keyword}',
-            phenotype,
-            rs_db_snp as rs_number,
-            hgnc_id,
-            chromosome,
-            start as position,
-            clinical_significance
-                from clinvar c inner join
-                clinvar__phenotype cp on (c.id=cp.clinvar_id) inner JOIN
-                clinvar_phenotype p on (cp.clinvar_phenotype_id=p.id)
-            where
-                p.phenotype like '%%{keyword}%%'
-                and rs_db_snp != -1"""
+        cv = clinvar.Clinvar
+        cp = clinvar.ClinvarPhenotype
 
         results = dict()
         for kwd in disease_keywords:
-            sql = sql_temp.format(keyword=kwd)
-            rows = self.engine.execute(sql)
-            results[kwd] = [Snp(*x) for x in rows.fetchall()]
+            sql = (
+                select(
+                    cp.phenotype,
+                    cv.rs_db_snp.label("rs_number"),
+                    cv.hgnc_id,
+                    cv.chromosome,
+                    cv.start.label("position"),
+                    cv.clinical_significance,
+                )
+                .join(cp, cv.phenotypes)
+                .where(cv.rs_db_snp != -1)
+                .where(cp.phenotype.like(f"%{kwd}%"))
+            )
+            rows = self.session.execute(sql).fetchall()
+            results[kwd] = [Snp(*x) for x in rows]
 
         return results
 
@@ -197,6 +204,7 @@ class ClinVar(odb_meta.Graph):
             for snp in tqdm(rows, desc=f"Add has_X_snp_cv edges to BEL for {disease}"):
                 if snp.hgnc_id in hgnc_id_gene_rid_cache:
                     gene_mapped_rid = hgnc_id_gene_rid_cache[snp.hgnc_id]
+
                 else:
                     gene_mapped_rid = self._get_set_gene_rid(hgnc_id=snp.hgnc_id)
                     hgnc_id_gene_rid_cache[snp.hgnc_id] = gene_mapped_rid
@@ -206,7 +214,7 @@ class ClinVar(odb_meta.Graph):
                     value_dict = {
                         "clinical_significance": snp.clinical_significance,
                         "phenotype": snp.phenotype,
-                        "keyword": snp.keyword,
+                        "keyword": disease,
                     }
                     self.create_edge(
                         class_name="has_mapped_snp_cv",

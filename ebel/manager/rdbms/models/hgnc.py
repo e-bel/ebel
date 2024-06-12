@@ -1,8 +1,10 @@
 """HGNC RDBMS model definition."""
-from sqlalchemy import (BigInteger, Column, Date, ForeignKey, Integer, String,
-                        Text)
+import datetime
+from typing import List, Optional
+
+from sqlalchemy import BigInteger, Date, ForeignKey, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ebel.manager.rdbms.models import object_as_dict
 
@@ -13,59 +15,60 @@ class Hgnc(Base):
     """Class definition for the hgnc table."""
 
     __tablename__ = "hgnc"
-    id = Column(Integer, primary_key=True)
-    hgnc_id = Column(String(20))
-    version = Column(BigInteger)
-    bioparadigms_slc = Column(String(20))
-    cd = Column(String(20))
-    cosmic = Column(String(50))
-    date_approved_reserved = Column(Date)
-    date_modified = Column(Date)
-    date_name_changed = Column(Date)
-    date_symbol_changed = Column(Date)
-    ensembl_gene_id = Column(String(20))
-    entrez_id = Column(Integer)
-    homeodb = Column(Integer)
-    horde_id = Column(String(50))
-    imgt = Column(String(50))
-    iuphar = Column(String(50))
-    kznf_gene_catalog = Column(Integer)
-    lncipedia = Column(String(50))
-    lncrnadb = Column(String(50))
-    location = Column(String(100))
-    location_sortable = Column(String(100))
-    locus_group = Column(String(50))
-    locus_type = Column(String(50))
-    merops = Column(String(20))
-    mirbase = Column(String(20))
-    name = Column(String(255))
-    orphanet = Column(Integer)
-    snornabase = Column(String(20))
-    status = Column(String(50))
-    symbol = Column(String(100), index=True)
-    ucsc_id = Column(String(50))
-    uuid = Column(String(50))
-    vega_id = Column(String(50))
-    agr = Column(String(50))
-    kznf_gene_catalog = Column(Text)
 
-    pre_symbols = relationship("PrevSymbol", back_populates="hgnc")
-    alias_names = relationship("AliasName", back_populates="hgnc")
-    alias_symbols = relationship("AliasSymbol", back_populates="hgnc")
-    ccdss = relationship("Ccds", back_populates="hgnc")
-    enas = relationship("Ena", back_populates="hgnc")
-    enzymes = relationship("Enzyme", back_populates="hgnc")
-    gene_group_names = relationship("GeneGroupName", back_populates="hgnc")
-    gene_group_ids = relationship("GeneGroupId", back_populates="hgnc")
-    uniprots = relationship("UniProt", back_populates="hgnc")
-    rna_centrals = relationship("RnaCentral", back_populates="hgnc")
-    rgds = relationship("Rgd", back_populates="hgnc")
-    refseqs = relationship("RefSeq", back_populates="hgnc")
-    pubmeds = relationship("PubMed", back_populates="hgnc")
-    prev_names = relationship("PrevName", back_populates="hgnc")
-    omims = relationship("Omim", back_populates="hgnc")
-    mgds = relationship("Mgd", back_populates="hgnc")
-    lsdbs = relationship("Lsdb", back_populates="hgnc")
+    id: Mapped[int] = mapped_column(primary_key=True)
+    hgnc_id: Mapped[str] = mapped_column(String(20))
+    version: Mapped[int] = mapped_column(BigInteger)
+    bioparadigms_slc: Mapped[Optional[str]] = mapped_column(String(20))
+    cd: Mapped[Optional[str]] = mapped_column(String(20))
+    cosmic: Mapped[Optional[str]] = mapped_column(String(50))
+    date_approved_reserved: Mapped[datetime.date] = mapped_column(Date)
+    date_modified: Mapped[Optional[datetime.date]] = mapped_column(Date)
+    date_name_changed: Mapped[Optional[datetime.date]] = mapped_column(Date)
+    date_symbol_changed: Mapped[Optional[datetime.date]] = mapped_column(Date)
+    ensembl_gene_id: Mapped[Optional[str]] = mapped_column(String(20))
+    entrez_id: Mapped[Optional[int]] = mapped_column()
+    homeodb: Mapped[Optional[int]] = mapped_column()
+    horde_id: Mapped[Optional[str]] = mapped_column(String(50))
+    imgt: Mapped[Optional[str]] = mapped_column(String(50))
+    iuphar: Mapped[Optional[str]] = mapped_column(String(50))
+    kznf_gene_catalog: Mapped[int] = mapped_column()
+    lncipedia: Mapped[Optional[str]] = mapped_column(String(50))
+    lncrnadb: Mapped[Optional[str]] = mapped_column(String(50))
+    location: Mapped[Optional[str]] = mapped_column(String(100))
+    location_sortable: Mapped[Optional[str]] = mapped_column(String(100))
+    locus_group: Mapped[str] = mapped_column(String(50))
+    locus_type: Mapped[str] = mapped_column(String(50))
+    merops: Mapped[Optional[str]] = mapped_column(String(20))
+    mirbase: Mapped[Optional[str]] = mapped_column(String(20))
+    name: Mapped[str] = mapped_column(String(255))
+    orphanet: Mapped[Optional[int]] = mapped_column()
+    snornabase: Mapped[Optional[str]] = mapped_column(String(20))
+    status: Mapped[str] = mapped_column(String(50))
+    symbol: Mapped[str] = mapped_column(String(100), index=True)
+    ucsc_id: Mapped[Optional[str]] = mapped_column(String(50))
+    uuid: Mapped[str] = mapped_column(String(50))
+    vega_id: Mapped[Optional[str]] = mapped_column(String(50))
+    agr: Mapped[Optional[str]] = mapped_column(String(50))
+    kznf_gene_catalog: Mapped[Optional[str]] = mapped_column(Text)
+
+    pre_symbols: Mapped[List["PrevSymbol"]] = relationship("PrevSymbol", back_populates="hgnc")
+    alias_names: Mapped[List["AliasName"]] = relationship("AliasName", back_populates="hgnc")
+    alias_symbols: Mapped[List["AliasSymbol"]] = relationship("AliasSymbol", back_populates="hgnc")
+    ccdss: Mapped[List["Ccds"]] = relationship("Ccds", back_populates="hgnc")
+    enas: Mapped[List["Ena"]] = relationship("Ena", back_populates="hgnc")
+    enzymes: Mapped[List["Enzyme"]] = relationship("Enzyme", back_populates="hgnc")
+    gene_group_names: Mapped[List["GeneGroupName"]] = relationship("GeneGroupName", back_populates="hgnc")
+    gene_group_ids: Mapped[List["GeneGroupId"]] = relationship("GeneGroupId", back_populates="hgnc")
+    uniprots: Mapped[List["UniProt"]] = relationship("UniProt", back_populates="hgnc")
+    rna_centrals: Mapped[List["RnaCentral"]] = relationship("RnaCentral", back_populates="hgnc")
+    rgds: Mapped[List["Rgd"]] = relationship("Rgd", back_populates="hgnc")
+    refseqs: Mapped[List["RefSeq"]] = relationship("RefSeq", back_populates="hgnc")
+    pubmeds: Mapped[List["PubMed"]] = relationship("PubMed", back_populates="hgnc")
+    prev_names: Mapped[List["PrevName"]] = relationship("PrevName", back_populates="hgnc")
+    omims: Mapped[List["Omim"]] = relationship("Omim", back_populates="hgnc")
+    mgds: Mapped[List["Mgd"]] = relationship("Mgd", back_populates="hgnc")
+    lsdbs: Mapped[List["Lsdb"]] = relationship("Lsdb", back_populates="hgnc")
 
     def as_dict(self):
         """Convert object values to dictionary."""
@@ -127,12 +130,12 @@ class PrevSymbol(Base):
     """Class definition for the hgnc_prev_symbol table."""
 
     __tablename__ = "hgnc_prev_symbol"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    prev_symbol = Column(String(50), index=True)
+    prev_symbol: Mapped[str] = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
-    hgnc = relationship("Hgnc", back_populates="pre_symbols")
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
+    hgnc: Mapped[Hgnc] = relationship("Hgnc", back_populates="pre_symbols")
 
     def __str__(self):
         return self.prev_symbol
@@ -142,12 +145,12 @@ class AliasName(Base):
     """Class definition for the hgnc_alias_name table."""
 
     __tablename__ = "hgnc_alias_name"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    alias_name = Column(String(255))
+    alias_name: Mapped[str] = mapped_column(String(255))
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
-    hgnc = relationship("Hgnc", back_populates="alias_names")
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
+    hgnc: Mapped[Hgnc] = relationship("Hgnc", back_populates="alias_names")
 
     def __str__(self):
         return self.alias_name
@@ -157,12 +160,12 @@ class AliasSymbol(Base):
     """Class definition for the hgnc_alias_symbol table."""
 
     __tablename__ = "hgnc_alias_symbol"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    alias_symbol = Column(String(50), index=True)
+    alias_symbol: Mapped[str] = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
-    hgnc = relationship("Hgnc", back_populates="alias_symbols")
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
+    hgnc: Mapped[Hgnc] = relationship("Hgnc", back_populates="alias_symbols")
 
     def __str__(self):
         return self.alias_symbol
@@ -172,12 +175,12 @@ class Ccds(Base):
     """Class definition for the hgnc_ccds table."""
 
     __tablename__ = "hgnc_ccds"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    identifier = Column(String(50), index=True)
+    identifier: Mapped[str] = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
-    hgnc = relationship("Hgnc", back_populates="ccdss")
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
+    hgnc: Mapped[Hgnc] = relationship("Hgnc", back_populates="ccdss")
 
     def __str__(self):
         return self.identifier
@@ -187,12 +190,12 @@ class Ena(Base):
     """Class definition for the hgnc_ena table."""
 
     __tablename__ = "hgnc_ena"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    identifier = Column(String(50), index=True)
+    identifier: Mapped[str] = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
-    hgnc = relationship("Hgnc", back_populates="enas")
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
+    hgnc: Mapped[Hgnc] = relationship("Hgnc", back_populates="enas")
 
     def __str__(self):
         return self.identifier
@@ -202,11 +205,11 @@ class Enzyme(Base):
     """Class definition for the hgnc_enzyme table."""
 
     __tablename__ = "hgnc_enzyme"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    ec_number = Column(String(50), index=True)
+    ec_number = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="enzymes")
 
     def __str__(self):
@@ -217,11 +220,11 @@ class GeneGroupName(Base):
     """Class definition for the hgnc_gene_group_name table."""
 
     __tablename__ = "hgnc_gene_group_name"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    name = Column(String(255))
+    name = mapped_column(String(255))
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="gene_group_names")
 
     def __str__(self):
@@ -236,11 +239,11 @@ class GeneGroupId(Base):
     """Class definition for the hgnc_gene_group_id table."""
 
     __tablename__ = "hgnc_gene_group_id"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    identifier = Column(Integer)
+    identifier = mapped_column(Integer)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="gene_group_ids")
 
     def __str__(self):
@@ -251,11 +254,11 @@ class UniProt(Base):
     """Class definition for the hgnc_uniprot table."""
 
     __tablename__ = "hgnc_uniprot"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    accession = Column(String(50), index=True)
+    accession = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="uniprots")
 
     def __str__(self):
@@ -266,11 +269,11 @@ class RnaCentral(Base):
     """Class definition for the hgnc_rna_central table."""
 
     __tablename__ = "hgnc_rna_central"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    identifier = Column(String(50), index=True)
+    identifier = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="rna_centrals")
 
     def __str__(self):
@@ -281,11 +284,11 @@ class Rgd(Base):
     """Class definition for the hgnc_rgd table."""
 
     __tablename__ = "hgnc_rgd"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    identifier = Column(String(50), index=True)
+    identifier = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="rgds")
 
     def __str__(self):
@@ -296,11 +299,11 @@ class RefSeq(Base):
     """Class definition for the hgnc_refseq table."""
 
     __tablename__ = "hgnc_refseq"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    accession = Column(String(50), index=True)
+    accession = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="refseqs")
 
     def __str__(self):
@@ -311,11 +314,11 @@ class PubMed(Base):
     """Class definition for the hgnc_pubmed table."""
 
     __tablename__ = "hgnc_pubmed"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    pmid = Column(Integer, index=True)
+    pmid = mapped_column(Integer, index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="pubmeds")
 
     def __str__(self):
@@ -326,11 +329,11 @@ class PrevName(Base):
     """Class definition for the hgnc_prev_name table."""
 
     __tablename__ = "hgnc_prev_name"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    prev_name = Column(String(255))
+    prev_name = mapped_column(String(255))
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="prev_names")
 
     def __str__(self):
@@ -341,11 +344,11 @@ class Omim(Base):
     """Class definition for the hgnc_omim table."""
 
     __tablename__ = "hgnc_omim"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    identifier = Column(Integer, index=True)
+    identifier = mapped_column(Integer, index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="omims")
 
     def __str__(self):
@@ -356,11 +359,11 @@ class Mgd(Base):
     """Class definition for the hgnc_mgd table."""
 
     __tablename__ = "hgnc_mgd"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    identifier = Column(String(50), index=True)
+    identifier = mapped_column(String(50), index=True)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="mgds")
 
     def __str__(self):
@@ -371,11 +374,11 @@ class Lsdb(Base):
     """Class definition for the hgnc_lsdb table."""
 
     __tablename__ = "hgnc_lsdb"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
-    identifier = Column(Text)
+    identifier: Mapped[str] = mapped_column(Text)
 
-    hgnc_id = Column(Integer, ForeignKey("hgnc.id"))
+    hgnc_id: Mapped[int] = mapped_column(ForeignKey("hgnc.id"))
     hgnc = relationship("Hgnc", back_populates="lsdbs")
 
     def __str__(self):

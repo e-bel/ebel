@@ -5,6 +5,7 @@ from typing import Dict
 
 import pandas as pd
 from pyorientdb import OrientDB
+from sqlalchemy import select
 from tqdm import tqdm
 
 from ebel.constants import RID
@@ -62,12 +63,12 @@ class PathwayCommons(odb_meta.Graph):
             "INTERACTION_PUBMED_ID",
             "PATHWAY_NAMES",
         ]
-
         df = pd.read_csv(self.file_path, sep="\t", low_memory=True, usecols=usecols)
         # Because 2 tables are in file, we have to identify where second table starts and slice the dataframe
         df = df.iloc[: df[df["PARTICIPANT_A"] == "PARTICIPANT"].index[0]]
 
         df.columns = self._standardize_column_names(df.columns)
+
         df.pathway_names = df.pathway_names.str.split(";")
         df.interaction_data_source = df.interaction_data_source.str.split(";")
         df.interaction_pubmed_id = df.interaction_pubmed_id.str.split(";")
@@ -103,14 +104,17 @@ class PathwayCommons(odb_meta.Graph):
             columns={"id": "pathway_commons_id", "interaction_pubmed_id": "pmid"},
             inplace=True,
         )
-        df_pmids.pmid = pd.to_numeric(df_pmids.pmid, errors="coerce")
-        df_pmids.to_sql(
-            pc.Pmid.__tablename__,
-            con=self.engine,
-            index=False,
-            if_exists="append",
-            chunksize=10000,
-        )
+        df_pmids.pmid = pd.to_numeric(df_pmids.pmid, errors="coerce", downcast="integer")
+        df_pmids = df_pmids[df_pmids.pmid.notna()]
+
+        with self.engine.connect() as conn:
+            df_pmids.to_sql(
+                pc.Pmid.__tablename__,
+                con=conn,
+                index=False,
+                if_exists="append",
+                chunksize=10000,
+            )
         del df_pmids
 
     def create_joining_table_names(self, df, df_pc_names):
@@ -212,12 +216,17 @@ class PathwayCommons(odb_meta.Graph):
         inserted = {}
 
         pc_pathway_name_rid_dict = self.get_pathway_name_rid_dict()
+
+        # Update HGNC in case not in DB
+        self.hgnc.update()
         valid_hgnc_symbols = {x[0] for x in self.session.query(hgnc.Hgnc).with_entities(hgnc.Hgnc.symbol).all()}
 
+        pure_symbol_rids_dict = self.get_pure_symbol_rids_dict()
+        symbol_rids_bel_context_dict = self.get_pure_symbol_rids_dict_in_bel_context()
+
         cols = ["symbol", "rid"]
-        pure_symbol_rids_dict = self.hgnc.get_pure_symbol_rids_dict()
         df_all = pd.DataFrame(pure_symbol_rids_dict.items(), columns=cols)
-        df_bel = pd.DataFrame(self.hgnc.get_pure_symbol_rids_dict_in_bel_context().items(), columns=cols)
+        df_bel = pd.DataFrame(symbol_rids_bel_context_dict.items(), columns=cols)
 
         # skip here if there is no pure symbols with or without BEL context
         if any([df_all.empty, df_bel.empty]):
@@ -232,22 +241,25 @@ class PathwayCommons(odb_meta.Graph):
         for edge_type in edge_types:
             inserted[edge_type] = 0
 
-            sql = f"""Select id, participant_a, participant_b from
-                pathway_commons where interaction_type='{edge_type}'"""
+            sql = select(pc.PathwayCommons.id, pc.PathwayCommons.participant_a, pc.PathwayCommons.participant_b).where(
+                pc.PathwayCommons.interaction_type == edge_type
+            )
+
             df_ppi_of = pd.read_sql(sql, self.engine)
+
             df_join = (
                 df_ppi_of.set_index("participant_a")
                 .join(df_all.set_index("symbol"))
                 .rename(columns={"rid": "rid_a_all"})
                 .join(df_bel.set_index("symbol"))
                 .reset_index()
-                .rename(columns={"rid": "rid_a_bel", "index": "a"})
+                .rename(columns={"rid": "rid_a_bel", "participant_a": "a"})
                 .set_index("participant_b")
                 .join(df_all.set_index("symbol"))
                 .rename(columns={"rid": "rid_b_all"})
                 .join(df_bel.set_index("symbol"))
                 .reset_index()
-                .rename(columns={"rid": "rid_b_bel", "index": "b"})
+                .rename(columns={"rid": "rid_b_bel", "participant_b": "b"})
                 .set_index("id")
             )
 
@@ -289,8 +301,14 @@ class PathwayCommons(odb_meta.Graph):
 
     def get_pathway_pmids_sources(self, pc_id, pc_pathway_name_rid_dict) -> tuple:
         """Return all pathway, PMIDs, and their sources."""
-        pc_obj = self.session.query(pc.PathwayCommons).get(pc_id)
+        pc_obj = self.session.get(pc.PathwayCommons, pc_id)
         sources = [x.source for x in pc_obj.sources]
         pmids = [x.pmid for x in pc_obj.pmids]
         pathways = [pc_pathway_name_rid_dict[x.name] for x in pc_obj.pathway_names]
         return pathways, pmids, sources
+
+
+if __name__ == "__main__":
+    p = PathwayCommons()
+    foo = p.get_pure_symbol_rids_dict()
+    a = 2

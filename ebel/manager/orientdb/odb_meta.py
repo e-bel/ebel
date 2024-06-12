@@ -21,21 +21,28 @@ import requests
 import sqlalchemy as sqla
 import xmltodict
 from pyorientdb import OrientDB, orient
-from pyorientdb.exceptions import (PyOrientCommandException,
-                                   PyOrientIndexException,
-                                   PyOrientSecurityAccessException)
+from pyorientdb.exceptions import (
+    PyOrientBadMethodCallException,
+    PyOrientCommandException,
+    PyOrientIndexException,
+    PyOrientSecurityAccessException,
+    PyOrientSecurityException,
+)
 from pyorientdb.otypes import OrientRecord
+from sqlalchemy import func, select, text
 from sqlalchemy.sql.schema import Table
 from sqlalchemy_utils import create_database, database_exists
 from tqdm import tqdm
 
 import ebel.database
+import ebel.defaults
 from ebel.cache import set_mysql_interactive
 from ebel.config import get_config_as_dict, get_config_value, write_to_config
 from ebel.constants import DEFAULT_ODB, RID
 from ebel.manager.orientdb import urls as default_urls
-from ebel.manager.orientdb.odb_structure import (Edge, Generic, Node, OClass,
-                                                 OIndex, OProperty)
+from ebel.manager.orientdb.odb_structure import Edge, Generic, Node, OClass, OIndex, OProperty
+from ebel.manager.rdbms.models import uniprot
+from ebel.manager.rdbms.models.ensembl import Ensembl as ens
 from ebel.tools import BelRdb, chunks, get_file_path, get_standard_name
 
 type_map_inverse = {v: k for k, v in orient.type_map.items()}
@@ -96,12 +103,15 @@ class Graph(abc.ABC):
         self.engine = rdb.engine
         self.session = rdb.session
 
-        if not (get_config_value("DATABASE", "sqlalchemy_connection_string") or database_exists(self.engine.url)):
-            if str(self.engine.url).startswith("mysql"):
+        conn = get_config_value("DATABASE", "sqlalchemy_connection_string")
+
+        if not conn:
+            dialect = self.session.bind.dialect.name
+            if dialect == "mysql":
                 set_mysql_interactive()
 
-            else:
-                create_database(self.engine.url)
+        if not database_exists(self.engine.url):
+            create_database(self.engine.url)
 
     def __config_params_check(self, overwrite_config: bool = False):
         """Go through passed/available configuration params."""
@@ -157,15 +167,18 @@ class Graph(abc.ABC):
         try:
             return self.client.command(command_str)
 
-        # TODO: following exceptions seems not to cover connection error
-        # except (PyOrientCommandException, PyOrientSecurityAccessException):
-        except:
+        except (
+            PyOrientCommandException,
+            PyOrientSecurityAccessException,
+            PyOrientBadMethodCallException,
+            PyOrientSecurityException,
+        ) as e:
+            logger.error(e)
             # Try to reconnect
             self.client.close()
             self.client = self.get_client()
-            # self.client.db_open(self.odb_name, self.odb_user, self.odb_password)
             # print(command_str)
-            return self.client.command(command_str)
+            return self.execute(command_str)
 
     def set_configuration_parameters(self):
         """Set configuration for OrientDB database client instance using configuration file or passed params."""
@@ -240,12 +253,12 @@ class Graph(abc.ABC):
         return inserted
 
     def create_index_rdbms(self, table_name: str, columns):
-        """Creates index on column(s) in RDBMS."""
+        """Creates index on mapped_column(s) in RDBMS."""
         if isinstance(columns, str):
             columns = [columns]
         sql_columns = ",".join(columns)
         index_name = f"idx_{table_name}_" + "_".join(columns)
-        self.engine.execute(f"CREATE INDEX {index_name} ON {table_name} ({sql_columns})")
+        self.session.execute(f"CREATE INDEX {index_name} ON {table_name} ({sql_columns})")
 
     def clear_edges_by_bel_doc_rid(self, bel_document_rid: str, even_if_other_doc_rids_exists=True):
         """Delete all edges linked to a specified BEL document rID."""
@@ -400,7 +413,7 @@ class Graph(abc.ABC):
         if distinct and len(cols) == 1:
             sql_cols = "distinct({})".format(sql_cols)
 
-        sql_temp = "SELECT {sql_cols} FROM `{class_name}` {where} {group_by} {sql_limit} {sql_skip}"
+        sql_temp = "SELECT {sql_cols} FROM {class_name} {where} {group_by} {sql_limit} {sql_skip}"
 
         sql = sql_temp.format(
             sql_cols=sql_cols,
@@ -818,8 +831,9 @@ class Graph(abc.ABC):
         if self.tables_base:
             for table_name, table in self.tables_base.metadata.tables.items():
                 if self.table_exists(table_name):
-                    sql = f"Select count(*) from `{table_name}`"
-                    numbers[table_name] = self.engine.execute(sql).fetchone()[0]
+                    # sql = f"Select count(*) from `{table_name}`"
+                    sql = select(func.count(table_name))
+                    numbers[table_name] = self.session.execute(sql).fetchone()[0]
                 else:
                     numbers[table_name] = 0
         elif self.generic_classes:
@@ -835,16 +849,21 @@ class Graph(abc.ABC):
         for column, value in params.items():
             if isinstance(value, (str, list, dict)):
                 if value == "notnull":
-                    where_list.append("`{}` IS NOT NULL".format(column))
+                    where_list.append("{} IS NOT NULL".format(column))
+
                 else:
-                    where_list.append("`{}` = {}".format(column, json.dumps(value)))
+                    where_list.append("{} = {}".format(column, json.dumps(value)))
+
             elif isinstance(value, (int, float)):
-                where_list.append("`{}` = {}".format(column, value))
+                where_list.append("{} = {}".format(column, value))
+
             elif value is None:
-                where_list.append("`{}` IS NULL".format(column))
+                where_list.append("{` IS NULL".format(column))
+
         where = ""
         if where_list:
-            where = " WHERE " + " AND ".join(where_list)
+            where = "WHERE " + " AND ".join(where_list)
+
         return where
 
     def get_number_of_class(self, class_name, distinct_column_name: str = None, **params):
@@ -940,7 +959,9 @@ class Graph(abc.ABC):
         if check_for:
             check_for = [check_for] if isinstance(check_for, str) else check_for
             check_for_dict = {k: v for k, v in check_for_dict.items() if k in check_for}
-        result = self.query_class(class_name=class_name, limit=1, print_sql=print_sql, **check_for_dict)
+        result = self.query_class(
+            class_name=class_name, columns=[], limit=1, with_rid=True, print_sql=print_sql, **check_for_dict
+        )
         if result:
             return result[0][RID]
 
@@ -980,8 +1001,10 @@ class Graph(abc.ABC):
             check_for=check_for,
             print_sql=print_sql,
         )
+
         if not rid:
             rid = self.insert_record(class_name=class_name, value_dict=value_dict, print_sql=print_sql)
+
         return rid
 
     def update_correlative_edges(self) -> List[str]:
@@ -1319,36 +1342,57 @@ class Graph(abc.ABC):
         gene_rids = defaultdict(list)
         sqls = dict()
 
-        sqls[
-            "mapped"
-        ] = f"""Select symbol
-                            from ensembl
-                            where
-                                start < {position} and
-                                stop > {position} and
-                                chromosome='{chromosome}' group by symbol"""
+        # sqls[
+        #     "mapped"
+        # ] = f"""Select symbol
+        #                     from ensembl
+        #                     where
+        #                         start < {position} and
+        #                         stop > {position} and
+        #                         chromosome='{chromosome}' group by symbol"""
+        sqls["mapped"] = (
+            select(ens.symbol)
+            .where(ens.start < position)
+            .where(ens.stop > position)
+            .where(ens.chromosome == chromosome)
+            .group_by(ens.symbol)
+        )
 
-        sqls[
-            "downstream"
-        ] = f"""Select symbol
-                            from ensembl
-                            where
-                                start > {position} and
-                                chromosome='{chromosome}'
-                            order by start limit 1"""
+        # sqls[
+        #     "downstream"
+        # ] = f"""Select symbol
+        #                     from ensembl
+        #                     where
+        #                         start > {position} and
+        #                         chromosome='{chromosome}'
+        #                     order by start limit 1"""
+        sqls["downstream"] = (
+            select(ens.symbol)
+            .where(ens.start > position)
+            .where(ens.chromosome == chromosome)
+            .limit(1)
+            .order_by(ens.start.asc())
+        )
 
-        sqls[
-            "upstream"
-        ] = f"""Select symbol
-                            from ensembl
-                            where
-                                stop < {position} and
-                                chromosome='{chromosome}'
-                            order by stop desc limit 1"""
+        # sqls[
+        #     "upstream"
+        # ] = f"""Select symbol
+        #                     from ensembl
+        #                     where
+        #                         stop < {position} and
+        #                         chromosome='{chromosome}'
+        #                     order by stop desc limit 1"""
+        sqls["upstream"] = (
+            select(ens.symbol)
+            .where(ens.stop < position)
+            .where(ens.chromosome == chromosome)
+            .limit(1)
+            .order_by(ens.stop.desc())
+        )
 
         for gene_type, sql in sqls.items():
             if gene_type in gene_types:
-                results = self.engine.execute(sql)
+                results = self.session.execute(sql)
                 for (symbol,) in results.fetchall():
                     bel = f'g(HGNC:"{symbol}")'
                     data = {
@@ -1438,6 +1482,7 @@ class Graph(abc.ABC):
             )
             logger.warning(wtext)
             return 0
+
         else:
             class_name = class_name if class_name is not None else "V"
             return self.execute(f"Delete VERTEX {class_name} where both().size() = 0")[0]
@@ -1480,7 +1525,7 @@ class Graph(abc.ABC):
 
     def get_pure_symbol_rids_dict(self, class_name="protein", namespace="HGNC") -> Dict[str, str]:
         """Return dictionary with protein name as keys and node rIDs as values."""
-        results = self.query_class(class_name, pure=True, namespace=namespace)
+        results = self.query_class(class_name, pure=True, namespace=namespace, columns=["name"], with_rid=True)
         return {r["name"]: r["rid"] for r in results}
 
     def get_pure_rid_by_uniprot(self, uniprot: str):
@@ -1499,14 +1544,33 @@ class Graph(abc.ABC):
         # only include proteins which are also part of a BEL statement to avoid explosion of graph
 
         sql = """Select uniprot, @rid.asString() as rid from protein where pure=true and uniprot in (
-        Select unionall(uniprot_list).asSet() as all_uniprots from (select unionall(in.uniprot, out.uniprot).asSet() as
-        uniprot_list from bel_relation where document IS NOT NULL
-        and (in.uniprot IS NOT NULL or out.uniprot IS NOT NULL)))"""
+        select set(unionall(in.uniprot, out.uniprot)) as all_uniprots from bel_relation where document IS NOT NULL)"""
+        # sql = "select uniprot, @rid.asString() as rid from protein where pure = true and uniprot is not null"
 
         return {r["uniprot"]: r["rid"] for r in self.query_get_dict(sql)}
+
+    def get_pure_bel_rid_dict(self) -> Dict[str, str]:
+        """Return a dictionary of pure bel representation and it's rid."""
+        sql = "SELECT bel, @rid.asString() as rid from protein where pure=true"
+        results = self.query_get_dict(sql)
+        return {r["bel"]: r["rid"] for r in results}
 
     def get_pure_uniprot_rids_dict(self):
         """Return dictionary with UniProt IDs as keys and node rIDs as values."""
         sql = "Select uniprot, @rid.asString() as rid from protein where uniprot IS NOT NULL and pure=true"
         results = self.query_get_dict(sql)
         return {r["uniprot"]: r["rid"] for r in results}
+
+    def get_uniprot_accession_namespaces(self) -> Dict[str, Tuple[str, str]]:
+        """Return a dictionary of uniprot accession keys and namespace and values."""
+        sql = select(uniprot.Uniprot.accession, uniprot.GeneSymbol.symbol, uniprot.Uniprot.taxid).join(uniprot.Uniprot)
+        results = self.session.execute(sql).fetchall()
+
+        acc_dict = dict()
+        taxid_to_namespace = {9606: "HGNC", 10090: "MGI", 10116: "RGD"}
+        for r in results:
+            accession, name, taxid = r
+            namespace = taxid_to_namespace.get(taxid, "UNIPROT")
+            acc_dict[accession] = (namespace, name)
+
+        return acc_dict
